@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background:#fff; color:#16161C; font-family:'Manrope',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background:#4F5BF0; color:#fff; }
+  ::-webkit-scrollbar { width: 11px; }
+  ::-webkit-scrollbar-track { background:#E9EBF3; }
+  ::-webkit-scrollbar-thumb { background:#4F5BF0; border-radius:99px; border:3px solid #E9EBF3; }
+  .bz-nav a:hover { color:#4F5BF0; }
+  .bz-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+  .bz-body p { font-size:17.5px; line-height:1.8; color:#33333D; margin:0 0 22px; }
+  .bz-body h2 { font-family:'Space Grotesk'; font-weight:700; font-size:27px; letter-spacing:-.01em; color:#14141C; margin:38px 0 16px; }
+  .bz-body ul { margin:0 0 22px; padding-left:22px; }
+  .bz-body li { font-size:17px; line-height:1.7; color:#33333D; margin-bottom:8px; }
+  .bz-rel:hover { transform:translateY(-5px); box-shadow:0 20px 42px rgba(20,20,45,.12); }
+  .bz-rel:hover .bz-rel-img { transform:scale(1.05); }
+  .ba-nav a { transition: color .2s; }
+  .ba-nav a:hover { color: #4F5BF0; }
+  .ba-search-btn:hover { border-color:#4F5BF0 !important; color:#4F5BF0 !important; }
+  .ba-search-btn:hover .ba-search-txt { max-width:70px; opacity:1; margin-left:9px; }
+  .ba-apply-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#fff;">
+
+  <!-- HEADER (shared) -->
+  <div style="position:sticky; top:0; z-index:60;">
+    <div style="background:#0F1020; color:#C7C8DA; font-size:13px;">
+      <div style="max-width:1240px; margin:0 auto; padding:9px 28px; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+          <span>✉ office@britishacademy.az</span>
+          <span>☎ (+994) 55 212 41 51</span>
+          <span style="opacity:.65;">Həftə içi 09:00–21:00 · Şənbə 10:00–16:00</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <a href="#">Tələbə zonası</a>
+          <div style="display:inline-flex; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:2px;">
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; background:#4F5BF0; color:#fff;">AZ</span>
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; color:rgba(255,255,255,.65);">EN</span>
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; color:rgba(255,255,255,.65);">RU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header style="background:rgba(255,255,255,.92); backdrop-filter:blur(14px); border-bottom:1px solid #ECEDF2;">
+      <div style="max-width:1240px; margin:0 auto; padding:15px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+        <a href="British Academy.dc.html" style="display:flex; align-items:center; gap:12px;">
+          <span style="width:42px; height:42px; border-radius:11px; background:#4F5BF0; color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:800; font-size:20px;">B</span>
+          <span style="line-height:1;">
+            <span style="display:block; font-family:'Space Grotesk'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
+          </span>
+        </a>
+        <nav class="ba-nav" style="display:flex; align-items:center; gap:26px; font-size:15px; font-weight:600; color:#4C4C58;">
+          <a href="British Academy.dc.html#kurslar">Kurslar</a>
+          <a href="British Academy.dc.html#imtahan">IELTS · TOEFL</a>
+          <a href="British Academy.dc.html#xaricde">Xaricdə təhsil</a>
+          <a href="Muellimler.dc.html">Müəllimlər</a>
+          <a href="Bloq.dc.html" style="color:#4F5BF0;">Bloq</a>
+          <a href="Haqqimizda.dc.html">Haqqımızda</a>
+        </nav>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a href="British Academy.dc.html" aria-label="Axtar" class="ba-search-btn" style="display:flex; align-items:center; justify-content:flex-start; background:#F1F2F6; border:1px solid #E7E8EE; color:#4C4C58; font-weight:600; font-size:14px; height:42px; padding:0 13px; border-radius:99px; cursor:pointer; transition:background .2s, border-color .2s, color .2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span class="ba-search-txt" style="max-width:0; opacity:0; overflow:hidden; white-space:nowrap; transition:max-width .32s ease, opacity .25s ease, margin .32s ease;">Axtar</span>
+          </a>
+          <a href="British Academy.dc.html" class="ba-apply-btn" style="display:inline-flex; align-items:center; gap:8px; background:#4F5BF0; color:#fff; font-weight:700; font-size:14.5px; padding:11px 20px; border-radius:99px; transition:.2s; white-space:nowrap;">Müraciət et</a>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <!-- ARTICLE -->
+  <article style="max-width:820px; margin:0 auto; padding:42px 28px 20px;">
+    <div style="font-size:14px; color:#9A9AA6;"><a href="Bloq.dc.html" style="color:#9A9AA6;">Bloq</a> <span style="margin:0 6px;">/</span> <span style="color:#54545F;">IELTS</span></div>
+    <span style="display:inline-block; margin-top:20px; background:#EEF0FF; color:#4F5BF0; font-size:12.5px; font-weight:700; padding:6px 13px; border-radius:99px;">IELTS</span>
+    <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:clamp(32px,4.6vw,46px); letter-spacing:-.02em; margin:18px 0 0; line-height:1.15; color:#14141C;">IELTS imtahanına necə hazırlaşmalı?</h1>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:22px;">
+      <image-slot id="author" shape="circle" placeholder="Foto" style="width:44px; height:44px; flex:none;"></image-slot>
+      <div>
+        <div style="font-weight:700; font-size:14.5px; color:#17171F;">Aygün Əliyeva</div>
+        <div style="font-size:13px; color:#8A8A98;">05 Yanvar 2026 · 7 dəq oxu</div>
+      </div>
+    </div>
+  </article>
+
+  <div style="max-width:1000px; margin:0 auto; padding:12px 28px 0;">
+    <div style="position:relative; aspect-ratio:16/8; border-radius:24px; overflow:hidden; background:#EEF0F6;">
+      <image-slot id="cover" fit="cover" placeholder="Örtük şəkli" style="position:absolute; inset:0; width:100%; height:100%;"></image-slot>
+    </div>
+  </div>
+
+  <div class="bz-body" style="max-width:820px; margin:0 auto; padding:44px 28px 20px;">
+    <p>IELTS imtahanı dünya üzrə ən çox tanınan ingilis dili sertifikatlarından biridir. Yüksək bal almaq üçün yalnız qrammatika deyil, dörd bacarığın — Listening, Reading, Writing və Speaking — balanslı hazırlığı vacibdir.</p>
+    <h2>1. Hədəf balını müəyyən et</h2>
+    <p>Universitet və ya proqramın tələb etdiyi minimum balı öyrən. Hədəf aydın olduqda hazırlıq planını ona uyğun qurmaq daha asandır.</p>
+    <h2>2. Hər bacarığa vaxt ayır</h2>
+    <ul>
+      <li>Listening — müxtəlif aksentlərə qulaq as, qeyd götürməyi öyrən.</li>
+      <li>Reading — skimming və scanning texnikalarını mənimsə.</li>
+      <li>Writing — Task 1 və Task 2 üçün struktur şablonları hazırla.</li>
+      <li>Speaking — hər gün ucadan danışıq praktikası et.</li>
+    </ul>
+    <h2>3. Sınaq imtahanları ver</h2>
+    <p>British Academy-də rəsmi formatda sınaq imtahanlarında iştirak edərək real şəraiti hiss edə, zəif tərəflərini müəyyən edə bilərsən.</p>
+    <h2>4. Danışıq klublarına qatıl</h2>
+    <p>Speaking bölməsində uğur davamlı praktikadan asılıdır. Həftəlik danışıq klubları özünə inamı və axıcılığı artırır.</p>
+    <div style="background:#F6F7FA; border:1px solid #ECEDF2; border-left:4px solid #4F5BF0; border-radius:14px; padding:22px 24px; margin:12px 0 26px;">
+      <div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#17171F;">Məsləhət</div>
+      <p style="margin:8px 0 0; font-size:16px; color:#54545F; line-height:1.65;">Gündə 1 saat ardıcıl hazırlıq, həftədə 6 saatdan daha effektivdir. Davamlılıq nəticənin açarıdır.</p>
+    </div>
+    <p>Düzgün plan və peşəkar dəstəklə IELTS 7+ real hədəfdir. British Academy müəllimləri hər addımda səninlə olacaq.</p>
+  </div>
+
+  <!-- SHARE / CTA -->
+  <div style="max-width:820px; margin:0 auto; padding:10px 28px 40px;">
+    <a href="British Academy.dc.html" class="bz-btn" style="display:inline-block; background:#4F5BF0; color:#fff; font-weight:700; font-size:15px; padding:14px 24px; border-radius:12px; transition:.2s;">Pulsuz sınaq dərsinə yazıl</a>
+  </div>
+
+  <!-- RELATED -->
+  <section style="background:#F6F7FA; border-top:1px solid #ECEDF2;">
+    <div style="max-width:1100px; margin:0 auto; padding:56px 28px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-.02em; margin:0 0 28px; color:#14141C;">Oxşar yazılar</h2>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:22px;">
+        <sc-for list="{{ related }}" as="r" hint-placeholder-count="3">
+          <a href="BlogYazi.dc.html" class="bz-rel" style="display:block; background:#fff; border:1px solid #ECEDF2; border-radius:18px; overflow:hidden; transition:transform .25s ease, box-shadow .25s ease;">
+            <div style="position:relative; aspect-ratio:16/10; overflow:hidden; background:#EEF0F6;">
+              <image-slot id="{{ r.slot }}" fit="cover" placeholder="Şəkil" class="bz-rel-img" style="position:absolute; inset:0; width:100%; height:100%; transition:transform .35s ease;"></image-slot>
+            </div>
+            <div style="padding:18px 20px 22px;">
+              <div style="font-size:12.5px; color:#4F5BF0; font-weight:700;">{{ r.cat }}</div>
+              <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin:7px 0 0; line-height:1.3; color:#17171F;">{{ r.title }}</h3>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#0C0D1A; color:#C4C5D6;">
+    <div style="height:5px; background:#4F5BF0;"></div>
+    <div style="max-width:1100px; margin:0 auto; padding:44px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="width:40px; height:40px; border-radius:11px; background:#4F5BF0; color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:700; font-size:19px;">B</span>
+        <span style="font-family:'Space Grotesk'; font-weight:700; font-size:18px; color:#fff;">British Academy</span>
+      </div>
+      <div style="font-size:14px; color:#8788A0;">© 2014–2026 British Academy · <a href="Bloq.dc.html" style="color:#B9BAC4;">Bütün yazılar</a></div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000}}">
+class Component extends DCLogic {
+  renderVals() {
+    const related = [
+      { cat: 'Dil', title: 'Danışıq klubları niyə vacibdir?', slot: 'r0' },
+      { cat: 'IELTS', title: 'Speaking bölməsində yüksək bal', slot: 'r1' },
+      { cat: 'Xaricdə təhsil', title: 'Təqaüd proqramlarına müraciət', slot: 'r2' }
+    ];
+    return { related };
+  }
+}
+</script>
+</body>
+</html>

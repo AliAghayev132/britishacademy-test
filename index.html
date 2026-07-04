@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>British Academy — Dil kursları, IELTS/TOEFL hazırlığı və xaricdə təhsil</title>
+<meta name="description" content="British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div style="min-height:100vh; overflow-x:hidden; background:#fff;">
+
+  <!-- ============ LOADER ============ -->
+  <div id="ba-loader" style="position:fixed; inset:0; z-index:200; background:#0C0D1A; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; transition:opacity .55s ease;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <span style="width:52px; height:52px; border-radius:14px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:700; font-size:26px;">B</span>
+      <span style="font-family:'Space Grotesk'; font-weight:700; font-size:26px; color:#fff; letter-spacing:-.01em;">British Academy</span>
+    </div>
+    <div style="width:210px; height:4px; border-radius:99px; background:rgba(255,255,255,.14); overflow:hidden;">
+      <div id="ba-loadbar" style="height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width 1s cubic-bezier(.4,.1,.2,1);"></div>
+    </div>
+  </div>
+  <div id="ba-progress" style="position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:70; transition:width .08s linear;"></div>
+
+  <div class="ba-fixhead" style="position:fixed; top:0; left:0; right:0; z-index:60;">
+    <!-- ============ TOP BAR ============ -->
+    <div style="background:#0F1020; color:#C7C8DA; font-size:13px;">
+      <div style="max-width:1240px; margin:0 auto; padding:8px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+          <span>✉ office@britishacademy.az</span>
+          <span>☎ (+994) 55 212 41 51</span>
+          <span style="opacity:.65;">Həftə içi 09:00–21:00 · Şənbə 10:00–16:00</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <a href="#">Tələbə zonası</a>
+          <div data-langs style="display:inline-flex; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:2px;">
+            <button data-lang="AZ" style="border:none; cursor:pointer; font-family:inherit; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; background:var(--accent); color:#fff; transition:background .2s, color .2s;">AZ</button>
+            <button data-lang="EN" style="border:none; cursor:pointer; font-family:inherit; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; background:transparent; color:rgba(255,255,255,.65); transition:background .2s, color .2s;">EN</button>
+            <button data-lang="RU" style="border:none; cursor:pointer; font-family:inherit; font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; background:transparent; color:rgba(255,255,255,.65); transition:background .2s, color .2s;">RU</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HEADER ============ -->
+    <header style="position:relative; z-index:40; background:rgba(255,255,255,.92); backdrop-filter:blur(14px); border-bottom:1px solid #ECEDF2;">
+      <div style="max-width:1240px; margin:0 auto; padding:15px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+        <a href="index.html" style="display:flex; align-items:center; gap:12px;">
+          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:800; font-size:20px;">B</span>
+          <span style="line-height:1;">
+            <span style="display:block; font-family:'Space Grotesk'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
+          </span>
+        </a>
+        <nav class="ba-nav" style="display:flex; align-items:center; gap:26px; font-size:15px; font-weight:600; color:#4C4C58;">
+          <a href="#kurslar">Kurslar</a>
+          <a href="#imtahan">IELTS · TOEFL</a>
+          <a href="#xaricde">Xaricdə təhsil</a>
+          <a href="muellimler.html">Müəllimlər</a>
+          <a href="bloq.html">Bloq</a>
+          <a href="haqqimizda.html">Haqqımızda</a>
+        </nav>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button data-open-search aria-label="Axtar" class="ba-search-btn" style="display:flex; align-items:center; justify-content:flex-start; background:#F1F2F6; border:1px solid #E7E8EE; color:#4C4C58; font-weight:600; font-size:14px; height:42px; padding:0 13px; border-radius:99px; cursor:pointer; font-family:inherit; transition:background .2s, border-color .2s, color .2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span class="ba-search-txt" style="max-width:0; opacity:0; overflow:hidden; white-space:nowrap; transition:max-width .32s ease, opacity .25s ease, margin .32s ease;">Axtar</span>
+          </button>
+          <button data-open-apply class="ba-apply-btn" style="display:flex; align-items:center; gap:8px; background:var(--accent); color:#fff; border:none; font-weight:700; font-size:14.5px; padding:11px 20px; border-radius:99px; cursor:pointer; font-family:inherit; transition:.2s; white-space:nowrap;">Müraciət et</button>
+        </div>
+      </div>
+    </header>
+  </div>
+  <div id="ba-hspace" style="height:112px;"></div>
+
+  <!-- ============ SEARCH OVERLAY ============ -->
+  <div id="ba-search-overlay" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(255,255,255,.98); backdrop-filter:blur(10px); padding:36px 24px; overflow:auto;">
+    <div style="max-width:760px; margin:0 auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;">
+        <span style="font-family:'Space Grotesk'; font-weight:800; font-size:22px; color:#14141C;">Axtarış</span>
+        <button data-close-search style="display:flex; align-items:center; gap:8px; background:#F1F2F6; border:1px solid #E7E8EE; color:#4C4C58; font-weight:600; font-size:14px; padding:9px 16px; border-radius:99px; cursor:pointer; font-family:inherit;">Bağla ✕</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; border:2px solid var(--accent); border-radius:16px; padding:15px 18px; background:#fff;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--accent); flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input id="ba-search-input" placeholder="Kurs, xəbər və ya proqram axtar..." autocomplete="off" style="border:none; outline:none; font-size:19px; width:100%; background:transparent; color:#14141C; font-family:inherit;">
+      </div>
+      <div id="ba-search-results" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
+      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:34px; font-size:16px;">Nəticə tapılmadı</div>
+    </div>
+  </div>
+
+  <!-- ============ APPLY MODAL ============ -->
+  <div id="ba-apply-modal" style="display:none; position:fixed; inset:0; z-index:150; background:rgba(12,13,26,.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:24px;">
+    <div style="width:100%; max-width:540px; background:#fff; border-radius:26px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,.45);">
+      <div style="position:relative; background:var(--accent); padding:36px 34px 42px; overflow:hidden;">
+        <div style="position:absolute; top:-45px; right:-25px; width:190px; height:190px; border-radius:50%; background:rgba(255,255,255,.13);"></div>
+        <div style="position:absolute; bottom:-80px; left:34%; width:170px; height:170px; border-radius:50%; background:rgba(255,255,255,.1);"></div>
+        <button data-close-apply class="ba-modal-close" style="position:absolute; top:20px; right:20px; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.22); color:#fff; cursor:pointer; font-size:15px; display:grid; place-items:center; transition:.2s; z-index:2;">✕</button>
+        <div style="position:relative;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="width:46px; height:46px; border-radius:13px; background:rgba(255,255,255,.2); color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:700; font-size:23px;">B</span>
+            <span style="font-family:'Space Grotesk'; font-weight:700; font-size:18px; color:#fff; letter-spacing:-.01em;">British Academy</span>
+          </div>
+          <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; margin:24px 0 0; color:#fff; letter-spacing:-.015em;">Müraciət et</h3>
+          <p style="font-size:15px; color:rgba(255,255,255,.92); margin:9px 0 0; line-height:1.55; max-width:370px;">Gələcəyinə bu gün başla — dil biliyini British Academy ilə növbəti səviyyəyə qaldır.</p>
+        </div>
+      </div>
+      <form id="ba-apply-form" style="padding:28px 34px 32px; display:flex; flex-direction:column; gap:14px;">
+        <input class="ba-field" required placeholder="Ad Soyad" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; outline:none; transition:border-color .2s; color:#14141C;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <input class="ba-field" required placeholder="Telefon" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; outline:none; transition:border-color .2s; color:#14141C; min-width:0;">
+          <input class="ba-field" type="email" placeholder="E-poçt" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; outline:none; transition:border-color .2s; color:#14141C; min-width:0;">
+        </div>
+        <div style="position:relative;">
+          <button type="button" id="ba-apply-select" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; background:#fff; cursor:pointer;">
+            <span id="ba-apply-select-label" style="color:#9A9AA6;">Nəyə müraciət edirsən?</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9AA6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <div id="ba-apply-menu" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #E4E6EF; border-radius:13px; box-shadow:0 16px 40px rgba(20,20,45,.18); overflow:hidden; z-index:5; max-height:210px; overflow-y:auto;">
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">İngilis dili</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">IELTS · TOEFL</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Rus dili</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Alman dili</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Biznes İngilis</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Uşaqlar üçün</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Xaricdə təhsil</div>
+            <div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Kompüter kursları</div>
+          </div>
+        </div>
+        <button type="submit" class="ba-apply-btn" style="margin-top:6px; background:var(--accent); color:#fff; border:none; font-weight:700; font-size:16px; padding:16px; border-radius:13px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciəti göndər</button>
+        <p style="text-align:center; font-size:12.5px; color:#9A9AA6; margin:2px 0 0;">Məlumatların üçüncü tərəflə paylaşılmır.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <section style="position:relative; background:var(--hero-bg); overflow:hidden;">
+    <div style="position:absolute; top:-100px; left:8%; width:360px; height:360px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.22), transparent 68%); filter:blur(20px); animation:ba-blobA 14s ease-in-out infinite; pointer-events:none;"></div>
+    <div style="position:absolute; bottom:-120px; right:6%; width:420px; height:420px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.16), transparent 68%); filter:blur(24px); animation:ba-blobB 18s ease-in-out infinite; pointer-events:none;"></div>
+    <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.18) 1.4px, transparent 1.4px); background-size:26px 26px; -webkit-mask-image:radial-gradient(circle at 50% 42%, transparent 24%, #000 80%); mask-image:radial-gradient(circle at 50% 42%, transparent 24%, #000 80%); pointer-events:none;"></div>
+    <div style="position:absolute; top:66px; left:6%; transform:rotate(-8deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 6s ease-in-out infinite; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:600; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">Salam</span></div>
+    <div style="position:absolute; top:118px; right:7%; transform:rotate(7deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 7s ease-in-out infinite .6s; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:600; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">Hello</span></div>
+    <div style="position:absolute; top:300px; left:4%; transform:rotate(6deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 8s ease-in-out infinite 1.1s; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:600; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">Привет</span></div>
+    <div style="position:absolute; top:360px; right:5%; transform:rotate(-6deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 6.5s ease-in-out infinite .3s; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:600; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">Speaking</span></div>
+    <div style="position:absolute; bottom:172px; left:9%; transform:rotate(-5deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 7.5s ease-in-out infinite .9s; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:700; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">IELTS 7.0</span></div>
+    <div style="position:absolute; bottom:150px; right:10%; transform:rotate(8deg); pointer-events:none;"><span data-chip style="display:inline-block; animation:ba-float 6.8s ease-in-out infinite 1.4s; padding:10px 17px; border-radius:99px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.28); color:#fff; font-weight:700; font-size:15px; white-space:nowrap; backdrop-filter:blur(3px);">A1 → C1</span></div>
+
+    <div style="position:relative; max-width:1000px; margin:0 auto; padding:78px 28px 66px; text-align:center;">
+      <h1 style="font-family:'Space Grotesk'; font-weight:800; font-size:clamp(36px,5.2vw,56px); line-height:1.14; letter-spacing:-.02em; color:#fff; margin:0;">
+        British Academy ilə<br>
+        <span style="position:relative; display:inline-block; height:1.2em; vertical-align:top; min-width:1px;">
+          <span class="ba-rot-word">ingiliscə danış</span>
+          <span class="ba-rot-word">IELTS 7+ al</span>
+          <span class="ba-rot-word">rus dili öyrən</span>
+          <span class="ba-rot-word">almanca danış</span>
+          <span class="ba-rot-word">xaricdə oxu</span>
+        </span>
+      </h1>
+      <p style="font-size:19px; line-height:1.6; color:rgba(255,255,255,.9); max-width:600px; margin:24px auto 0;">
+        Böyük Britaniyada hazırlanmış xüsusi metodika ilə dilləri 4 dəfə sürətli öyrən. IELTS, TOEFL, SAT hazırlığı və xaricdə təhsil — hamısı bir mərkəzdə.
+      </p>
+
+      <!-- stats -->
+      <div class="hero-stats" style="display:flex; justify-content:center; gap:56px; margin-top:44px; flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Space Grotesk'; font-weight:800; font-size:34px; color:#fff; letter-spacing:-.02em;">20 000+</div>
+          <div style="font-size:14px; color:rgba(255,255,255,.82); margin-top:5px; line-height:1.35; max-width:170px;">məzun tələbə</div>
+        </div>
+        <div>
+          <div style="font-family:'Space Grotesk'; font-weight:800; font-size:34px; color:#fff; letter-spacing:-.02em;">30+</div>
+          <div style="font-size:14px; color:rgba(255,255,255,.82); margin-top:5px; line-height:1.35; max-width:170px;">korporativ tərəfdaş</div>
+        </div>
+        <div>
+          <div style="font-family:'Space Grotesk'; font-weight:800; font-size:34px; color:#fff; letter-spacing:-.02em;">4</div>
+          <div style="font-size:14px; color:rgba(255,255,255,.82); margin-top:5px; line-height:1.35; max-width:170px;">filial · Bakı</div>
+        </div>
+      </div>
+
+      <!-- category pills -->
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:52px;">
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2z"></path><path d="M4 19a2 2 0 0 1 2-2h10"></path></svg></span>İngilis dili</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18"></path><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10"></path><path d="M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2"></path></svg></span>IELTS · TOEFL</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>Rus dili</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18"></path><path d="M3 12h18"></path><path d="M12 3c2.5 2.7 2.5 15.3 0 18"></path><path d="M12 3c-2.5 2.7-2.5 15.3 0 18"></path></svg></span>Alman dili</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M8 6V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"></path><path d="M3 12h18"></path></svg></span>Biznes İngilis</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18"></path><path d="M9 10h.01"></path><path d="M15 10h.01"></path><path d="M9 15a4 4 0 0 0 6 0"></path></svg></span>Uşaqlar üçün</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"></path><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Danışıq klubları</a>
+        <a href="#xaricde" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 1 0 20 0 10 10 0 0 0-20 0"></path><path d="M2 12h20"></path><path d="M12 2a15 15 0 0 1 0 20"></path><path d="M12 2a15 15 0 0 0 0 20"></path></svg></span>Xaricdə təhsil</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path><path d="M8 20h8"></path><path d="M12 16v4"></path></svg></span>Kompüter kursları</a>
+        <a href="#kurslar" class="ba-pill ba-pill-cat" style="display:inline-flex; align-items:center; gap:9px; background:#fff; color:#1B1B26; font-weight:600; font-size:15px; padding:11px 18px; border-radius:99px; box-shadow:0 6px 16px rgba(20,20,40,.12); transition:background .45s ease, color .45s ease, transform .2s ease, box-shadow .2s ease;"><span class="ba-pill-ic" style="color:var(--accent); display:flex; transition:color .45s ease;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12"></path><path d="M8.2 13.9 7 22l5-3 5 3-1.2-8.1"></path></svg></span>Təlimlər</a>
+        <a href="#qeydiyyat" class="ba-pill" style="display:inline-flex; align-items:center; gap:9px; background:#0F1020; color:#fff; font-weight:700; font-size:15px; padding:11px 18px; border-radius:99px; transition:.2s;">Pulsuz sınaq dərsi →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COURSES ============ -->
+  <section id="kurslar" class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:84px 28px 20px;">
+    <div style="margin-bottom:42px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Kurslarımız<br><span style="color:#B9BAC4;">və qiymətləri seç</span></h2>
+    </div>
+    <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:42px;">
+
+      <!-- Course card -->
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">Ümumi kurs</span>
+          <span style="font-size:11.5px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:99px;">Ən populyar</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">İngilis Dili</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Həftədə 2 dəfə · 90 dəqiqə</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Danışıq klubu + workshop daxil</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>1 səviyyə 1.5–2 ay</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">A</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Aygün Əliyeva</span></a>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">G</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Günel Sadıqova</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div><span style="font-family:'Space Grotesk'; font-weight:800; font-size:30px; color:#14141C;">109</span><span style="font-size:14px; color:#9A9AA6; margin-left:4px;">AZN / 2 ay</span></div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">Peşəkarlar üçün</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">Biznes İngilis</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Həftədə 2 dəfə · 90 dəqiqə</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>6 gün danışıq klubu</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Müddət 1.5–2 ay</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">R</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Rəşad Məmmədov</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div><span style="font-family:'Space Grotesk'; font-weight:800; font-size:30px; color:#14141C;">180</span><span style="font-size:14px; color:#9A9AA6; margin-left:4px;">AZN / ay</span></div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">İmtahan hazırlığı</span>
+          <span style="font-size:11.5px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:99px;">Rəsmi mərkəz</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">IELTS Hazırlıq</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Həftədə 2 dəfə · 90 dəqiqə</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Rəsmi sınaq imtahanı</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Müddət 3 ay</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">A</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Aygün Əliyeva</span></a>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">K</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Kamran İsmayılov</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div><span style="font-family:'Space Grotesk'; font-weight:800; font-size:30px; color:#14141C;">180</span><span style="font-size:14px; color:#9A9AA6; margin-left:4px;">AZN / ay</span></div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">Ümumi kurs</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">Rus Dili</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Həftədə 2 dəfə · 90 dəqiqə</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Canlı danışıq təcrübəsi</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Müddət 1.5–2 ay</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">N</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Nigar Hüseynova</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div><span style="font-family:'Space Grotesk'; font-weight:800; font-size:30px; color:#14141C;">80</span><span style="font-size:14px; color:#9A9AA6; margin-left:4px;">AZN / ay</span></div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">Kompüter kursu</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">Ofis Proqramları</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Həftədə 2 dəfə · 90 dəqiqə</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Əlavə praktika</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Müddət 3 ay</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">E</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Elvin Quliyev</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div><span style="font-family:'Space Grotesk'; font-weight:800; font-size:30px; color:#14141C;">80</span><span style="font-size:14px; color:#9A9AA6; margin-left:4px;">AZN / ay</span></div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+      <div class="ba-course" style="background:#fff; border:1px solid #ECEDF2; border-radius:20px; padding:26px; transition:.22s; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <span style="font-size:12px; font-weight:700; color:#9A9AA6; letter-spacing:.05em; text-transform:uppercase;">6–14 yaş</span>
+        </div>
+        <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:23px; margin:14px 0 0; letter-spacing:-.01em; color:#17171F;">Uşaqlar üçün İngilis</h3>
+        <ul style="list-style:none; padding:0; margin:18px 0 0; display:flex; flex-direction:column; gap:11px; flex:1;">
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Oyun əsaslı metodika</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Kiçik yaş qrupları</span></li>
+          <li style="display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:#54545F; line-height:1.45;"><span style="color:var(--accent); margin-top:1px; flex:none; font-weight:800;">✓</span><span>Yaşa uyğun səviyyələr</span></li>
+        </ul>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:16px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#9A9AA6; font-weight:700;">Müəllim:</span>
+          <a href="muellimler.html" style="display:inline-flex; align-items:center; gap:6px; background:#F4F5F8; border-radius:99px; padding:4px 11px 4px 4px;"><span style="width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; font-weight:700; display:grid; place-items:center;">G</span><span style="font-size:12.5px; font-weight:600; color:#54545F;">Günel Sadıqova</span></a>
+        </div>
+        <div style="border-top:1px solid #EEEFF3; margin-top:22px; padding-top:20px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+          <div style="font-size:15px; color:#54545F; font-weight:700;">Qiymət üçün soruş</div>
+          <a href="#qeydiyyat" class="ba-link" style="font-size:14px; font-weight:700; color:var(--accent); white-space:nowrap; transition:.2s;">Ətraflı →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ MARQUEE ============ -->
+  <div style="background:#0F1020; transform:rotate(-1.2deg); width:104%; margin:70px -2% -8px; padding:15px 0; overflow:hidden;">
+    <div id="ba-mq" style="display:flex; align-items:center; gap:38px; white-space:nowrap; will-change:transform;">
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">İNGİLİS DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">IELTS 7+<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">DANIŞIQ KLUBU<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">XARİCDƏ TƏHSİL<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">RUS DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">ALMAN DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">BİZNES İNGİLİS<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">İNGİLİS DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">IELTS 7+<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">DANIŞIQ KLUBU<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">XARİCDƏ TƏHSİL<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">RUS DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">ALMAN DİLİ<span style="color:var(--accent);">✦</span></span>
+      <span style="display:inline-flex; align-items:center; gap:38px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:16px; letter-spacing:.08em;">BİZNES İNGİLİS<span style="color:var(--accent);">✦</span></span>
+    </div>
+  </div>
+
+  <!-- ============ ADVANTAGES ============ -->
+  <section id="ustunluk" class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:84px 28px 20px;">
+    <div style="margin-bottom:42px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Üstünlüklərimiz<br><span style="color:#B9BAC4;">nəyə görə British Academy?</span></h2>
+    </div>
+    <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12"></path><path d="M8.2 13.9 7 22l5-3 5 3-1.2-8.1"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">01</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Müəllimlər</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">IELTS 8.0–8.5 sertifikatlı, xaricdə təhsil almış, beynəlxalq təcrübəli müəllimlər.</p>
+      </div>
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"></path><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">02</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Kiçik qruplar</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">3–6 tələbədən ibarət qruplar və ya tam fərdi dərs formatı.</p>
+      </div>
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2z"></path><path d="M4 19a2 2 0 0 1 2-2h10"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">03</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Xüsusi metodika</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Böyük Britaniyada hazırlanmış kitablarla 4 dəfə sürətli öyrənmə.</p>
+      </div>
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 12.5 12.5 20.6a2 2 0 0 1-2.8 0l-6.3-6.3a2 2 0 0 1-.6-1.4V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l6.5 6.5a2 2 0 0 1 0 2.8z"></path><path d="M7 7h.01"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">04</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Kampaniyalar</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Sərfəli qiymətlər, mövsüm və bayram endirimləri.</p>
+      </div>
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">05</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Müasir siniflər</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Bütün lazımi avadanlıqla təchiz olunmuş rahat sinif otaqları.</p>
+      </div>
+      <div class="ba-adv2" style="position:relative; background:#F7F8FB; border:1px solid #ECEDF2; border-radius:20px; padding:30px 26px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div class="ba-adv2-ic" style="width:50px; height:50px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"></path><path d="M2 7h20v5H2z"></path><path d="M12 21V7"></path><path d="M12 7S9 3 6.5 3 4 5 4 5s1 2 3 2h5"></path><path d="M12 7s3-4 5.5-4S20 5 20 5s-1 2-3 2h-5"></path></svg></div>
+          <span class="ba-adv2-n" style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; color:#E4E6EF;">06</span>
+        </div>
+        <h3 class="ba-adv2-t" style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:22px 0 0; color:#17171F;">Ödənişsiz vəsaitlər</h3>
+        <p class="ba-adv2-d" style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Dərs kitabları və hər gün təşkil olunan danışıq klubları ödənişsiz.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STUDY ABROAD ============ -->
+  <section id="xaricde" class="ba-reveal" style="background:#F6F7FA; margin-top:84px;">
+    <div style="max-width:1240px; margin:0 auto; padding:80px 28px;">
+      <div style="margin-bottom:38px;">
+        <h2 id="imtahan" style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Xaricdə təhsil<br><span style="color:#B9BAC4;">arzuladığın ölkədə oxu</span></h2>
+      </div>
+      <div class="grid-5" style="display:grid; grid-template-columns:repeat(5,1fr); gap:14px;">
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">ŞİMALİ AMERİKA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Kanada</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Bakalavr, master, dil</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">AVROPA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Almaniya</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Ödənişsiz universitetlər</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">AVROPA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Polşa</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Sərfəli təhsil</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">ŞİMALİ AMERİKA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Amerika</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Universitet & dil</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">AVROPA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Türkiyə</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Bakalavr & master</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">PROQRAM</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Təqaüd proqramları</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Tam & qismən</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">YAY</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Yay düşərgələri</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Dil + səyahət</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">AVROPA</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Avropa</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Geniş seçim</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">REGİON</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Gürcüstan</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Tibb & universitet</div></a>
+        <a href="#" class="ba-dest" style="background:#fff; border:1px solid #ECEDF2; border-radius:16px; padding:20px; transition:.2s; display:block;"><div style="font-size:12px; color:var(--accent); font-weight:800; letter-spacing:.04em;">REGİON</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; margin-top:8px; color:#17171F;">Ukrayna</div><div style="font-size:13px; color:#8A8A98; margin-top:5px; line-height:1.4;">Universitet təhsili</div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GRADUATES (video) ============ -->
+  <section class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:84px 28px 20px;">
+    <div style="margin-bottom:42px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:800; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Məzunlarımız<br><span style="color:#B9BAC4;">bizim haqqımızda nə deyər?</span></h2>
+    </div>
+    <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+      <!-- graduate video card -->
+      <div class="ba-vcard" data-video data-dur="25" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:3/4; border-radius:20px; overflow:hidden; background:#0F1020;">
+        <div class="img-slot" style="position:absolute; inset:0; width:100%; height:100%;"><span>Məzun videosu</span></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.8)); pointer-events:none;"></div>
+        <div style="position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+          <span style="background:rgba(0,0,0,.55); color:#fff; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:8px; backdrop-filter:blur(4px);">Aysel Məmmədova danışır</span>
+          <button class="ba-vmenu" aria-label="Menyu" style="width:30px; height:30px; border:none; border-radius:8px; background:rgba(0,0,0,.5); color:#fff; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px);"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></button>
+        </div>
+        <button class="v-play ba-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:20px; background:var(--accent); border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 12px 28px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+          <svg class="v-ic-play" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff; margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="v-ic-pause" width="22" height="22" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:10px;">
+          <button class="v-mini ba-vmini" aria-label="Oynat / Dayandır" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-play" width="14" height="14" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M7 4.5v15l13-7.5z"></path></svg>
+            <svg class="v-ic-pause" width="13" height="13" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.4"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.4"></rect></svg>
+          </button>
+          <div class="v-track ba-vtrack" style="flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.32); overflow:hidden;"><div class="v-fill ba-vfill" style="height:100%; width:0%; background:var(--accent); border-radius:99px;"></div></div>
+          <span class="v-time ba-vtime" style="color:#fff; font-size:12px; font-weight:600; white-space:nowrap;">00:25</span>
+          <button class="v-mute ba-vmute" aria-label="Səs" data-muted="0" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-vol" width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a4 4 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            <svg class="v-ic-mute" width="15" height="15" viewBox="0 0 24 24" fill="#fff" style="display:none;"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9l5 6M22 9l-5 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+          <button class="v-fs ba-vfs" aria-label="Tam ekran" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+        </div>
+      </div>
+
+      <div class="ba-vcard" data-video data-dur="58" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:3/4; border-radius:20px; overflow:hidden; background:#0F1020;">
+        <div class="img-slot" style="position:absolute; inset:0; width:100%; height:100%;"><span>Məzun videosu</span></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.8)); pointer-events:none;"></div>
+        <div style="position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+          <span style="background:rgba(0,0,0,.55); color:#fff; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:8px; backdrop-filter:blur(4px);">Rəşad Quliyev danışır</span>
+          <button class="ba-vmenu" aria-label="Menyu" style="width:30px; height:30px; border:none; border-radius:8px; background:rgba(0,0,0,.5); color:#fff; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px);"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></button>
+        </div>
+        <button class="v-play ba-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:20px; background:var(--accent); border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 12px 28px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+          <svg class="v-ic-play" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff; margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="v-ic-pause" width="22" height="22" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:10px;">
+          <button class="v-mini ba-vmini" aria-label="Oynat / Dayandır" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-play" width="14" height="14" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M7 4.5v15l13-7.5z"></path></svg>
+            <svg class="v-ic-pause" width="13" height="13" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.4"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.4"></rect></svg>
+          </button>
+          <div class="v-track ba-vtrack" style="flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.32); overflow:hidden;"><div class="v-fill ba-vfill" style="height:100%; width:0%; background:var(--accent); border-radius:99px;"></div></div>
+          <span class="v-time ba-vtime" style="color:#fff; font-size:12px; font-weight:600; white-space:nowrap;">00:58</span>
+          <button class="v-mute ba-vmute" aria-label="Səs" data-muted="0" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-vol" width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a4 4 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            <svg class="v-ic-mute" width="15" height="15" viewBox="0 0 24 24" fill="#fff" style="display:none;"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9l5 6M22 9l-5 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+          <button class="v-fs ba-vfs" aria-label="Tam ekran" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+        </div>
+      </div>
+
+      <div class="ba-vcard" data-video data-dur="53" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:3/4; border-radius:20px; overflow:hidden; background:#0F1020;">
+        <div class="img-slot" style="position:absolute; inset:0; width:100%; height:100%;"><span>Məzun videosu</span></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.8)); pointer-events:none;"></div>
+        <div style="position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+          <span style="background:rgba(0,0,0,.55); color:#fff; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:8px; backdrop-filter:blur(4px);">Nigar Əhmədzadə danışır</span>
+          <button class="ba-vmenu" aria-label="Menyu" style="width:30px; height:30px; border:none; border-radius:8px; background:rgba(0,0,0,.5); color:#fff; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px);"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></button>
+        </div>
+        <button class="v-play ba-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:20px; background:var(--accent); border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 12px 28px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+          <svg class="v-ic-play" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff; margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="v-ic-pause" width="22" height="22" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:10px;">
+          <button class="v-mini ba-vmini" aria-label="Oynat / Dayandır" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-play" width="14" height="14" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M7 4.5v15l13-7.5z"></path></svg>
+            <svg class="v-ic-pause" width="13" height="13" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.4"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.4"></rect></svg>
+          </button>
+          <div class="v-track ba-vtrack" style="flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.32); overflow:hidden;"><div class="v-fill ba-vfill" style="height:100%; width:0%; background:var(--accent); border-radius:99px;"></div></div>
+          <span class="v-time ba-vtime" style="color:#fff; font-size:12px; font-weight:600; white-space:nowrap;">00:53</span>
+          <button class="v-mute ba-vmute" aria-label="Səs" data-muted="0" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-vol" width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a4 4 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            <svg class="v-ic-mute" width="15" height="15" viewBox="0 0 24 24" fill="#fff" style="display:none;"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9l5 6M22 9l-5 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+          <button class="v-fs ba-vfs" aria-label="Tam ekran" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+        </div>
+      </div>
+
+      <div class="ba-vcard" data-video data-dur="47" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:3/4; border-radius:20px; overflow:hidden; background:#0F1020;">
+        <div class="img-slot" style="position:absolute; inset:0; width:100%; height:100%;"><span>Məzun videosu</span></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.8)); pointer-events:none;"></div>
+        <div style="position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+          <span style="background:rgba(0,0,0,.55); color:#fff; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:8px; backdrop-filter:blur(4px);">Bülbül İsmayılova danışır</span>
+          <button class="ba-vmenu" aria-label="Menyu" style="width:30px; height:30px; border:none; border-radius:8px; background:rgba(0,0,0,.5); color:#fff; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px);"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></button>
+        </div>
+        <button class="v-play ba-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:20px; background:var(--accent); border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 12px 28px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+          <svg class="v-ic-play" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff; margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="v-ic-pause" width="22" height="22" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:10px;">
+          <button class="v-mini ba-vmini" aria-label="Oynat / Dayandır" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-play" width="14" height="14" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M7 4.5v15l13-7.5z"></path></svg>
+            <svg class="v-ic-pause" width="13" height="13" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.4"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.4"></rect></svg>
+          </button>
+          <div class="v-track ba-vtrack" style="flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.32); overflow:hidden;"><div class="v-fill ba-vfill" style="height:100%; width:0%; background:var(--accent); border-radius:99px;"></div></div>
+          <span class="v-time ba-vtime" style="color:#fff; font-size:12px; font-weight:600; white-space:nowrap;">00:47</span>
+          <button class="v-mute ba-vmute" aria-label="Səs" data-muted="0" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-vol" width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a4 4 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            <svg class="v-ic-mute" width="15" height="15" viewBox="0 0 24 24" fill="#fff" style="display:none;"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9l5 6M22 9l-5 6" stroke="#fff" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+          <button class="v-fs ba-vfs" aria-label="Tam ekran" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PARTNERS ============ -->
+  <section class="ba-reveal" style="background:#F6F7FA; margin-top:84px; border-top:1px solid #ECEDF2; border-bottom:1px solid #ECEDF2;">
+    <div style="max-width:1240px; margin:0 auto; padding:70px 28px;">
+      <div style="margin-bottom:40px;">
+        <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Tərəfdaşlarımız<br><span style="color:#B9BAC4;">bizə güvənənlər</span></h2>
+      </div>
+      <div class="grid-6" style="display:grid; grid-template-columns:repeat(6,1fr); gap:16px;">
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Rabitəbank</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">AzerGold</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Veysəloğlu</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">ARB 24</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Araz Market</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">PMD Group</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Alfa Telekom</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Petrochem</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">A+CO</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Green Plast</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Caspian Pipe</span></div>
+        <div class="ba-partner" style="background:#fff; border:1px solid #ECEDF2; border-radius:14px; height:92px; display:grid; place-items:center; padding:12px;"><div class="ba-pov"></div><span class="ba-partner-name" style="font-family:'Space Grotesk'; font-weight:700; font-size:15px; color:#54545F; text-align:center;">Enefcon</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEWS ============ -->
+  <section class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:84px 28px 20px;">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:40px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Xəbərlər & Bloq<br><span style="color:#B9BAC4;">son yazılar</span></h2>
+      <a href="bloq.html" class="ba-link" style="font-size:15px; font-weight:700; color:var(--accent);">Hamısına bax →</a>
+    </div>
+    <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:22px;">
+      <a href="bloq.html" class="ba-news-card" style="display:block; background:#fff; border:1px solid #ECEDF2; border-radius:20px; overflow:hidden;">
+        <div style="position:relative; aspect-ratio:16/10; overflow:hidden; background:#EEF0F6;">
+          <div class="img-slot ba-news-img" style="position:absolute; inset:0; width:100%; height:100%; transition:transform .35s ease;"><span>Şəkil</span></div>
+          <span style="position:absolute; top:12px; left:12px; background:var(--accent); color:#fff; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:99px; z-index:2;">Xaricdə təhsil</span>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-size:13px; color:#9A9AA6; font-weight:600;">13 Aprel 2026</div>
+          <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:8px 0 0; line-height:1.3; color:#17171F;">Xaricdə təhsilin üstünlükləri nələrdir?</h3>
+          <p style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Beynəlxalq diplom, dil praktikası və karyera imkanları — xaricdə oxumağın əsas faydaları.</p>
+        </div>
+      </a>
+      <a href="bloq.html" class="ba-news-card" style="display:block; background:#fff; border:1px solid #ECEDF2; border-radius:20px; overflow:hidden;">
+        <div style="position:relative; aspect-ratio:16/10; overflow:hidden; background:#EEF0F6;">
+          <div class="img-slot ba-news-img" style="position:absolute; inset:0; width:100%; height:100%; transition:transform .35s ease;"><span>Şəkil</span></div>
+          <span style="position:absolute; top:12px; left:12px; background:var(--accent); color:#fff; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:99px; z-index:2;">Dil</span>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-size:13px; color:#9A9AA6; font-weight:600;">22 Yanvar 2026</div>
+          <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:8px 0 0; line-height:1.3; color:#17171F;">Alman dili bilməyin üstünlükləri</h3>
+          <p style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">Almaniyada təhsil və iş üçün alman dilinin rolu və öyrənməyə haradan başlamalı.</p>
+        </div>
+      </a>
+      <a href="blogyazi.html" class="ba-news-card" style="display:block; background:#fff; border:1px solid #ECEDF2; border-radius:20px; overflow:hidden;">
+        <div style="position:relative; aspect-ratio:16/10; overflow:hidden; background:#EEF0F6;">
+          <div class="img-slot ba-news-img" style="position:absolute; inset:0; width:100%; height:100%; transition:transform .35s ease;"><span>Şəkil</span></div>
+          <span style="position:absolute; top:12px; left:12px; background:var(--accent); color:#fff; font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:99px; z-index:2;">IELTS</span>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-size:13px; color:#9A9AA6; font-weight:600;">05 Yanvar 2026</div>
+          <h3 style="font-family:'Space Grotesk'; font-weight:700; font-size:19px; margin:8px 0 0; line-height:1.3; color:#17171F;">IELTS imtahanına necə hazırlaşmalı?</h3>
+          <p style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.55;">7+ bal üçün strategiya, resurslar və ümumi səhvlərdən qaçmağın yolları.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section id="faq" class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:84px 28px 20px;">
+    <div style="margin-bottom:40px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; letter-spacing:-.02em; margin:0; line-height:1.08; color:#14141C;">Tez-tez verilən<br><span style="color:#B9BAC4;">suallar</span></h2>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Digər mərkəzlərdən üstün cəhətləriniz nələrdir?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">British Academy ingilis dilini xüsusi metodlarla standart üsullardan 4 dəfə daha sürətli və effektiv tədris edir. Dili sistemli şəkildə, ana diliniz kimi öyrənirsiniz.</div></div>
+      </div>
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Sınaq dərsi mövcuddur?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">Bəli. İlk dərs sınaq dərsidir; davam etsəniz dərs saatı kimi qeydə alınır.</div></div>
+      </div>
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Müəllimlərin sertifikatı var?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">British Academy müəllimləri xaricdə təhsil almış, beynəlxalq sertifikatlara malik (IELTS 8.0–8.5) müəllimlərdir.</div></div>
+      </div>
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Bir səviyyə nə qədər çəkir?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">Hər dil səviyyəsi 1.5–2 ay müddətində tədris olunur, sonra növbəti səviyyəyə keçilir.</div></div>
+      </div>
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Dərsliklərlə təmin edirsinizmi?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">Böyük Britaniyada hazırlanmış xüsusi tədris kitabları ilə tələbələr ödənişsiz təmin olunur.</div></div>
+      </div>
+      <div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; cursor:pointer;">
+          <span style="font-family:'Space Grotesk'; font-weight:600; font-size:17px; color:#1C1C26;">Danışıq klubu üçün əlavə ödəniş var?</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 24px 22px; font-size:15px; color:#5A5A66; line-height:1.6;">Xeyr. Conversation Club tələbələrimiz üçün ödənişsizdir — həftənin 3 günü, 8 fərqli klub formatında.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA / QEYDIYYAT ============ -->
+  <section id="qeydiyyat" class="ba-reveal" style="max-width:1240px; margin:0 auto; padding:80px 28px 20px;">
+    <div style="background:var(--accent); border-radius:28px; padding:60px 40px; text-align:center; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:-50px; right:-30px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.12);"></div>
+      <div style="position:absolute; bottom:-70px; left:8%; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.1);"></div>
+      <div style="position:relative;">
+        <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:clamp(28px,4vw,40px); color:#fff; margin:0; letter-spacing:-.02em;">Pulsuz sınaq dərsinə bu gün yazıl</h2>
+        <p style="font-size:17px; color:rgba(255,255,255,.9); margin:14px auto 0; max-width:520px; line-height:1.6;">Səviyyəni pulsuz təyin edək və sənə uyğun kurs planını təklif edək.</p>
+        <button data-open-apply style="margin-top:26px; background:#fff; color:var(--accent); border:none; font-weight:700; font-size:16px; padding:15px 30px; border-radius:13px; cursor:pointer; font-family:inherit; transition:.2s;" class="hz-btn">Müraciət et</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer style="position:relative; background:#0C0D1A; color:#C4C5D6; overflow:visible; margin-top:60px;">
+    <div style="height:5px; background:var(--accent);"></div>
+    <div style="position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:5; width:104px; height:104px; border-radius:50%; background:var(--accent); border:7px solid #0C0D1A; display:grid; place-items:center; box-shadow:0 14px 36px rgba(0,0,0,.45);">
+      <span style="font-family:'Space Grotesk'; font-weight:700; font-size:44px; color:#fff; line-height:1;">B</span>
+    </div>
+    <div class="footer-grid" style="position:relative; z-index:2; max-width:1240px; margin:0 auto; padding:62px 28px 20px; display:grid; grid-template-columns:1.7fr 1fr 1fr 1fr; gap:36px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:800; font-size:19px;">B</span>
+          <span style="font-family:'Space Grotesk'; font-weight:800; font-size:19px; color:#fff;">British Academy</span>
+        </div>
+        <p style="font-size:14.5px; line-height:1.65; margin:20px 0 0; max-width:330px; color:#9A9BB0;">English UK akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti. 2014-cü ildən keyfiyyətli dil təhsili və xaricdə təhsil.</p>
+        <div style="font-size:14px; color:#8788A0; margin-top:20px; line-height:1.75;">C.Cabbarlı 44, Caspian Plaza<br>(+994 12) 497 62 97 · (+994) 55 212 41 51<br>office@britishacademy.az</div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:13px; color:#fff; letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px;">Kurslar</div>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:14.5px;">
+          <a href="#kurslar" class="ba-flink">İngilis dili</a><a href="#kurslar" class="ba-flink">Rus dili</a><a href="#kurslar" class="ba-flink">Alman dili</a><a href="#imtahan" class="ba-flink">IELTS · TOEFL</a><a href="#kurslar" class="ba-flink">Biznes İngilis</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:13px; color:#fff; letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px;">Akademiya</div>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:14.5px;">
+          <a href="haqqimizda.html" class="ba-flink">Haqqımızda</a><a href="#ustunluk" class="ba-flink">Üstünlüklər</a><a href="#xaricde" class="ba-flink">Xaricdə təhsil</a><a href="muellimler.html" class="ba-flink">Müəllimlər</a><a href="bloq.html" class="ba-flink">Bloq</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:13px; color:#fff; letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px;">Sosial</div>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:14.5px;">
+          <a href="#" class="ba-flink">Instagram</a><a href="#" class="ba-flink">Facebook</a><a href="#" class="ba-flink">YouTube</a><a href="#faq" class="ba-flink">FAQ</a><a href="#qeydiyyat" class="ba-flink">Əlaqə</a>
+        </div>
+      </div>
+    </div>
+    <div style="position:relative; z-index:2; border-top:1px solid rgba(255,255,255,.1); margin-top:24px;">
+      <div style="max-width:1240px; margin:0 auto; padding:22px 28px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:13px; color:#7B7C94;">
+        <span>© 2014–2026 British Academy. Bütün hüquqlar qorunur.</span>
+        <span>English UK · Cambridge · British Council · Duolingo · TOEFL</span>
+      </div>
+    </div>
+    <div style="position:relative; z-index:1; line-height:.74; text-align:center; margin-top:4px; overflow:hidden;">
+      <div style="font-family:'Space Grotesk'; font-weight:800; font-size:clamp(40px,9.5vw,124px); color:var(--accent-wm); letter-spacing:-.03em; white-space:nowrap; transform:translateY(12%);">British Academy</div>
+    </div>
+  </footer>
+
+  <!-- ============ FIXED WHATSAPP ============ -->
+  <a href="https://wa.me/994552124151" target="_blank" rel="noopener" aria-label="WhatsApp" class="ba-wa" style="position:fixed; right:22px; bottom:56px; z-index:90; width:78px; height:78px; border-radius:50%; background:#25D366; display:grid; place-items:center; box-shadow:0 14px 32px rgba(37,211,102,.5); transition:transform .2s;">
+    <svg viewBox="0 0 32 32" width="40" height="40" fill="#fff"><path d="M16 .5C7.4.5.5 7.4.5 16c0 2.8.7 5.5 2.1 7.9L.4 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.5 16 .5zm0 28c-2.4 0-4.7-.6-6.7-1.8l-.5-.3-4.7 1.2 1.3-4.6-.3-.5c-1.3-2.1-2-4.5-2-7 0-7.1 5.8-12.9 13-12.9s12.9 5.8 12.9 12.9-5.8 12.9-13 13zm7.1-9.7c-.4-.2-2.3-1.1-2.6-1.3-.3-.1-.6-.2-.8.2-.2.4-.9 1.3-1.2 1.5-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.7.2-.2.2-.4.4-.7.1-.3 0-.5 0-.7-.1-.2-.8-2-1.1-2.7-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.5 3.8 6 5.3.8.4 1.5.6 2 .8.8.3 1.6.2 2.2.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.4z"></path></svg>
+  </a>
+
+</div>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

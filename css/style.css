@@ -1,0 +1,166 @@
+/* ============================================================
+   British Academy — shared styles
+   Pure HTML / CSS / JS (no build tools)
+   Accent color is controlled by the --accent CSS variable.
+   ============================================================ */
+
+:root {
+  --accent: #4F5BF0;
+  --accent-soft: #4F5BF014;
+  --accent-wm: #4F5BF02e;
+  --hero-bg: #4F5BF0;
+  --ink: #16161C;
+  --max: 1240px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+::selection { background: var(--accent); color: #fff; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: #E9EBF3; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 99px; border: 3px solid #E9EBF3; }
+::-webkit-scrollbar-thumb:hover { background: #14141C; }
+
+/* ---------- Keyframes ---------- */
+@keyframes ba-word {
+  0%    { opacity:0; transform: translate(-50%, 80%) rotateX(-80deg); }
+  2.5%  { opacity:1; transform: translate(-50%, 0) rotateX(0); }
+  18%   { opacity:1; transform: translate(-50%, 0) rotateX(0); }
+  20%   { opacity:0; transform: translate(-50%, -80%) rotateX(80deg); }
+  100%  { opacity:0; transform: translate(-50%, -80%) rotateX(80deg); }
+}
+@keyframes ba-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes ba-blobA { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(70px,40px) scale(1.15); } 66% { transform: translate(-40px,60px) scale(.92); } }
+@keyframes ba-blobB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-80px,-50px) scale(1.22); } }
+
+.ba-rot-word {
+  position:absolute; left:50%; top:0; white-space:nowrap; opacity:0;
+  transform:translate(-50%,80%) rotateX(-80deg);
+  transition:opacity .5s ease, transform .55s cubic-bezier(.2,.75,.25,1);
+}
+
+/* ---------- Hover / interaction states ---------- */
+.ba-nav a { transition: color .2s; }
+.ba-nav a:hover { color: var(--accent); }
+.ba-pill:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(20,20,40,.14); }
+.ba-pill-cat:hover { background: var(--accent) !important; color: #fff !important; }
+.ba-pill-cat:hover .ba-pill-ic { color: #fff !important; }
+.ba-course:hover { transform: translateY(-5px); box-shadow: 0 20px 44px rgba(20,20,45,.1); border-color: rgba(20,20,60,.14) !important; }
+.ba-dest:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(20,20,45,.1); }
+.ba-btn-primary:hover { filter: brightness(1.07); transform: translateY(-2px); }
+.ba-link:hover { opacity:.7; }
+.ba-flink { color:#9A9BB0; transition:color .2s; }
+.ba-flink:hover { color:#fff; }
+.ba-faq:hover { border-color: rgba(20,20,60,.16) !important; }
+.ba-search-btn:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
+.ba-search-btn:hover .ba-search-txt { max-width:100px; opacity:1; margin-left:9px; }
+.ba-apply-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.ba-wa:hover { transform: scale(1.08); }
+.ba-vcard:hover .ba-vplay { transform: translate(-50%,-50%) scale(1.06); }
+.ba-vmenu:hover, .ba-vmini:hover { filter: brightness(1.12); }
+.ba-sel-opt:hover { background: var(--accent-soft); }
+.ba-modal-close:hover { background:#EEF0F6; }
+.ba-field:focus { border-color: var(--accent) !important; }
+
+/* Partner tiles — radial fill on hover */
+.ba-partner { position: relative; overflow: hidden; cursor: default; }
+.ba-partner .ba-pov { position:absolute; border-radius:50%; background:var(--accent); z-index:2; pointer-events:none; transform:scale(0); transform-origin:center; transition:transform .5s cubic-bezier(.2,.7,.2,1); }
+.ba-partner-name { position:relative; z-index:3; transition: color .35s ease, transform .35s ease, letter-spacing .35s ease; }
+.ba-partner:hover .ba-partner-name { color:#fff !important; transform:scale(1.08); letter-spacing:.03em; }
+
+/* News / cards */
+.ba-news-card { transition: transform .25s ease, box-shadow .25s ease; }
+.ba-news-card:hover { transform: translateY(-6px); box-shadow: 0 22px 46px rgba(20,20,45,.12); }
+.ba-news-card:hover .ba-news-img { transform: scale(1.06); }
+
+/* Advantages */
+.ba-adv2 { transition: background .3s ease, transform .25s ease, box-shadow .25s ease; }
+.ba-adv2:hover { background: var(--accent) !important; transform: translateY(-5px); box-shadow: 0 20px 44px rgba(20,20,60,.18); }
+.ba-adv2:hover .ba-adv2-t, .ba-adv2:hover .ba-adv2-d, .ba-adv2:hover .ba-adv2-n { color:#fff !important; }
+.ba-adv2:hover .ba-adv2-ic { color:var(--accent) !important; background:#fff !important; }
+
+/* About / teacher / blog page specifics */
+.hz-val:hover { border-color:var(--accent); transform:translateY(-4px); }
+.hz-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+.mt-card { transition: transform .25s ease, box-shadow .25s ease; }
+.mt-card:hover { transform: translateY(-6px); box-shadow: 0 24px 48px rgba(20,20,45,.13); }
+.mt-card:hover .mt-img { transform: scale(1.05); }
+.mt-card:hover .mt-arrow { background:var(--accent); color:#fff; }
+.bl-post { transition: transform .25s ease, box-shadow .25s ease; }
+.bl-post:hover { transform: translateY(-6px); box-shadow: 0 22px 46px rgba(20,20,45,.12); }
+.bl-post:hover .bl-img { transform: scale(1.06); }
+.bl-chip { transition: background .2s, color .2s, border-color .2s; }
+.bl-btn:hover, .bz-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.bl-featured:hover .bl-img { transform: scale(1.04); }
+.bz-rel:hover { transform:translateY(-5px); box-shadow:0 20px 42px rgba(20,20,45,.12); }
+.bz-rel:hover .bz-rel-img { transform:scale(1.05); }
+.tp-cert-row { scroll-behavior:smooth; scrollbar-width:none; }
+.tp-cert-row::-webkit-scrollbar { display:none; }
+.tp-arrow:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tp-train:hover { border-color:var(--accent); }
+
+/* Article body (blog post) */
+.bz-body p { font-size:17.5px; line-height:1.8; color:#33333D; margin:0 0 22px; }
+.bz-body h2 { font-family:'Space Grotesk'; font-weight:700; font-size:27px; letter-spacing:-.01em; color:#14141C; margin:38px 0 16px; }
+.bz-body ul { margin:0 0 22px; padding-left:22px; }
+.bz-body li { font-size:17px; line-height:1.7; color:#33333D; margin-bottom:8px; }
+
+/* ---------- Image placeholder (stands in for user photos/videos) ---------- */
+.img-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, #EEF0F6 0%, #E4E7F5 100%);
+  color: #9A9AA6;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  overflow: hidden;
+}
+.img-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(79,91,240,.10) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+  opacity: .7;
+}
+.img-slot span { position: relative; z-index: 1; padding: 0 14px; }
+.img-slot.circle { border-radius: 50%; }
+
+/* ---------- Reveal on scroll ---------- */
+.ba-reveal { opacity: 0; transform: translateY(38px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.ba-reveal.is-visible { opacity: 1; transform: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-5 { grid-template-columns: repeat(3, 1fr) !important; }
+  .grid-6 { grid-template-columns: repeat(3, 1fr) !important; }
+  .split { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 760px) {
+  .ba-nav { display: none !important; }
+  .grid-2, .grid-3, .grid-4, .grid-5, .grid-6 { grid-template-columns: 1fr !important; }
+  .footer-grid { grid-template-columns: 1fr 1fr !important; }
+  .hero-stats { gap: 30px !important; }
+  h1 { font-size: clamp(30px, 8vw, 44px) !important; }
+}
+@media (max-width: 460px) {
+  .footer-grid { grid-template-columns: 1fr !important; }
+}

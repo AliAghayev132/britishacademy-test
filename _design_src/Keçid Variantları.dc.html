@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background:#EAECF3; color:#16161C; font-family:'Manrope',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color: inherit; text-decoration: none; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#EAECF3;">
+
+  <section style="padding:38px 42px 26px;">
+    <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
+      <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-.02em; color:#14141C; margin:0;">Eksperimental — 4-cü dəst</h1>
+      <span style="font-size:14.5px; color:#6A6A78;">dil məktəbi mövzusunda ən cəsarətlilər</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+
+      <!-- 4a OPEN BOOK -->
+      <div id="4a" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#4a" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">4a</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Açıq kitab</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 26px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Metodikamız</div>
+            <div style="height:10px; width:58%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <svg viewBox="0 0 720 70" preserveAspectRatio="none" style="display:block; width:100%; height:56px;">
+            <path d="M0 26 C120 2 240 2 358 26 L358 70 L0 70 Z" fill="#4F5BF0"></path>
+            <path d="M362 26 C480 2 600 2 720 26 L720 70 L362 70 Z" fill="#4F5BF0"></path>
+            <rect x="358" y="8" width="4" height="62" fill="#3A44C4"></rect>
+          </svg>
+          <div style="background:#4F5BF0; padding:4px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Dərs vəsaitləri</div>
+            <div style="height:10px; width:54%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmənin kənarı açıq kitab silueti — kitablar/metodika bölməsi üçün.</p>
+      </div>
+
+      <!-- 4b SPEECH BUBBLE -->
+      <div id="4b" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#4b" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">4b</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Söz balonu</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#0F1020;">
+          <div style="background:#fff; border-radius:0 0 30px 30px; padding:32px 30px 30px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Danışıq klubları</div>
+            <div style="height:10px; width:62%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="width:34px; height:30px; background:#fff; clip-path:polygon(0 0, 100% 0, 28% 100%); margin-left:88px;"></div>
+          <div style="padding:14px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Söhbətə qoşul</div>
+            <div style="height:10px; width:50%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bütün bölmə nəhəng söz balonuna çevrilir — danışıq mövzusu üçün ideal.</p>
+      </div>
+
+      <!-- 4c EQUALIZER -->
+      <div id="4c" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#4c" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">4c</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Səs dalğası</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 24px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Listening & Speaking</div>
+            <div style="height:10px; width:60%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:5px; height:54px; padding:0 24px 0;">
+            <sc-for list="{{ eqBars }}" as="b" hint-placeholder-count="20">
+              <div style="flex:1; height:{{ b.h }}; background:{{ b.c }}; border-radius:99px 99px 0 0;"></div>
+            </sc-for>
+          </div>
+          <div style="background:#0F1020; padding:20px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Podkast & audio dərslər</div>
+            <div style="height:10px; width:52%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Ekvalayzer zolaqları bölməyə "səslənir" — dinləmə/danışıq üçün. İstəsən canlı pulsasiya da edərəm.</p>
+      </div>
+
+      <!-- 4d PUZZLE -->
+      <div id="4d" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#4d" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">4d</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Puzzle birləşməsi</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 30px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Qrammatika</div>
+            <div style="height:10px; width:56%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <svg viewBox="0 0 720 64" preserveAspectRatio="none" style="display:block; width:100%; height:50px;">
+            <path d="M0 32 L60 32 A17 17 0 1 1 94 32 L170 32 A17 17 0 1 0 204 32 L280 32 A17 17 0 1 1 314 32 L390 32 A17 17 0 1 0 424 32 L500 32 A17 17 0 1 1 534 32 L610 32 A17 17 0 1 0 644 32 L720 32 L720 64 L0 64 Z" fill="#12B5A5"></path>
+          </svg>
+          <div style="background:#12B5A5; padding:4px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Söz ehtiyatı</div>
+            <div style="height:10px; width:48%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmələr puzzle kimi bir-birinə keçir — "dilin parçaları birləşir".</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section style="padding:38px 42px 26px;">
+    <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
+      <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-.02em; color:#14141C; margin:0;">Daha da maraqlılar — 3-cü dəst</h1>
+      <span style="font-size:14.5px; color:#6A6A78;">təhsil mövzusuna bağlı ideyalar</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+
+      <!-- 3a STAIRS -->
+      <div id="3a" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#3a" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">3a</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Pilləkən — səviyyə keçidi</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:14px;">
+            <div>
+              <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Kurslarımız</div>
+              <div style="height:10px; width:150px; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+            </div>
+            <div style="display:flex; gap:6px; font-family:'Space Grotesk'; font-weight:700; font-size:12px; color:#9A9AA6; padding-top:6px;">A1 → C1</div>
+          </div>
+          <svg viewBox="0 0 720 60" preserveAspectRatio="none" style="display:block; width:100%; height:52px;">
+            <path d="M0 60 L0 52 L80 52 L80 45 L160 45 L160 38 L240 38 L240 31 L320 31 L320 24 L400 24 L400 17 L480 17 L480 10 L560 10 L560 3 L720 3 L720 60 Z" fill="#4F5BF0"></path>
+          </svg>
+          <div style="background:#4F5BF0; padding:4px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Uğur hekayələri</div>
+            <div style="height:10px; width:56%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Pillə-pillə yüksəliş — dil səviyyələri (A1→C1) metaforası.</p>
+      </div>
+
+      <!-- 3b FLIGHT PATH -->
+      <div id="3b" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#3b" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">3b</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Uçuş xətti</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 6px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Kurslarımız</div>
+            <div style="height:10px; width:58%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <svg viewBox="0 0 720 100" preserveAspectRatio="none" style="display:block; width:100%; height:84px;">
+            <circle cx="34" cy="72" r="7" fill="none" stroke="#4F5BF0" stroke-width="2.5"></circle>
+            <circle cx="34" cy="72" r="2.6" fill="#4F5BF0"></circle>
+            <path d="M48,70 C180,8 420,108 652,38" fill="none" stroke="#4F5BF0" stroke-width="2.5" stroke-dasharray="8 8" stroke-linecap="round"></path>
+            <g transform="translate(660,36) rotate(-14)">
+              <path d="M0,0 L26,7 L4,14 L8,7 Z" fill="#4F5BF0"></path>
+            </g>
+          </svg>
+          <div style="background:#0F1020; padding:14px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Xaricdə təhsil</div>
+            <div style="height:10px; width:52%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Nöqtəli uçuş marşrutu + kağız təyyarə — "Bakıdan dünyaya" hissi.</p>
+      </div>
+
+      <!-- 3c TYPO BRIDGE -->
+      <div id="3c" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#3c" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">3c</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Nəhəng yazı körpüsü</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 64px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Məzunlarımız</div>
+            <div style="height:10px; width:60%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="position:relative; background:#0F1020;">
+            <div style="position:absolute; top:-24px; left:0; right:0; text-align:center; font-family:'Space Grotesk'; font-weight:700; font-size:40px; letter-spacing:.02em; color:#4F5BF0; line-height:1; white-space:nowrap; overflow:hidden;">BRITISH ACADEMY</div>
+            <div style="padding:52px 30px 34px;">
+              <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Tərəfdaşlar</div>
+              <div style="height:10px; width:48%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Brend yazısı iki bölmənin sərhədində körpü kimi dayanır.</p>
+      </div>
+
+      <!-- 3d BUNTING FLAGS -->
+      <div id="3d" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#3d" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">3d</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Bayraq lenti</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 14px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Danışıq klubları</div>
+            <div style="height:10px; width:62%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <svg viewBox="0 0 720 66" preserveAspectRatio="none" style="display:block; width:100%; height:60px;">
+            <path d="M0,8 Q360,46 720,8" fill="none" stroke="#C9CBD8" stroke-width="2"></path>
+            <polygon points="37,13 59,13 48,39" fill="#4F5BF0"></polygon>
+            <polygon points="109,19 131,19 120,45" fill="#F5533D"></polygon>
+            <polygon points="181,24 203,24 192,50" fill="#12B5A5"></polygon>
+            <polygon points="253,27 275,27 264,53" fill="#F59E0B"></polygon>
+            <polygon points="325,29 347,29 336,55" fill="#4F5BF0"></polygon>
+            <polygon points="397,29 419,29 408,55" fill="#F5533D"></polygon>
+            <polygon points="469,26 491,26 480,52" fill="#12B5A5"></polygon>
+            <polygon points="541,22 563,22 552,48" fill="#F59E0B"></polygon>
+            <polygon points="613,16 635,16 624,42" fill="#4F5BF0"></polygon>
+            <polygon points="685,10 707,10 696,36" fill="#F5533D"></polygon>
+          </svg>
+          <div style="background:#F6F7FA; padding:20px 30px 32px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Tədbirlər & klublar</div>
+            <div style="height:10px; width:54%; background:#E4E6EF; border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Rəngli bayraq lenti — klub və tədbir bölmələri üçün şən keçid.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section style="padding:38px 42px 26px;">
+    <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
+      <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-.02em; color:#14141C; margin:0;">Yeni variantlar — 2-ci dəst</h1>
+      <span style="font-size:14.5px; color:#6A6A78;"><a href="#1c" style="color:#4F5BF0; font-weight:700;">1c</a> axan lent artıq ana səhifədədir — bunlardan da əlavə seçə bilərsən</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+
+      <!-- 2a ZIGZAG -->
+      <div id="2a" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#2a" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">2a</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Ziqzaq kənar</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Kurslarımız</div>
+            <div style="height:10px; width:64%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <svg viewBox="0 0 720 40" preserveAspectRatio="none" style="display:block; width:100%; height:30px;">
+            <path d="M0 22 L24 2 L48 22 L72 2 L96 22 L120 2 L144 22 L168 2 L192 22 L216 2 L240 22 L264 2 L288 22 L312 2 L336 22 L360 2 L384 22 L408 2 L432 22 L456 2 L480 22 L504 2 L528 22 L552 2 L576 22 L600 2 L624 22 L648 2 L672 22 L696 2 L720 22 L720 40 L0 40 Z" fill="#4F5BF0"></path>
+          </svg>
+          <div style="background:#4F5BF0; padding:6px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Üstünlüklərimiz</div>
+            <div style="height:10px; width:56%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">İti ziqzaq dişlər — enerjili, qrafik görünüş.</p>
+      </div>
+
+      <!-- 2b OVERLAP CARD -->
+      <div id="2b" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#2b" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">2b</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Üst-üstə kart</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="background:#4F5BF0; padding:32px 30px 78px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Xaricdə təhsil</div>
+            <div style="height:10px; width:60%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="background:#fff; border-radius:20px; margin:-46px 24px 0; box-shadow:0 18px 44px rgba(15,16,32,.18); padding:26px 26px 28px; position:relative;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:20px; color:#14141C;">Məzunlarımız</div>
+            <div style="height:10px; width:58%; background:#EDEEF4; border-radius:99px; margin-top:13px;"></div>
+            <div style="height:10px; width:42%; background:#EDEEF4; border-radius:99px; margin-top:8px;"></div>
+          </div>
+          <div style="height:26px;"></div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Növbəti bölmə kart kimi əvvəlkinin üstünə çıxır — dərinlik hissi.</p>
+      </div>
+
+      <!-- 2c SCALLOP -->
+      <div id="2c" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#2c" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">2c</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Yarımdairə naxış</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 36px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Tərəfdaşlar</div>
+            <div style="height:10px; width:52%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="height:20px; background-image:radial-gradient(circle 20px at 20px 20px, #0F1020 99%, transparent 100%); background-size:40px 20px; background-repeat:repeat-x;"></div>
+          <div style="background:#0F1020; padding:8px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Footer</div>
+            <div style="height:10px; width:46%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Yumşaq yarımdairə "kruzhevo" kənarı — mehriban, oynaq üslub.</p>
+      </div>
+
+      <!-- 2d DOTS FADE -->
+      <div id="2d" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#2d" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">2d</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Nöqtələrə çevrilən keçid</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 24px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Xəbərlər & Bloq</div>
+            <div style="height:10px; width:62%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="height:64px; background-image:radial-gradient(#4F5BF0 2.3px, transparent 2.8px); background-size:17px 17px; -webkit-mask-image:linear-gradient(to bottom, transparent, #000 85%); mask-image:linear-gradient(to bottom, transparent, #000 85%);"></div>
+          <div style="background:#4F5BF0; padding:10px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Qeydiyyat</div>
+            <div style="height:10px; width:50%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmə nöqtə-nöqtə əriyib rəngli bölməyə çevrilir — incə, texnoloji.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section style="padding:38px 42px 70px;">
+    <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
+      <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-.02em; color:#14141C; margin:0;">Bölmə keçidi variantları</h1>
+      <span style="font-size:14.5px; color:#6A6A78;">bəyəndiyini de (1a / 1b / 1c / 1d) — sayta tətbiq edim</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+
+      <!-- 1a WAVE -->
+      <div id="1a" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#1a" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">1a</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Dalğa keçidi</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 0;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Kurslarımız</div>
+            <div style="height:10px; width:70%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+            <div style="height:10px; width:52%; background:#EDEEF4; border-radius:99px; margin-top:8px;"></div>
+          </div>
+          <svg viewBox="0 0 720 70" preserveAspectRatio="none" style="display:block; width:100%; height:58px; margin-top:26px;">
+            <path d="M0,38 C120,72 240,4 360,22 C480,40 600,66 720,16 L720,70 L0,70 Z" fill="#4F5BF0"></path>
+          </svg>
+          <div style="background:#4F5BF0; padding:4px 30px 34px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Xaricdə təhsil</div>
+            <div style="height:10px; width:64%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:14px;"></div>
+            <div style="height:10px; width:46%; background:rgba(255,255,255,.34); border-radius:99px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmə dalğa ilə rəngli bölməyə "axır" — yumşaq, dinamik hiss.</p>
+      </div>
+
+      <!-- 1b DIAGONAL -->
+      <div id="1b" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#1b" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">1b</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Diaqonal kəsik</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 44px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Üstünlüklərimiz</div>
+            <div style="height:10px; width:66%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="background:#0F1020; clip-path:polygon(0 28px, 100% 0, 100% calc(100% - 28px), 0 100%); padding:56px 30px; margin:-24px 0;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff;">Məzunlarımız</div>
+            <div style="height:10px; width:58%; background:rgba(255,255,255,.24); border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="padding:48px 30px 32px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Tərəfdaşlar</div>
+            <div style="height:10px; width:48%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmələr çəp xətlə kəsilir — cəsarətli, müasir görünüş.</p>
+      </div>
+
+      <!-- 1c MARQUEE -->
+      <div id="1c" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#1c" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">1c</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Axan lent (marquee)</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 40px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Kurslarımız</div>
+            <div style="height:10px; width:62%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="background:#0F1020; transform:rotate(-1.4deg); width:106%; margin:0 -3%; padding:13px 0; overflow:hidden;">
+            <div id="kv-mq1" style="display:flex; align-items:center; gap:30px; white-space:nowrap; will-change:transform;">
+              <sc-for list="{{ mqItems }}" as="m" hint-placeholder-count="8">
+                <span style="display:inline-flex; align-items:center; gap:30px; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:14px; letter-spacing:.08em;">{{ m }}<span style="color:#6D79FF;">✦</span></span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#F6F7FA; padding:42px 30px 32px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Xəbərlər & Bloq</div>
+            <div style="height:10px; width:56%; background:#E4E6EF; border-radius:99px; margin-top:14px;"></div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmələr arasında daim axan yazılı lent — canlı, enerjili.</p>
+      </div>
+
+      <!-- 1d ARC + MEDALLION -->
+      <div id="1d" style="width:540px; flex:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <a href="#1d" style="background:#14141C; color:#fff; font-weight:700; font-size:13px; padding:4px 12px; border-radius:99px;">1d</a>
+          <span style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#14141C;">Qövs + medalyon</span>
+        </div>
+        <div style="border:1px solid #DDDFE9; border-radius:20px; overflow:hidden; background:#fff;">
+          <div style="padding:32px 30px 58px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#14141C;">Tez-tez verilən suallar</div>
+            <div style="height:10px; width:64%; background:#EDEEF4; border-radius:99px; margin-top:14px;"></div>
+          </div>
+          <div style="position:relative; background:#0F1020; margin-top:26px;">
+            <div style="position:absolute; top:-26px; left:-10%; width:120%; height:54px; background:#0F1020; border-radius:50% 50% 0 0 / 100% 100% 0 0;"></div>
+            <div style="position:absolute; top:-30px; left:50%; transform:translateX(-50%); width:58px; height:58px; border-radius:50%; background:#4F5BF0; border:5px solid #fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:700; font-size:23px; color:#fff; z-index:2;">B</div>
+            <div style="position:relative; padding:48px 30px 34px;">
+              <div style="font-family:'Space Grotesk'; font-weight:700; font-size:22px; color:#fff; text-align:center;">Footer</div>
+              <div style="height:10px; width:44%; background:rgba(255,255,255,.24); border-radius:99px; margin:14px auto 0;"></div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:13.5px; color:#6A6A78; margin:10px 2px 0; line-height:1.5;">Bölmə qövslə qapanır, ortada loqo medalyonu — footer dairəsi ilə eyni dildə.</p>
+      </div>
+
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    let x = 0;
+    const step = () => {
+      x += 0.55;
+      const a = document.getElementById('kv-mq1');
+      if (a && a.scrollWidth > 0) {
+        const w = a.scrollWidth / 2;
+        if (w > 0) a.style.transform = 'translateX(' + (-(x % w)) + 'px)';
+      }
+      this._raf = requestAnimationFrame(step);
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+  componentWillUnmount() { cancelAnimationFrame(this._raf); }
+  renderVals() {
+    const base = ['İNGİLİS DİLİ', 'IELTS 7+', 'DANIŞIQ KLUBU', 'XARİCDƏ TƏHSİL', 'RUS DİLİ', 'ALMAN DİLİ'];
+    const mqItems = base.concat(base);
+    const cols = ['#4F5BF0', '#6D79FF', '#0F1020'];
+    const eqBars = [];
+    for (let i = 0; i < 44; i++) {
+      const h = Math.round(10 + 40 * Math.abs(Math.sin(i * 0.55) * (0.55 + 0.45 * Math.sin(i * 0.19))));
+      eqBars.push({ h: h + 'px', c: cols[i % 3] });
+    }
+    return { mqItems, eqBars };
+  }
+}
+</script>
+</body>
+</html>

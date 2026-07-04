@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background:#fff; color:#16161C; font-family:'Manrope',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background:#4F5BF0; color:#fff; }
+  ::-webkit-scrollbar { width: 11px; }
+  ::-webkit-scrollbar-track { background:#E9EBF3; }
+  ::-webkit-scrollbar-thumb { background:#4F5BF0; border-radius:99px; border:3px solid #E9EBF3; }
+  .tp-nav a:hover { color:#4F5BF0; }
+  .tp-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+  .tp-cert-row { scroll-behavior:smooth; scrollbar-width:none; }
+  .tp-cert-row::-webkit-scrollbar { display:none; }
+  .tp-arrow:hover { background:#4F5BF0; color:#fff; border-color:#4F5BF0; }
+  .tp-train:hover { border-color:#4F5BF0; }
+  .ba-nav a { transition: color .2s; }
+  .ba-nav a:hover { color: #4F5BF0; }
+  .ba-search-btn:hover { border-color:#4F5BF0 !important; color:#4F5BF0 !important; }
+  .ba-search-btn:hover .ba-search-txt { max-width:70px; opacity:1; margin-left:9px; }
+  .ba-apply-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#fff;">
+
+  <!-- HEADER (shared) -->
+  <div style="position:sticky; top:0; z-index:60;">
+    <div style="background:#0F1020; color:#C7C8DA; font-size:13px;">
+      <div style="max-width:1240px; margin:0 auto; padding:9px 28px; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+          <span>✉ office@britishacademy.az</span>
+          <span>☎ (+994) 55 212 41 51</span>
+          <span style="opacity:.65;">Həftə içi 09:00–21:00 · Şənbə 10:00–16:00</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <a href="#">Tələbə zonası</a>
+          <div style="display:inline-flex; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:2px;">
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; background:#4F5BF0; color:#fff;">AZ</span>
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; color:rgba(255,255,255,.65);">EN</span>
+            <span style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:99px; color:rgba(255,255,255,.65);">RU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <header style="background:rgba(255,255,255,.92); backdrop-filter:blur(14px); border-bottom:1px solid #ECEDF2;">
+      <div style="max-width:1240px; margin:0 auto; padding:15px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+        <a href="British Academy.dc.html" style="display:flex; align-items:center; gap:12px;">
+          <span style="width:42px; height:42px; border-radius:11px; background:#4F5BF0; color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:800; font-size:20px;">B</span>
+          <span style="line-height:1;">
+            <span style="display:block; font-family:'Space Grotesk'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
+          </span>
+        </a>
+        <nav class="ba-nav" style="display:flex; align-items:center; gap:26px; font-size:15px; font-weight:600; color:#4C4C58;">
+          <a href="British Academy.dc.html#kurslar">Kurslar</a>
+          <a href="British Academy.dc.html#imtahan">IELTS · TOEFL</a>
+          <a href="British Academy.dc.html#xaricde">Xaricdə təhsil</a>
+          <a href="Muellimler.dc.html" style="color:#4F5BF0;">Müəllimlər</a>
+          <a href="Bloq.dc.html">Bloq</a>
+          <a href="Haqqimizda.dc.html">Haqqımızda</a>
+        </nav>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a href="British Academy.dc.html" aria-label="Axtar" class="ba-search-btn" style="display:flex; align-items:center; justify-content:flex-start; background:#F1F2F6; border:1px solid #E7E8EE; color:#4C4C58; font-weight:600; font-size:14px; height:42px; padding:0 13px; border-radius:99px; cursor:pointer; transition:background .2s, border-color .2s, color .2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <span class="ba-search-txt" style="max-width:0; opacity:0; overflow:hidden; white-space:nowrap; transition:max-width .32s ease, opacity .25s ease, margin .32s ease;">Axtar</span>
+          </a>
+          <a href="British Academy.dc.html" class="ba-apply-btn" style="display:inline-flex; align-items:center; gap:8px; background:#4F5BF0; color:#fff; font-weight:700; font-size:14.5px; padding:11px 20px; border-radius:99px; transition:.2s; white-space:nowrap;">Müraciət et</a>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <div style="max-width:1160px; margin:0 auto; padding:22px 28px 0; font-size:14px; color:#9A9AA6;">
+    <a href="Muellimler.dc.html" style="color:#9A9AA6;">Müəllimlər</a> <span style="margin:0 6px;">/</span> <span style="color:#54545F;">Aygün Əliyeva</span>
+  </div>
+
+  <!-- HERO -->
+  <section style="max-width:1160px; margin:0 auto; padding:26px 28px 20px;">
+    <div style="display:grid; grid-template-columns:.85fr 1.15fr; gap:44px; align-items:stretch;">
+      <div style="position:relative; border-radius:26px; overflow:hidden; border:1px solid #ECEDF2; min-height:420px; background:#EEF0F6;">
+        <image-slot id="teacher-photo" fit="cover" placeholder="Müəllim fotosu" style="position:absolute; inset:0; width:100%; height:100%;"></image-slot>
+      </div>
+      <div style="display:flex; flex-direction:column; justify-content:center;">
+        <span style="display:inline-block; width:max-content; background:#EEF0FF; color:#4F5BF0; font-size:12.5px; font-weight:700; padding:6px 13px; border-radius:99px; letter-spacing:.03em;">IELTS & General English</span>
+        <h1 style="font-family:'Space Grotesk'; font-weight:700; font-size:clamp(34px,4.6vw,50px); letter-spacing:-.025em; margin:18px 0 0; line-height:1.04; color:#14141C;">Aygün Əliyeva</h1>
+        <p style="font-size:16.5px; color:#54545F; margin:18px 0 0; line-height:1.7; max-width:560px;">Böyük Britaniyada təhsil almış, 9 illik təcrübəyə malik müəllim. IELTS 8.5 sertifikatına sahibdir və 500-dən çox tələbəni yüksək nəticələrə çatdırıb. Dərslərini canlı danışıq və praktika üzərində qurur.</p>
+        <div style="display:flex; gap:30px; margin-top:26px; flex-wrap:wrap;">
+          <div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; color:#14141C;">8.5</div><div style="font-size:13px; color:#8A8A98; margin-top:3px;">IELTS balı</div></div>
+          <div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; color:#14141C;">9 il</div><div style="font-size:13px; color:#8A8A98; margin-top:3px;">tədris təcrübəsi</div></div>
+          <div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:30px; color:#14141C;">500+</div><div style="font-size:13px; color:#8A8A98; margin-top:3px;">məzun tələbə</div></div>
+        </div>
+        <a href="British Academy.dc.html" class="tp-btn" style="display:inline-block; width:max-content; margin-top:28px; background:#4F5BF0; color:#fff; font-weight:700; font-size:15px; padding:14px 24px; border-radius:12px; transition:.2s;">Bu müəllimə yazıl</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTIFICATES CAROUSEL -->
+  <section style="max-width:1160px; margin:0 auto; padding:56px 28px 20px;">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:26px;">
+      <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; letter-spacing:-.02em; margin:0; line-height:1.1; color:#14141C;">Sertifikatlar<br><span style="color:#B9BAC4;">və nailiyyətlər</span></h2>
+      <div style="display:flex; gap:10px;">
+        <button class="tp-arrow" data-dir="-1" style="width:44px; height:44px; border:1.5px solid #E4E6EF; background:#fff; border-radius:50%; cursor:pointer; color:#4C4C58; font-size:20px; display:grid; place-items:center; transition:.2s;">←</button>
+        <button class="tp-arrow" data-dir="1" style="width:44px; height:44px; border:1.5px solid #E4E6EF; background:#fff; border-radius:50%; cursor:pointer; color:#4C4C58; font-size:20px; display:grid; place-items:center; transition:.2s;">→</button>
+      </div>
+    </div>
+    <div id="tp-certs" class="tp-cert-row" style="display:flex; gap:18px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x mandatory;">
+      <sc-for list="{{ certs }}" as="c" hint-placeholder-count="5">
+        <div style="flex:none; width:300px; scroll-snap-align:start; border:1px solid #ECEDF2; border-radius:18px; overflow:hidden; background:#fff;">
+          <div style="position:relative; aspect-ratio:4/3; background:#EEF0F6;">
+            <image-slot id="{{ c.slot }}" fit="cover" placeholder="Sertifikat" style="position:absolute; inset:0; width:100%; height:100%;"></image-slot>
+          </div>
+          <div style="padding:16px 18px;">
+            <div style="font-family:'Space Grotesk'; font-weight:700; font-size:16px; color:#17171F;">{{ c.title }}</div>
+            <div style="font-size:13px; color:#8A8A98; margin-top:4px;">{{ c.org }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- TRAININGS -->
+  <section style="max-width:1160px; margin:0 auto; padding:48px 28px 20px;">
+    <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; letter-spacing:-.02em; margin:0 0 26px; line-height:1.1; color:#14141C;">Keçdiyi təlimlər<br><span style="color:#B9BAC4;">və kurslar</span></h2>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <sc-for list="{{ trainings }}" as="t" hint-placeholder-count="6">
+        <div class="tp-train" style="border:1px solid #ECEDF2; border-radius:16px; padding:22px; transition:.2s;">
+          <div style="font-family:'Space Grotesk'; font-weight:700; font-size:17px; color:#17171F;">{{ t.name }}</div>
+          <div style="font-size:13.5px; color:#63636F; margin-top:6px;">{{ t.info }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- TRIAL VIDEO -->
+  <section style="max-width:1160px; margin:0 auto; padding:56px 28px 72px;">
+    <h2 style="font-family:'Space Grotesk'; font-weight:700; font-size:34px; letter-spacing:-.02em; margin:0 0 26px; line-height:1.1; color:#14141C;">Sınaq dərsi<br><span style="color:#B9BAC4;">videosuna bax</span></h2>
+    <div id="tp-video" data-dur="72" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:16/9; border-radius:24px; overflow:hidden; background:#0F1020;">
+      <image-slot id="teacher-trial" fit="cover" placeholder="Sınaq dərsi videosu" style="position:absolute; inset:0; width:100%; height:100%;"></image-slot>
+      <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.25), transparent 40%, rgba(0,0,0,.7)); pointer-events:none;"></div>
+      <button class="tp-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:78px; height:78px; border-radius:22px; background:#4F5BF0; border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 16px 36px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+        <svg class="tp-ic-play" width="30" height="30" viewBox="0 0 24 24" style="fill:#fff; margin-left:3px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+        <svg class="tp-ic-pause" width="28" height="28" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+      </button>
+      <div style="position:absolute; left:20px; right:20px; bottom:18px; display:flex; align-items:center; gap:14px;">
+        <button class="tp-vmini" aria-label="Oynat/Dayandır" style="width:34px; height:34px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+          <svg class="tp-ic-play" width="16" height="16" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="tp-ic-pause" width="15" height="15" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div class="tp-vtrack" style="flex:1; height:6px; border-radius:99px; background:rgba(255,255,255,.3); overflow:hidden;">
+          <div class="tp-vfill" style="height:100%; width:0%; background:#4F5BF0; border-radius:99px;"></div>
+        </div>
+        <span class="tp-vtime" style="color:#fff; font-size:13px; font-weight:600; white-space:nowrap;">01:12</span>
+        <button class="tp-vfs" aria-label="Tam ekran" style="width:32px; height:32px; border:none; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; display:grid; place-items:center; flex:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background:#0C0D1A; color:#C4C5D6;">
+    <div style="height:5px; background:#4F5BF0;"></div>
+    <div style="max-width:1160px; margin:0 auto; padding:44px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="width:40px; height:40px; border-radius:11px; background:#4F5BF0; color:#fff; display:grid; place-items:center; font-family:'Space Grotesk'; font-weight:700; font-size:19px;">B</span>
+        <span style="font-family:'Space Grotesk'; font-weight:700; font-size:18px; color:#fff;">British Academy</span>
+      </div>
+      <div style="font-size:14px; color:#8788A0;">© 2014–2026 British Academy · <a href="Muellimler.dc.html" style="color:#B9BAC4;">Bütün müəllimlər</a></div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const fmt = (s) => { s = Math.max(0, Math.round(s)); const m = Math.floor(s / 60), ss = s % 60; return ('0' + m).slice(-2) + ':' + ('0' + ss).slice(-2); };
+    const card = document.getElementById('tp-video');
+    const vReset = () => {
+      if (!card) return;
+      card.setAttribute('data-playing', '0'); card.setAttribute('data-frac', '0');
+      const f = card.querySelector('.tp-vfill'); if (f) { f.style.transition = 'none'; f.style.width = '0%'; }
+      const c = card.querySelector('.tp-vplay'); if (c) { c.style.opacity = ''; c.style.pointerEvents = ''; }
+      card.querySelectorAll('.tp-ic-play').forEach((e) => { e.style.display = ''; });
+      card.querySelectorAll('.tp-ic-pause').forEach((e) => { e.style.display = 'none'; });
+      if (card._iv) clearInterval(card._iv);
+    };
+    const vToggle = () => {
+      if (!card) return;
+      const fill = card.querySelector('.tp-vfill'); const timeEl = card.querySelector('.tp-vtime');
+      const dur = parseInt(card.getAttribute('data-dur') || '60', 10);
+      if (card._t0 == null && timeEl) card._t0 = timeEl.textContent;
+      const playing = card.getAttribute('data-playing') === '1';
+      const center = card.querySelector('.tp-vplay');
+      if (!playing) {
+        card.setAttribute('data-playing', '1');
+        if (center) { center.style.opacity = '0'; center.style.pointerEvents = 'none'; }
+        card.querySelectorAll('.tp-ic-play').forEach((e) => { e.style.display = 'none'; });
+        card.querySelectorAll('.tp-ic-pause').forEach((e) => { e.style.display = ''; });
+        const sf = parseFloat(card.getAttribute('data-frac') || '0');
+        fill.style.transition = 'width ' + (dur * (1 - sf)) + 's linear'; void fill.offsetWidth; fill.style.width = '100%';
+        const start = Date.now();
+        card._iv = setInterval(() => {
+          let frac = sf + (Date.now() - start) / 1000 / dur;
+          if (frac >= 1) frac = 1;
+          card.setAttribute('data-frac', frac);
+          if (timeEl) timeEl.textContent = fmt(dur * frac);
+          if (frac >= 1) vReset();
+        }, 200);
+      } else {
+        card.setAttribute('data-playing', '0');
+        if (card._iv) clearInterval(card._iv);
+        const track = card.querySelector('.tp-vtrack'); const w = getComputedStyle(fill).width;
+        fill.style.transition = 'none'; fill.style.width = w;
+        if (track && track.clientWidth) card.setAttribute('data-frac', parseFloat(w) / track.clientWidth);
+        if (center) { center.style.opacity = ''; center.style.pointerEvents = ''; }
+        card.querySelectorAll('.tp-ic-play').forEach((e) => { e.style.display = ''; });
+        card.querySelectorAll('.tp-ic-pause').forEach((e) => { e.style.display = 'none'; });
+      }
+    };
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest) return;
+      if (e.target.closest('.tp-vplay, .tp-vmini')) { vToggle(); return; }
+      if (e.target.closest('.tp-vfs')) { if (document.fullscreenElement) { document.exitFullscreen && document.exitFullscreen(); } else if (card && card.requestFullscreen) card.requestFullscreen(); return; }
+      const ar = e.target.closest('.tp-arrow');
+      if (ar) { const row = document.getElementById('tp-certs'); if (row) row.scrollBy({ left: parseInt(ar.getAttribute('data-dir'), 10) * 336, behavior: 'smooth' }); }
+    });
+  }
+  renderVals() {
+    const certs = [
+      { title: 'IELTS Academic 8.5', org: 'British Council', slot: 'cert0' },
+      { title: 'CELTA', org: 'Cambridge Assessment', slot: 'cert1' },
+      { title: 'TKT: Teaching Knowledge', org: 'Cambridge English', slot: 'cert2' },
+      { title: 'TESOL Certificate', org: 'Arizona State University', slot: 'cert3' },
+      { title: 'TOEFL iBT 115', org: 'ETS', slot: 'cert4' }
+    ];
+    const trainings = [
+      { name: 'General English (A1–C1)', info: 'Ümumi kurs · bütün səviyyələr' },
+      { name: 'IELTS Hazırlıq', info: 'Academic & General · 7+ hədəf' },
+      { name: 'Speaking Club', info: 'Həftəlik canlı danışıq praktikası' },
+      { name: 'Biznes İngilis', info: 'Peşəkarlar üçün' },
+      { name: 'Pre-IELTS', info: 'İmtahana hazırlıq mərhələsi' },
+      { name: 'Korporativ təlim', info: 'Şirkət komandaları üçün' }
+    ];
+    return { certs, trainings };
+  }
+}
+</script>
+</body>
+</html>
