@@ -10,6 +10,8 @@
     initLoader();
     initProgressBar();
     initHeaderSpacer();
+    initMobileNav();
+    initActiveNav();
     initReveal();
     initHeroWords();
     initHeroChips();
@@ -59,6 +61,37 @@
     window.addEventListener('resize', size);
     size();
     setTimeout(size, 300);
+  }
+
+  /* ---------- Mobile navigation drawer ---------- */
+  function initMobileNav() {
+    var burger = document.querySelector('.ba-burger');
+    var drawer = document.getElementById('ba-mnav');
+    if (!burger || !drawer) return;
+    function set(open) {
+      drawer.classList.toggle('open', open);
+      burger.classList.toggle('is-open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+    burger.addEventListener('click', function () { set(!drawer.classList.contains('open')); });
+    drawer.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { set(false); });
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+  }
+
+  /* ---------- Active nav highlight ---------- */
+  function initActiveNav() {
+    var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    document.querySelectorAll('.ba-nav .ba-nav-item').forEach(function (item) {
+      var match = false;
+      item.querySelectorAll('a').forEach(function (a) {
+        var href = (a.getAttribute('href') || '').split('#')[0].split('/').pop().toLowerCase();
+        if (href && href === here) match = true;
+      });
+      if (match) item.classList.add('is-active');
+    });
   }
 
   /* ---------- Reveal on scroll ---------- */
@@ -204,23 +237,44 @@
     var emptyBox = document.getElementById('ba-search-empty');
 
     var index = [
-      { title: 'İngilis Dili', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'Biznes İngilis', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'IELTS Hazırlıq', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'Rus Dili', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'Ofis Proqramları', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'Uşaqlar üçün İngilis', type: 'Kurs', href: 'index.html#kurslar' },
-      { title: 'IELTS · TOEFL', type: 'Proqram', href: 'index.html#imtahan' },
-      { title: 'Alman dili', type: 'Proqram', href: 'index.html#kurslar' },
-      { title: 'Danışıq klubları', type: 'Proqram', href: 'index.html#kurslar' },
-      { title: 'Kanada', type: 'Xaricdə', href: 'index.html#xaricde' },
-      { title: 'Almaniya', type: 'Xaricdə', href: 'index.html#xaricde' },
-      { title: 'Polşa', type: 'Xaricdə', href: 'index.html#xaricde' },
-      { title: 'Amerika', type: 'Xaricdə', href: 'index.html#xaricde' },
-      { title: 'Türkiyə', type: 'Xaricdə', href: 'index.html#xaricde' },
-      { title: 'Xaricdə təhsilin üstünlükləri nələrdir?', type: 'Xəbər', href: 'bloq.html' },
-      { title: 'Alman dili bilməyin üstünlükləri', type: 'Xəbər', href: 'bloq.html' },
-      { title: 'IELTS imtahanına necə hazırlaşmalı?', type: 'Xəbər', href: 'blogyazi.html' }
+      { title: 'İngilis dili kursu', type: 'Kurs', href: 'ingilis-dili-kursu.html' },
+      { title: 'Biznes İngilis dili kursu', type: 'Kurs', href: 'biznes-ingilis-dili-kursu.html' },
+      { title: 'Hüquqşünaslar üçün İngilis dili', type: 'Kurs', href: 'huquqsunaslar-ingilis-dili-kursu.html' },
+      { title: 'Otel və Turizm üçün İngilis dili', type: 'Kurs', href: 'otel-turizm-ingilis-dili-kursu.html' },
+      { title: 'Alman dili kursu', type: 'Kurs', href: 'alman-dili-kursu.html' },
+      { title: 'Rus dili kursu', type: 'Kurs', href: 'rus-dili-kursu.html' },
+      { title: 'İspan dili kursu', type: 'Kurs', href: 'ispan-dili-kursu.html' },
+      { title: 'İtalyan dili kursu', type: 'Kurs', href: 'italyan-dili-kursu.html' },
+      { title: 'Fransız dili kursu', type: 'Kurs', href: 'fransiz-dili-kursu.html' },
+      { title: 'IELTS & Pre-IELTS', type: 'İmtahan', href: 'ielts.html' },
+      { title: 'TOEFL & Pre-TOEFL', type: 'İmtahan', href: 'toefl.html' },
+      { title: 'OET', type: 'İmtahan', href: 'oet.html' },
+      { title: 'TOEIC', type: 'İmtahan', href: 'toeic.html' },
+      { title: 'SAT & Pre-SAT', type: 'İmtahan', href: 'sat.html' },
+      { title: 'Duolingo', type: 'İmtahan', href: 'duolingo.html' },
+      { title: 'TOLES', type: 'İmtahan', href: 'toles.html' },
+      { title: 'Conversation Club', type: 'Praktika', href: 'conversation-club.html' },
+      { title: 'Workshop', type: 'Praktika', href: 'workshop.html' },
+      { title: 'TEFL Kursları', type: 'Sertifikat', href: 'tefl-kurslari.html' },
+      { title: 'MS Office proqramları', type: 'Kompüter', href: 'ms-office.html' },
+      { title: 'Peşəkar Excel kursu', type: 'Kompüter', href: 'pesekar-excel-kursu.html' },
+      { title: 'Mühasibatlıq və 1C kursu', type: 'Karyera', href: 'muhasibatliq-1c-kursu.html' },
+      { title: 'HR & Kargüzarlıq kursu', type: 'Karyera', href: 'hr-karguzarliq-kursu.html' },
+      { title: 'Uşaqlar üçün İngilis dili', type: 'Uşaq', href: 'usaq-ingilis-dili.html' },
+      { title: 'Uşaqlar üçün Rus dili', type: 'Uşaq', href: 'usaq-rus-dili.html' },
+      { title: 'Uşaqlar üçün Məntiq', type: 'Uşaq', href: 'usaq-mentiq.html' },
+      { title: 'Dinləmə günü', type: 'Tələbələrə özəl', href: 'dinleme-gunu.html' },
+      { title: 'Film günü', type: 'Tələbələrə özəl', href: 'film-gunu.html' },
+      { title: 'Almaniya', type: 'Xaricdə', href: 'xaricde-almaniya.html' },
+      { title: 'Türkiyə', type: 'Xaricdə', href: 'xaricde-turkiye.html' },
+      { title: 'Polşa', type: 'Xaricdə', href: 'xaricde-polsa.html' },
+      { title: 'Kanada', type: 'Xaricdə', href: 'xaricde-kanada.html' },
+      { title: 'İngiltərə', type: 'Xaricdə', href: 'xaricde-ingiltere.html' },
+      { title: 'Gürcüstan', type: 'Xaricdə', href: 'xaricde-gurcustan.html' },
+      { title: 'Taqaüd Proqramları', type: 'Proqram', href: 'taqaud-proqramlari.html' },
+      { title: 'Xaricdə təhsil', type: 'Səhifə', href: 'xaricde-tehsil.html' },
+      { title: 'Dil Kursları', type: 'Səhifə', href: 'dil-kurslari.html' },
+      { title: 'Əlaqə', type: 'Səhifə', href: 'elaqe.html' }
     ];
 
     function render(q) {

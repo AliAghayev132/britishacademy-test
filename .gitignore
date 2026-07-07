@@ -1,0 +1,10 @@
+# Design source (Claude Design export) — reference only, not part of the site
+_design_src/
+*.dc.html
+Diva Academy saytı dizaynı.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
