@@ -209,6 +209,128 @@ img { display: block; max-width: 100%; }
 .ba-msub--all { color: var(--accent); font-weight: 700; }
 .ba-msub--head { font-weight: 700; color: #14141C; padding-top: 13px; }
 
+/* ============================================================
+   Homepage FX — scoped to body.ba-home (index.html only).
+   .ba-fx is added by JS unless prefers-reduced-motion.
+   ============================================================ */
+
+/* -- Hero: layered gradient + slow aurora + tinted chips -- */
+body.ba-home .ba-hero {
+  background:
+    radial-gradient(90% 120% at 12% -10%, rgba(255,255,255,.16), transparent 55%),
+    linear-gradient(155deg, rgba(255,255,255,.08), rgba(8,8,34,.30) 92%),
+    var(--hero-bg) !important;
+}
+/* a rotating square sized 120%W + 120vh always covers the hero at any aspect ratio */
+body.ba-home .ba-hero::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(120% + 120vh); height: 0; padding-top: calc(120% + 120vh);
+  margin-left: calc(-60% - 60vh); margin-top: calc(-60% - 60vh);
+  background: conic-gradient(from 20deg at 50% 50%,
+    transparent, rgba(255,214,130,.16) 12%, transparent 28%,
+    rgba(110,255,225,.13) 46%, transparent 60%,
+    rgba(255,150,215,.15) 78%, transparent 95%);
+  pointer-events: none;
+}
+/* no-JS fallback: the loader fades itself out (JS normally hides it first) */
+body.ba-home #ba-loader { animation: ba-loader-out .55s ease 1.7s forwards; }
+@keyframes ba-loader-out { to { opacity: 0; visibility: hidden; } }
+/* hero children order: 1 blobA · 2 blobB · 3 dots · 4–9 chips · 10 content */
+body.ba-home .ba-hero > div:nth-of-type(4) [data-chip] { background:rgba(255,199,89,.30) !important; border-color:rgba(255,222,150,.55) !important; }
+body.ba-home .ba-hero > div:nth-of-type(5) [data-chip] { background:rgba(255,111,180,.28) !important; border-color:rgba(255,160,205,.5) !important; }
+body.ba-home .ba-hero > div:nth-of-type(6) [data-chip] { background:rgba(66,226,197,.26) !important; border-color:rgba(140,240,220,.5) !important; }
+body.ba-home .ba-hero > div:nth-of-type(7) [data-chip] { background:rgba(122,192,255,.28) !important; border-color:rgba(170,215,255,.52) !important; }
+body.ba-home .ba-hero > div:nth-of-type(8) [data-chip] { background:rgba(196,152,255,.30) !important; border-color:rgba(220,190,255,.52) !important; }
+body.ba-home .ba-hero > div:nth-of-type(9) [data-chip] { background:rgba(186,255,148,.24) !important; border-color:rgba(215,255,185,.5) !important; }
+
+/* -- Staggered "framer" reveal: containers tagged .ba-sg -- */
+body.ba-home.ba-fx .ba-sg:not(.is-in) > * { opacity: 0; }
+body.ba-home.ba-fx .ba-sg.is-in > * {
+  animation: ba-in .72s cubic-bezier(.22,.9,.28,1) both;
+  animation-delay: calc(var(--i, 0) * .07s);
+}
+@keyframes ba-in {
+  from { opacity: 0; transform: translateY(26px) scale(.985); filter: blur(7px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* -- Course cards: colored wash + shine sweep (per-card --accent) -- */
+body.ba-home #kurslar .ba-course { position: relative; overflow: hidden; }
+body.ba-home #kurslar .ba-course > * { position: relative; z-index: 1; }
+body.ba-home #kurslar .ba-course::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, var(--accent), transparent 70%) top / 100% 4px no-repeat,
+    radial-gradient(110% 80% at 88% -12%, var(--accent-soft), transparent 58%);
+}
+body.ba-home #kurslar .ba-course::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -75%; width: 46%; z-index: 2;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.42), transparent);
+  transform: skewX(-18deg); pointer-events: none; transition: left .65s ease;
+}
+body.ba-home #kurslar .ba-course:hover::after { left: 130%; }
+body.ba-home #kurslar .ba-course:hover { border-color: var(--accent) !important; }
+
+/* -- Advantages: hover fills with a darkened card color (AA contrast for white text) -- */
+body.ba-home .ba-adv2:hover { background: color-mix(in srgb, var(--accent) 58%, #14141C) !important; }
+body.ba-home .ba-adv2:hover .ba-adv2-n { color: rgba(255,255,255,.55) !important; }
+
+/* -- Marquee band: gradient + multicolored stars -- */
+body.ba-home .ba-mqband { background: linear-gradient(90deg, #0F1020, #201A4E 50%, #0F1020) !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+1) > span { color: #FF5A3C !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+2) > span { color: #F5A524 !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+3) > span { color: #2EE6C8 !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+4) > span { color: #FF3D8B !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+5) > span { color: #38BDF8 !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+6) > span { color: #4ADE80 !important; }
+body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+7) > span { color: #B49CFF !important; }
+
+/* -- Soft multi-hue section tints -- */
+body.ba-home #xaricde { background: linear-gradient(165deg, #F4F7FF 0%, #FDF6F0 55%, #F3FAF6 100%) !important; }
+body.ba-home .ba-partners { background: linear-gradient(150deg, #F6F6FF 0%, #FFF6F2 100%) !important; }
+
+/* -- Destination cards with full-height flag art -- */
+body.ba-home .ba-fdest {
+  position: relative; overflow: hidden; display: flex; align-items: flex-end;
+  min-height: 138px; background: #fff; border: 1px solid #ECEDF2;
+  border-radius: 18px; padding: 20px;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+body.ba-home .ba-fdest:hover { transform: translateY(-5px); box-shadow: 0 18px 38px rgba(20,20,45,.12); border-color: var(--cc); }
+body.ba-home .ba-flag {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 60%;
+  opacity: .17; filter: blur(2.5px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(to left, #000 55%, transparent);
+  mask-image: linear-gradient(to left, #000 55%, transparent);
+  pointer-events: none;
+  transition: opacity .35s ease, filter .35s ease, transform .45s cubic-bezier(.2,.7,.2,1);
+}
+body.ba-home .ba-flag svg { width: 100%; height: 100%; display: block; }
+body.ba-home .ba-fdest:hover .ba-flag { opacity: .4; filter: blur(0) saturate(1.25); transform: scale(1.06) translateX(-3px); }
+body.ba-home .ba-fdest-body { position: relative; z-index: 1; }
+body.ba-home .ba-fdest-tag { font-size: 11.5px; color: var(--cc); font-weight: 800; letter-spacing: .05em; }
+body.ba-home .ba-fdest-name { font-family: 'Space Grotesk'; font-weight: 700; font-size: 18px; margin-top: 7px; color: #17171F; }
+body.ba-home .ba-fdest-sub { font-size: 13px; color: #6C6C7A; margin-top: 4px; line-height: 1.4; }
+body.ba-home .ba-fdest-all { background: linear-gradient(120deg, var(--accent), #7C4DFF 60%, #C13DBF 130%); border: none; }
+body.ba-home .ba-fdest-all .ba-fdest-tag,
+body.ba-home .ba-fdest-all .ba-fdest-name,
+body.ba-home .ba-fdest-all .ba-fdest-sub { color: #fff; }
+body.ba-home .ba-fdest-all:hover { border: none; box-shadow: 0 18px 40px rgba(96,61,240,.35); }
+
+/* -- CTA band: vivid gradient -- */
+body.ba-home #qeydiyyat > div {
+  background: linear-gradient(115deg, var(--accent) 0%, #7C4DFF 52%, #C13DBF 115%) !important;
+}
+
+/* -- Motion niceties -- */
+@media (prefers-reduced-motion: no-preference) {
+  body.ba-home .ba-hero::before { animation: ba-spin 30s linear infinite; }
+}
+@keyframes ba-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) {
+  body.ba-home .ba-hero::before { display: none; }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
   .ba-nav { display: none !important; }

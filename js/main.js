@@ -12,6 +12,7 @@
     initHeaderSpacer();
     initMobileNav();
     initActiveNav();
+    initHomeFx();
     initReveal();
     initHeroWords();
     initHeroChips();
@@ -61,6 +62,91 @@
     window.addEventListener('resize', size);
     size();
     setTimeout(size, 300);
+  }
+
+  /* ---------- Homepage FX: stagger, count-up, hero parallax ---------- */
+  function initHomeFx() {
+    if (!document.body.classList.contains('ba-home')) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Staggered reveal for .ba-sg containers
+    var groups = document.querySelectorAll('.ba-sg');
+    if (groups.length && !reduce && 'IntersectionObserver' in window) {
+      document.body.classList.add('ba-fx');
+      // once a child's entry animation ends, release it so hover transforms work
+      document.addEventListener('animationend', function (e) {
+        if (e.animationName === 'ba-in') e.target.style.animation = 'none';
+      });
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
+      groups.forEach(function (g) {
+        Array.prototype.forEach.call(g.children, function (c, i) { c.style.setProperty('--i', i); });
+        // keyboard users: reveal a group instantly when focus enters it
+        g.addEventListener('focusin', function () {
+          g.classList.add('is-in');
+          Array.prototype.forEach.call(g.children, function (c) { c.style.animation = 'none'; });
+        });
+      });
+      // hold the reveal until the loader has fully faded, so the entrance is seen
+      var revealWait = document.getElementById('ba-loader') ? 1650 : 0;
+      setTimeout(function () { groups.forEach(function (g) { io.observe(g); }); }, revealWait);
+    }
+
+    // Count-up hero stats
+    var nums = document.querySelectorAll('[data-count]');
+    if (nums.length && !reduce) {
+      var fmt = function (n) {
+        var s = String(Math.round(n));
+        return s.length > 3 ? s.slice(0, -3) + ' ' + s.slice(-3) : s;
+      };
+      var run = function (el) {
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        // lock the width while the static final text is still in place, so the row doesn't jitter
+        el.style.minWidth = Math.ceil(el.getBoundingClientRect().width) + 'px';
+        var t0 = null, dur = 1400;
+        function tick(t) {
+          if (!t0) t0 = t;
+          var p = Math.min(1, (t - t0) / dur);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt(target * eased) + suffix;
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      };
+      // start after the loader fully fades so the animation is actually seen
+      setTimeout(function () { nums.forEach(run); }, document.getElementById('ba-loader') ? 1650 : 200);
+    }
+
+    // Gentle mouse parallax on hero chips
+    var hero = document.querySelector('.ba-hero');
+    if (hero && !reduce && window.matchMedia('(pointer: fine)').matches) {
+      var layers = [];
+      hero.querySelectorAll('[data-chip]').forEach(function (chip, i) {
+        var wrap = chip.parentElement;
+        layers.push({ el: wrap, base: wrap.style.transform || '', depth: 7 + (i % 3) * 6 });
+      });
+      var raf = 0;
+      hero.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          raf = 0;
+          var r = hero.getBoundingClientRect();
+          var nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+          var ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+          layers.forEach(function (l) {
+            l.el.style.transform = 'translate3d(' + (nx * l.depth).toFixed(1) + 'px,' + (ny * l.depth).toFixed(1) + 'px,0) ' + l.base;
+          });
+        });
+      });
+      hero.addEventListener('pointerleave', function () {
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        layers.forEach(function (l) { l.el.style.transform = l.base; });
+      });
+    }
   }
 
   /* ---------- Mobile navigation drawer ---------- */

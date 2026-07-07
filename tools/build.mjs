@@ -83,7 +83,7 @@ const MENU = [
     ]},
   ]},
 
-  { label: 'Tələbələrə özəl', slug: 'telebelere-ozel.html', align: 'right', dd: [
+  { label: 'Tələbələrə özəl', slug: 'telebelere-ozel.html', hidden: true, align: 'right', dd: [
     { label: 'Dinləmə günü', slug: 'dinleme-gunu.html' },
     { label: 'Film günü', slug: 'film-gunu.html' },
   ]},
@@ -102,7 +102,7 @@ const MENU = [
     { label: 'Estoniya', slug: 'xaricde-estoniya.html' },
   ]},
 
-  { label: 'Taqaüd Proqramları', slug: 'taqaud-proqramlari.html' },
+  { label: 'Taqaüd Proqramları', slug: 'taqaud-proqramlari.html', hidden: true },
   { label: 'Əlaqə', slug: 'elaqe.html' },
 ];
 
@@ -199,6 +199,7 @@ function head(p) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}</style></noscript>
 ${jsonLd(p)}
 </head>`;
 }
@@ -209,7 +210,9 @@ ${jsonLd(p)}
 const CARET = '<svg class="ba-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>';
 
 function navBlock() {
-  const items = MENU.map((top) => {
+  // hidden: true → səhifə yaradılır, amma menyuda görünmür
+  const NAV = MENU.filter((t) => !t.hidden);
+  const items = NAV.map((top) => {
     if (top.mega) {
       const cols = top.mega.map((g) =>
         `<div class="ba-mega-col"><a class="ba-mega-title" href="${g.slug}">${esc(g.label)}</a>` +
@@ -226,7 +229,7 @@ function navBlock() {
     return `<div class="ba-nav-item"><a href="${top.slug}">${esc(top.label)}</a></div>`;
   }).join('\n          ');
 
-  const mobile = MENU.map((top) => {
+  const mobile = NAV.map((top) => {
     let kids = null;
     if (top.dd) kids = top.dd;
     else if (top.mega) kids = top.mega.flatMap((g) => [{ label: g.label, slug: g.slug, head: true }, ...g.items]);
@@ -670,6 +673,11 @@ for (const [file, cfg] of Object.entries(EXISTING)) {
   // 1) SEO: inject before </head> if not already present
   if (!/rel="canonical"/.test(src)) {
     src = src.replace('</head>', seoBlock(file, cfg.canonicalSlug) + '\n</head>');
+  }
+
+  // 1b) no-JS fallback: hide loader, show .ba-reveal sections
+  if (!src.includes('<noscript>')) {
+    src = src.replace('</head>', '<noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}</style></noscript>\n</head>');
   }
 
   // 2) Nav: replace the mega-menu block (idempotent via markers), else the original <nav>
