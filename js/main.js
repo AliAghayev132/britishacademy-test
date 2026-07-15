@@ -13,6 +13,7 @@
     initMobileNav();
     initActiveNav();
     initHomeFx();
+    initWhatsAppBranches();
     initReveal();
     initHeroWords();
     initHeroChips();
@@ -147,6 +148,47 @@
         layers.forEach(function (l) { l.el.style.transform = l.base; });
       });
     }
+  }
+
+  /* ---------- WhatsApp branch selector (click → pick branch) ---------- */
+  function initWhatsAppBranches() {
+    var wa = document.querySelector('.ba-wa');
+    if (!wa) return;
+    // Filial siyahısı — tools/build.mjs-dəki BRANCHES ilə eyni saxla
+    var branches = [
+      { name: 'Mərkəz — Caspian Plaza', wa: '994552124151' },
+      { name: 'Nərimanov filialı', wa: '994552124152' },
+      { name: 'Xətai filialı', wa: '994552124153' },
+      { name: 'Yasamal filialı', wa: '994552124154' }
+    ];
+    var waIcon = '<span class="ba-wa-pop-ic"><svg viewBox="0 0 32 32" width="17" height="17" fill="#fff"><path d="M16 .5C7.4.5.5 7.4.5 16c0 2.8.7 5.5 2.1 7.9L.4 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.5 16 .5z"></path></svg></span>';
+    var pop = document.createElement('div');
+    pop.className = 'ba-wa-pop';
+    pop.setAttribute('role', 'menu');
+    pop.innerHTML = '<div class="ba-wa-pop-h">Filial seç · WhatsApp</div>' +
+      branches.map(function (b) {
+        return '<a href="https://wa.me/' + b.wa + '" target="_blank" rel="noopener" role="menuitem">' + waIcon + '<span>' + b.name + '</span></a>';
+      }).join('');
+    document.body.appendChild(pop);
+
+    wa.setAttribute('aria-haspopup', 'true');
+    wa.setAttribute('aria-expanded', 'false');
+    function setOpen(open) {
+      pop.classList.toggle('open', open);
+      wa.classList.toggle('is-open', open);
+      wa.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    wa.addEventListener('click', function (e) {
+      e.preventDefault();
+      setOpen(!pop.classList.contains('open'));
+    });
+    pop.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { setOpen(false); });
+    });
+    document.addEventListener('click', function (e) {
+      if (!pop.contains(e.target) && !wa.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
   }
 
   /* ---------- Mobile navigation drawer ---------- */
