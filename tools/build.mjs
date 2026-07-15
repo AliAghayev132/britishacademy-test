@@ -247,7 +247,7 @@ function head(p) {
 <meta name="twitter:image" content="${ORIGIN}/og-cover.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}</style></noscript>
 ${jsonLd(p)}
@@ -334,8 +334,8 @@ function header() {
     <header style="background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-bottom:1px solid #ECEDF2;">
       <div class="ba-headrow" style="max-width:1240px; margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
         <a href="index.html" style="display:flex; align-items:center; gap:12px; flex:none;">
-          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Sora'; font-weight:800; font-size:20px;">B</span>
-          <span style="font-family:'Sora'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
+          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:800; font-size:20px;">B</span>
+          <span style="font-family:'Poppins'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
         </a>
         ${navBlock()}
         <div style="display:flex; align-items:center; gap:10px; flex:none;">
@@ -354,7 +354,7 @@ function searchOverlay() {
   return `  <div id="ba-search-overlay" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(255,255,255,.98); backdrop-filter:blur(10px); padding:36px 24px; overflow:auto;">
     <div style="max-width:760px; margin:0 auto;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;">
-        <span style="font-family:'Sora'; font-weight:800; font-size:22px; color:#14141C;">Axtarış</span>
+        <span style="font-family:'Poppins'; font-weight:800; font-size:22px; color:#14141C;">Axtarış</span>
         <button data-close-search style="display:flex; align-items:center; gap:8px; background:#F1F2F6; border:1px solid #E7E8EE; color:#4C4C58; font-weight:600; font-size:14px; padding:9px 16px; border-radius:99px; cursor:pointer; font-family:inherit;">Bağla ✕</button>
       </div>
       <div style="display:flex; align-items:center; gap:12px; border:2px solid var(--accent); border-radius:16px; padding:15px 18px; background:#fff;">
@@ -375,10 +375,10 @@ function applyModal() {
       <div style="position:relative; background:var(--accent); padding:34px 34px 40px; overflow:hidden;">
         <button data-close-apply class="ba-modal-close" style="position:absolute; top:20px; right:20px; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.22); color:#fff; cursor:pointer; font-size:15px; display:grid; place-items:center; transition:.2s; z-index:2;">✕</button>
         <div style="display:flex; align-items:center; gap:12px;">
-          <span style="width:46px; height:46px; border-radius:13px; background:rgba(255,255,255,.2); color:#fff; display:grid; place-items:center; font-family:'Sora'; font-weight:700; font-size:23px;">B</span>
-          <span style="font-family:'Sora'; font-weight:700; font-size:18px; color:#fff;">British Academy</span>
+          <span style="width:46px; height:46px; border-radius:13px; background:rgba(255,255,255,.2); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:700; font-size:23px;">B</span>
+          <span style="font-family:'Poppins'; font-weight:700; font-size:18px; color:#fff;">British Academy</span>
         </div>
-        <h3 style="font-family:'Sora'; font-weight:700; font-size:30px; margin:22px 0 0; color:#fff; letter-spacing:-.015em;">Müraciət et</h3>
+        <h3 style="font-family:'Poppins'; font-weight:700; font-size:30px; margin:22px 0 0; color:#fff; letter-spacing:-.015em;">Müraciət et</h3>
         <p style="font-size:15px; color:rgba(255,255,255,.92); margin:9px 0 0; line-height:1.55; max-width:370px;">Gələcəyinə bu gün başla — dil biliyini British Academy ilə növbəti səviyyəyə qaldır.</p>
       </div>
       <form id="ba-apply-form" style="padding:28px 34px 32px; display:flex; flex-direction:column; gap:14px;">
@@ -405,12 +405,12 @@ function footer() {
   const col = (title, links) => `<div><div style="font-weight:700; font-size:13px; color:#fff; letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px;">${title}</div><div style="display:flex; flex-direction:column; gap:12px; font-size:14.5px;">${links.map(([l, h]) => `<a href="${h}" class="ba-flink">${esc(l)}</a>`).join('')}</div></div>`;
   return `  <footer style="position:relative; background:#0C0D1A; color:#C4C5D6; overflow:visible; margin-top:70px;">
     <div style="height:5px; background:var(--accent);"></div>
-    <div style="position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:5; width:104px; height:104px; border-radius:50%; background:var(--accent); border:7px solid #0C0D1A; display:grid; place-items:center; box-shadow:0 14px 36px rgba(0,0,0,.45);"><span style="font-family:'Sora'; font-weight:700; font-size:44px; color:#fff; line-height:1;">B</span></div>
+    <div style="position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:5; width:104px; height:104px; border-radius:50%; background:var(--accent); border:7px solid #0C0D1A; display:grid; place-items:center; box-shadow:0 14px 36px rgba(0,0,0,.45);"><span style="font-family:'Poppins'; font-weight:700; font-size:44px; color:#fff; line-height:1;">B</span></div>
     <div class="footer-grid" style="position:relative; z-index:2; max-width:1240px; margin:0 auto; padding:64px 28px 20px; display:grid; grid-template-columns:1.7fr 1fr 1fr 1fr; gap:36px;">
       <div>
         <div style="display:flex; align-items:center; gap:12px;">
-          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Sora'; font-weight:800; font-size:19px;">B</span>
-          <span style="font-family:'Sora'; font-weight:800; font-size:19px; color:#fff;">British Academy</span>
+          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:800; font-size:19px;">B</span>
+          <span style="font-family:'Poppins'; font-weight:800; font-size:19px; color:#fff;">British Academy</span>
         </div>
         <p style="font-size:14.5px; line-height:1.65; margin:20px 0 0; max-width:330px; color:#9A9BB0;">English UK akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti. 2014-cü ildən keyfiyyətli dil təhsili və xaricdə təhsil.</p>
         <div style="font-size:14px; color:#8788A0; margin-top:20px; line-height:1.75;">${ORG.address}<br>(+994 12) 497 62 97 · (+994) 55 212 41 51<br>${ORG.email}</div>
@@ -425,7 +425,7 @@ function footer() {
         <span>English UK · Cambridge · British Council · Duolingo · TOEFL</span>
       </div>
     </div>
-    <div style="position:relative; z-index:1; line-height:.74; text-align:center; margin-top:4px; overflow:hidden;"><div style="font-family:'Sora'; font-weight:800; font-size:clamp(40px,9.5vw,124px); color:var(--accent-wm); letter-spacing:-.03em; white-space:nowrap; transform:translateY(12%);">British Academy</div></div>
+    <div style="position:relative; z-index:1; line-height:.74; text-align:center; margin-top:4px; overflow:hidden;"><div style="font-family:'Poppins'; font-weight:800; font-size:clamp(40px,9.5vw,124px); color:var(--accent-wm); letter-spacing:-.03em; white-space:nowrap; transform:translateY(12%);">British Academy</div></div>
   </footer>
   <a href="${ORG.whatsapp}" target="_blank" rel="noopener" aria-label="WhatsApp" class="ba-wa" style="position:fixed; right:22px; bottom:56px; z-index:90; width:72px; height:72px; border-radius:50%; background:#25D366; display:grid; place-items:center; box-shadow:0 14px 32px rgba(37,211,102,.5); transition:transform .2s;">
     <svg viewBox="0 0 32 32" width="38" height="38" fill="#fff"><path d="M16 .5C7.4.5.5 7.4.5 16c0 2.8.7 5.5 2.1 7.9L.4 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.5 16 .5zm0 28c-2.4 0-4.7-.6-6.7-1.8l-.5-.3-4.7 1.2 1.3-4.6-.3-.5c-1.3-2.1-2-4.5-2-7 0-7.1 5.8-12.9 13-12.9s12.9 5.8 12.9 12.9-5.8 12.9-13 13zm7.1-9.7c-.4-.2-2.3-1.1-2.6-1.3-.3-.1-.6-.2-.8.2-.2.4-.9 1.3-1.2 1.5-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.7.2-.2.2-.4.4-.7.1-.3 0-.5 0-.7-.1-.2-.8-2-1.1-2.7-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.5 3.8 6 5.3.8.4 1.5.6 2 .8.8.3 1.6.2 2.2.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.4z"></path></svg>
@@ -454,7 +454,7 @@ function hero(p, eyebrow, lead) {
     <div style="position:relative; max-width:1200px; margin:0 auto; padding:30px 28px 60px;">
       ${breadcrumb(p)}
       <span style="display:inline-block; margin-top:22px; font-size:12.5px; color:rgba(255,255,255,.9); font-weight:700; letter-spacing:.14em; text-transform:uppercase;">${esc(eyebrow)}</span>
-      <h1 style="font-family:'Sora'; font-weight:700; font-size:clamp(34px,5vw,54px); letter-spacing:-.025em; margin:14px 0 0; line-height:1.08; color:#fff; max-width:860px;">${esc(p.h1)}</h1>
+      <h1 style="font-family:'Poppins'; font-weight:700; font-size:clamp(34px,5vw,54px); letter-spacing:-.025em; margin:14px 0 0; line-height:1.08; color:#fff; max-width:860px;">${esc(p.h1)}</h1>
       <p style="font-size:18px; color:rgba(255,255,255,.92); margin:18px 0 0; max-width:660px; line-height:1.6;">${esc(lead)}</p>
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;">
         <button data-open-apply class="ba-btn-primary" style="background:#fff; color:var(--accent); border:none; font-weight:700; font-size:15px; padding:14px 26px; border-radius:99px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciət et</button>
@@ -469,7 +469,7 @@ function ctaBand() {
     <div style="position:relative; overflow:hidden; background:#0C0D1A; border-radius:28px; padding:52px 40px; text-align:center;">
       <div style="position:absolute; top:-60px; left:-30px; width:220px; height:220px; border-radius:50%; background:var(--accent-wm); filter:blur(10px);"></div>
       <div style="position:relative;">
-        <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(26px,3.4vw,36px); color:#fff; margin:0; letter-spacing:-.02em;">Hazırsan? Elə bu gün başla.</h2>
+        <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(26px,3.4vw,36px); color:#fff; margin:0; letter-spacing:-.02em;">Hazırsan? Elə bu gün başla.</h2>
         <p style="font-size:16px; color:#B9BAD0; margin:14px auto 26px; max-width:520px; line-height:1.6;">Ödənişsiz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.</p>
         <button data-open-apply class="ba-btn-primary" style="background:var(--accent); color:#fff; border:none; font-weight:700; font-size:16px; padding:15px 30px; border-radius:99px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciət et</button>
       </div>
@@ -481,7 +481,7 @@ function boxGrid(boxes) {
   return `<div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">` +
     boxes.map((b) => `<a href="${b.slug}" class="ba-course ba-reveal" style="display:block; border:1px solid #ECEDF2; border-radius:20px; padding:26px; background:#fff; transition:transform .25s ease, box-shadow .25s ease, border-color .25s;">
       <span style="display:grid; place-items:center; width:54px; height:54px; border-radius:15px; background:var(--accent-soft); font-size:26px;">${b.icon || iconFor(b.label)}</span>
-      <h3 style="font-family:'Sora'; font-weight:700; font-size:20px; color:#16161C; margin:18px 0 0; letter-spacing:-.01em;">${esc(b.label)}</h3>
+      <h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; color:#16161C; margin:18px 0 0; letter-spacing:-.01em;">${esc(b.label)}</h3>
       <p style="font-size:14.5px; color:#63636F; margin:10px 0 0; line-height:1.6;">${esc(b.blurb || 'Ətraflı məlumat və qeydiyyat üçün klikləyin.')}</p>
       <span style="display:inline-flex; align-items:center; gap:6px; margin-top:16px; color:var(--accent); font-weight:700; font-size:14px;">Ətraflı →</span>
     </a>`).join('') + `</div>`;
@@ -494,13 +494,13 @@ function hubPage(p) {
     const it = p.items;
     const grp = (title, sub, list) => `<div class="ba-course ba-reveal" style="grid-column:span 1; border:1px solid #ECEDF2; border-radius:22px; padding:28px; background:#fff;">
         <span style="display:grid; place-items:center; width:56px; height:56px; border-radius:15px; background:var(--accent-soft); font-size:28px;">${iconFor(title)}</span>
-        <h3 style="font-family:'Sora'; font-weight:700; font-size:22px; color:#16161C; margin:18px 0 4px;">${esc(title)}</h3>
+        <h3 style="font-family:'Poppins'; font-weight:700; font-size:22px; color:#16161C; margin:18px 0 4px;">${esc(title)}</h3>
         <p style="font-size:14px; color:#8A8A96; margin:0 0 14px;">${esc(sub)}</p>
         <div style="display:flex; flex-direction:column; gap:8px;">${list.map((x) => `<a href="${x.slug}" class="ba-flink" style="color:#3A3A46; font-weight:600; font-size:14.5px; padding:9px 12px; border-radius:10px; background:#F7F8FC;">${esc(x.label)} →</a>`).join('')}</div>
       </div>`;
     const single = (x) => `<a href="${x.slug}" class="ba-course ba-reveal" style="display:block; border:1px solid #ECEDF2; border-radius:22px; padding:28px; background:#fff;">
         <span style="display:grid; place-items:center; width:56px; height:56px; border-radius:15px; background:var(--accent-soft); font-size:28px;">${iconFor(x.label)}</span>
-        <h3 style="font-family:'Sora'; font-weight:700; font-size:20px; color:#16161C; margin:18px 0 0;">${esc(x.label)}</h3>
+        <h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; color:#16161C; margin:18px 0 0;">${esc(x.label)}</h3>
         <span style="display:inline-flex; margin-top:14px; color:var(--accent); font-weight:700; font-size:14px;">Ətraflı →</span>
       </a>`;
     body = `<div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start;">
@@ -516,7 +516,7 @@ function hubPage(p) {
     header(), searchOverlay(), applyModal(),
     hero(p, p.parent ? p.parent.label : 'British Academy', p.lead),
     `  <section style="max-width:1200px; margin:60px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">İstiqamətlər</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">İstiqamətlər</h2>
     ${body}
   </section>`,
     ctaBand(), footer(),
@@ -534,7 +534,7 @@ function priceSection(p) {
         <span style="font-size:15px; font-weight:800; color:var(--accent); white-space:nowrap;">${esc(prices[i])}</span>
       </div>`).join('\n      ');
   return `  <section id="qiymetler" style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">Filiallar üzrə qiymətlər</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">Filiallar üzrə qiymətlər</h2>
     <div style="border:1px solid #ECEDF2; border-radius:20px; background:#fff; overflow:hidden; max-width:720px;">
       ${rows}
     </div>
@@ -548,14 +548,14 @@ function teacherSection(p) {
   if (p.kind !== 'course') return '';
   const cards = pick3(p.slug).map((t) =>
     `<a href="muellimler.html" class="ba-course ba-reveal" style="display:flex; align-items:center; gap:14px; border:1px solid #ECEDF2; border-radius:18px; padding:18px; background:#fff; --accent:${t.c}; --accent-soft:${t.c}1f;">
-        <span style="width:52px; height:52px; border-radius:50%; background:${t.c}; color:#fff; display:grid; place-items:center; font-family:'Sora'; font-weight:700; font-size:22px; flex:none;">${t.i}</span>
+        <span style="width:52px; height:52px; border-radius:50%; background:${t.c}; color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:700; font-size:22px; flex:none;">${t.i}</span>
         <span style="min-width:0;">
-          <span style="display:block; font-family:'Sora'; font-weight:700; font-size:16.5px; color:#16161C;">${esc(t.n)}</span>
+          <span style="display:block; font-family:'Poppins'; font-weight:700; font-size:16.5px; color:#16161C;">${esc(t.n)}</span>
           <span style="display:block; font-size:13px; color:#63636F; margin-top:3px;">${esc(t.s)}</span>
         </span>
       </a>`).join('\n      ');
   return `  <section style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 8px;">Bu kursun müəllimləri</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 8px;">Bu kursun müəllimləri</h2>
     <p style="font-size:15px; color:#63636F; margin:0 0 24px;">Beynəlxalq sertifikatlı, təcrübəli müəllim heyəti. <a href="muellimler.html" style="color:var(--accent); font-weight:700;">Hamısına bax →</a></p>
     <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
       ${cards}
@@ -583,7 +583,7 @@ function leafPage(p) {
     `  <section style="max-width:1200px; margin:60px auto 0; padding:0 28px;">
     <div class="split" style="display:grid; grid-template-columns:1.6fr 1fr; gap:36px; align-items:start;">
       <div>
-        <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 16px;">${aboutTitle}</h2>
+        <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 16px;">${aboutTitle}</h2>
         <p style="font-size:17px; line-height:1.8; color:#33333D; margin:0 0 18px;">${esc(p.lead)}</p>
         <p style="font-size:16.5px; line-height:1.8; color:#4a4a55; margin:0;">Bu bölmənin təfərrüatlı məzmunu tezliklə əlavə olunacaq. Proqram, qiymət və cədvəl barədə ətraflı məlumat üçün bizimlə əlaqə saxla və ya müraciət et.</p>
       </div>
@@ -595,14 +595,14 @@ function leafPage(p) {
     </div>
   </section>
 ${priceSection(p)}  <section style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">Üstünlüklər</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">Üstünlüklər</h2>
     <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
-      ${feats.map(([ic, t, d]) => `<div class="ba-reveal" style="border:1px solid #ECEDF2; border-radius:18px; padding:24px; background:#fff;"><span style="display:grid; place-items:center; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); font-size:23px;">${ic}</span><h3 style="font-family:'Sora'; font-weight:700; font-size:17px; color:#16161C; margin:16px 0 8px;">${t}</h3><p style="font-size:14px; color:#63636F; line-height:1.6; margin:0;">${d}</p></div>`).join('')}
+      ${feats.map(([ic, t, d]) => `<div class="ba-reveal" style="border:1px solid #ECEDF2; border-radius:18px; padding:24px; background:#fff;"><span style="display:grid; place-items:center; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); font-size:23px;">${ic}</span><h3 style="font-family:'Poppins'; font-weight:700; font-size:17px; color:#16161C; margin:16px 0 8px;">${t}</h3><p style="font-size:14px; color:#63636F; line-height:1.6; margin:0;">${d}</p></div>`).join('')}
     </div>
   </section>
 ${teacherSection(p)}`,
     rel.length ? `  <section style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Sora'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">${isCountry ? 'Digər ölkələr' : 'Digər istiqamətlər'}</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">${isCountry ? 'Digər ölkələr' : 'Digər istiqamətlər'}</h2>
     ${boxGrid(rel.map((r) => ({ label: r.label, slug: r.slug })))}
   </section>` : '',
     ctaBand(), footer(),
@@ -617,7 +617,7 @@ function branchesPage(p) {
     return `<div class="ba-course ba-reveal" style="border:1px solid #ECEDF2; border-radius:20px; padding:26px; background:#fff; --accent:${cc}; --accent-soft:${cc}1f;">
         <div style="display:flex; align-items:center; gap:13px;">
           <span style="width:48px; height:48px; border-radius:13px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:22px; flex:none;">📍</span>
-          <h3 style="font-family:'Sora'; font-weight:700; font-size:19px; color:#16161C; margin:0;">${esc(b.name)}</h3>
+          <h3 style="font-family:'Poppins'; font-weight:700; font-size:19px; color:#16161C; margin:0;">${esc(b.name)}</h3>
         </div>
         <div style="margin-top:18px; display:flex; flex-direction:column; gap:10px; font-size:14.5px; color:#54545F;">
           <div>📍 ${esc(b.address)}</div>
@@ -675,12 +675,12 @@ function contactPage(p) {
     hero(p, 'British Academy', p.lead),
     `  <section style="max-width:1200px; margin:60px auto 0; padding:0 28px;">
     <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
-      ${cards.map(([ic, t, v]) => `<div style="border:1px solid #ECEDF2; border-radius:18px; padding:24px; background:#fff;"><span style="display:grid; place-items:center; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); font-size:22px;">${ic}</span><h3 style="font-family:'Sora'; font-weight:700; font-size:16px; color:#16161C; margin:16px 0 8px;">${t}</h3><p style="font-size:14.5px; color:#63636F; line-height:1.6; margin:0;">${v}</p></div>`).join('')}
+      ${cards.map(([ic, t, v]) => `<div style="border:1px solid #ECEDF2; border-radius:18px; padding:24px; background:#fff;"><span style="display:grid; place-items:center; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); font-size:22px;">${ic}</span><h3 style="font-family:'Poppins'; font-weight:700; font-size:16px; color:#16161C; margin:16px 0 8px;">${t}</h3><p style="font-size:14.5px; color:#63636F; line-height:1.6; margin:0;">${v}</p></div>`).join('')}
     </div>
     <div class="split" style="display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:32px; align-items:stretch;">
       <div class="img-slot" style="min-height:340px; border-radius:22px;"><span>Xəritə buraya əlavə olunacaq<br>(Google Maps embed)</span></div>
       <form id="ba-apply-form" style="border:1px solid #ECEDF2; border-radius:22px; padding:30px; background:#FAFBFF; display:flex; flex-direction:column; gap:14px;">
-        <h2 style="font-family:'Sora'; font-weight:700; font-size:24px; color:#14141C; margin:0 0 6px;">Bizə yaz</h2>
+        <h2 style="font-family:'Poppins'; font-weight:700; font-size:24px; color:#14141C; margin:0 0 6px;">Bizə yaz</h2>
         <input class="ba-field" required placeholder="Ad Soyad" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:14px 16px; font-size:15px; font-family:inherit; outline:none; color:#14141C;">
         <input class="ba-field" required placeholder="Telefon" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:14px 16px; font-size:15px; font-family:inherit; outline:none; color:#14141C;">
         <input class="ba-field" type="email" placeholder="E-poçt" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:14px 16px; font-size:15px; font-family:inherit; outline:none; color:#14141C;">
