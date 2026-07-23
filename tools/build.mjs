@@ -105,8 +105,9 @@ const MENU = [
 
   { label: 'Filiallar', slug: 'filiallar.html', branches: true },
   { label: 'Müəllimlər', slug: 'muellimler.html', exists: true },
+  { label: 'Tələbələrimiz', slug: 'telebelerimiz.html', students: true },
   { label: 'Taqaüd Proqramları', slug: 'taqaud-proqramlari.html', hidden: true },
-  { label: 'Əlaqə', slug: 'elaqe.html', hidden: true },
+  { label: 'Əlaqə', slug: 'elaqe.html' },
 ];
 
 /* ============================================================
@@ -742,6 +743,113 @@ function simplePage(p) {
   ].join('\n');
 }
 
+/* ============================================================
+   Tələbələrimiz — video rəylər + şərh divarı (mock data)
+   Real profil şəkli: assets/students/<ad-soyad>.jpg  (yoxdursa hərf qalır)
+   ============================================================ */
+const VIDEO_REVIEWS = [
+  { n: 'Aysel Məmmədova', c: 'IELTS Hazırlıq · 7.5 bal', d: 25 },
+  { n: 'Rəşad Quliyev', c: 'Biznes İngilis dili', d: 58 },
+  { n: 'Nigar Əhmədzadə', c: 'İngilis dili · C1', d: 53 },
+  { n: 'Bülbül İsmayılova', c: 'Xaricdə təhsil · Almaniya', d: 47 },
+];
+
+const TEXT_REVIEWS = [
+  { n: 'Leyla Hüseynova', c: 'İngilis dili · B2', r: 5, col: '#2E6BE6', t: 'Sıfırdan başladım, dörd ayda B2 səviyyəsinə çatdım. Ən çox xoşuma gələn danışıq klublarıdır — dərsdə öyrəndiyini elə həmin həftə real söhbətdə işlədirsən.' },
+  { n: 'Elvin Səfərov', c: 'IELTS · 7.0 bal', r: 5, col: '#7C4DFF', t: 'İkinci cəhdimdə 7.0 aldım. Müəllim hər həftə yazı tapşırıqlarımı ayrıca yoxlayır, səhvlərimi bir-bir izah edirdi.' },
+  { n: 'Günel Rzayeva', c: 'Uşaqlar üçün İngilis', r: 5, col: '#FF3D8B', t: 'Oğlum 8 yaşındadır, dərsə həvəslə gedir. Oyunlarla keçdikləri üçün onun üçün bu, dərs yox, əyləncədir.' },
+  { n: 'Tural Abbasov', c: 'Biznes İngilis dili', r: 5, col: '#F5A524', t: 'Xarici tərəfdaşlarla görüşlərdə özümü rahat hiss edirəm. Təqdimat hazırlamağı və işgüzar yazışmanı ayrıca öyrətdilər.' },
+  { n: 'Aynur Kərimli', c: 'Alman dili · A2', r: 5, col: '#12B5A5', t: 'Almaniyada təhsil üçün hazırlaşıram. Qrup kiçik olduğuna görə müəllim hər kəsə ayrıca vaxt ayıra bilir.' },
+  { n: 'Kamran Əliyev', c: 'Peşəkar Excel kursu', r: 4, col: '#0EA5E9', t: 'İş yerimdə hesabatları üç dəfə tez hazırlayıram. Praktik nümunələr üzərində işlədik, quru nəzəriyyə yox idi.' },
+  { n: 'Səbinə Nəbiyeva', c: 'Rus dili kursu', r: 5, col: '#E0533D', t: 'Uzun illər dili anlayırdım, amma danışa bilmirdim. Buradakı danışıq blokları məni bu kompleksdən qurtardı.' },
+  { n: 'Orxan Məmmədli', c: 'TOEFL hazırlıq', r: 5, col: '#22B07D', t: 'Sınaq imtahanları real imtahandan fərqlənmirdi, ona görə imtahan günü ümumiyyətlə həyəcanlanmadım.' },
+  { n: 'Fidan Qasımova', c: 'İtalyan dili kursu', r: 5, col: '#B45CF0', t: 'Onlayn qoşulurdum, amma qrupla əlaqəm heç kəsilmirdi. Müəllim ekran arxasından da hamını danışdırırdı.' },
+];
+
+const avatar = (name, color, size) => {
+  const file = norm(name).replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+  return `<span class="ba-av" style="--c:${color}; width:${size}px; height:${size}px; font-size:${Math.round(size * 0.4)}px;">`
+    + `<img src="assets/students/${file}.jpg" alt="" loading="lazy" onerror="this.remove()">`
+    + `<span>${esc(name.trim().charAt(0))}</span></span>`;
+};
+
+const stars = (n) => `<span class="ba-stars" aria-label="${n} ulduz">`
+  + '★'.repeat(n) + `<span style="opacity:.25;">${'★'.repeat(5 - n)}</span></span>`;
+
+function videoReviewCard(v) {
+  const mm = String(Math.floor(v.d / 60)).padStart(2, '0'), ss = String(v.d % 60).padStart(2, '0');
+  return `<div class="ba-vcard" data-video data-dur="${v.d}" data-frac="0" data-playing="0" style="position:relative; aspect-ratio:3/4; border-radius:20px; overflow:hidden; background:#0F1020;">
+        <div class="img-slot" style="position:absolute; inset:0; width:100%; height:100%;"><span>Məzun videosu</span></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.82)); pointer-events:none;"></div>
+        <div style="position:absolute; top:12px; left:12px; right:12px;">
+          <span style="display:inline-block; background:rgba(0,0,0,.55); color:#fff; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:8px; backdrop-filter:blur(4px);">${esc(v.n)}</span>
+          <span style="display:block; margin-top:6px; font-size:11.5px; font-weight:700; color:#fff; background:var(--accent); padding:4px 9px; border-radius:7px; width:fit-content;">${esc(v.c)}</span>
+        </div>
+        <button class="v-play ba-vplay" aria-label="Oynat" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:20px; background:var(--accent); border:none; cursor:pointer; display:grid; place-items:center; box-shadow:0 12px 28px rgba(0,0,0,.45); transition:opacity .25s, transform .2s;">
+          <svg class="v-ic-play" width="24" height="24" viewBox="0 0 24 24" style="fill:#fff; margin-left:2px;"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"></path></svg>
+          <svg class="v-ic-pause" width="22" height="22" viewBox="0 0 24 24" style="fill:#fff; display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.6"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6"></rect></svg>
+        </button>
+        <div style="position:absolute; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:10px;">
+          <button class="v-mini ba-vmini" aria-label="Oynat / Dayandır" style="width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.92); cursor:pointer; display:grid; place-items:center; flex:none;">
+            <svg class="v-ic-play" width="14" height="14" viewBox="0 0 24 24" fill="#14141C" style="margin-left:2px;"><path d="M7 4.5v15l13-7.5z"></path></svg>
+            <svg class="v-ic-pause" width="13" height="13" viewBox="0 0 24 24" fill="#14141C" style="display:none;"><rect x="6" y="4.5" width="4.5" height="15" rx="1.4"></rect><rect x="13.5" y="4.5" width="4.5" height="15" rx="1.4"></rect></svg>
+          </button>
+          <div class="v-track ba-vtrack" style="flex:1; height:5px; border-radius:99px; background:rgba(255,255,255,.32); overflow:hidden;"><div class="v-fill ba-vfill" style="height:100%; width:0%; background:var(--accent); border-radius:99px;"></div></div>
+          <span class="v-time ba-vtime" style="color:#fff; font-size:12px; font-weight:600; white-space:nowrap;">${mm}:${ss}</span>
+        </div>
+      </div>`;
+}
+
+function studentsPage(p) {
+  const statBox = (num, label) => `<div style="text-align:center;">
+        <div style="font-family:'Poppins'; font-weight:800; font-size:clamp(30px,4vw,44px); color:var(--accent); letter-spacing:-.02em;">${num}</div>
+        <div style="font-size:14.5px; color:#63636F; margin-top:4px;">${label}</div>
+      </div>`;
+
+  const wall = TEXT_REVIEWS.map((t) => `<figure class="ba-review" style="--c:${t.col};">
+        <span class="ba-review-quote" aria-hidden="true">”</span>
+        ${stars(t.r)}
+        <blockquote style="margin:12px 0 0; font-size:15.5px; line-height:1.75; color:#3c3c47;">${esc(t.t)}</blockquote>
+        <figcaption style="display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid #EFF0F5;">
+          ${avatar(t.n, t.col, 46)}
+          <span>
+            <span style="display:block; font-family:'Poppins'; font-weight:700; font-size:15px; color:#16161C;">${esc(t.n)}</span>
+            <span style="display:block; font-size:13px; color:var(--c); font-weight:600; margin-top:2px;">${esc(t.c)}</span>
+          </span>
+        </figcaption>
+      </figure>`).join('\n      ');
+
+  return [
+    head(p), '\n<body>\n<div style="min-height:100vh; overflow-x:hidden; background:#fff;">\n',
+    header(), searchOverlay(), applyModal(),
+    hero(p, 'British Academy', p.lead),
+    `  <section style="max-width:1200px; margin:52px auto 0; padding:0 28px;">
+    <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; border:1px solid #ECEDF2; border-radius:22px; padding:30px 24px; background:linear-gradient(150deg,#FAFBFF,#FFF6F2);">
+      ${statBox('20 000+', 'məzun tələbə')}
+      ${statBox('4.9', 'orta qiymətləndirmə')}
+      ${statBox('96%', 'dostuna tövsiyə edir')}
+      ${statBox('11 il', 'təhsil təcrübəsi')}
+    </div>
+  </section>
+  <section class="ba-reveal" style="max-width:1200px; margin:64px auto 0; padding:0 28px;">
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,34px); color:#14141C; letter-spacing:-.02em; margin:0 0 8px;">Onlar danışır</h2>
+    <p style="font-size:15.5px; color:#63636F; margin:0 0 26px;">Məzunlarımız təcrübələrini öz sözləri ilə paylaşır.</p>
+    <div class="grid-4 ba-sg" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+      ${VIDEO_REVIEWS.map(videoReviewCard).join('\n      ')}
+    </div>
+  </section>
+  <section class="ba-reveal" style="max-width:1200px; margin:70px auto 0; padding:0 28px;">
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,34px); color:#14141C; letter-spacing:-.02em; margin:0 0 8px;">Tələbə rəyləri</h2>
+    <p style="font-size:15.5px; color:#63636F; margin:0 0 26px;">Kurs sonunda topladığımız real geri bildirimlər.</p>
+    <div class="ba-wall">
+      ${wall}
+    </div>
+  </section>`,
+    ctaBand(), footer(),
+    '\n</div>\n<script src="js/main.js" defer></script>\n</body>\n</html>',
+  ].join('\n');
+}
+
 /* ---- Əlaqə səhifəsi ---- */
 function contactPage(p) {
   const cards = [
@@ -789,6 +897,15 @@ function push(p) {
 
 for (const top of MENU) {
   if (top.exists) continue; // haqqimizda.html / muellimler.html mövcuddur
+  if (top.students) {
+    push({
+      slug: top.slug, kind: 'students', mascot: 'wave', h1: 'Tələbələrimiz',
+      desc: 'British Academy məzunlarının rəyləri — video təcrübələr, qiymətləndirmələr və real geri bildirimlər.',
+      lead: 'Məzunlarımız British Academy təcrübəsini öz sözləri ilə danışır.',
+      parent: { label: 'Ana səhifə', slug: 'index.html' },
+    });
+    continue;
+  }
   if (top.branches) {
     push({ slug: top.slug, kind: 'branches', mascot: 'point', h1: 'Filiallar', desc: 'British Academy filialları — ünvanlar, telefon, iş saatları və WhatsApp. Özünə ən yaxın filialı seç.', lead: 'British Academy-nin Bakıdakı filialları — özünə ən yaxın filialı seç və birbaşa əlaqə saxla.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
     continue;
@@ -825,6 +942,7 @@ for (const p of pages) {
   else if (p.kind === 'contact') html = contactPage(p);
   else if (p.kind === 'simple') html = simplePage(p);
   else if (p.kind === 'branches') html = branchesPage(p);
+  else if (p.kind === 'students') html = studentsPage(p);
   else html = leafPage(p);
   writeFileSync(join(ROOT, p.slug), html, 'utf8');
   written++;

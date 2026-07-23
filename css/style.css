@@ -165,7 +165,9 @@ img { display: block; max-width: 100%; }
 /* ============================================================
    Mega menu / navigation (shared by every page)
    ============================================================ */
-.ba-nav { position: relative; display: flex; align-items: center; gap: 22px; font-size: 15px; font-weight: 600; color: #4C4C58; }
+.ba-nav { position: relative; display: flex; align-items: center; gap: 20px; font-size: 15px; font-weight: 600; color: #4C4C58; }
+/* 7 menyu bəndi 1240px konteynerə sığsın deyə orta ölçüdə sıxılır */
+@media (max-width: 1240px) { .ba-nav { gap: 14px; font-size: 14.2px; } }
 .ba-nav-item { position: relative; }
 .ba-nav-item.has-mega { position: static; }
 .ba-nav-item > a { display: inline-flex; align-items: center; gap: 4px; padding: 19px 0; color: #4C4C58; transition: color .2s; white-space: nowrap; }
@@ -386,6 +388,42 @@ body.ba-home #qeydiyyat > div {
 @media (prefers-reduced-motion: reduce) { .ba-mascot-hero { animation: none; } }
 @media (max-width: 1100px) { .ba-mascot-hero { width: 150px; opacity: .55; } }
 @media (max-width: 860px) { .ba-mascot-hero, .ba-mascot-cta { display: none; } }
+
+/* ============================================================
+   Tələbə rəyləri — avatar, ulduzlar, masonry şərh divarı
+   ============================================================ */
+.ba-av {
+  position: relative; display: grid; place-items: center; border-radius: 50%;
+  background: var(--c); color: #fff; font-family: 'Poppins'; font-weight: 700;
+  flex: none; overflow: hidden; line-height: 1;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px color-mix(in srgb, var(--c) 32%, #fff);
+}
+.ba-av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.ba-stars { display: inline-block; color: #F5A524; font-size: 15px; letter-spacing: 2px; }
+
+.ba-wall { columns: 3; column-gap: 20px; }
+.ba-wall > .ba-review {
+  break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid;
+  display: block; width: 100%; margin: 0 0 20px;
+  position: relative; overflow: hidden;
+  background: #fff; border: 1px solid #ECEDF2; border-radius: 20px; padding: 24px 22px 20px;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.ba-wall > .ba-review::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c);
+}
+.ba-wall > .ba-review:hover {
+  transform: translateY(-4px); border-color: var(--c);
+  box-shadow: 0 20px 42px rgba(20,20,45,.11);
+}
+.ba-review-quote {
+  position: absolute; top: 2px; right: 16px;
+  font-family: 'Poppins'; font-weight: 800; font-size: 76px; line-height: 1;
+  color: var(--c); opacity: .13; pointer-events: none;
+}
+@media (max-width: 980px) { .ba-wall { columns: 2; } }
+@media (max-width: 620px) { .ba-wall { columns: 1; } }
 
 /* FAQ sualı klaviatura ilə işlənə bilir — fokus görünsün */
 .ba-faq-q:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; border-radius: 14px; }
