@@ -3,6 +3,21 @@ _design_src/
 *.dc.html
 Diva Academy saytı dizaynı.zip
 
+# Dependencies / build output (monorepo-wide)
+node_modules/
+dist/
+.next/
+build/
+coverage/
+
+# Runtime uploads
+apps/api/uploads/
+
+# Environment — never commit real secrets
+.env
+.env.*
+!.env.example
+
 # OS / editor
 .DS_Store
 Thumbs.db
