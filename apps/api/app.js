@@ -21,7 +21,14 @@ import {
 } from "#middlewares";
 
 // Routes
-import { AuthRouter, PostRouter, MediaRouter, AIRouter } from "#routes";
+import {
+  AuthRouter,
+  PostRouter,
+  MediaRouter,
+  AIRouter,
+  PublicRouter,
+  AdminRouter,
+} from "#routes";
 
 // ============ APP INSTANCE ============
 const app = express();
@@ -104,6 +111,10 @@ const setupRoutes = (app) => {
   app.use("/api/posts", PostRouter);
   app.use("/api/media", MediaRouter);
   app.use("/api/ai", AIRouter);
+
+  // British Academy: public read API + admin CRUD
+  app.use("/api", PublicRouter);
+  app.use("/api/admin", AdminRouter);
 
   // Health check
   app.get("/api/health", (req, res) => {
