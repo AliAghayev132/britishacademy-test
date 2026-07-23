@@ -50,6 +50,43 @@ node tools/build.mjs
 - **Domain dəyişmək:** faylın başındakı `const ORIGIN = 'https://britishacademy.az'` dəyərini dəyiş → generatoru işə sal. Bütün canonical / Open Graph / sitemap URL-ləri avtomatik yenilənir.
 - Generator mövcud 6 səhifəni də avtomatik patch edir (nav + SEO). Təkrar işə salmaq təhlükəsizdir (idempotent).
 
+## Kurs mətnləri (SEO məzmunu)
+
+Kurs səhifələrinin mətnləri **`tools/content.mjs`** faylındadır — slug üzrə obyekt:
+
+```js
+'ingilis-dili-kursu.html': {
+  h1, lead, info: [[ad, dəyər]], intro: [abzas],
+  sections: [{ h:2|3, t, p:[], ul:[], dl:[[ad,izah]], highlight, note }],
+  faq: [[sual, cavab]],
+  pricing: { only:[filial indeksi] | custom:[[ad,qiymət]], note }
+}
+```
+
+Mətni dəyiş → `node tools/build.mjs`. FAQ avtomatik akkordeon + **FAQPage schema** olur.
+`pricing.only` kursu tək filiala bağlayır (Alman dili), `pricing.custom` isə filial cədvəlini
+əvəz edir (Danışıq klubları).
+
+## Loqo və maskotlar
+
+`assets/` qovluğunda hazır, optimallaşdırılmış fayllar (hamısı < 500 KB):
+
+| Fayl | İstifadə |
+|------|----------|
+| `logo.png` | Header (bütün səhifələr) |
+| `logo-stack.png` | Footer və yüklənmə ekranı (ağ fon üzərində) |
+| `shield.png` | Müraciət pəncərəsi |
+| `badge11.png` | Footer-dəki dairəvi «11 il sizinlə» nişanı |
+| `favicon.png`, `favicon-180.png` | Brauzer ikonu / iOS |
+| `og-cover.png` | Sosial şəbəkə paylaşım şəkli (1200×630) |
+
+Mənbə fayllar (`hugelogo.png`, `midlogo.png`, `small.png`, `11.png`) 4K ölçüdədir və
+birbaşa saytda **istifadə olunmur** — `assets/` içindəkilər onlardan kəsilib kiçildilib.
+
+**Maskotlar:** `assets/mascot/` qovluğuna 5 PNG at — `flag`, `gift`, `wave`, `point`, `run`.
+Təfərrüat: [assets/mascot/README.md](assets/mascot/README.md). Fayl yoxdursa sayt pozulmur,
+şəkil sadəcə görünmür.
+
 ## SEO (statik olaraq quruldu)
 
 Hər səhifədə: unikal `<title>` + `meta description`, `canonical`, **Open Graph** + Twitter Card, **JSON-LD schema** (`EducationalOrganization` + `BreadcrumbList` + `Course`). Əlavə: `sitemap.xml`, `robots.txt`.

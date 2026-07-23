@@ -9,6 +9,7 @@
 import { writeFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { COURSE_CONTENT } from './content.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -160,6 +161,9 @@ const pick3 = (slug) => {
    Köməkçilər
    ============================================================ */
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/* JS söndürüləndə gizli qalan blokları açan fallback — tək mənbə */
+const NOJS = '<noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}.ba-faq-body{max-height:none!important;opacity:1!important}</style></noscript>';
 const url = (slug) => ORIGIN + '/' + (slug === 'index.html' ? '' : slug);
 
 function norm(s) {
@@ -186,6 +190,12 @@ function iconFor(s) {
   return '📘';
 }
 
+/* Maskot şəkilləri — assets/mascot/ qovluğuna atılır.
+   Fayl yoxdursa onerror ilə gizlənir, dizayn pozulmur.
+   Gözlənilən adlar: point · gift · run · flag · wave  (.png) */
+const mascot = (name, cls, alt) =>
+  `<img src="assets/mascot/${name}.png" alt="${esc(alt || '')}" loading="lazy" decoding="async"${alt ? '' : ' aria-hidden="true"'} onerror="this.remove()" class="ba-mascot ${cls}">`;
+
 const courseDesc = (l) => `British Academy-də ${l}: təcrübəli müəllimlər, müasir metodika və beynəlxalq standartlara uyğun proqram. Ətraflı məlumat, cədvəl və qeydiyyat üçün əlaqə saxla.`;
 const hubDesc = (l) => `${l} — British Academy. Bütün istiqamətlər, proqram detalları və onlayn qeydiyyat bir səhifədə.`;
 const countryDesc = (l) => `${l}-də təhsil — British Academy xaricdə təhsil dəstəyi: universitetlər, sənədlər, viza və qəbul prosesi haqqında məlumat.`;
@@ -196,7 +206,7 @@ const countryDesc = (l) => `${l}-də təhsil — British Academy xaricdə təhsi
 function jsonLd(p) {
   const org = {
     '@context': 'https://schema.org', '@type': 'EducationalOrganization',
-    name: ORG.name, url: ORIGIN + '/', logo: ORIGIN + '/og-cover.jpg',
+    name: ORG.name, url: ORIGIN + '/', logo: ORIGIN + '/assets/logo.png',
     description: 'English UK akkreditasiyalı dil mərkəzi və rəsmi TOEFL imtahan mərkəzi.',
     address: { '@type': 'PostalAddress', streetAddress: ORG.address, addressLocality: ORG.city, addressCountry: 'AZ' },
     telephone: ORG.phone, email: ORG.email,
@@ -220,6 +230,16 @@ function jsonLd(p) {
       provider: { '@type': 'EducationalOrganization', name: ORG.name, sameAs: ORIGIN + '/' },
     });
   }
+  const C = COURSE_CONTENT[p.slug];
+  if (C && C.faq && C.faq.length) {
+    blocks.push({
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: C.faq.map(([q, a]) => ({
+        '@type': 'Question', name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    });
+  }
   return blocks.map((b) => `<script type="application/ld+json">${JSON.stringify(b)}</script>`).join('\n');
 }
 
@@ -240,16 +260,19 @@ function head(p) {
 <meta property="og:title" content="${esc(p.title)}">
 <meta property="og:description" content="${esc(p.desc)}">
 <meta property="og:url" content="${u}">
-<meta property="og:image" content="${ORIGIN}/og-cover.jpg">
+<meta property="og:image" content="${ORIGIN}/assets/og-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(p.title)}">
 <meta name="twitter:description" content="${esc(p.desc)}">
-<meta name="twitter:image" content="${ORIGIN}/og-cover.jpg">
+<meta name="twitter:image" content="${ORIGIN}/assets/og-cover.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}</style></noscript>
+<link rel="icon" type="image/png" sizes="76x76" href="assets/favicon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+<meta name="theme-color" content="#00157A">
+${NOJS}
 ${jsonLd(p)}
 </head>`;
 }
@@ -333,9 +356,8 @@ function header() {
     </div>
     <header style="background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-bottom:1px solid #ECEDF2;">
       <div class="ba-headrow" style="max-width:1240px; margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
-        <a href="index.html" style="display:flex; align-items:center; gap:12px; flex:none;">
-          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:800; font-size:20px;">B</span>
-          <span style="font-family:'Poppins'; font-weight:700; font-size:20px; letter-spacing:-.01em; color:#14141C;">British Academy</span>
+        <a href="index.html" aria-label="British Academy — ana səhifə" style="display:flex; align-items:center; flex:none;">
+          <img src="assets/logo.png" alt="British Academy" width="553" height="110" style="height:46px; width:auto; display:block;">
         </a>
         ${navBlock()}
         <div style="display:flex; align-items:center; gap:10px; flex:none;">
@@ -362,7 +384,7 @@ function searchOverlay() {
         <input id="ba-search-input" placeholder="Kurs, proqram və ya ölkə axtar..." autocomplete="off" style="border:none; outline:none; font-size:19px; width:100%; background:transparent; color:#14141C; font-family:inherit;">
       </div>
       <div id="ba-search-results" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
-      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:34px; font-size:16px;">Nəticə tapılmadı</div>
+      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:28px; font-size:16px;">${mascot('wave', 'ba-mascot-empty')}<div style="margin-top:10px;">Nəticə tapılmadı</div></div>
     </div>
   </div>`;
 }
@@ -374,9 +396,9 @@ function applyModal() {
     <div style="width:100%; max-width:540px; background:#fff; border-radius:26px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,.45);">
       <div style="position:relative; background:var(--accent); padding:34px 34px 40px; overflow:hidden;">
         <button data-close-apply class="ba-modal-close" style="position:absolute; top:20px; right:20px; width:38px; height:38px; border:none; border-radius:50%; background:rgba(255,255,255,.22); color:#fff; cursor:pointer; font-size:15px; display:grid; place-items:center; transition:.2s; z-index:2;">✕</button>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="width:46px; height:46px; border-radius:13px; background:rgba(255,255,255,.2); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:700; font-size:23px;">B</span>
-          <span style="font-family:'Poppins'; font-weight:700; font-size:18px; color:#fff;">British Academy</span>
+        <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border-radius:12px; padding:9px 14px;">
+          <img src="assets/shield.png" alt="British Academy" width="237" height="237" loading="lazy" style="height:34px; width:auto; display:block;">
+          <span style="font-family:'Poppins'; font-weight:700; font-size:16px; color:#00157A;">British Academy</span>
         </div>
         <h3 style="font-family:'Poppins'; font-weight:700; font-size:30px; margin:22px 0 0; color:#fff; letter-spacing:-.015em;">Müraciət et</h3>
         <p style="font-size:15px; color:rgba(255,255,255,.92); margin:9px 0 0; line-height:1.55; max-width:370px;">Gələcəyinə bu gün başla — dil biliyini British Academy ilə növbəti səviyyəyə qaldır.</p>
@@ -405,12 +427,11 @@ function footer() {
   const col = (title, links) => `<div><div style="font-weight:700; font-size:13px; color:#fff; letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px;">${title}</div><div style="display:flex; flex-direction:column; gap:12px; font-size:14.5px;">${links.map(([l, h]) => `<a href="${h}" class="ba-flink">${esc(l)}</a>`).join('')}</div></div>`;
   return `  <footer style="position:relative; background:#0C0D1A; color:#C4C5D6; overflow:visible; margin-top:70px;">
     <div style="height:5px; background:var(--accent);"></div>
-    <div style="position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:5; width:104px; height:104px; border-radius:50%; background:var(--accent); border:7px solid #0C0D1A; display:grid; place-items:center; box-shadow:0 14px 36px rgba(0,0,0,.45);"><span style="font-family:'Poppins'; font-weight:700; font-size:44px; color:#fff; line-height:1;">B</span></div>
+    <div style="position:absolute; top:0; left:50%; transform:translate(-50%,-50%); z-index:5; width:104px; height:104px; border-radius:50%; background:#fff; border:7px solid #0C0D1A; display:grid; place-items:center; box-shadow:0 14px 36px rgba(0,0,0,.45); overflow:hidden;"><img src="assets/badge11.png" alt="11 il sizinlə — est. 2014" width="248" height="220" loading="lazy" style="width:74px; height:auto; display:block;"></div>
     <div class="footer-grid" style="position:relative; z-index:2; max-width:1240px; margin:0 auto; padding:64px 28px 20px; display:grid; grid-template-columns:1.7fr 1fr 1fr 1fr; gap:36px;">
       <div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="width:42px; height:42px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-family:'Poppins'; font-weight:800; font-size:19px;">B</span>
-          <span style="font-family:'Poppins'; font-weight:800; font-size:19px; color:#fff;">British Academy</span>
+        <div style="display:inline-block; background:#fff; border-radius:14px; padding:14px 18px;">
+          <img src="assets/logo-stack.png" alt="British Academy — Education For Your Future" width="377" height="200" loading="lazy" style="height:74px; width:auto; display:block;">
         </div>
         <p style="font-size:14.5px; line-height:1.65; margin:20px 0 0; max-width:330px; color:#9A9BB0;">English UK akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti. 2014-cü ildən keyfiyyətli dil təhsili və xaricdə təhsil.</p>
         <div style="font-size:14px; color:#8788A0; margin-top:20px; line-height:1.75;">${ORG.address}<br>(+994 12) 497 62 97 · (+994) 55 212 41 51<br>${ORG.email}</div>
@@ -447,14 +468,15 @@ function breadcrumb(p) {
     }).join(' ') + `</nav>`;
 }
 
-function hero(p, eyebrow, lead) {
+function hero(p, eyebrow, lead, h1) {
   return `  <section style="position:relative; background:var(--accent); overflow:hidden;">
     <div style="position:absolute; top:-90px; right:6%; width:340px; height:340px; border-radius:50%; background:rgba(255,255,255,.13); filter:blur(22px); pointer-events:none;"></div>
     <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.14) 1.3px, transparent 1.3px); background-size:24px 24px; -webkit-mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); pointer-events:none;"></div>
+    ${p.mascot ? mascot(p.mascot, 'ba-mascot-hero') : ''}
     <div style="position:relative; max-width:1200px; margin:0 auto; padding:30px 28px 60px;">
       ${breadcrumb(p)}
       <span style="display:inline-block; margin-top:22px; font-size:12.5px; color:rgba(255,255,255,.9); font-weight:700; letter-spacing:.14em; text-transform:uppercase;">${esc(eyebrow)}</span>
-      <h1 style="font-family:'Poppins'; font-weight:700; font-size:clamp(34px,5vw,54px); letter-spacing:-.025em; margin:14px 0 0; line-height:1.08; color:#fff; max-width:860px;">${esc(p.h1)}</h1>
+      <h1 style="font-family:'Poppins'; font-weight:700; font-size:clamp(30px,4.4vw,48px); letter-spacing:-.025em; margin:14px 0 0; line-height:1.12; color:#fff; max-width:900px;">${esc(h1 || p.h1)}</h1>
       <p style="font-size:18px; color:rgba(255,255,255,.92); margin:18px 0 0; max-width:660px; line-height:1.6;">${esc(lead)}</p>
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;">
         <button data-open-apply class="ba-btn-primary" style="background:#fff; color:var(--accent); border:none; font-weight:700; font-size:15px; padding:14px 26px; border-radius:99px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciət et</button>
@@ -468,6 +490,7 @@ function ctaBand() {
   return `  <section style="max-width:1200px; margin:64px auto 0; padding:0 28px;">
     <div style="position:relative; overflow:hidden; background:#0C0D1A; border-radius:28px; padding:52px 40px; text-align:center;">
       <div style="position:absolute; top:-60px; left:-30px; width:220px; height:220px; border-radius:50%; background:var(--accent-wm); filter:blur(10px);"></div>
+      ${mascot('gift', 'ba-mascot-cta')}
       <div style="position:relative;">
         <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(26px,3.4vw,36px); color:#fff; margin:0; letter-spacing:-.02em;">Hazırsan? Elə bu gün başla.</h2>
         <p style="font-size:16px; color:#B9BAD0; margin:14px auto 26px; max-width:520px; line-height:1.6;">Ödənişsiz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.</p>
@@ -524,21 +547,74 @@ function hubPage(p) {
   ].join('\n');
 }
 
-/* ---- Filiallar üzrə qiymətlər (yalnız kurs səhifələri) ---- */
+/* ---- Qiymətlər (yalnız kurs səhifələri) ---- */
 function priceSection(p) {
   if (p.kind !== 'course') return '';
-  const prices = branchPrices(p.slug);
-  const rows = BRANCHES.map((b, i) =>
-    `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px;${i < BRANCHES.length - 1 ? ' border-bottom:1px solid #ECEDF2;' : ''}">
-        <span style="font-size:15px; font-weight:600; color:#33333D;">${esc(b.name)}</span>
-        <span style="font-size:15px; font-weight:800; color:var(--accent); white-space:nowrap;">${esc(prices[i])}</span>
+  const pr = (COURSE_CONTENT[p.slug] || {}).pricing || {};
+  let list;
+  if (pr.custom) {
+    list = pr.custom;
+  } else {
+    const prices = branchPrices(p.slug);
+    list = pr.only
+      ? pr.only.map((i) => [BRANCHES[i].name, prices[i]])
+      : BRANCHES.map((b, i) => [b.name, prices[i]]);
+  }
+  const rows = list.map(([k, v], i) =>
+    `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px;${i < list.length - 1 ? ' border-bottom:1px solid #ECEDF2;' : ''}">
+        <span style="font-size:15px; font-weight:600; color:#33333D;">${esc(k)}</span>
+        <span style="font-size:15px; font-weight:800; color:var(--accent); white-space:nowrap;">${esc(v)}</span>
       </div>`).join('\n      ');
+  const title = pr.custom ? 'Qiymətlər' : 'Filiallar üzrə qiymətlər';
+  const extra = pr.note ? `<p style="font-size:14.5px; color:#33333D; margin:14px 0 0; padding:13px 16px; background:var(--accent-soft); border-radius:12px; font-weight:600;">${esc(pr.note)}</p>` : '';
   return `  <section id="qiymetler" style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">Filiallar üzrə qiymətlər</h2>
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">${title}</h2>
     <div style="border:1px solid #ECEDF2; border-radius:20px; background:#fff; overflow:hidden; max-width:720px;">
       ${rows}
     </div>
+    ${extra}
     <p style="font-size:13.5px; color:#9A9AA6; margin:14px 0 0;">Qiymətlər qrupun ölçüsünə və formata görə dəyişə bilər. Bütün <a href="filiallar.html" style="color:var(--accent); font-weight:700;">filiallara bax</a> və ya <a href="elaqe.html" style="color:var(--accent); font-weight:700;">əlaqə saxla</a>.</p>
+  </section>
+`;
+}
+
+/* ---- Müştəri SEO məzmunu: bölmələr ---- */
+function contentSections(p) {
+  const C = COURSE_CONTENT[p.slug];
+  if (!C || !C.sections) return '';
+  return C.sections.map((s) => {
+    const tag = s.h === 3 ? 'h3' : 'h2';
+    const size = s.h === 3 ? 'clamp(19px,2.3vw,24px)' : 'clamp(23px,2.9vw,31px)';
+    const out = [`<${tag} style="font-family:'Poppins'; font-weight:700; font-size:${size}; color:#14141C; letter-spacing:-.02em; margin:0 0 14px;">${esc(s.t)}</${tag}>`];
+    (s.p || []).forEach((x) => out.push(`<p style="font-size:16.5px; line-height:1.85; color:#3c3c47; margin:0 0 16px;">${esc(x)}</p>`));
+    if (s.ul) out.push(`<ul role="list" style="margin:0 0 18px; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;">`
+      + s.ul.map((x) => `<li style="display:flex; gap:11px; font-size:16px; line-height:1.65; color:#3c3c47;"><span style="color:var(--accent); font-weight:800; flex:none;">✓</span><span>${esc(x)}</span></li>`).join('')
+      + `</ul>`);
+    if (s.dl) out.push(`<div style="display:flex; flex-direction:column; gap:11px; margin:0 0 18px;">`
+      + s.dl.map(([k, v]) => `<div style="border-left:3px solid var(--accent); background:#FAFBFF; border-radius:0 12px 12px 0; padding:13px 16px;"><strong style="font-weight:700; color:#16161C;">${esc(k)}:</strong> <span style="color:#4a4a55; font-size:15.5px; line-height:1.7;">${esc(v)}</span></div>`).join('')
+      + `</div>`);
+    if (s.highlight) out.push(`<div style="display:flex; gap:12px; align-items:flex-start; background:var(--accent-soft); border:1px solid var(--accent); border-radius:14px; padding:16px 18px; margin:0 0 18px;"><span style="font-size:19px; flex:none; line-height:1.3;">★</span><p style="margin:0; font-size:15.5px; line-height:1.7; color:#26263a; font-weight:600;">${esc(s.highlight)}</p></div>`);
+    if (s.note) out.push(`<p style="font-size:15px; line-height:1.7; color:#55555f; margin:0 0 16px; padding:13px 16px; background:#F7F8FC; border-radius:12px;">${esc(s.note)}</p>`);
+    return `  <section style="max-width:900px; margin:44px auto 0; padding:0 28px;">\n    ${out.join('\n    ')}\n  </section>`;
+  }).join('\n');
+}
+
+/* ---- Müştəri SEO məzmunu: FAQ akkordeonu ---- */
+function faqSection(p) {
+  const C = COURSE_CONTENT[p.slug];
+  if (!C || !C.faq || !C.faq.length) return '';
+  const items = C.faq.map(([q, a]) => `<div class="ba-faq" style="border:1px solid #ECEDF2; border-radius:16px; background:#fff; overflow:hidden; transition:.2s;">
+        <div class="ba-faq-q" style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:19px 22px; cursor:pointer;">
+          <span style="font-family:'Poppins'; font-weight:600; font-size:16.5px; color:#1C1C26;">${esc(q)}</span>
+          <span class="ba-faq-sign" style="width:30px; height:30px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:20px; font-weight:600;">+</span>
+        </div>
+        <div class="ba-faq-body" style="overflow:hidden; transition:max-height .4s ease, opacity .35s ease; max-height:0; opacity:0;"><div style="padding:0 22px 20px; font-size:15.5px; color:#5A5A66; line-height:1.7;">${esc(a)}</div></div>
+      </div>`).join('\n      ');
+  return `  <section style="max-width:900px; margin:56px auto 0; padding:0 28px;">
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 24px;">Tez-tez verilən suallar</h2>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      ${items}
+    </div>
   </section>
 `;
 }
@@ -567,25 +643,28 @@ function teacherSection(p) {
 /* ---- Kurs / ölkə (leaf) səhifə ---- */
 function leafPage(p) {
   const isCountry = p.kind === 'country';
+  const C = COURSE_CONTENT[p.slug] || null;
   const aboutTitle = isCountry ? 'Ölkə haqqında' : 'Kurs haqqında';
-  const info = isCountry
+  const info = (C && C.info) ? C.info : (isCountry
     ? [['Təhsil dili', '—'], ['Təhsil haqqı', '—'], ['Viza dəstəyi', 'Var'], ['Müddət', '—']]
-    : [['Müddət', '—'], ['Səviyyə', 'A1 – C1'], ['Format', 'Qrup / Fərdi'], ['Cədvəl', 'Həftədə 2–3 dəfə']];
+    : [['Müddət', '—'], ['Səviyyə', 'A1 – C1'], ['Format', 'Qrup / Fərdi'], ['Cədvəl', 'Həftədə 2–3 dəfə']]);
   const feats = isCountry
     ? [['🎓', 'Universitet seçimi', 'Profilinə uyğun universitet və proqram seçimində dəstək.'], ['📄', 'Sənəd hazırlığı', 'Müraciət sənədləri, motivasiya məktubu və tərcümələr.'], ['🛂', 'Viza prosesi', 'Viza sənədləri və müsahibəyə hazırlıq.'], ['🏠', 'Yerləşmə', 'Yaşayış və adaptasiya məsələlərində köməklik.']]
-    : [['🎯', 'Məqsədyönlü proqram', 'Sənin səviyyənə və hədəfinə uyğun fərdi tədris planı.'], ['👩‍🏫', 'Təcrübəli müəllimlər', 'Beynəlxalq sertifikatlı, təcrübəli müəllim heyəti.'], ['🗣️', 'Danışıq praktikası', 'Hər dərsdə canlı danışıq və interaktiv tapşırıqlar.'], ['📜', 'Sertifikat', 'Kurs sonunda British Academy sertifikatı.']];
+    : [['🎯', 'Məqsədyönlü proqram', 'Sənin səviyyənə və hədəfinə uyğun fərdi tədris planı.'], ['👩‍🏫', 'Təcrübəli müəllimlər', 'Beynəlxalq sertifikatlı, təcrübəli müəllim heyəti.'], ['🗣️', 'Danışıq praktikası', 'Hər dərsdə canlı danışıq və interaktiv tapşırıqlar.'], ['📜', 'Sertifikat', 'İmtahanda uğur qazanan tələbələrə British Academy sertifikatı.']];
   const rel = (p.siblings || []).filter((s) => s.slug !== p.slug).slice(0, 6);
 
   return [
     head(p), '\n<body>\n<div style="min-height:100vh; overflow-x:hidden; background:#fff;">\n',
     header(), searchOverlay(), applyModal(),
-    hero(p, p.parent ? p.parent.label : 'British Academy', p.lead),
+    hero(p, p.parent ? p.parent.label : 'British Academy', (C && C.lead) || p.lead, C && C.h1),
     `  <section style="max-width:1200px; margin:60px auto 0; padding:0 28px;">
     <div class="split" style="display:grid; grid-template-columns:1.6fr 1fr; gap:36px; align-items:start;">
       <div>
         <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 16px;">${aboutTitle}</h2>
-        <p style="font-size:17px; line-height:1.8; color:#33333D; margin:0 0 18px;">${esc(p.lead)}</p>
-        <p style="font-size:16.5px; line-height:1.8; color:#4a4a55; margin:0;">Bu bölmənin təfərrüatlı məzmunu tezliklə əlavə olunacaq. Proqram, qiymət və cədvəl barədə ətraflı məlumat üçün bizimlə əlaqə saxla və ya müraciət et.</p>
+        ${C && C.intro
+          ? C.intro.map((x) => `<p style="font-size:16.5px; line-height:1.85; color:#3c3c47; margin:0 0 16px;">${esc(x)}</p>`).join('\n        ')
+          : `<p style="font-size:17px; line-height:1.8; color:#33333D; margin:0 0 18px;">${esc(p.lead)}</p>
+        <p style="font-size:16.5px; line-height:1.8; color:#4a4a55; margin:0;">Bu bölmənin təfərrüatlı məzmunu tezliklə əlavə olunacaq. Proqram, qiymət və cədvəl barədə ətraflı məlumat üçün bizimlə əlaqə saxla və ya müraciət et.</p>`}
       </div>
       <aside style="border:1px solid #ECEDF2; border-radius:20px; padding:26px; background:#FAFBFF;">
         <div style="font-weight:700; font-size:13px; color:#9A9AA6; letter-spacing:.08em; text-transform:uppercase; margin-bottom:16px;">Qısa məlumat</div>
@@ -601,6 +680,8 @@ ${priceSection(p)}  <section style="max-width:1200px; margin:56px auto 0; paddin
     </div>
   </section>
 ${teacherSection(p)}`,
+    contentSections(p),
+    faqSection(p),
     rel.length ? `  <section style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
     <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 26px;">${isCountry ? 'Digər ölkələr' : 'Digər istiqamətlər'}</h2>
     ${boxGrid(rel.map((r) => ({ label: r.label, slug: r.slug })))}
@@ -679,7 +760,7 @@ function contactPage(p) {
     </div>
     <div class="split" style="display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:32px; align-items:stretch;">
       <div class="img-slot" style="min-height:340px; border-radius:22px;"><span>Xəritə buraya əlavə olunacaq<br>(Google Maps embed)</span></div>
-      <form id="ba-apply-form" style="border:1px solid #ECEDF2; border-radius:22px; padding:30px; background:#FAFBFF; display:flex; flex-direction:column; gap:14px;">
+      <form id="ba-contact-form" style="border:1px solid #ECEDF2; border-radius:22px; padding:30px; background:#FAFBFF; display:flex; flex-direction:column; gap:14px;">
         <h2 style="font-family:'Poppins'; font-weight:700; font-size:24px; color:#14141C; margin:0 0 6px;">Bizə yaz</h2>
         <input class="ba-field" required placeholder="Ad Soyad" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:14px 16px; font-size:15px; font-family:inherit; outline:none; color:#14141C;">
         <input class="ba-field" required placeholder="Telefon" style="border:1.5px solid #E4E6EF; border-radius:13px; padding:14px 16px; font-size:15px; font-family:inherit; outline:none; color:#14141C;">
@@ -699,6 +780,9 @@ function contactPage(p) {
    ============================================================ */
 const pages = [];
 function push(p) {
+  // müştəri mətni varsa, meta description onu əks etdirsin (boilerplate yox)
+  const C = COURSE_CONTENT[p.slug];
+  if (C && C.lead) p.desc = `${p.h1} — ${C.lead}`.slice(0, 300);
   p.title = p.title || `${p.h1} — British Academy`;
   pages.push(p);
 }
@@ -706,7 +790,7 @@ function push(p) {
 for (const top of MENU) {
   if (top.exists) continue; // haqqimizda.html / muellimler.html mövcuddur
   if (top.branches) {
-    push({ slug: top.slug, kind: 'branches', h1: 'Filiallar', desc: 'British Academy filialları — ünvanlar, telefon, iş saatları və WhatsApp. Özünə ən yaxın filialı seç.', lead: 'British Academy-nin Bakıdakı filialları — özünə ən yaxın filialı seç və birbaşa əlaqə saxla.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
+    push({ slug: top.slug, kind: 'branches', mascot: 'point', h1: 'Filiallar', desc: 'British Academy filialları — ünvanlar, telefon, iş saatları və WhatsApp. Özünə ən yaxın filialı seç.', lead: 'British Academy-nin Bakıdakı filialları — özünə ən yaxın filialı seç və birbaşa əlaqə saxla.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
     continue;
   }
   if (top.mega) {
@@ -719,7 +803,8 @@ for (const top of MENU) {
     }
   } else if (top.dd) {
     const isCountryHub = top.slug === 'xaricde-tehsil.html';
-    push({ slug: top.slug, kind: 'hub', h1: top.label, desc: hubDesc(top.label), lead: `${top.label} — bütün istiqamətlər bir səhifədə.`, parent: { label: 'Ana səhifə', slug: 'index.html' }, boxes: top.dd.map((it) => ({ label: it.label, slug: it.slug })) });
+    const hubMascot = isCountryHub ? 'flag' : (top.slug === 'usaq-proqramlari.html' ? 'wave' : null);
+    push({ slug: top.slug, kind: 'hub', mascot: hubMascot, h1: top.label, desc: hubDesc(top.label), lead: `${top.label} — bütün istiqamətlər bir səhifədə.`, parent: { label: 'Ana səhifə', slug: 'index.html' }, boxes: top.dd.map((it) => ({ label: it.label, slug: it.slug })) });
     for (const it of top.dd) {
       push({ slug: it.slug, kind: isCountryHub ? 'country' : 'course', h1: it.label, desc: isCountryHub ? countryDesc(it.label) : courseDesc(it.label), lead: isCountryHub ? `${it.label}-də təhsil almaq üçün British Academy dəstəyi.` : `${it.label} — British Academy proqramı.`, parent: { label: top.label, slug: top.slug }, siblings: top.dd });
     }
@@ -750,7 +835,7 @@ for (const p of pages) {
    ============================================================ */
 const allSlugs = ['index.html', 'haqqimizda.html', 'muellimler.html', 'muellim.html', 'bloq.html', 'blogyazi.html', ...pages.map((p) => p.slug)];
 const uniqueSlugs = [...new Set(allSlugs)];
-const today = '2026-07-07';
+const today = new Date().toISOString().slice(0, 10);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${uniqueSlugs.map((s) => {
@@ -789,7 +874,7 @@ function seoBlock(file, slug) {
   const u = url(slug);
   const org = {
     '@context': 'https://schema.org', '@type': 'EducationalOrganization', name: ORG.name, url: ORIGIN + '/',
-    logo: ORIGIN + '/og-cover.jpg', address: { '@type': 'PostalAddress', streetAddress: ORG.address, addressLocality: ORG.city, addressCountry: 'AZ' },
+    logo: ORIGIN + '/assets/logo.png', address: { '@type': 'PostalAddress', streetAddress: ORG.address, addressLocality: ORG.city, addressCountry: 'AZ' },
     telephone: ORG.phone, email: ORG.email, sameAs: [ORG.instagram, ORG.facebook, ORG.youtube],
   };
   return `<link rel="canonical" href="${u}">
@@ -800,11 +885,11 @@ function seoBlock(file, slug) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${u}">
-<meta property="og:image" content="${ORIGIN}/og-cover.jpg">
+<meta property="og:image" content="${ORIGIN}/assets/og-cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
-<meta name="twitter:image" content="${ORIGIN}/og-cover.jpg">
+<meta name="twitter:image" content="${ORIGIN}/assets/og-cover.png">
 <script type="application/ld+json">${JSON.stringify(org)}</script>`;
 }
 
@@ -817,9 +902,25 @@ for (const [file, cfg] of Object.entries(EXISTING)) {
     src = src.replace('</head>', seoBlock(file, cfg.canonicalSlug) + '\n</head>');
   }
 
-  // 1b) no-JS fallback: hide loader, show .ba-reveal sections
-  if (!src.includes('<noscript>')) {
-    src = src.replace('</head>', '<noscript><style>#ba-loader{display:none!important}.ba-reveal{opacity:1!important;transform:none!important}</style></noscript>\n</head>');
+  // 1b) no-JS fallback (idempotent: köhnə bloku yeniləyir, yoxdursa əlavə edir)
+  if (/<noscript>[\s\S]*?<\/noscript>/.test(src)) {
+    src = src.replace(/<noscript>[\s\S]*?<\/noscript>/, NOJS);
+  } else {
+    src = src.replace('</head>', NOJS + '\n</head>');
+  }
+
+  // 1c) Logo: swap the "B" letter placeholders for the real logo (header + footer)
+  if (!src.includes('assets/logo.png')) {
+    src = src.replace(
+      /<a href="index\.html"[^>]*>\s*<span style="width:42px;[^>]*>B<\/span>[\s\S]*?<\/a>/,
+      `<a href="index.html" aria-label="British Academy — ana səhifə" style="display:flex; align-items:center; flex:none;"><img src="assets/logo.png" alt="British Academy" width="553" height="110" style="height:46px; width:auto; display:block;"></a>`
+    );
+  }
+  if (!src.includes('assets/logo-stack.png')) {
+    src = src.replace(
+      /<a href="index\.html"[^>]*>\s*<span style="width:40px;[^>]*>B<\/span>[\s\S]*?<\/a>/,
+      `<a href="index.html" aria-label="British Academy" style="display:inline-block; background:#fff; border-radius:12px; padding:10px 14px;"><img src="assets/logo-stack.png" alt="British Academy — Education For Your Future" width="377" height="200" loading="lazy" style="height:56px; width:auto; display:block;"></a>`
+    );
   }
 
   // 2) Nav: replace the mega-menu block (idempotent via markers), else the original <nav>

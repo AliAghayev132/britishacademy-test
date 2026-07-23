@@ -335,8 +335,11 @@
     function setOpen(item, open) {
       var body = item.querySelector('.ba-faq-body');
       var sign = item.querySelector('.ba-faq-sign');
+      var head = item.querySelector('.ba-faq-q');
+      if (head) head.setAttribute('aria-expanded', open ? 'true' : 'false');
       if (open) {
-        body.style.maxHeight = '260px';
+        // measure so long answers are never clipped
+        body.style.maxHeight = (body.scrollHeight + 20) + 'px';
         body.style.opacity = '1';
         if (sign) sign.textContent = '–';
       } else {
@@ -346,12 +349,33 @@
       }
     }
     items.forEach(function (item, idx) {
-      setOpen(item, idx === 0);
       var head = item.querySelector('.ba-faq-q');
-      head.addEventListener('click', function () {
-        var isOpen = item.querySelector('.ba-faq-body').style.opacity === '1';
+      var body = item.querySelector('.ba-faq-body');
+      if (!head || !body) return;
+      // make the question row operable by keyboard + announce its state
+      if (!body.id) body.id = 'ba-faq-body-' + idx;
+      head.setAttribute('role', 'button');
+      head.setAttribute('tabindex', '0');
+      head.setAttribute('aria-controls', body.id);
+      setOpen(item, idx === 0);
+      function toggle() {
+        var isOpen = body.style.opacity === '1';
         items.forEach(function (o) { setOpen(o, false); });
         if (!isOpen) setOpen(item, true);
+      }
+      head.addEventListener('click', toggle);
+      head.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggle(); }
+      });
+    });
+    // re-measure the open panel when the viewport reflows
+    window.addEventListener('resize', function () {
+      items.forEach(function (item) {
+        var body = item.querySelector('.ba-faq-body');
+        if (body && body.style.opacity === '1') {
+          body.style.maxHeight = 'none';
+          body.style.maxHeight = (body.scrollHeight + 20) + 'px';
+        }
       });
     });
   }
