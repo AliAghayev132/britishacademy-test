@@ -13,7 +13,7 @@ import { NextResponse } from 'next/server'
  * NOTE: This is a lightweight UX guard, not a security boundary. The real
  * authorization always happens on the API server, which validates the JWT.
  */
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('token')?.value
 

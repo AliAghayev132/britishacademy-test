@@ -41,11 +41,11 @@ pageSchema.virtual("url").get(function () {
   return `/${this.slug}`;
 });
 
-pageSchema.pre("save", async function (next) {
+pageSchema.pre("save", async function () {
   if (!this.slug && this.title) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
-  next();
+
 });
 
 pageSchema.statics.findPublic = function (filter = {}) {

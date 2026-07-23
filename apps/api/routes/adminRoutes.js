@@ -7,7 +7,10 @@ const AdminRouter = Router();
 // Every admin route requires an authenticated admin/editor.
 AdminRouter.use(authenticate, requireRole(adminRoles));
 
-// Lead-specific action (before the generic :resource routes).
+// Fixed routes MUST be registered before the generic /:resource matcher.
+AdminRouter.get("/stats", adminController.stats);
+AdminRouter.get("/settings", adminController.getSettings);
+AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
 
 // Generic CRUD over the resource registry.

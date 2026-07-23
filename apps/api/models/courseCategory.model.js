@@ -61,11 +61,11 @@ courseCategorySchema.virtual("courses", {
   foreignField: "category",
 });
 
-courseCategorySchema.pre("save", async function (next) {
+courseCategorySchema.pre("save", async function () {
   if (!this.slug && this.name) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
-  next();
+
 });
 
 courseCategorySchema.statics.findPublic = function (filter = {}) {

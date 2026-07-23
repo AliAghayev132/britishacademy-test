@@ -10,22 +10,81 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
+import { apiGet } from "@/lib/api";
+import { buildMetadata } from "@/lib/seo";
+
+/** The /kurslar/<slug> namespace serves BOTH courses and category hubs. */
+async function findCategory(slug) {
+  const catData = await apiGet("/categories");
+  for (const top of catData?.categories || []) {
+    if (top.slug === slug) return top;
+    for (const child of top.children || []) if (child.slug === slug) return child;
+  }
+  return null;
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const { data } = await apiGetStatus(`/courses/${slug}`);
   const course = data?.course;
-  if (!course) return {};
-  return metaFromApi(course.seo, {
-    title: course.h1 || course.title,
-    description: course.lead,
-    path: `/kurslar/${slug}`,
-  });
+  if (course) {
+    return metaFromApi(course.seo, {
+      title: course.h1 || course.title,
+      description: course.lead,
+      path: `/kurslar/${slug}`,
+    });
+  }
+  const cat = await findCategory(slug);
+  if (cat) {
+    return buildMetadata({
+      title: cat.name,
+      description: cat.lead || `${cat.name} — British Academy proqramları və qeydiyyat.`,
+      path: `/kurslar/${slug}`,
+    });
+  }
+  return {};
+}
+
+/** Category hub: boxes of the category's courses. */
+async function CategoryHub({ cat }) {
+  const courseData = await apiGet(`/courses?category=${cat.slug}`);
+  const courses = courseData?.courses || [];
+  return (
+    <>
+      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
+        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "30px 28px 60px" }}>
+          <nav aria-label="Breadcrumb" style={{ display: "flex", gap: 8, fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
+            <Link href="/" style={{ color: "rgba(255,255,255,.8)" }}>Ana səhifə</Link>
+            <span style={{ opacity: 0.5 }}>/</span>
+            <Link href="/kurslar" style={{ color: "rgba(255,255,255,.8)" }}>Kurslar</Link>
+            <span style={{ opacity: 0.5 }}>/</span>
+            <span style={{ color: "#fff", fontWeight: 600 }}>{cat.name}</span>
+          </nav>
+          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(30px,4.4vw,48px)", letterSpacing: "-.025em", margin: "18px 0 0", color: "#fff" }}>{cat.name}</h1>
+          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
+            {cat.lead || `${cat.name} üzrə bütün proqramlar və qeydiyyat.`}
+          </p>
+        </div>
+      </section>
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
+        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+          {courses.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
+        </div>
+        {!courses.length && <p style={{ color: "#63636F" }}>Bu kateqoriyada hələ kurs yoxdur.</p>}
+      </section>
+    </>
+  );
 }
 
 export default async function CoursePage({ params }) {
   const { slug } = await params;
   const { data, status } = await apiGetStatus(`/courses/${slug}`);
-  if (status === 404 || !data?.course) notFound();
+
+  if (status === 404 || !data?.course) {
+    const cat = await findCategory(slug);
+    if (cat) return <CategoryHub cat={cat} />;
+    notFound();
+  }
 
   const { course, teachersByBranch = [], related = [] } = data;
 

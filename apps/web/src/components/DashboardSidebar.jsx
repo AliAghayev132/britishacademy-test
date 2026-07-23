@@ -12,16 +12,35 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
+  Inbox,
+  GraduationCap,
+  Users,
+  Building2,
+  CalendarClock,
+  MessageSquareQuote,
+  Globe2,
+  Boxes,
+  Settings,
 } from 'lucide-react'
 
 import { logout } from '@/store/slices/authSlice'
 import { useLogoutMutation } from '@/store/api'
 
-// Generic dashboard navigation. Add resources here as the app grows.
+// British Academy admin navigation. Resource pages use the generic browser
+// at /dashboard/resurslar/<resource> (see resourceRegistry on the server).
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-  { name: 'Posts', href: '/dashboard/posts', icon: FileText },
-  { name: 'Profile', href: '/dashboard/profile', icon: User },
+  { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true },
+  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox },
+  { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap },
+  { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users },
+  { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2 },
+  { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock },
+  { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote },
+  { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2 },
+  { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText },
+  { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true },
+  { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings },
+  { name: 'Profil', href: '/dashboard/profile', icon: User },
 ]
 
 /**

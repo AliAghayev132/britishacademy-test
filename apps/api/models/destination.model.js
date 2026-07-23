@@ -59,7 +59,7 @@ destinationSchema.virtual("url").get(function () {
   return `/xaricde-tehsil/${this.slug}`;
 });
 
-destinationSchema.pre("save", async function (next) {
+destinationSchema.pre("save", async function () {
   if (!this.slug && this.country) {
     this.slug = await SlugService.unique(
       this.constructor,
@@ -67,7 +67,7 @@ destinationSchema.pre("save", async function (next) {
       this._id,
     );
   }
-  next();
+
 });
 
 destinationSchema.statics.findPublic = function (filter = {}) {

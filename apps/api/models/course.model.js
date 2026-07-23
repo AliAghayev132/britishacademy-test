@@ -114,11 +114,11 @@ courseSchema.virtual("priceFrom").get(function () {
   return values.length ? Math.min(...values) : null;
 });
 
-courseSchema.pre("save", async function (next) {
+courseSchema.pre("save", async function () {
   if (!this.slug && this.title) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
-  next();
+
 });
 
 courseSchema.statics.findPublic = function (filter = {}) {

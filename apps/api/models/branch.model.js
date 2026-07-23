@@ -66,11 +66,11 @@ branchSchema.virtual("whatsappUrl").get(function () {
   return this.whatsapp ? `https://wa.me/${this.whatsapp}` : null;
 });
 
-branchSchema.pre("save", async function (next) {
+branchSchema.pre("save", async function () {
   if (!this.slug && this.name) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
-  next();
+
 });
 
 branchSchema.statics.findPublic = function (filter = {}) {

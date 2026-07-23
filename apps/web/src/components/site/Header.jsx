@@ -103,31 +103,29 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
       {/* mobile drawer */}
       <div className={`ba-mnav${mobile ? " open" : ""}`} onClick={() => setMobile(false)}>
         <div className="ba-mnav-inner" onClick={(e) => e.stopPropagation()}>
-          {nav.map((item) => (
-            <details key={item.label} className={item.variant ? "ba-macc" : undefined}>
-              {item.variant ? (
-                <>
-                  <summary>{item.label}</summary>
-                  <div className="ba-macc-body">
-                    <Link className="ba-msub ba-msub--all" href={item.href} onClick={() => setMobile(false)}>{item.label} — hamısı</Link>
-                    {item.variant === "mega" &&
-                      services.flatMap((g) => [
-                        <Link key={g.category._id} className="ba-msub ba-msub--head" href={`/kurslar/${g.category.slug}`} onClick={() => setMobile(false)}>{g.category.name}</Link>,
-                        ...g.courses.map((c) => (
-                          <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={() => setMobile(false)}>{c.title}</Link>
-                        )),
-                      ])}
-                    {item.variant === "destinations" &&
-                      destinations.map((d) => (
-                        <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={() => setMobile(false)}>{d.country}</Link>
-                      ))}
-                  </div>
-                </>
-              ) : (
-                <Link className="ba-mrow" href={item.href} onClick={() => setMobile(false)}>{item.label}</Link>
-              )}
-            </details>
-          ))}
+          {nav.map((item) =>
+            item.variant ? (
+              <details key={item.label} className="ba-macc">
+                <summary>{item.label}</summary>
+                <div className="ba-macc-body">
+                  <Link className="ba-msub ba-msub--all" href={item.href} onClick={() => setMobile(false)}>{item.label} — hamısı</Link>
+                  {item.variant === "mega" &&
+                    services.flatMap((g) => [
+                      <Link key={g.category._id} className="ba-msub ba-msub--head" href={`/kurslar/${g.category.slug}`} onClick={() => setMobile(false)}>{g.category.name}</Link>,
+                      ...g.courses.map((c) => (
+                        <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={() => setMobile(false)}>{c.title}</Link>
+                      )),
+                    ])}
+                  {item.variant === "destinations" &&
+                    destinations.map((d) => (
+                      <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={() => setMobile(false)}>{d.country}</Link>
+                    ))}
+                </div>
+              </details>
+            ) : (
+              <Link key={item.label} className="ba-mrow" href={item.href} onClick={() => setMobile(false)}>{item.label}</Link>
+            ),
+          )}
         </div>
       </div>
     </div>

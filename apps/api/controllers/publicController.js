@@ -155,7 +155,10 @@ const listTeachers = asyncHandler(async (req, res) => {
     const b = await Branch.findOne({ slug: req.query.branch });
     if (b) filter.branches = b._id;
   }
-  const teachers = await Teacher.findPublic(filter);
+  const teachers = await Teacher.findPublic(filter).populate(
+    "branches",
+    "name slug",
+  );
   res.json({ success: true, data: { teachers } });
 });
 

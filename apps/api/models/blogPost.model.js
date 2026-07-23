@@ -42,14 +42,14 @@ blogPostSchema.virtual("url").get(function () {
   return `/bloq/${this.slug}`;
 });
 
-blogPostSchema.pre("save", async function (next) {
+blogPostSchema.pre("save", async function () {
   if (!this.slug && this.title) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
   if (this.status === "published" && !this.publishedAt) {
     this.publishedAt = new Date();
   }
-  next();
+
 });
 
 blogPostSchema.statics.findPublished = function (filter = {}) {

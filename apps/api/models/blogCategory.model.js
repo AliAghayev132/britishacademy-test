@@ -14,11 +14,11 @@ const blogCategorySchema = new Schema(
   { timestamps: true, versionKey: false, toJSON: { virtuals: true } },
 );
 
-blogCategorySchema.pre("save", async function (next) {
+blogCategorySchema.pre("save", async function () {
   if (!this.slug && this.name) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
-  next();
+
 });
 
 blogCategorySchema.statics.findPublic = function (filter = {}) {

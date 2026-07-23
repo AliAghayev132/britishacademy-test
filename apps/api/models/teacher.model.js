@@ -71,7 +71,7 @@ teacherSchema.virtual("initial").get(function () {
   return (this.fullName || "?").trim().charAt(0).toUpperCase();
 });
 
-teacherSchema.pre("save", async function (next) {
+teacherSchema.pre("save", async function () {
   if (!this.slug && this.fullName) {
     this.slug = await SlugService.unique(
       this.constructor,
@@ -79,7 +79,7 @@ teacherSchema.pre("save", async function (next) {
       this._id,
     );
   }
-  next();
+
 });
 
 teacherSchema.statics.findPublic = function (filter = {}) {

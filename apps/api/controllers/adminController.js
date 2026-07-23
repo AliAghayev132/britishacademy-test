@@ -1,5 +1,6 @@
 // Generic admin CRUD over the resource registry.
 import { asyncHandler } from "#utils";
+import { SiteSetting, Lead } from "#models";
 import { RESOURCES } from "./resourceRegistry.js";
 
 /** Resolve `:resource` from the URL to its registry entry (or 404). */
@@ -118,4 +119,43 @@ const reorder = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Sıralama yeniləndi" });
 });
 
-export { list, getOne, create, update, remove, reorder };
+/** GET /api/admin/settings — the singleton SiteSetting document. */
+const getSettings = asyncHandler(async (_req, res) => {
+  const settings = await SiteSetting.get();
+  res.json({ success: true, data: { settings } });
+});
+
+/** PUT /api/admin/settings — partial update of the singleton. */
+const updateSettings = asyncHandler(async (req, res) => {
+  const settings = await SiteSetting.get();
+  const body = { ...req.body };
+  delete body._id;
+  delete body.key;
+  delete body.createdAt;
+  delete body.updatedAt;
+  Object.assign(settings, body);
+  await settings.save();
+  res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings } });
+});
+
+/** GET /api/admin/stats — dashboard overview: per-resource counts + new leads. */
+const stats = asyncHandler(async (_req, res) => {
+  const counts = {};
+  await Promise.all(
+    Object.entries(RESOURCES).map(async ([key, entry]) => {
+      const filter = entry.softDelete === false ? {} : { isDeleted: false };
+      counts[key] = await entry.model.countDocuments(filter);
+    }),
+  );
+  const [newLeads, latestLeads] = await Promise.all([
+    Lead.countDocuments({ status: "new", isDeleted: false }),
+    Lead.find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate("course", "title")
+      .populate("branch", "name"),
+  ]);
+  res.json({ success: true, data: { counts, newLeads, latestLeads } });
+});
+
+export { list, getOne, create, update, remove, reorder, getSettings, updateSettings, stats };
