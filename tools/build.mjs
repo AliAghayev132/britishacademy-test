@@ -117,8 +117,8 @@ const MENU = [
 const BRANCHES = [
   { name: 'Mərkəz — Caspian Plaza', address: 'C.Cabbarlı 44, Caspian Plaza', metro: 'Nizami m.', phone: '(+994) 55 212 41 51', wa: '994552124151', hours: 'B.e–Şənbə 09:00–21:00' },
   { name: 'Nərimanov filialı', address: 'Nərimanov r., Atatürk pr. 25', metro: 'Nərimanov m.', phone: '(+994) 55 212 41 52', wa: '994552124152', hours: 'B.e–Şənbə 09:00–21:00' },
-  { name: 'Xətai filialı', address: 'Xətai r., Babək pr. 88', metro: 'Həzi Aslanov m.', phone: '(+994) 55 212 41 53', wa: '994552124153', hours: 'B.e–Şənbə 09:00–20:00' },
-  { name: 'Yasamal filialı', address: 'Yasamal r., Şərifzadə 12', metro: 'İnşaatçılar m.', phone: '(+994) 55 212 41 54', wa: '994552124154', hours: 'B.e–Şənbə 10:00–20:00' },
+  { name: 'Əhmədli filialı', address: 'Əhmədli, Babək pr. 88', metro: 'Həzi Aslanov m.', phone: '(+994) 55 212 41 53', wa: '994552124153', hours: 'B.e–Şənbə 09:00–20:00' },
+  { name: 'Elmlər Akademiyası filialı', address: 'Elmlər Akademiyası, H.Cavid pr. 31', metro: 'Elmlər Akademiyası m.', phone: '(+994) 55 212 41 54', wa: '994552124154', hours: 'B.e–Şənbə 10:00–20:00' },
 ];
 
 /* Kurs bazis qiyməti (AZN/ay). Filiallar üzrə +delta ilə mock data yaranır. */
@@ -499,7 +499,7 @@ function hero(p, eyebrow, lead, h1) {
       <p style="font-size:18px; color:rgba(255,255,255,.92); margin:18px 0 0; max-width:660px; line-height:1.6;">${esc(lead)}</p>
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;">
         <button data-open-apply class="ba-btn-primary" style="background:#fff; color:var(--accent); border:none; font-weight:700; font-size:15px; padding:14px 26px; border-radius:99px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciət et</button>
-        <a href="elaqe.html" style="display:inline-flex; align-items:center; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); color:#fff; font-weight:700; font-size:15px; padding:14px 26px; border-radius:99px;">Əlaqə saxla</a>
+        ${p.kind === 'branches' ? '' : `<a href="elaqe.html" style="display:inline-flex; align-items:center; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); color:#fff; font-weight:700; font-size:15px; padding:14px 26px; border-radius:99px;">Əlaqə saxla</a>`}
       </div>
     </div>
   </section>`;
