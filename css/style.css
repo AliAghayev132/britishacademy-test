@@ -390,6 +390,55 @@ body.ba-home #qeydiyyat > div {
 @media (max-width: 860px) { .ba-mascot-hero, .ba-mascot-cta { display: none; } }
 
 /* ============================================================
+   Filial üzrə qiymət kartları (kurs səhifələri)
+   ============================================================ */
+.ba-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.ba-pricegrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (max-width: 900px) { .ba-pricegrid { grid-template-columns: 1fr; } }
+
+.ba-pricecard {
+  position: relative; overflow: hidden;
+  border: 1px solid #ECEDF2; border-radius: 20px; background: #fff; padding: 22px;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.ba-pricecard::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--c); }
+.ba-pricecard:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 18px 38px rgba(20,20,45,.10); }
+.ba-pricecard-head { display: flex; flex-direction: column; gap: 3px; margin-bottom: 16px; }
+.ba-pricecard-name { font-family: 'Poppins'; font-weight: 700; font-size: 17px; color: #16161C; }
+.ba-pricecard-addr { font-size: 13px; color: #8A8A98; }
+
+.ba-ptable { width: 100%; border-collapse: collapse; }
+.ba-ptable th, .ba-ptable td { text-align: left; padding: 11px 10px; }
+.ba-ptable thead th {
+  font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--c); border-bottom: 2px solid color-mix(in srgb, var(--c) 22%, #fff);
+}
+.ba-ptable thead th span { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #9A9AA6; margin-top: 2px; }
+.ba-ptable tbody th {
+  font-size: 13.5px; font-weight: 700; color: #33333D; white-space: nowrap;
+  border-bottom: 1px solid #F0F1F5;
+}
+.ba-ptable tbody th span { display: block; font-size: 11.5px; font-weight: 500; color: #9A9AA6; }
+.ba-ptable tbody td {
+  font-family: 'Poppins'; font-weight: 700; font-size: 17px; color: #16161C;
+  border-bottom: 1px solid #F0F1F5; white-space: nowrap;
+}
+.ba-ptable tbody td i { font-style: normal; font-family: 'Nunito Sans'; font-size: 12px; font-weight: 600; color: #9A9AA6; margin-left: 2px; }
+.ba-ptable tbody tr:last-child th, .ba-ptable tbody tr:last-child td { border-bottom: 0; }
+.ba-ptable th:first-child, .ba-ptable td:first-child { padding-left: 0; }
+
+.ba-pricecard-t { margin-top: 16px; padding-top: 15px; border-top: 1px dashed #E4E6EF; display: flex; flex-direction: column; gap: 9px; }
+.ba-pricecard-tlabel { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #9A9AA6; }
+.ba-pricecard-t a { transition: background .18s, transform .18s; }
+.ba-pricecard-t a:hover { background: color-mix(in srgb, var(--c) 14%, #fff) !important; transform: translateY(-1px); }
+
+@media (max-width: 380px) {
+  .ba-ptable th, .ba-ptable td { padding: 9px 6px; }
+  .ba-ptable tbody td { font-size: 15px; }
+}
+
+/* ============================================================
    Tələbə rəyləri — avatar, ulduzlar, masonry şərh divarı
    ============================================================ */
 .ba-av {

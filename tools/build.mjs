@@ -150,12 +150,30 @@ const TEACHERS = [
   { n: 'Leyla Rəhimova', i: 'L', s: 'Alman dili · Sertifikat', c: '#FF3D8B' },
   { n: 'Tural Əhmədov', i: 'T', s: 'SAT · İmtahan hazırlığı', c: '#22B07D' },
 ];
-const pick3 = (slug) => {
+const hash = (s) => {
   let h = 0;
-  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
-  const L = TEACHERS.length, b = h % L;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+};
+const pick3 = (slug) => {
+  const L = TEACHERS.length, b = hash(slug) % L;
   // 0,3,5 offsetləri L=8 üçün həmişə fərqlidir — döngüsüz, stabil seçim
   return [b % L, (b + 3) % L, (b + 5) % L].map((i) => TEACHERS[i]);
+};
+/* Filial üzrə müəllimlər — kurs+filial üçün stabil 2 nəfər */
+const branchTeachers = (slug, bi) => {
+  const L = TEACHERS.length, b = hash(slug + '#' + bi) % L;
+  return [b % L, (b + 3) % L].map((i) => TEACHERS[i]);
+};
+
+/* Qiymət matrisi: qrup/fərdi × gündüz/axşam.
+   Axşam (17:00-dan sonra) əlavəsi: qrup +10 AZN, fərdi +20 AZN.
+   Fərdi dərs qrup qiymətinin ~2.2 misli, 5-ə yuvarlaqlaşdırılır. */
+const EVENING_GROUP = 10, EVENING_SOLO = 20;
+const priceMatrix = (slug, bi) => {
+  const groupDay = (COURSE_BASE[slug] || 100) + BRANCH_DELTA[bi];
+  const soloDay = Math.round((groupDay * 2.2) / 5) * 5;
+  return { groupDay, soloDay, groupEve: groupDay + EVENING_GROUP, soloEve: soloDay + EVENING_SOLO };
 };
 
 /* ============================================================
@@ -552,29 +570,70 @@ function hubPage(p) {
 function priceSection(p) {
   if (p.kind !== 'course') return '';
   const pr = (COURSE_CONTENT[p.slug] || {}).pricing || {};
-  let list;
+  const note = pr.note ? `<p style="font-size:14.5px; color:#33333D; margin:18px 0 0; padding:13px 16px; background:var(--accent-soft); border-radius:12px; font-weight:600;">${esc(pr.note)}</p>` : '';
+  const foot = `<p style="font-size:13.5px; color:#9A9AA6; margin:14px 0 0;">Bütün <a href="filiallar.html" style="color:var(--accent); font-weight:700;">filiallara bax</a> və ya dəqiq məlumat üçün <a href="elaqe.html" style="color:var(--accent); font-weight:700;">əlaqə saxla</a>.</p>`;
+
+  /* Sadə siyahı — seans əsaslı qiymətlər (məs. danışıq klubları) */
   if (pr.custom) {
-    list = pr.custom;
-  } else {
-    const prices = branchPrices(p.slug);
-    list = pr.only
-      ? pr.only.map((i) => [BRANCHES[i].name, prices[i]])
-      : BRANCHES.map((b, i) => [b.name, prices[i]]);
-  }
-  const rows = list.map(([k, v], i) =>
-    `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px;${i < list.length - 1 ? ' border-bottom:1px solid #ECEDF2;' : ''}">
+    const rows = pr.custom.map(([k, v], i) =>
+      `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px;${i < pr.custom.length - 1 ? ' border-bottom:1px solid #ECEDF2;' : ''}">
         <span style="font-size:15px; font-weight:600; color:#33333D;">${esc(k)}</span>
         <span style="font-size:15px; font-weight:800; color:var(--accent); white-space:nowrap;">${esc(v)}</span>
       </div>`).join('\n      ');
-  const title = pr.custom ? 'Qiymətlər' : 'Filiallar üzrə qiymətlər';
-  const extra = pr.note ? `<p style="font-size:14.5px; color:#33333D; margin:14px 0 0; padding:13px 16px; background:var(--accent-soft); border-radius:12px; font-weight:600;">${esc(pr.note)}</p>` : '';
-  return `  <section id="qiymetler" style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
-    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">${title}</h2>
+    return `  <section id="qiymetler" style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 22px;">Qiymətlər</h2>
     <div style="border:1px solid #ECEDF2; border-radius:20px; background:#fff; overflow:hidden; max-width:720px;">
       ${rows}
     </div>
-    ${extra}
-    <p style="font-size:13.5px; color:#9A9AA6; margin:14px 0 0;">Qiymətlər qrupun ölçüsünə və formata görə dəyişə bilər. Bütün <a href="filiallar.html" style="color:var(--accent); font-weight:700;">filiallara bax</a> və ya <a href="elaqe.html" style="color:var(--accent); font-weight:700;">əlaqə saxla</a>.</p>
+    ${note}
+    ${foot}
+  </section>
+`;
+  }
+
+  /* Filial üzrə detallı matris + həmin filialın müəllimləri */
+  const idx = pr.only || BRANCHES.map((_, i) => i);
+  const cards = idx.map((i) => {
+    const b = BRANCHES[i];
+    const m = priceMatrix(p.slug, i);
+    const cc = ['#2E6BE6', '#12B5A5', '#7C4DFF', '#E0533D'][i % 4];
+    const teachers = branchTeachers(p.slug, i).map((t) =>
+      `<a href="muellimler.html" title="${esc(t.s)}" style="display:inline-flex; align-items:center; gap:7px; background:#F5F6FA; border-radius:99px; padding:4px 12px 4px 4px;">
+            <span style="width:24px; height:24px; border-radius:50%; background:${t.c}; color:#fff; font-size:11.5px; font-weight:700; display:grid; place-items:center; flex:none;">${t.i}</span>
+            <span style="font-size:12.5px; font-weight:600; color:#4a4a55;">${esc(t.n)}</span>
+          </a>`).join('\n            ');
+    return `<div class="ba-pricecard" style="--c:${cc};">
+        <div class="ba-pricecard-head">
+          <span class="ba-pricecard-name">${esc(b.name)}</span>
+          <span class="ba-pricecard-addr">${esc(b.address)} · ${esc(b.metro)}</span>
+        </div>
+        <table class="ba-ptable">
+          <caption class="ba-sr">${esc(b.name)} üzrə aylıq qiymətlər</caption>
+          <thead>
+            <tr><th scope="col"><span class="ba-sr">Vaxt</span></th><th scope="col">Qrup <span>3–6 nəfər</span></th><th scope="col">Fərdi <span>1 nəfər</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Gündüz <span>09:00–17:00</span></th><td>${m.groupDay} <i>AZN/ay</i></td><td>${m.soloDay} <i>AZN/ay</i></td></tr>
+            <tr><th scope="row">Axşam <span>17:00-dan sonra</span></th><td>${m.groupEve} <i>AZN/ay</i></td><td>${m.soloEve} <i>AZN/ay</i></td></tr>
+          </tbody>
+        </table>
+        <div class="ba-pricecard-t">
+          <span class="ba-pricecard-tlabel">Bu filialda dərs deyir</span>
+          <span style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${teachers}
+          </span>
+        </div>
+      </div>`;
+  }).join('\n      ');
+
+  return `  <section id="qiymetler" style="max-width:1200px; margin:56px auto 0; padding:0 28px;">
+    <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(24px,3vw,32px); color:#14141C; letter-spacing:-.02em; margin:0 0 8px;">Filiallar üzrə qiymətlər</h2>
+    <p style="font-size:15.5px; color:#63636F; margin:0 0 24px;">Qiymət filiala, dərs formatına (qrup / fərdi) və saata görə dəyişir. Axşam qrupları — qrup dərsi üçün +${EVENING_GROUP} AZN, fərdi dərs üçün +${EVENING_SOLO} AZN.</p>
+    <div class="ba-pricegrid">
+      ${cards}
+    </div>
+    ${note}
+    ${foot}
   </section>
 `;
 }

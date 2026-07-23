@@ -242,11 +242,13 @@
   function initHeroWords() {
     var words = document.querySelectorAll('.ba-rot-word');
     if (!words.length) return;
-    var heroPal = ['#4F5BF0', '#3D5AF0', '#5B49E8', '#6C4DF0', '#2E6BE6', '#0EA5A0', '#E0533D', '#8B3DF0', '#1E9E8A', '#4338CA'];
-    document.documentElement.style.setProperty('--hero-bg', heroPal[Math.floor(Math.random() * heroPal.length)]);
+    // Loqonun rəngləri — təsadüfi deyil, sözlərlə birlikdə ardıcıl dəyişir
+    var heroPal = ['#001478', '#0B2A9C', '#C8102E', '#00105E', '#1438B8'];
+    document.documentElement.style.setProperty('--hero-bg', heroPal[0]);
     var wi = -1, prev = -1;
     function cycle() {
       wi = (wi + 1) % words.length;
+      document.documentElement.style.setProperty('--hero-bg', heroPal[wi % heroPal.length]);
       words.forEach(function (w, i) {
         if (i === wi) { w.style.opacity = '1'; w.style.transform = 'translate(-50%,0) rotateX(0deg)'; }
         else if (i === prev) { w.style.opacity = '0'; w.style.transform = 'translate(-50%,-80%) rotateX(80deg)'; }
