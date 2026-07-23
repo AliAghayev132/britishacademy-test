@@ -154,13 +154,16 @@
   function initWhatsAppBranches() {
     var wa = document.querySelector('.ba-wa');
     if (!wa) return;
-    // Filial siyahısı — tools/build.mjs-dəki BRANCHES ilə eyni saxla
+    // Bu blok `node tools/build.mjs` tərəfindən BRANCHES-dən avtomatik yazılır.
+    // Əl ilə redaktə etmə — build.mjs-dəki BRANCHES massivini dəyiş.
+    /* BA-BRANCHES-START */
     var branches = [
       { name: 'Mərkəz — Caspian Plaza', wa: '994552124151' },
       { name: 'Nərimanov filialı', wa: '994552124152' },
-      { name: 'Xətai filialı', wa: '994552124153' },
-      { name: 'Yasamal filialı', wa: '994552124154' }
+      { name: 'Əhmədli filialı', wa: '994552124153' },
+      { name: 'Elmlər Akademiyası filialı', wa: '994552124154' }
     ];
+    /* BA-BRANCHES-END */
     var waIcon = '<span class="ba-wa-pop-ic"><svg viewBox="0 0 32 32" width="17" height="17" fill="#fff"><path d="M16 .5C7.4.5.5 7.4.5 16c0 2.8.7 5.5 2.1 7.9L.4 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.5 16 .5z"></path></svg></span>';
     var pop = document.createElement('div');
     pop.className = 'ba-wa-pop';

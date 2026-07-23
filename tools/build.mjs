@@ -1032,6 +1032,26 @@ Sitemap: ${ORIGIN}/sitemap.xml
 writeFileSync(join(ROOT, 'robots.txt'), robots, 'utf8');
 
 /* ============================================================
+   js/main.js-dəki WhatsApp filial siyahısını BRANCHES ilə sinxronla
+   ============================================================ */
+{
+  const jsPath = join(ROOT, 'js', 'main.js');
+  let js = readFileSync(jsPath, 'utf8');
+  const block = '    /* BA-BRANCHES-START */\n'
+    + '    var branches = [\n'
+    + BRANCHES.map((b) => `      { name: '${b.name.replace(/'/g, "\\'")}', wa: '${b.wa}' }`).join(',\n')
+    + '\n    ];\n'
+    + '    /* BA-BRANCHES-END */';
+  const re = /    \/\* BA-BRANCHES-START \*\/[\s\S]*?    \/\* BA-BRANCHES-END \*\//;
+  if (re.test(js)) {
+    const next = js.replace(re, block);
+    if (next !== js) { writeFileSync(jsPath, next, 'utf8'); console.log('✓ js/main.js WhatsApp filial siyahısı yeniləndi'); }
+  } else {
+    console.warn('! js/main.js-də BA-BRANCHES markerləri tapılmadı — WhatsApp siyahısı sinxronlanmadı');
+  }
+}
+
+/* ============================================================
    Mövcud səhifələri patch et (nav + SEO)
    ============================================================ */
 const EXISTING = {
