@@ -1,7 +1,8 @@
 # British Academy
 
-Dil mərkəzi üçün tam-stack vebsayt. Hazırda **statik saytdan dinamik sistemə (Next.js + Express)
-miqrasiya** mərhələsindədir.
+Dil mərkəzi üçün tam-stack vebsayt: **Next.js 16 + Express 5 + MongoDB**.
+Statik saytdan dinamik sistemə miqrasiya tamamlanıb — bütün məzmun bazadan gəlir
+və admin paneldən idarə olunur.
 
 ```
 britishacademy/
@@ -14,16 +15,57 @@ britishacademy/
     └── template-reference/      ← starter şablonun sənədləri
 ```
 
+## Sürətli başlanğıc
+
+MongoDB lokal işləməlidir (`mongodb://localhost:27017/britishacademy`).
+
+```bash
+# 1) Backend
+cd apps/api
+npm install --legacy-peer-deps
+node scripts/seed.js          # statik məzmunu bazaya köçürür
+npm run dev                   # http://localhost:5000
+
+# 2) Frontend (ayrı terminalda)
+cd apps/web
+npm install --legacy-peer-deps
+npm run dev                   # http://localhost:3000
+```
+
+Admin panel: `http://localhost:3000/dashboard`
+(ilk boot-da yaranan admin: `.env.development`-dəki `DEFAULT_ADMIN_*`).
+
+> `INTERNAL_API_KEY` hər iki `.env`-də **eyni** olmalıdır — Next SSR bütün trafiki
+> tək IP-dən göndərdiyi üçün bu açar API-nin per-IP rate limitini keçir.
+
 ## Miqrasiya mərhələləri
 
 | Mərhələ | Vəziyyət | İş |
 |---------|----------|-----|
 | 0 | ✅ | Skafold + statikin `legacy-static/`-ə köçürülməsi |
 | 1 | ✅ | 17 Mongoose modeli + enum-lar + seed skripti |
-| 2 | ⏳ | API — controller + route (public read + admin CRUD) |
-| 3 | ⏳ | Next.js public sayt (bütün səhifələr dinamik) |
-| 4 | ⏳ | Admin dashboard |
-| 5 | ⏳ | SEO paritet (metadata, sitemap, JSON-LD) |
+| 2 | ✅ | API — 22 public endpoint + 16 resurs üzrə admin CRUD |
+| 3 | ✅ | Next.js public sayt — bütün səhifələr dinamik |
+| 4 | ✅ | Admin dashboard (resurslar, müraciətlər, tənzimləmələr) |
+| 5 | ✅ | SEO — metadata, canonical, JSON-LD, dinamik sitemap/robots |
+
+## Səhifələr
+
+| Marşrut | Məzmun |
+|---------|--------|
+| `/` | Hero (dinamik sözlər/rənglər), kurslar, üstünlüklər, xaricdə təhsil, rəylər, tərəfdaşlar |
+| `/kurslar` · `/kurslar/[slug]` | Kurs hub-ı; slug həm **kursu**, həm **kateqoriya hub-ını** tanıyır |
+| `/filiallar` | Filiallar (ünvan, saat, WhatsApp, zəng) |
+| `/muellimler` · `/muellimler/[slug]` | Müəllim heyəti + profil (dərs qrafiki ilə) |
+| `/telebelerimiz` | Video rəylər + rəy divarı |
+| `/xaricde-tehsil` · `/[slug]` | Ölkələr + təqaüd proqramları |
+| `/bloq` · `/bloq/[slug]` | Bloq (kateqoriya filtri, TipTap HTML, DOMPurify) |
+| `/elaqe` · `/haqqimizda` | Əlaqə (lead forması) · Haqqımızda |
+| `/dashboard/*` | Admin panel (Edge middleware ilə qorunur) |
+
+Kurs səhifəsi: content blokları, «Qısa məlumat» kartı, **filiallar üzrə qiymət matrisi**
+(qrup/fərdi × gündüz/axşam) + həmin filialın müəllimləri, FAQ akkordeon,
+Course + FAQPage + BreadcrumbList JSON-LD.
 
 ## Backend (`apps/api`)
 
@@ -54,10 +96,29 @@ Açar məqamlar:
 
 ## Frontend (`apps/web`)
 
-Next.js 16 App Router + RTK Query + Tailwind v4. Bloq üçün TipTap, karusel üçün embla,
-dashboard qrafikləri üçün recharts. (Mərhələ 3-də doldurulur.)
+Next.js 16 App Router + RTK Query + Tailwind v4.
+
+- **Data**: Server Component-lər `src/lib/api.js` (`apiGet` / `apiGetStatus`, ISR 60 san) ilə
+  API-dən çəkir; klient interaktivliyi RTK Query (`store/api/{publicApi,leadApi,adminApi}.js`).
+- **Chrome**: `components/site/*` — `SiteProvider` (müraciət modalı konteksti), `Header`
+  (dinamik mega-menyu, mobil çekmecə), `Footer`, `ApplyModal`, `WhatsAppWidget` (filial seçici).
+- **Stillər**: `globals.css` = Tailwind v4 + `legacy-static`-dən köçürülmüş təsdiqlənmiş
+  dizayn sistemi (mega-menyu, kartlar, qiymət cədvəli, rəy divarı). Fontlar: Poppins + Nunito Sans.
+- **Route qrupları**: `(public)` marketinq qabığı ilə, `(auth)` login/register (qabıqsız),
+  `(protected)/dashboard` admin. Qorunma: `src/proxy.js` (Edge, `token` cookie).
+
+> `loading.js` **qəsdən** yalnız `(auth)` və `(protected)` qruplarındadır. Kökdə olsaydı,
+> bütün public marşrutları Suspense sərhədinə salıb `notFound()`-un 404 statusu qaytarmasına
+> mane olardı (soft 404).
+
+### Admin panel
+
+`/dashboard` — sayğaclar + son müraciətlər · `/dashboard/muracietler` — lead pipeline ·
+`/dashboard/resurslar/[resource]` — 16 resurs üçün generic CRUD (cədvəl, axtarış, JSON redaktoru) ·
+`/dashboard/tenzimlemeler` — əlaqə, sosial, hero, statistika, head/body kod inyeksiyası,
+robots.txt, şəkil limiti.
 
 ## Legacy statik sayt
 
-`legacy-static/` hələ də tam işlək statik saytdır (generator + 60 səhifə). Dinamik sistem hazır
-olana qədər referans və ehtiyat kimi saxlanılır. Onun öz README-si: `legacy-static/README.md`.
+`legacy-static/` hələ də tam işlək statik saytdır (generator + 60 səhifə) — vizual referans
+və ehtiyat kimi saxlanılır. Onun öz README-si: `legacy-static/README.md`.
