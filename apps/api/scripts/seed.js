@@ -2,7 +2,7 @@
  * Seed — migrate the existing static-site content into MongoDB.
  *
  * Source of truth for the long course copy is the legacy generator's data file
- * (legacy-static/tools/content.mjs); branches, teachers, testimonials, menu and
+ * (tools/content.mjs at the repo root); branches, teachers, testimonials, menu and
  * homepage blocks are declared inline here (small, and already known from the
  * static build).
  *
@@ -28,7 +28,7 @@ import {
 import { SlugService } from "#services/SlugService.js";
 
 // Legacy content data (safe: only exports COURSE_CONTENT).
-import { COURSE_CONTENT } from "../../../legacy-static/tools/content.mjs";
+import { COURSE_CONTENT } from "../../../tools/content.mjs";
 
 const DRY = process.argv.includes("--dry");
 

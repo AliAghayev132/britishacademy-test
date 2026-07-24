@@ -2,6 +2,13 @@ import { Router, adminRoles } from "#constants";
 import { adminController, leadController } from "#controllers";
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
 
+/**
+ * ADMIN API — mounted at /api/admin. NOTHING here is public.
+ *
+ * The router-level guard below applies to every route in this file, so any
+ * endpoint added here is authenticated + role-gated by default (fail-closed).
+ * Public read endpoints belong in publicRoutes.js instead.
+ */
 const AdminRouter = Router();
 
 // Every admin route requires an authenticated admin/editor.

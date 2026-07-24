@@ -1,7 +1,15 @@
 import { baseApi } from "./baseApi";
 
-// Generic admin CRUD — one set of endpoints parameterised by `resource`
-// (mirrors the server's /api/admin/:resource registry).
+/**
+ * ADMIN endpoints (/api/admin/*) — every request is authenticated.
+ *
+ * ⚠️ Use these hooks ONLY inside src/app/(protected)/dashboard/**.
+ * Public pages must use publicApi.js — importing an admin hook into a public
+ * page would fire an authenticated request for anonymous visitors (401).
+ *
+ * Generic CRUD: one set of endpoints parameterised by `resource`, mirroring the
+ * server's /api/admin/:resource registry (controllers/resourceRegistry.js).
+ */
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     adminList: builder.query({

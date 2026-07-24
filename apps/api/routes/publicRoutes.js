@@ -6,6 +6,13 @@ import {
 } from "#controllers";
 import { writeRateLimiter } from "#middlewares";
 
+/**
+ * PUBLIC API — mounted at /api. No authentication.
+ *
+ * Everything here is read-only and safe to cache, with ONE exception:
+ * POST /api/leads (the enquiry form), which is rate-limited.
+ * Anything that mutates content lives in adminRoutes.js instead.
+ */
 const PublicRouter = Router();
 
 // Site chrome

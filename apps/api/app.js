@@ -112,9 +112,15 @@ const setupRoutes = (app) => {
   app.use("/api/media", MediaRouter);
   app.use("/api/ai", AIRouter);
 
-  // British Academy: public read API + admin CRUD
-  app.use("/api", PublicRouter);
+  // ---- British Academy ----
+  // ADMIN FIRST: every /api/admin/* route is authenticated + role-gated.
+  // Mounting it before the public router guarantees no future public path can
+  // ever shadow an admin one (PublicRouter is mounted on the bare /api prefix).
   app.use("/api/admin", AdminRouter);
+
+  // PUBLIC: read-only, no auth. The single write endpoint is POST /api/leads
+  // (rate-limited) — see routes/publicRoutes.js.
+  app.use("/api", PublicRouter);
 
   // Health check
   app.get("/api/health", (req, res) => {

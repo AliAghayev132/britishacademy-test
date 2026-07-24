@@ -6,14 +6,18 @@ və admin paneldən idarə olunur.
 
 ```
 britishacademy/
+├── index.html, *.html, css/, js/, assets/, tools/   ← statik sayt (GitHub Pages kökdən verir)
 ├── apps/
 │   ├── api/          ← Express 5 + Mongoose 9 + Socket.IO backend
 │   └── web/          ← Next.js 16 (App Router) + RTK Query frontend
-├── legacy-static/    ← əvvəlki 60 səhifəlik statik sayt (referans, işlək)
 └── docs/
+    ├── API.md                   ← marşrut arayışı (PUBLIC vs ADMIN)
     ├── DATA-MODEL.md            ← domen modelinin dizaynı
     └── template-reference/      ← starter şablonun sənədləri
 ```
+
+> **Kökdəki statik sayt** GitHub Pages üçündür (60 səhifə, `tools/build.mjs` ilə generasiya olunur).
+> Dinamik sistem `apps/` altındadır və ayrıca deploy olunur — bir-birinə qarışmır.
 
 ## Sürətli başlanğıc
 
@@ -118,7 +122,28 @@ Next.js 16 App Router + RTK Query + Tailwind v4.
 `/dashboard/tenzimlemeler` — əlaqə, sosial, hero, statistika, head/body kod inyeksiyası,
 robots.txt, şəkil limiti.
 
-## Legacy statik sayt
+## Statik sayt (GitHub Pages)
 
-`legacy-static/` hələ də tam işlək statik saytdır (generator + 60 səhifə) — vizual referans
-və ehtiyat kimi saxlanılır. Onun öz README-si: `legacy-static/README.md`.
+Repo kökündəki HTML/CSS/JS **tam işlək statik saytdır** — GitHub Pages onu birbaşa kökdən verir
+(`Settings → Pages → Branch: main / root`). 60 səhifə `tools/build.mjs` generatoru ilə yaradılır:
+
+```bash
+node tools/build.mjs      # menyu/SEO/sitemap-i yenidən qurur
+```
+
+Dinamik sistem (`apps/`) bundan **asılı deyil** — yeganə əlaqə odur ki, `apps/api/scripts/seed.js`
+kurs mətnlərini `tools/content.mjs`-dən oxuyur.
+
+## API marşrutları
+
+Tam arayış: **[docs/API.md](docs/API.md)**. Qısaca:
+
+| | Prefiks | Auth |
+|---|---------|------|
+| Public | `/api/*` | yoxdur (yeganə yazma: `POST /api/leads`) |
+| Admin | `/api/admin/*` | JWT + `admin`/`editor` rolu |
+
+Admin router `app.js`-də public-dən **əvvəl** mount olunur və guard router səviyyəsindədir —
+`adminRoutes.js`-ə əlavə olunan hər yeni endpoint avtomatik qorunur.
+Next.js tərəfində: public → `publicApi.js`/`lib/api.js`, admin → `adminApi.js`
+(**yalnız** `(protected)/dashboard/**` daxilində).

@@ -1,7 +1,12 @@
 import { baseApi } from "./baseApi";
 
-// Public read endpoints (client-side RTK Query). Server Components fetch via
-// lib/api.js; these hooks are for interactive client widgets (search, filters).
+/**
+ * PUBLIC endpoints (/api/*) — no authentication, safe on any page.
+ *
+ * Server Components should fetch through lib/api.js instead (SSR + ISR);
+ * these hooks exist for interactive client widgets (filters, search).
+ * Admin/authenticated calls live in adminApi.js.
+ */
 export const publicApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSite: builder.query({ query: () => "/site", providesTags: ["Site"] }),
