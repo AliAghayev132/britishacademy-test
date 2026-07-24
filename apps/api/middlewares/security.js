@@ -1,4 +1,5 @@
 import { rateLimit } from "#lib";
+import { config } from "#config";
 
 /**
  * Rate limiter for general API requests.
@@ -12,6 +13,11 @@ const apiRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Trusted server-to-server calls (Next.js SSR) come from ONE IP and would
+  // otherwise exhaust the per-IP budget for every visitor at once.
+  skip: (req) =>
+    Boolean(config.internalApiKey) &&
+    req.headers["x-internal-key"] === config.internalApiKey,
 });
 
 /**

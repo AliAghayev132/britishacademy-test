@@ -35,6 +35,15 @@ const config = {
   refreshSecretKey: process.env.REFRESH_SECRET_KEY || "starter_refresh_secret_key",
   encryptionKey: process.env.ENCRYPTION_KEY || "starter_32_char_encryption_key!!",
 
+  /**
+   * Shared secret for trusted server-to-server calls (the Next.js SSR layer).
+   * All SSR traffic arrives from a single IP, so without this the per-IP API
+   * rate limiter would throttle the whole public site. Requests carrying this
+   * key in `x-internal-key` skip the general rate limiter (they never skip
+   * authentication — admin routes still require a JWT).
+   */
+  internalApiKey: process.env.INTERNAL_API_KEY || "",
+
   // Default admin (created on first boot by BootstrapService)
   defaultAdmin: {
     email: process.env.DEFAULT_ADMIN_EMAIL || "admin@example.com",

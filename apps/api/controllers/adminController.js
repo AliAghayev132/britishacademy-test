@@ -18,6 +18,9 @@ function applyPopulate(query, populate) {
   return query;
 }
 
+/** Escape regex metacharacters so a search term is matched literally. */
+const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
  * List every document (including inactive/unpublished — this is the admin view).
  * GET /api/admin/:resource?page=1&limit=20&search=...&sort=...
@@ -34,7 +37,7 @@ const list = asyncHandler(async (req, res) => {
   const filter = {};
   if (softDelete) filter.isDeleted = false;
   if (req.query.search && search.length) {
-    const rx = { $regex: String(req.query.search), $options: "i" };
+    const rx = { $regex: escapeRegex(req.query.search).slice(0, 100), $options: "i" };
     filter.$or = search.map((f) => ({ [f]: rx }));
   }
 

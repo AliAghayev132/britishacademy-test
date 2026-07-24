@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { apiGetStatus } from "@/lib/api";
+import { apiGetStatus, isMissing } from "@/lib/api";
 import { metaFromApi, SITE_URL } from "@/lib/seo";
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { PriceCards } from "@/components/site/PriceCards";
@@ -28,8 +28,10 @@ export async function generateMetadata({ params }) {
   const { data } = await apiGetStatus(`/courses/${slug}`);
   const course = data?.course;
   if (course) {
+    // Use the short `title`, not `h1` — h1 copy often already carries the brand
+    // name and the root layout appends "| British Academy" via the template.
     return metaFromApi(course.seo, {
-      title: course.h1 || course.title,
+      title: course.title,
       description: course.lead,
       path: `/kurslar/${slug}`,
     });
@@ -78,15 +80,17 @@ async function CategoryHub({ cat }) {
 
 export default async function CoursePage({ params }) {
   const { slug } = await params;
-  const { data, status } = await apiGetStatus(`/courses/${slug}`);
+  const res = await apiGetStatus(`/courses/${slug}`);
 
-  if (status === 404 || !data?.course) {
+  // isMissing throws when the API is unreachable, so an outage renders a 5xx
+  // instead of silently 404-ing a real course.
+  if (isMissing(res, "course")) {
     const cat = await findCategory(slug);
     if (cat) return <CategoryHub cat={cat} />;
     notFound();
   }
 
-  const { course, teachersByBranch = [], related = [] } = data;
+  const { course, teachersByBranch = [], related = [] } = res.data;
 
   // JSON-LD: Course + Breadcrumb + FAQPage
   const ld = [

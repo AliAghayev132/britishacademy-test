@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import DOMPurify from "isomorphic-dompurify";
-import { apiGetStatus } from "@/lib/api";
+import { apiGetStatus, isMissing } from "@/lib/api";
 import { metaFromApi, SITE_URL } from "@/lib/seo";
 
 const fmtDate = (d) =>
@@ -22,9 +22,9 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogPostPage({ params }) {
   const { slug } = await params;
-  const { data, status } = await apiGetStatus(`/blog/${slug}`);
-  if (status === 404 || !data?.post) notFound();
-  const p = data.post;
+  const res = await apiGetStatus(`/blog/${slug}`);
+  if (isMissing(res, "post")) notFound();
+  const p = res.data.post;
 
   // TipTap emits HTML; sanitize before rendering.
   const html = DOMPurify.sanitize(p.content || "");

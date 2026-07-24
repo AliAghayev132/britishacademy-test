@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { apiGetStatus } from "@/lib/api";
+import { apiGetStatus, isMissing } from "@/lib/api";
 import { metaFromApi } from "@/lib/seo";
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
@@ -20,9 +20,9 @@ export async function generateMetadata({ params }) {
 
 export default async function DestinationPage({ params }) {
   const { slug } = await params;
-  const { data, status } = await apiGetStatus(`/destinations/${slug}`);
-  if (status === 404 || !data?.destination) notFound();
-  const d = data.destination;
+  const res = await apiGetStatus(`/destinations/${slug}`);
+  if (isMissing(res, "destination")) notFound();
+  const d = res.data.destination;
 
   return (
     <>

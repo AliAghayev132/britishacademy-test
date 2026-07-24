@@ -40,16 +40,27 @@ const getMenu = asyncHandler(async (req, res) => {
 
 /** GET /api/home — everything the homepage needs, in one payload. */
 const getHome = asyncHandler(async (_req, res) => {
-  const [settings, courses, testimonials, partners, advantages, destinations, faqs] =
+  const [settings, courses, partners, advantages, destinations, faqs] =
     await Promise.all([
       SiteSetting.get(),
       Course.findFeatured(6).populate("category"),
-      Testimonial.findPublic({ isFeatured: true }).limit(8),
       Partner.findPublic(),
       Advantage.findPublic(),
       Destination.findPublic({ isFeatured: true }).limit(8),
       Faq.findPublic().limit(8),
     ]);
+
+  // The homepage renders the written-review wall. Prefer featured reviews, but
+  // fall back to any published text review so the section is never empty just
+  // because nothing was flagged in the admin panel.
+  let testimonials = await Testimonial.findPublic({
+    type: "text",
+    isFeatured: true,
+  }).limit(6);
+  if (!testimonials.length) {
+    testimonials = await Testimonial.findPublic({ type: "text" }).limit(6);
+  }
+
   res.json({
     success: true,
     data: { settings, courses, testimonials, partners, advantages, destinations, faqs },
