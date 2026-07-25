@@ -90,14 +90,27 @@
   </section>
 
   <section style="max-width:1200px; margin:0 auto; padding:30px 28px 64px;">
-    <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:26px;">
+      <span style="font-size:14px; font-weight:700; color:#63636F;">Dərsə görə:</span>
+      <select id="mt-filter" aria-label="Dərsə görə filtr" style="border:1.5px solid #E4E6EF; border-radius:99px; padding:11px 40px 11px 18px; font-size:14.5px; font-family:inherit; color:#14141C; background:#fff; cursor:pointer; outline:none; -webkit-appearance:none; appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2218%22 height=%2218%22 fill=%22none%22 stroke=%22%239A9AA6%22 stroke-width=%222.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>'); background-repeat:no-repeat; background-position:right 15px center;">
+        <option value="">Bütün müəllimlər</option>
+        <option value="ingilis">İngilis dili</option>
+        <option value="ielts">IELTS · TOEFL</option>
+        <option value="biznes">Biznes İngilis</option>
+        <option value="rus">Rus dili</option>
+        <option value="alman">Alman dili</option>
+        <option value="usaq">Uşaqlar üçün</option>
+      </select>
+      <span id="mt-empty" style="display:none; font-size:14.5px; color:#9A9AA6;">Bu dərs üzrə müəllim tapılmadı.</span>
+    </div>
+    <div class="grid-3" id="mt-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:24px;">
       <a href="muellim.html" class="mt-card" style="display:block; background:#fff; border:1px solid #ECEDF2; border-radius:22px; overflow:hidden;">
         <div style="position:relative; aspect-ratio:4/4.4; overflow:hidden; background:#EEF0F6;">
           <div class="img-slot mt-img" style="position:absolute; inset:0; width:100%; height:100%; transition:transform .35s ease;"><span>Foto</span></div>
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">IELTS 8.5</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Aygün Əliyeva</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">IELTS & General English</div></div>
+          <div data-course="ielts ingilis"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Aygün Əliyeva</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">IELTS & General English</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
@@ -107,7 +120,7 @@
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">IELTS 8.0</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Rəşad Məmmədov</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Biznes İngilis</div></div>
+          <div data-course="biznes ingilis"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Rəşad Məmmədov</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Biznes İngilis</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
@@ -117,7 +130,7 @@
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">C2</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Nigar Hüseynova</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Rus dili</div></div>
+          <div data-course="rus"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Nigar Hüseynova</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Rus dili</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
@@ -127,7 +140,7 @@
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">C1</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Elvin Quliyev</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Alman dili</div></div>
+          <div data-course="alman"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Elvin Quliyev</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Alman dili</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
@@ -137,7 +150,7 @@
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">CELTA</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Günel Sadıqova</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Uşaqlar üçün İngilis</div></div>
+          <div data-course="usaq ingilis"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Günel Sadıqova</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">Uşaqlar üçün İngilis</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
@@ -147,11 +160,31 @@
           <span style="position:absolute; top:14px; left:14px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px;">TOEFL 118</span>
         </div>
         <div style="padding:22px 22px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Kamran İsmayılov</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">TOEFL & SAT</div></div>
+          <div data-course="ielts toefl ingilis"><h3 style="font-family:'Poppins'; font-weight:700; font-size:20px; margin:0; color:#17171F;">Kamran İsmayılov</h3><div style="font-size:14px; color:#63636F; margin-top:4px;">TOEFL & SAT</div></div>
           <span class="mt-arrow" style="width:40px; height:40px; flex:none; border-radius:50%; background:#F1F2F6; color:#4C4C58; display:grid; place-items:center; transition:.25s; font-size:18px;">→</span>
         </div>
       </a>
     </div>
+    <script>
+      (function () {
+        var sel = document.getElementById('mt-filter');
+        var grid = document.getElementById('mt-grid');
+        var empty = document.getElementById('mt-empty');
+        if (!sel || !grid) return;
+        sel.addEventListener('change', function () {
+          var v = sel.value;
+          var shown = 0;
+          grid.querySelectorAll('.mt-card').forEach(function (card) {
+            var tag = card.querySelector('[data-course]');
+            var list = tag ? tag.getAttribute('data-course').split(/\s+/) : [];
+            var ok = !v || list.indexOf(v) !== -1;
+            card.style.display = ok ? '' : 'none';
+            if (ok) shown++;
+          });
+          empty.style.display = shown ? 'none' : '';
+        });
+      })();
+    </script>
   </section>
 
   <footer style="background:#0C0D1A; color:#C4C5D6;">

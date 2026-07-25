@@ -211,7 +211,8 @@ function iconFor(s) {
 
 /* Maskot şəkilləri — assets/mascot/ qovluğuna atılır.
    Fayl yoxdursa onerror ilə gizlənir, dizayn pozulmur.
-   Gözlənilən adlar: point · gift · run · flag · wave  (.png) */
+   Adlar dinamik sayt (apps/web) ilə eynidir — bir dəst kifayət edir:
+   hero · courses · teachers · filiallar · students · destinations · blog · contact · about  (.png) */
 const mascot = (name, cls, alt) =>
   `<img src="assets/mascot/${name}.png" alt="${esc(alt || '')}" loading="lazy" decoding="async"${alt ? '' : ' aria-hidden="true"'} onerror="this.remove()" class="ba-mascot ${cls}">`;
 
@@ -402,7 +403,7 @@ function searchOverlay() {
         <input id="ba-search-input" placeholder="Kurs, proqram və ya ölkə axtar..." autocomplete="off" style="border:none; outline:none; font-size:19px; width:100%; background:transparent; color:#14141C; font-family:inherit;">
       </div>
       <div id="ba-search-results" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
-      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:28px; font-size:16px;">${mascot('wave', 'ba-mascot-empty')}<div style="margin-top:10px;">Nəticə tapılmadı</div></div>
+      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:28px; font-size:16px;">${mascot('about', 'ba-mascot-empty')}<div style="margin-top:10px;">Nəticə tapılmadı</div></div>
     </div>
   </div>`;
 }
@@ -434,6 +435,10 @@ function applyModal() {
           </button>
           <div id="ba-apply-menu" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #E4E6EF; border-radius:13px; box-shadow:0 16px 40px rgba(20,20,45,.18); overflow:hidden; z-index:5; max-height:210px; overflow-y:auto;">${opts}</div>
         </div>
+        <select id="ba-apply-branch" name="branch" style="width:100%; border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; color:#14141C; background:#fff; cursor:pointer; outline:none; -webkit-appearance:none; appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2218%22 height=%2218%22 fill=%22none%22 stroke=%22%239A9AA6%22 stroke-width=%222.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>'); background-repeat:no-repeat; background-position:right 16px center;">
+          <option value="" disabled selected>Hansı filial? (istəyə bağlı)</option>
+          ${BRANCHES.map((b) => `<option value="${esc(b.name)}">${esc(b.name)}</option>`).join('')}
+        </select>
         <button type="submit" class="ba-apply-btn" style="margin-top:6px; background:var(--accent); color:#fff; border:none; font-weight:700; font-size:16px; padding:16px; border-radius:13px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciəti göndər</button>
         <p style="text-align:center; font-size:12.5px; color:#9A9AA6; margin:2px 0 0;">Məlumatların üçüncü tərəflə paylaşılmır.</p>
       </form>
@@ -487,7 +492,7 @@ function breadcrumb(p) {
 }
 
 function hero(p, eyebrow, lead, h1) {
-  return `  <section style="position:relative; background:var(--accent); overflow:hidden;">
+  return `  <section style="position:relative; background:var(--banner-grad); overflow:hidden;">
     <div style="position:absolute; top:-90px; right:6%; width:340px; height:340px; border-radius:50%; background:rgba(255,255,255,.13); filter:blur(22px); pointer-events:none;"></div>
     <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.14) 1.3px, transparent 1.3px); background-size:24px 24px; -webkit-mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); pointer-events:none;"></div>
     ${p.mascot ? mascot(p.mascot, 'ba-mascot-hero') : ''}
@@ -508,7 +513,7 @@ function ctaBand() {
   return `  <section style="max-width:1200px; margin:64px auto 0; padding:0 28px;">
     <div style="position:relative; overflow:hidden; background:#0C0D1A; border-radius:28px; padding:52px 40px; text-align:center;">
       <div style="position:absolute; top:-60px; left:-30px; width:220px; height:220px; border-radius:50%; background:var(--accent-wm); filter:blur(10px);"></div>
-      ${mascot('gift', 'ba-mascot-cta')}
+      ${mascot('hero', 'ba-mascot-cta')}
       <div style="position:relative;">
         <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(26px,3.4vw,36px); color:#fff; margin:0; letter-spacing:-.02em;">Hazırsan? Elə bu gün başla.</h2>
         <p style="font-size:16px; color:#B9BAD0; margin:14px auto 26px; max-width:520px; line-height:1.6;">Ödənişsiz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.</p>
@@ -957,7 +962,7 @@ for (const top of MENU) {
   if (top.exists) continue; // haqqimizda.html / muellimler.html mövcuddur
   if (top.students) {
     push({
-      slug: top.slug, kind: 'students', mascot: 'wave', h1: 'Tələbələrimiz',
+      slug: top.slug, kind: 'students', mascot: 'students', h1: 'Tələbələrimiz',
       desc: 'British Academy məzunlarının rəyləri — video təcrübələr, qiymətləndirmələr və real geri bildirimlər.',
       lead: 'Məzunlarımız British Academy təcrübəsini öz sözləri ilə danışır.',
       parent: { label: 'Ana səhifə', slug: 'index.html' },
@@ -965,26 +970,26 @@ for (const top of MENU) {
     continue;
   }
   if (top.branches) {
-    push({ slug: top.slug, kind: 'branches', mascot: 'point', h1: 'Filiallar', desc: 'British Academy filialları — ünvanlar, telefon, iş saatları və WhatsApp. Özünə ən yaxın filialı seç.', lead: 'British Academy-nin Bakıdakı filialları — özünə ən yaxın filialı seç və birbaşa əlaqə saxla.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
+    push({ slug: top.slug, kind: 'branches', mascot: 'filiallar', h1: 'Filiallar', desc: 'British Academy filialları — ünvanlar, telefon, iş saatları və WhatsApp. Özünə ən yaxın filialı seç.', lead: 'British Academy-nin Bakıdakı filialları — özünə ən yaxın filialı seç və birbaşa əlaqə saxla.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
     continue;
   }
   if (top.mega) {
-    push({ slug: top.slug, kind: 'hub', h1: top.label, desc: hubDesc(top.label), lead: 'British Academy xidmətləri — dil kurslarından beynəlxalq imtahanlara, kompüter və karyera proqramlarına qədər.', parent: { label: 'Ana səhifə', slug: 'index.html' }, boxes: top.mega.map((g) => ({ label: g.label, slug: g.slug, blurb: 'Alt-istiqamətlərə bax' })) });
+    push({ slug: top.slug, kind: 'hub', mascot: 'courses', h1: top.label, desc: hubDesc(top.label), lead: 'British Academy xidmətləri — dil kurslarından beynəlxalq imtahanlara, kompüter və karyera proqramlarına qədər.', parent: { label: 'Ana səhifə', slug: 'index.html' }, boxes: top.mega.map((g) => ({ label: g.label, slug: g.slug, blurb: 'Alt-istiqamətlərə bax' })) });
     for (const g of top.mega) {
-      push({ slug: g.slug, kind: 'hub', special: g.special || null, items: g.items, h1: g.label, desc: hubDesc(g.label), lead: `${g.label} üzrə bütün proqramlar və qeydiyyat.`, parent: { label: top.label, slug: top.slug }, boxes: g.items.map((it) => ({ label: it.label, slug: it.slug })) });
+      push({ slug: g.slug, kind: 'hub', mascot: 'courses', special: g.special || null, items: g.items, h1: g.label, desc: hubDesc(g.label), lead: `${g.label} üzrə bütün proqramlar və qeydiyyat.`, parent: { label: top.label, slug: top.slug }, boxes: g.items.map((it) => ({ label: it.label, slug: it.slug })) });
       for (const it of g.items) {
-        push({ slug: it.slug, kind: 'course', h1: it.label, desc: courseDesc(it.label), lead: `${it.label} — British Academy-nin təcrübəli müəllimləri ilə.`, parent: { label: g.label, slug: g.slug }, grand: { label: top.label, slug: top.slug }, siblings: g.items });
+        push({ slug: it.slug, kind: 'course', mascot: 'courses', h1: it.label, desc: courseDesc(it.label), lead: `${it.label} — British Academy-nin təcrübəli müəllimləri ilə.`, parent: { label: g.label, slug: g.slug }, grand: { label: top.label, slug: top.slug }, siblings: g.items });
       }
     }
   } else if (top.dd) {
     const isCountryHub = top.slug === 'xaricde-tehsil.html';
-    const hubMascot = isCountryHub ? 'flag' : (top.slug === 'usaq-proqramlari.html' ? 'wave' : null);
+    const hubMascot = isCountryHub ? 'destinations' : 'courses';
     push({ slug: top.slug, kind: 'hub', mascot: hubMascot, h1: top.label, desc: hubDesc(top.label), lead: `${top.label} — bütün istiqamətlər bir səhifədə.`, parent: { label: 'Ana səhifə', slug: 'index.html' }, boxes: top.dd.map((it) => ({ label: it.label, slug: it.slug })) });
     for (const it of top.dd) {
-      push({ slug: it.slug, kind: isCountryHub ? 'country' : 'course', h1: it.label, desc: isCountryHub ? countryDesc(it.label) : courseDesc(it.label), lead: isCountryHub ? `${it.label}-də təhsil almaq üçün British Academy dəstəyi.` : `${it.label} — British Academy proqramı.`, parent: { label: top.label, slug: top.slug }, siblings: top.dd });
+      push({ slug: it.slug, kind: isCountryHub ? 'country' : 'course', mascot: hubMascot, h1: it.label, desc: isCountryHub ? countryDesc(it.label) : courseDesc(it.label), lead: isCountryHub ? `${it.label}-də təhsil almaq üçün British Academy dəstəyi.` : `${it.label} — British Academy proqramı.`, parent: { label: top.label, slug: top.slug }, siblings: top.dd });
     }
   } else if (top.slug === 'elaqe.html') {
-    push({ slug: top.slug, kind: 'contact', h1: 'Əlaqə', desc: 'British Academy ilə əlaqə — ünvan, telefon, e-poçt və iş saatları. Sualların üçün bizə yaz.', lead: 'Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
+    push({ slug: top.slug, kind: 'contact', mascot: 'contact', h1: 'Əlaqə', desc: 'British Academy ilə əlaqə — ünvan, telefon, e-poçt və iş saatları. Sualların üçün bizə yaz.', lead: 'Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
   } else {
     push({ slug: top.slug, kind: 'simple', h1: top.label, desc: hubDesc(top.label), lead: 'British Academy təqaüd və maliyyə dəstəyi proqramları haqqında məlumat.', parent: { label: 'Ana səhifə', slug: 'index.html' } });
   }

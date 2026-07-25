@@ -97,7 +97,7 @@
         <input id="ba-search-input" placeholder="Kurs, proqram və ya ölkə axtar..." autocomplete="off" style="border:none; outline:none; font-size:19px; width:100%; background:transparent; color:#14141C; font-family:inherit;">
       </div>
       <div id="ba-search-results" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
-      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:28px; font-size:16px;"><img src="assets/mascot/wave.png" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.remove()" class="ba-mascot ba-mascot-empty"><div style="margin-top:10px;">Nəticə tapılmadı</div></div>
+      <div id="ba-search-empty" style="display:none; text-align:center; color:#9A9AA6; padding:28px; font-size:16px;"><img src="assets/mascot/about.png" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.remove()" class="ba-mascot ba-mascot-empty"><div style="margin-top:10px;">Nəticə tapılmadı</div></div>
     </div>
   </div>
   <div id="ba-apply-modal" style="display:none; position:fixed; inset:0; z-index:150; background:rgba(12,13,26,.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:24px;">
@@ -124,15 +124,19 @@
           </button>
           <div id="ba-apply-menu" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #E4E6EF; border-radius:13px; box-shadow:0 16px 40px rgba(20,20,45,.18); overflow:hidden; z-index:5; max-height:210px; overflow-y:auto;"><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">İngilis dili</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">IELTS · TOEFL</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Rus dili</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Alman dili</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Biznes İngilis</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Uşaqlar üçün</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Xaricdə təhsil</div><div class="ba-sel-opt" style="padding:13px 16px; font-size:15px; color:#1C1C26; cursor:pointer; transition:.15s;">Kompüter kursları</div></div>
         </div>
+        <select id="ba-apply-branch" name="branch" style="width:100%; border:1.5px solid #E4E6EF; border-radius:13px; padding:15px 16px; font-size:15px; font-family:inherit; color:#14141C; background:#fff; cursor:pointer; outline:none; -webkit-appearance:none; appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2218%22 height=%2218%22 fill=%22none%22 stroke=%22%239A9AA6%22 stroke-width=%222.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>'); background-repeat:no-repeat; background-position:right 16px center;">
+          <option value="" disabled selected>Hansı filial? (istəyə bağlı)</option>
+          <option value="Mərkəz — Caspian Plaza">Mərkəz — Caspian Plaza</option><option value="Nərimanov filialı">Nərimanov filialı</option><option value="Əhmədli filialı">Əhmədli filialı</option><option value="Elmlər Akademiyası filialı">Elmlər Akademiyası filialı</option>
+        </select>
         <button type="submit" class="ba-apply-btn" style="margin-top:6px; background:var(--accent); color:#fff; border:none; font-weight:700; font-size:16px; padding:16px; border-radius:13px; cursor:pointer; font-family:inherit; transition:.2s;">Müraciəti göndər</button>
         <p style="text-align:center; font-size:12.5px; color:#9A9AA6; margin:2px 0 0;">Məlumatların üçüncü tərəflə paylaşılmır.</p>
       </form>
     </div>
   </div>
-  <section style="position:relative; background:var(--accent); overflow:hidden;">
+  <section style="position:relative; background:var(--banner-grad); overflow:hidden;">
     <div style="position:absolute; top:-90px; right:6%; width:340px; height:340px; border-radius:50%; background:rgba(255,255,255,.13); filter:blur(22px); pointer-events:none;"></div>
     <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.14) 1.3px, transparent 1.3px); background-size:24px 24px; -webkit-mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); mask-image:radial-gradient(circle at 70% 30%, transparent 30%, #000 82%); pointer-events:none;"></div>
-    
+    <img src="assets/mascot/courses.png" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.remove()" class="ba-mascot ba-mascot-hero">
     <div style="position:relative; max-width:1200px; margin:0 auto; padding:30px 28px 60px;">
       <nav class="ba-crumb" aria-label="Breadcrumb" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13.5px; color:rgba(255,255,255,.8);"><a href="index.html" style="color:rgba(255,255,255,.8);">Ana səhifə</a><span style="opacity:.5;">/</span> <a href="xidmetler.html" style="color:rgba(255,255,255,.8);">Xidmətlər</a><span style="opacity:.5;">/</span> <a href="beynelxalq-imtahanlar.html" style="color:rgba(255,255,255,.8);">Beynəlxalq imtahanlara hazırlıq</a><span style="opacity:.5;">/</span> <span style="color:#fff; font-weight:600;">TOLES</span></nav>
       <span style="display:inline-block; margin-top:22px; font-size:12.5px; color:rgba(255,255,255,.9); font-weight:700; letter-spacing:.14em; text-transform:uppercase;">Beynəlxalq imtahanlara hazırlıq</span>
@@ -355,7 +359,7 @@
   <section style="max-width:1200px; margin:64px auto 0; padding:0 28px;">
     <div style="position:relative; overflow:hidden; background:#0C0D1A; border-radius:28px; padding:52px 40px; text-align:center;">
       <div style="position:absolute; top:-60px; left:-30px; width:220px; height:220px; border-radius:50%; background:var(--accent-wm); filter:blur(10px);"></div>
-      <img src="assets/mascot/gift.png" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.remove()" class="ba-mascot ba-mascot-cta">
+      <img src="assets/mascot/hero.png" alt="" loading="lazy" decoding="async" aria-hidden="true" onerror="this.remove()" class="ba-mascot ba-mascot-cta">
       <div style="position:relative;">
         <h2 style="font-family:'Poppins'; font-weight:700; font-size:clamp(26px,3.4vw,36px); color:#fff; margin:0; letter-spacing:-.02em;">Hazırsan? Elə bu gün başla.</h2>
         <p style="font-size:16px; color:#B9BAD0; margin:14px auto 26px; max-width:520px; line-height:1.6;">Ödənişsiz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.</p>

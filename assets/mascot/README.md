@@ -1,27 +1,35 @@
-# Maskot şəkilləri
+# Maskot şəkilləri (statik sayt)
 
-Bu qovluğa **5 fayl** at — sayt avtomatik onları götürəcək.
+Bu qovluğa maskot PNG-lərini at — sayt avtomatik götürəcək.
 Fayl yoxdursa heç nə sınmır: şəkil sadəcə görünmür (`onerror` ilə silinir).
 
-| Fayl adı | Hansı poza | Harada görünür |
-|----------|-----------|----------------|
-| `flag.png`  | Union Jack plaşı ilə qaçan | Ana səhifə hero (sağ alt) · Xaricdə təhsil səhifəsi |
-| `gift.png`  | Hədiyyə qutusu tutan | Bütün səhifələrdəki «Hazırsan? Elə bu gün başla» CTA blokunda |
-| `wave.png`  | Oturub əl edən | Axtarışda «Nəticə tapılmadı» · Uşaq Proqramları səhifəsi |
-| `point.png` | Barmağı ilə göstərən | Filiallar səhifəsi |
-| `run.png`   | Qaçan (ehtiyat) | Hazırda istifadə olunmur — ehtiyatda |
+**Vacib:** adlar dinamik sayt (`apps/web/public/assets/mascot/`) ilə **eynidir**.
+Yəni bir dəst maskot düzəldib **hər iki qovluğa** eyni faylları atmaq kifayətdir.
 
-## Tələblər
+| Fayl adı | Poza (təklif) | Harada görünür |
+|----------|---------------|----------------|
+| `hero.png`         | Salamlayan / thumbs-up            | Ana səhifə hero (sağ alt) · CTA blokları |
+| `courses.png`      | Kitab tutan                       | Kurslar hub + bütün kurs səhifələri |
+| `teachers.png`     | Lövhə/işarə çubuğu ilə            | (dinamik saytda müəllim səhifəsi) |
+| `filiallar.png`    | Xəritəni göstərən                 | Filiallar səhifəsi |
+| `students.png`     | Məzun papağı ilə                  | Tələbələrimiz səhifəsi |
+| `destinations.png` | **Əlində plakat/çamadan**         | Xaricdə təhsil hub + ölkə səhifələri |
+| `blog.png`         | Oxuyan                            | (dinamik saytda bloq səhifəsi) |
+| `contact.png`      | Qulaqlıq / əl edən                | Əlaqə səhifəsi |
+| `about.png`        | Əl edib salamlayan                | Haqqımızda · axtarışda «Nəticə tapılmadı» |
+
+Loader (səhifə yüklənərkən) ayrıca maskot **tələb etmir** — hazırda **loqonu**
+«gedirmiş kimi» yellədir (`.ba-loader-walk` animasiyası).
+
+## Ölçü tələbləri
 
 - **Format:** PNG, şəffaf fon (transparent background)
-- **Ölçü:** ~800×800 px kifayətdir (saytda 128–190 px göstərilir)
-- **Həcm:** hər fayl **500 KB-dan az** olmalıdır (texniki tapşırıq şərti)
-- Adlar **dəqiq** yuxarıdakı kimi olmalıdır (kiçik hərflərlə, `.png`)
+- **Ölçü:** kvadrat, **~800×800 px**; saytda banner-də ~190–250 px göstərilir
+- Maskot **aşağı-mərkəzə** oturur (ayaqları aşağıda) — kompozisiyanı buna görə qur
+- **Həcm:** hər fayl **500 KB-dan az** olmalıdır
+- Mobil (< 680 px) maskot avtomatik gizlənir ki, mətnlə toqquşmasın
 
-## Ölçünü kiçiltmək
+## Yeni səhifəyə maskot vermək
 
-Şəkillər böyükdürsə, layihədəki generator ilə eyni üsulla kiçildə bilərsən —
-və ya istənilən onlayn PNG sıxıcı (məs. tinypng.com) işə yarayar.
-
-Yeni poza əlavə etmək istəsən: faylı bura at, sonra `tools/build.mjs`
-içində `mascot('ad', 'ba-mascot-...')` çağırışı ilə istədiyin yerə yerləşdir.
+`tools/build.mjs` içində səhifə reyestrində `mascot: 'ad'` ver — `hero()`
+banner-də avtomatik `assets/mascot/ad.png`-i göstərəcək.
