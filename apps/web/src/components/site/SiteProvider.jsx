@@ -29,7 +29,7 @@ export function SiteProvider({ branches = [], children }) {
   return (
     <ApplyCtx.Provider value={{ open, close }}>
       {children}
-      <ApplyModal open={applyOpen} onClose={close} preset={preset} />
+      <ApplyModal open={applyOpen} onClose={close} preset={preset} branches={branches} />
       <WhatsAppWidget branches={branches} />
     </ApplyCtx.Provider>
   );

@@ -47,8 +47,8 @@ export default async function BlogPostPage({ params }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto", padding: "36px 28px 56px" }}>
+      <section className="ba-banner">
+        <div className="ba-banner-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "36px 28px 56px" }}>
           <nav aria-label="Breadcrumb" style={{ fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
             <Link href="/bloq" style={{ color: "rgba(255,255,255,.8)" }}>Bloq</Link>
             {p.category && (<><span style={{ opacity: 0.5 }}> / </span><Link href={`/bloq?kateqoriya=${p.category.slug}`} style={{ color: "rgba(255,255,255,.8)" }}>{p.category.name}</Link></>)}

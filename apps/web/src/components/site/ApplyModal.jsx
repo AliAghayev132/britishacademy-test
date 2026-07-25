@@ -14,10 +14,11 @@ const INTERESTS = [
   "Kompüter kursları",
 ];
 
-export function ApplyModal({ open, onClose, preset }) {
+export function ApplyModal({ open, onClose, preset, branches = [] }) {
   const [createLead, { isLoading }] = useCreateLeadMutation();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [interest, setInterest] = useState("");
+  const [branch, setBranch] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,6 +27,7 @@ export function ApplyModal({ open, onClose, preset }) {
       setDone(false);
       setError("");
       setInterest(preset || "");
+      setBranch("");
     }
   }, [open, preset]);
 
@@ -46,6 +48,7 @@ export function ApplyModal({ open, onClose, preset }) {
       await createLead({
         ...form,
         interest,
+        branch: branch || undefined,
         source: "apply-modal",
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
@@ -92,6 +95,12 @@ export function ApplyModal({ open, onClose, preset }) {
               <option value="">Nəyə müraciət edirsən?</option>
               {INTERESTS.map((i) => <option key={i} value={i}>{i}</option>)}
             </select>
+            {branches.length > 0 && (
+              <select value={branch} onChange={(e) => setBranch(e.target.value)} className="ba-field" style={{ ...field, cursor: "pointer" }}>
+                <option value="">Hansı filial? (istəyə bağlı)</option>
+                {branches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+              </select>
+            )}
             {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}
             <button type="submit" disabled={isLoading} className="ba-apply-btn" style={{ marginTop: 6, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: 16, borderRadius: 13, cursor: "pointer", opacity: isLoading ? 0.7 : 1 }}>
               {isLoading ? "Göndərilir…" : "Müraciəti göndər"}

@@ -5,6 +5,7 @@ import { metaFromApi } from "@/lib/seo";
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { ApplyButton } from "@/components/site/ApplyButton";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -26,22 +27,17 @@ export default async function DestinationPage({ params }) {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "30px 28px 60px" }}>
-          <nav aria-label="Breadcrumb" style={{ fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
-            <Link href="/xaricde-tehsil" style={{ color: "rgba(255,255,255,.8)" }}>Xaricdə təhsil</Link>
-            <span style={{ opacity: 0.5 }}> / </span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>{d.country}</span>
-          </nav>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(30px,4.4vw,48px)", letterSpacing: "-.025em", margin: "18px 0 0", color: "#fff" }}>
-            {d.isScholarship ? d.country : `${d.country}-də təhsil`}
-          </h1>
-          {(d.lead || d.tagline) && <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 660, lineHeight: 1.6 }}>{d.lead || d.tagline}</p>}
-          <div style={{ marginTop: 28 }}>
-            <ApplyButton interest={`Xaricdə təhsil — ${d.country}`} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
-          </div>
-        </div>
-      </section>
+      <PageBanner
+        title={d.isScholarship ? d.country : `${d.country}-də təhsil`}
+        subtitle={d.lead || d.tagline}
+        mascot="destinations"
+        breadcrumb={[
+          { label: "Xaricdə təhsil", href: "/xaricde-tehsil" },
+          { label: d.country },
+        ]}
+      >
+        <ApplyButton interest={`Xaricdə təhsil — ${d.country}`} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
+      </PageBanner>
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 36, alignItems: "start" }}>

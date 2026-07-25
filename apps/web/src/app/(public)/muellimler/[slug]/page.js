@@ -27,8 +27,8 @@ export default async function TeacherPage({ params }) {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "40px 28px 56px", display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
+      <section className="ba-banner">
+        <div className="ba-banner-inner" style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 28px 56px", display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
           <span className="ba-av" style={{ "--c": t.color || "#2E6BE6", width: 110, height: 110, fontSize: 42 }}>
             {t.photo ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={t.photo} alt={t.fullName} />) : <span>{(t.fullName || "?").charAt(0)}</span>}
           </span>

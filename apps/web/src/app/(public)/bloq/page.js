@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { apiGet } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export const metadata = buildMetadata({
   title: "Bloq",
@@ -24,14 +25,11 @@ export default async function BlogPage({ searchParams }) {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(32px,4.6vw,50px)", letterSpacing: "-.025em", margin: 0, color: "#fff" }}>Bloq</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            Dil öyrənmə, imtahanlar və xaricdə təhsil haqqında faydalı yazılar.
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title="Bloq"
+        subtitle="Dil öyrənmə, imtahanlar və xaricdə təhsil haqqında faydalı yazılar."
+        mascot="blog"
+      />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 28px 0" }}>
         {categories.length > 0 && (

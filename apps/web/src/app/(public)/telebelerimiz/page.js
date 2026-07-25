@@ -1,6 +1,7 @@
 import { apiGet } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
 import { TestimonialCard, SectionHead } from "@/components/site/cards";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export const metadata = buildMetadata({
   title: "Tələbələrimiz",
@@ -19,14 +20,11 @@ export default async function StudentsPage() {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(32px,4.6vw,50px)", letterSpacing: "-.025em", margin: 0, color: "#fff" }}>Tələbələrimiz</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            Məzunlarımız British Academy təcrübəsini öz sözləri ilə danışır.
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title="Tələbələrimiz"
+        subtitle="Məzunlarımız British Academy təcrübəsini öz sözləri ilə danışır."
+        mascot="students"
+      />
 
       {videos.length > 0 && (
         <section style={{ ...wrap, padding: "64px 28px 0" }}>

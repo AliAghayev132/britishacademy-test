@@ -3,6 +3,7 @@ import { metaFromApi } from "@/lib/seo";
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { ApplyButton } from "@/components/site/ApplyButton";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export async function generateMetadata() {
   const { data } = await apiGetStatus("/pages/haqqimizda");
@@ -24,15 +25,12 @@ export default async function AboutPage() {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <span style={{ fontSize: 13, color: "rgba(255,255,255,.85)", fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase" }}>Haqqımızda</span>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(30px,4.6vw,50px)", letterSpacing: "-.025em", margin: "14px 0 0", lineHeight: 1.1, color: "#fff", maxWidth: 820 }}>
-            {p.h1 || "2014-cü ildən dünya dillərini Azərbaycana öyrədirik"}
-          </h1>
-          {p.lead && <p style={{ fontSize: 19, color: "rgba(255,255,255,.9)", margin: "20px 0 0", maxWidth: 640, lineHeight: 1.6 }}>{p.lead}</p>}
-        </div>
-      </section>
+      <PageBanner
+        eyebrow="Haqqımızda"
+        title={p.h1 || "2014-cü ildən dünya dillərini Azərbaycana öyrədirik"}
+        subtitle={p.lead}
+        mascot="about"
+      />
 
       {stats.length > 0 && (
         <section style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 28px 0" }}>

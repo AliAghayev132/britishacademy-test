@@ -2,6 +2,7 @@ import Link from "next/link";
 import { apiGet } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
 import { CourseCard, SectionHead } from "@/components/site/cards";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export const metadata = buildMetadata({
   title: "Kurslar",
@@ -38,14 +39,11 @@ export default async function CoursesHubPage() {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(32px,4.6vw,50px)", letterSpacing: "-.025em", margin: 0, color: "#fff" }}>Kurslarımız</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            Dil kurslarından beynəlxalq imtahanlara, kompüter və karyera proqramlarına qədər — istiqamətini seç.
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title="Kurslarımız"
+        subtitle="Dil kurslarından beynəlxalq imtahanlara, kompüter və karyera proqramlarına qədər — istiqamətini seç."
+        mascot="courses"
+      />
 
       {groups.map((cat) => {
         const list = byCat[String(cat._id)] || [];

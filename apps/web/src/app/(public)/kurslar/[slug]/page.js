@@ -7,6 +7,7 @@ import { PriceCards } from "@/components/site/PriceCards";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { CourseCard, SectionHead } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
+import { PageBanner } from "@/components/site/PageBanner";
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
@@ -53,21 +54,16 @@ async function CategoryHub({ cat }) {
   const courses = courseData?.courses || [];
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "30px 28px 60px" }}>
-          <nav aria-label="Breadcrumb" style={{ display: "flex", gap: 8, fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
-            <Link href="/" style={{ color: "rgba(255,255,255,.8)" }}>Ana səhifə</Link>
-            <span style={{ opacity: 0.5 }}>/</span>
-            <Link href="/kurslar" style={{ color: "rgba(255,255,255,.8)" }}>Kurslar</Link>
-            <span style={{ opacity: 0.5 }}>/</span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>{cat.name}</span>
-          </nav>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(30px,4.4vw,48px)", letterSpacing: "-.025em", margin: "18px 0 0", color: "#fff" }}>{cat.name}</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            {cat.lead || `${cat.name} üzrə bütün proqramlar və qeydiyyat.`}
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title={cat.name}
+        subtitle={cat.lead || `${cat.name} üzrə bütün proqramlar və qeydiyyat.`}
+        mascot="courses"
+        breadcrumb={[
+          { label: "Ana səhifə", href: "/" },
+          { label: "Kurslar", href: "/kurslar" },
+          { label: cat.name },
+        ]}
+      />
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
           {courses.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
@@ -124,24 +120,21 @@ export default async function CoursePage({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
       {/* Hero */}
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -90, right: "6%", width: 340, height: 340, borderRadius: "50%", background: "rgba(255,255,255,.13)", filter: "blur(22px)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "30px 28px 60px" }}>
-          <nav aria-label="Breadcrumb" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
-            <Link href="/" style={{ color: "rgba(255,255,255,.8)" }}>Ana səhifə</Link>
-            <span style={{ opacity: 0.5 }}>/</span>
-            <Link href={`/kurslar/${course.category?.slug || ""}`} style={{ color: "rgba(255,255,255,.8)" }}>{course.category?.name || "Kurslar"}</Link>
-            <span style={{ opacity: 0.5 }}>/</span>
-            <span style={{ color: "#fff", fontWeight: 600 }}>{course.title}</span>
-          </nav>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(30px,4.4vw,48px)", letterSpacing: "-.025em", margin: "18px 0 0", lineHeight: 1.12, color: "#fff", maxWidth: 900 }}>{course.h1 || course.title}</h1>
-          {course.lead && <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "18px 0 0", maxWidth: 660, lineHeight: 1.6 }}>{course.lead}</p>}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
-            <ApplyButton interest={course.title} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
-            <Link href="/elaqe" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)", color: "#fff", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99 }}>Əlaqə saxla</Link>
-          </div>
+      <PageBanner
+        title={course.h1 || course.title}
+        subtitle={course.lead}
+        mascot="courses"
+        breadcrumb={[
+          { label: "Ana səhifə", href: "/" },
+          { label: course.category?.name || "Kurslar", href: `/kurslar/${course.category?.slug || ""}` },
+          { label: course.title },
+        ]}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+          <ApplyButton interest={course.title} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
+          <Link href="/elaqe" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)", color: "#fff", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99 }}>Əlaqə saxla</Link>
         </div>
-      </section>
+      </PageBanner>
 
       {/* About + info card */}
       <section style={{ ...wrap, padding: "60px 28px 0" }}>

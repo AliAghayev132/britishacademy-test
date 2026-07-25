@@ -26,6 +26,13 @@ export function Hero({ hero, stats = [] }) {
     <section className="ba-hero" style={{ position: "relative", background: bg, overflow: "hidden", transition: "background .8s ease" }} ref={bgRef}>
       <div style={{ position: "absolute", top: -100, left: "8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.22), transparent 68%)", filter: "blur(20px)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -120, right: "6%", width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.16), transparent 68%)", filter: "blur(24px)", pointerEvents: "none" }} />
+      {/* mascot — /public/assets/mascot/hero.png (shows nothing if absent) */}
+      <span
+        aria-hidden="true"
+        style={{ position: "absolute", right: "3%", bottom: 0, width: 240, height: "84%", maxHeight: 300, backgroundImage: "url(/assets/mascot/hero.png)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 18px 30px rgba(0,0,0,.28))", pointerEvents: "none", zIndex: 0 }}
+        className="ba-hero-mascot"
+      />
+      <style>{`@media(max-width:820px){.ba-hero-mascot{display:none}}`}</style>
 
       <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", padding: "78px 28px 66px", textAlign: "center" }}>
         <h1 style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: "clamp(36px,5.2vw,56px)", lineHeight: 1.14, letterSpacing: "-.02em", color: "#fff", margin: 0 }}>

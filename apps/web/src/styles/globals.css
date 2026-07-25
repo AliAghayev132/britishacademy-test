@@ -118,10 +118,12 @@ img { display: block; max-width: 100%; }
 .ba-field:focus { border-color: var(--accent) !important; }
 
 /* Partner tiles — radial fill on hover */
-.ba-partner { position: relative; overflow: hidden; cursor: default; }
-.ba-partner .ba-pov { position:absolute; border-radius:50%; background:var(--accent); z-index:2; pointer-events:none; transform:scale(0); transform-origin:center; transition:transform .5s cubic-bezier(.2,.7,.2,1); }
-.ba-partner-name { position:relative; z-index:3; transition: color .35s ease, transform .35s ease, letter-spacing .35s ease; }
-.ba-partner:hover .ba-partner-name { color:#fff !important; transform:scale(1.08); letter-spacing:.03em; }
+/* Partners: neutral, non-clickable feel — just a subtle lift. No blue fill,
+   no white-on-white text. Logos will be placed inside these tiles. */
+.ba-partner { position: relative; cursor: default; transition: box-shadow .25s ease, border-color .25s ease; }
+.ba-partner:hover { box-shadow: 0 8px 22px rgba(20,20,45,.07); border-color: #E1E3EC !important; }
+.ba-partner .ba-pov { display: none; }
+.ba-partner-name { position: relative; z-index: 3; }
 
 /* News / cards */
 .ba-news-card { transition: transform .25s ease, box-shadow .25s ease; }
@@ -500,6 +502,94 @@ body.ba-home #qeydiyyat > div {
 }
 @media (max-width: 980px) { .ba-wall { columns: 2; } }
 @media (max-width: 620px) { .ba-wall { columns: 1; } }
+
+/* ============================================================
+   Page banner — brand-gradient hero for inner pages, with a mascot slot.
+   The mascot is a CSS background so a missing file shows nothing (no broken
+   image icon) and it works in Server Components (no JS/onError needed).
+   ============================================================ */
+.ba-banner {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(90% 130% at 88% -10%, rgba(255,255,255,.10), transparent 55%),
+    linear-gradient(120deg, #001478 0%, #14329E 58%, #B00E28 132%);
+}
+.ba-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.13) 1.3px, transparent 1.3px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(circle at 78% 30%, transparent 26%, #000 82%);
+  mask-image: radial-gradient(circle at 78% 30%, transparent 26%, #000 82%);
+  pointer-events: none;
+}
+.ba-banner-inner { position: relative; z-index: 1; }
+.ba-banner-mascot {
+  position: absolute;
+  right: 4%;
+  bottom: 0;
+  width: 260px;
+  height: 92%;
+  max-height: 280px;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: contain;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.28));
+  pointer-events: none;
+  z-index: 1;
+  animation: ba-float 7s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .ba-banner-mascot { animation: none; } }
+@media (max-width: 900px) { .ba-banner-mascot { width: 190px; opacity: .5; } }
+@media (max-width: 680px) { .ba-banner-mascot { display: none; } }
+
+/* ============================================================
+   Route loader — walking mascot shown during client navigation.
+   ============================================================ */
+.ba-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+}
+.ba-loader-inner { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.ba-loader-mascot {
+  width: 120px;
+  height: 120px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  animation: ba-walk 0.7s ease-in-out infinite;
+}
+/* Fallback mark when no mascot image is present */
+.ba-loader-mark {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: var(--accent); color: #fff;
+  display: grid; place-items: center;
+  font-family: "Poppins"; font-weight: 800; font-size: 30px;
+  animation: ba-walk 0.7s ease-in-out infinite;
+}
+.ba-loader-bar {
+  width: 180px; height: 4px; border-radius: 99px;
+  background: rgba(0, 21, 122, 0.14); overflow: hidden;
+}
+.ba-loader-bar > span {
+  display: block; height: 100%; width: 40%; border-radius: 99px;
+  background: var(--accent); animation: ba-slide 1s ease-in-out infinite;
+}
+@keyframes ba-walk {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+@keyframes ba-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(360%); }
+}
 
 /* FAQ sualı klaviatura ilə işlənə bilir — fokus görünsün */
 .ba-faq-q:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; border-radius: 14px; }

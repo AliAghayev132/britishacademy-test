@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { apiGet } from "@/lib/api";
 import { SiteProvider } from "@/components/site/SiteProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { RouteLoader } from "@/components/site/RouteLoader";
 
 /**
  * Public marketing shell. Fetches the site chrome data server-side (SSR nav +
@@ -47,6 +49,9 @@ export default async function PublicLayout({ children }) {
 
   return (
     <SiteProvider branches={branches}>
+      <Suspense fallback={null}>
+        <RouteLoader />
+      </Suspense>
       <Header site={settings} nav={nav} services={services} destinations={destinations} />
       <main>{children}</main>
       <Footer site={settings} />

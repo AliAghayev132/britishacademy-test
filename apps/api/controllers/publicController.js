@@ -162,10 +162,25 @@ const getBranchBySlug = asyncHandler(async (req, res) => {
 
 const listTeachers = asyncHandler(async (req, res) => {
   const filter = {};
+
   if (req.query.branch) {
     const b = await Branch.findOne({ slug: req.query.branch });
-    if (b) filter.branches = b._id;
+    filter.branches = b ? b._id : null; // unknown branch → no results
   }
+
+  // Filter by course via the timetable: teachers who run a group of that course.
+  if (req.query.course) {
+    const c = await Course.findOne({ slug: req.query.course });
+    const ids = c
+      ? await CourseGroup.find({
+          course: c._id,
+          isActive: true,
+          isDeleted: false,
+        }).distinct("teacher")
+      : [];
+    filter._id = { $in: ids };
+  }
+
   const teachers = await Teacher.findPublic(filter).populate(
     "branches",
     "name slug",

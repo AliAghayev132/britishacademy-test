@@ -90,11 +90,11 @@ img { display: block; max-width: 100%; }
 .ba-modal-close:hover { background:#EEF0F6; }
 .ba-field:focus { border-color: var(--accent) !important; }
 
-/* Partner tiles — radial fill on hover */
-.ba-partner { position: relative; overflow: hidden; cursor: default; }
-.ba-partner .ba-pov { position:absolute; border-radius:50%; background:var(--accent); z-index:2; pointer-events:none; transform:scale(0); transform-origin:center; transition:transform .5s cubic-bezier(.2,.7,.2,1); }
-.ba-partner-name { position:relative; z-index:3; transition: color .35s ease, transform .35s ease, letter-spacing .35s ease; }
-.ba-partner:hover .ba-partner-name { color:#fff !important; transform:scale(1.08); letter-spacing:.03em; }
+/* Partner tiles — neutral (logos placed inside); subtle lift only */
+.ba-partner { position: relative; cursor: default; transition: box-shadow .25s ease, border-color .25s ease; }
+.ba-partner:hover { box-shadow: 0 8px 22px rgba(20,20,45,.07); border-color: #E1E3EC !important; }
+.ba-partner .ba-pov { display: none; }
+.ba-partner-name { position: relative; z-index: 3; }
 
 /* News / cards */
 .ba-news-card { transition: transform .25s ease, box-shadow .25s ease; }

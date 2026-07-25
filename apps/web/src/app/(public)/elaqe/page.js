@@ -1,6 +1,7 @@
 import { apiGet } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
 import { ContactForm } from "@/components/site/ContactForm";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export const metadata = buildMetadata({
   title: "Əlaqə",
@@ -26,14 +27,11 @@ export default async function ContactPage() {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(32px,4.6vw,50px)", letterSpacing: "-.025em", margin: 0, color: "#fff" }}>Əlaqə</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title="Əlaqə"
+        subtitle="Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır."
+        mascot="contact"
+      />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>

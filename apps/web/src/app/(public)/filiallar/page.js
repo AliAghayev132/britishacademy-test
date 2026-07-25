@@ -1,5 +1,6 @@
 import { apiGet } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
+import { PageBanner } from "@/components/site/PageBanner";
 
 export const metadata = buildMetadata({
   title: "Filiallar",
@@ -16,14 +17,11 @@ export default async function BranchesPage() {
 
   return (
     <>
-      <section style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
-        <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "56px 28px 60px" }}>
-          <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(32px,4.6vw,50px)", letterSpacing: "-.025em", margin: 0, color: "#fff" }}>Filiallar</h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,.92)", margin: "16px 0 0", maxWidth: 640, lineHeight: 1.6 }}>
-            Bakının {branches.length} nöqtəsində — sənə ən yaxın filialı seç.
-          </p>
-        </div>
-      </section>
+      <PageBanner
+        title="Filiallar"
+        subtitle={`Bakının ${branches.length} nöqtəsində — sənə ən yaxın filialı seç.`}
+        mascot="filiallar"
+      />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-2 ba-pricegrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 18 }}>
