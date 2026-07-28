@@ -12,12 +12,14 @@ import { usePathname, useSearchParams } from "next/navigation";
  * hides once the pathname/search actually changes.
  */
 export function RouteLoader() {
+  // ── State / derived ──
   const pathname = usePathname();
   const search = useSearchParams();
   const [active, setActive] = useState(false);
   const key = pathname + "?" + search.toString();
   const current = useRef(key);
 
+  // ── Effects ──
   // Hide as soon as the route has changed.
   useEffect(() => {
     if (current.current !== key) {

@@ -9,11 +9,13 @@ import { ApplyButton } from "./ApplyButton";
  * backdrop. Respects prefers-reduced-motion.
  */
 export function Hero({ hero, stats = [] }) {
+  // ── Derived / state ──
   const words = hero?.words?.length ? hero.words : ["ingiliscə danış"];
   const colors = hero?.colors?.length ? hero.colors : ["#001478"];
   const [i, setI] = useState(0);
   const bgRef = useRef(null);
 
+  // ── Effects ──
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => setI((n) => (n + 1) % words.length), 3000);
@@ -22,6 +24,7 @@ export function Hero({ hero, stats = [] }) {
 
   const bg = colors[i % colors.length];
 
+  // ── Render ──
   return (
     <section className="ba-hero" style={{ position: "relative", background: bg, overflow: "hidden", transition: "background .8s ease" }} ref={bgRef}>
       <div style={{ position: "absolute", top: -100, left: "8%", width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.22), transparent 68%)", filter: "blur(20px)", pointerEvents: "none" }} />

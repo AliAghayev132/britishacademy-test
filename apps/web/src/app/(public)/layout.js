@@ -1,5 +1,10 @@
+// React
 import { Suspense } from "react";
+
+// Data
 import { apiGet } from "@/lib/api";
+
+// Components
 import { SiteProvider } from "@/components/site/SiteProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -11,6 +16,7 @@ import { RouteLoader } from "@/components/site/RouteLoader";
  * client apply-modal/WhatsApp overlays.
  */
 export default async function PublicLayout({ children }) {
+  // ── data fetching ──
   const [site, cats, coursesData, destData, branchData] = await Promise.all([
     apiGet("/site"),
     apiGet("/categories"),
@@ -26,6 +32,7 @@ export default async function PublicLayout({ children }) {
   const destinations = destData?.destinations || [];
   const branches = branchData?.branches || [];
 
+  // ── derived values ──
   // Build the mega-menu: each course category with its courses.
   const coursesByCat = {};
   for (const c of courses) {
@@ -47,6 +54,7 @@ export default async function PublicLayout({ children }) {
     return { label: m.label, href: m.href || "/" };
   });
 
+  // ── render ──
   return (
     <SiteProvider branches={branches}>
       <Suspense fallback={null}>

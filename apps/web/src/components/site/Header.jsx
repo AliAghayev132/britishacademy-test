@@ -1,22 +1,98 @@
 "use client";
 
+// React
+import { memo, useCallback, useState } from "react";
+// Next
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+// Local
 import { useApply } from "./SiteProvider";
 
+// ── Constants ──
 const caret = (
   <svg className="ba-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
 
+// ── Subcomponents ──
+const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, destinations }) {
+  if (item.variant === "mega") {
+    return (
+      <div className={`ba-nav-item has-mega${active ? " is-active" : ""}`}>
+        <Link href={item.href}>{item.label} {caret}</Link>
+        <div className="ba-mega"><div className="ba-mega-inner">
+          {services.map((g) => (
+            <div key={g.category._id} className="ba-mega-col">
+              <Link className="ba-mega-title" href={`/kurslar/${g.category.slug}`}>{g.category.name}</Link>
+              <div className="ba-mega-links">
+                {g.courses.map((c) => (
+                  <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div></div>
+      </div>
+    );
+  }
+  if (item.variant === "destinations") {
+    return (
+      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
+        <Link href={item.href}>{item.label} {caret}</Link>
+        <div className="ba-dd ba-dd--right ba-dd--2col">
+          {destinations.map((d) => (
+            <Link key={d._id} href={`/xaricde-tehsil/${d.slug}`}>{d.country}</Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={`ba-nav-item${active ? " is-active" : ""}`}>
+      <Link href={item.href}>{item.label}</Link>
+    </div>
+  );
+});
+
+const MobileNavItem = memo(function MobileNavItem({ item, services, destinations, onClose }) {
+  if (item.variant) {
+    return (
+      <details className="ba-macc">
+        <summary>{item.label}</summary>
+        <div className="ba-macc-body">
+          <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{item.label} — hamısı</Link>
+          {item.variant === "mega" &&
+            services.flatMap((g) => [
+              <Link key={g.category._id} className="ba-msub ba-msub--head" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name}</Link>,
+              ...g.courses.map((c) => (
+                <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={onClose}>{c.title}</Link>
+              )),
+            ])}
+          {item.variant === "destinations" &&
+            destinations.map((d) => (
+              <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
+            ))}
+        </div>
+      </details>
+    );
+  }
+  return (
+    <Link className="ba-mrow" href={item.href} onClick={onClose}>{item.label}</Link>
+  );
+});
+
 export function Header({ site, nav = [], services = [], destinations = [] }) {
+  // ── State / derived ──
   const pathname = usePathname();
   const { open } = useApply();
   const [mobile, setMobile] = useState(false);
   const isActive = (href) => href && href !== "/" && pathname.startsWith(href);
 
+  // ── Handlers ──
+  const closeMobile = useCallback(() => setMobile(false), []);
+
+  // ── Render ──
   return (
     <div className="ba-fixhead" style={{ position: "sticky", top: 0, zIndex: 60 }}>
       {/* top bar */}
@@ -38,45 +114,15 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
           </Link>
 
           <nav className="ba-nav">
-            {nav.map((item) => {
-              const active = isActive(item.href);
-              if (item.variant === "mega") {
-                return (
-                  <div key={item.label} className={`ba-nav-item has-mega${active ? " is-active" : ""}`}>
-                    <Link href={item.href}>{item.label} {caret}</Link>
-                    <div className="ba-mega"><div className="ba-mega-inner">
-                      {services.map((g) => (
-                        <div key={g.category._id} className="ba-mega-col">
-                          <Link className="ba-mega-title" href={`/kurslar/${g.category.slug}`}>{g.category.name}</Link>
-                          <div className="ba-mega-links">
-                            {g.courses.map((c) => (
-                              <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div></div>
-                  </div>
-                );
-              }
-              if (item.variant === "destinations") {
-                return (
-                  <div key={item.label} className={`ba-nav-item${active ? " is-active" : ""}`}>
-                    <Link href={item.href}>{item.label} {caret}</Link>
-                    <div className="ba-dd ba-dd--right ba-dd--2col">
-                      {destinations.map((d) => (
-                        <Link key={d._id} href={`/xaricde-tehsil/${d.slug}`}>{d.country}</Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <div key={item.label} className={`ba-nav-item${active ? " is-active" : ""}`}>
-                  <Link href={item.href}>{item.label}</Link>
-                </div>
-              );
-            })}
+            {nav.map((item) => (
+              <DesktopNavItem
+                key={item.label}
+                item={item}
+                active={isActive(item.href)}
+                services={services}
+                destinations={destinations}
+              />
+            ))}
           </nav>
 
           <button
@@ -103,29 +149,15 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
       {/* mobile drawer */}
       <div className={`ba-mnav${mobile ? " open" : ""}`} onClick={() => setMobile(false)}>
         <div className="ba-mnav-inner" onClick={(e) => e.stopPropagation()}>
-          {nav.map((item) =>
-            item.variant ? (
-              <details key={item.label} className="ba-macc">
-                <summary>{item.label}</summary>
-                <div className="ba-macc-body">
-                  <Link className="ba-msub ba-msub--all" href={item.href} onClick={() => setMobile(false)}>{item.label} — hamısı</Link>
-                  {item.variant === "mega" &&
-                    services.flatMap((g) => [
-                      <Link key={g.category._id} className="ba-msub ba-msub--head" href={`/kurslar/${g.category.slug}`} onClick={() => setMobile(false)}>{g.category.name}</Link>,
-                      ...g.courses.map((c) => (
-                        <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={() => setMobile(false)}>{c.title}</Link>
-                      )),
-                    ])}
-                  {item.variant === "destinations" &&
-                    destinations.map((d) => (
-                      <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={() => setMobile(false)}>{d.country}</Link>
-                    ))}
-                </div>
-              </details>
-            ) : (
-              <Link key={item.label} className="ba-mrow" href={item.href} onClick={() => setMobile(false)}>{item.label}</Link>
-            ),
-          )}
+          {nav.map((item) => (
+            <MobileNavItem
+              key={item.label}
+              item={item}
+              services={services}
+              destinations={destinations}
+              onClose={closeMobile}
+            />
+          ))}
         </div>
       </div>
     </div>

@@ -1,7 +1,11 @@
+// Next
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { apiGetStatus, isMissing } from "@/lib/api";
-import { metaFromApi, SITE_URL } from "@/lib/seo";
+
+// Data
+import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
+
+// Components
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { PriceCards } from "@/components/site/PriceCards";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
@@ -9,11 +13,12 @@ import { CourseCard, SectionHead } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
+// Utils / SEO
+import { metaFromApi, buildMetadata, SITE_URL } from "@/lib/seo";
+
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
-import { apiGet } from "@/lib/api";
-import { buildMetadata } from "@/lib/seo";
-
+// ── Category hub helper ──
 /** The /kurslar/<slug> namespace serves BOTH courses and category hubs. */
 async function findCategory(slug) {
   const catData = await apiGet("/categories");
@@ -24,6 +29,7 @@ async function findCategory(slug) {
   return null;
 }
 
+// ── Metadata ──
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const { data } = await apiGetStatus(`/courses/${slug}`);
@@ -48,6 +54,7 @@ export async function generateMetadata({ params }) {
   return {};
 }
 
+// ── Category hub ──
 /** Category hub: boxes of the category's courses. */
 async function CategoryHub({ cat }) {
   const courseData = await apiGet(`/courses?category=${cat.slug}`);
@@ -74,10 +81,40 @@ async function CategoryHub({ cat }) {
   );
 }
 
+// ── Subcomponents ──
+/** Sidebar with course info rows + apply CTA. */
+function InfoSidebar({ course }) {
+  return (
+    <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF", position: "sticky", top: 100 }}>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+      {(course.info || []).map((r, i) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
+          <span style={{ color: "#63636F" }}>{r.label}</span>
+          <span style={{ color: "#16161C", fontWeight: 600 }}>{r.value}</span>
+        </div>
+      ))}
+      <ApplyButton interest={course.title} className="ba-btn-primary" style={{ width: "100%", marginTop: 20, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: 14, borderRadius: 13, cursor: "pointer" }} />
+    </aside>
+  );
+}
+
+/** "Digər istiqamətlər" related-courses grid. */
+function RelatedCourses({ related }) {
+  return (
+    <section style={{ ...wrap, padding: "56px 28px 0" }}>
+      <SectionHead title="Digər istiqamətlər" />
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+        {related.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
+      </div>
+    </section>
+  );
+}
+
 export default async function CoursePage({ params }) {
   const { slug } = await params;
   const res = await apiGetStatus(`/courses/${slug}`);
 
+  // ── Data fetching + notFound guard ──
   // isMissing throws when the API is unreachable, so an outage renders a 5xx
   // instead of silently 404-ing a real course.
   if (isMissing(res, "course")) {
@@ -88,7 +125,8 @@ export default async function CoursePage({ params }) {
 
   const { course, teachersByBranch = [], related = [] } = res.data;
 
-  // JSON-LD: Course + Breadcrumb + FAQPage
+  // ── JSON-LD ──
+  // Course + Breadcrumb + FAQPage
   const ld = [
     {
       "@context": "https://schema.org",
@@ -115,6 +153,7 @@ export default async function CoursePage({ params }) {
     });
   }
 
+  // ── Render ──
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
@@ -149,16 +188,7 @@ export default async function CoursePage({ params }) {
               </>
             )}
           </div>
-          <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF", position: "sticky", top: 100 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
-            {(course.info || []).map((r, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
-                <span style={{ color: "#63636F" }}>{r.label}</span>
-                <span style={{ color: "#16161C", fontWeight: 600 }}>{r.value}</span>
-              </div>
-            ))}
-            <ApplyButton interest={course.title} className="ba-btn-primary" style={{ width: "100%", marginTop: 20, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: 14, borderRadius: 13, cursor: "pointer" }} />
-          </aside>
+          <InfoSidebar course={course} />
         </div>
       </section>
 
@@ -178,14 +208,7 @@ export default async function CoursePage({ params }) {
       )}
 
       {/* Related */}
-      {related.length > 0 && (
-        <section style={{ ...wrap, padding: "56px 28px 0" }}>
-          <SectionHead title="Digər istiqamətlər" />
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-            {related.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
-          </div>
-        </section>
-      )}
+      {related.length > 0 && <RelatedCourses related={related} />}
 
       {/* CTA */}
       <section style={{ ...wrap, padding: "64px 28px 0" }}>

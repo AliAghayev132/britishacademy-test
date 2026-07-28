@@ -1,9 +1,14 @@
+// Data
 import { apiGetStatus, apiGet } from "@/lib/api";
-import { metaFromApi } from "@/lib/seo";
+
+// Components
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
+
+// Utils / SEO
+import { metaFromApi } from "@/lib/seo";
 
 export async function generateMetadata() {
   const { data } = await apiGetStatus("/pages/haqqimizda");
@@ -15,14 +20,29 @@ export async function generateMetadata() {
   });
 }
 
+// ── Subcomponents ──
+
+function StatCard({ stat }) {
+  return (
+    <div style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 28 }}>
+      <div style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 40, color: "#14141C", letterSpacing: "-.02em" }}>{stat.value}</div>
+      <div style={{ fontSize: 14.5, color: "#63636F", marginTop: 6 }}>{stat.label}</div>
+    </div>
+  );
+}
+
 export default async function AboutPage() {
+  // ── data fetching ──
   const [{ data }, siteData] = await Promise.all([
     apiGetStatus("/pages/haqqimizda"),
     apiGet("/site"),
   ]);
+
+  // ── derived values ──
   const p = data?.page || {};
   const stats = siteData?.settings?.stats || [];
 
+  // ── render ──
   return (
     <>
       <PageBanner
@@ -35,12 +55,7 @@ export default async function AboutPage() {
       {stats.length > 0 && (
         <section style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 28px 0" }}>
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(stats.length, 4)},1fr)`, gap: 20 }}>
-            {stats.map((s) => (
-              <div key={s.label} style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 28 }}>
-                <div style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 40, color: "#14141C", letterSpacing: "-.02em" }}>{s.value}</div>
-                <div style={{ fontSize: 14.5, color: "#63636F", marginTop: 6 }}>{s.label}</div>
-              </div>
-            ))}
+            {stats.map((s) => <StatCard key={s.label} stat={s} />)}
           </div>
         </section>
       )}

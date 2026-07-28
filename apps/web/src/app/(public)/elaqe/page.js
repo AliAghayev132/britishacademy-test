@@ -1,7 +1,12 @@
+// Data
 import { apiGet } from "@/lib/api";
-import { buildMetadata } from "@/lib/seo";
+
+// Components
 import { ContactForm } from "@/components/site/ContactForm";
 import { PageBanner } from "@/components/site/PageBanner";
+
+// Utils / SEO
+import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Əlaqə",
@@ -10,11 +15,26 @@ export const metadata = buildMetadata({
   path: "/elaqe",
 });
 
+// ── Subcomponents ──
+
+function ContactInfoCard({ icon, title, value }) {
+  return (
+    <div style={{ border: "1px solid #ECEDF2", borderRadius: 18, padding: 24, background: "#fff" }}>
+      <span style={{ display: "grid", placeItems: "center", width: 48, height: 48, borderRadius: 13, background: "var(--accent-soft)", fontSize: 22 }}>{icon}</span>
+      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16, color: "#16161C", margin: "16px 0 8px" }}>{title}</h3>
+      <p style={{ fontSize: 14.5, color: "#63636F", lineHeight: 1.6, margin: 0 }}>{value}</p>
+    </div>
+  );
+}
+
 export default async function ContactPage() {
+  // ── data fetching ──
   const [siteData, branchData] = await Promise.all([
     apiGet("/site"),
     apiGet("/branches"),
   ]);
+
+  // ── derived values ──
   const c = siteData?.settings?.contact || {};
   const branches = branchData?.branches || [];
 
@@ -25,6 +45,7 @@ export default async function ContactPage() {
     ["🕐", "İş saatları", c.hours],
   ].filter(([, , v]) => v);
 
+  // ── render ──
   return (
     <>
       <PageBanner
@@ -35,13 +56,7 @@ export default async function ContactPage() {
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
-          {cards.map(([ic, t, v]) => (
-            <div key={t} style={{ border: "1px solid #ECEDF2", borderRadius: 18, padding: 24, background: "#fff" }}>
-              <span style={{ display: "grid", placeItems: "center", width: 48, height: 48, borderRadius: 13, background: "var(--accent-soft)", fontSize: 22 }}>{ic}</span>
-              <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16, color: "#16161C", margin: "16px 0 8px" }}>{t}</h3>
-              <p style={{ fontSize: 14.5, color: "#63636F", lineHeight: 1.6, margin: 0 }}>{v}</p>
-            </div>
-          ))}
+          {cards.map(([ic, t, v]) => <ContactInfoCard key={t} icon={ic} title={t} value={v} />)}
         </div>
 
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 32, alignItems: "stretch" }}>

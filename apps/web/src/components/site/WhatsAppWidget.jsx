@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** Floating WhatsApp button that opens an upward branch picker. */
 export function WhatsAppWidget({ branches = [] }) {
+  // ── State / derived ──
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const list = branches.filter((b) => b.whatsapp);
+  const list = useMemo(() => branches.filter((b) => b.whatsapp), [branches]);
 
+  // ── Effects ──
   useEffect(() => {
     const onDoc = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -21,9 +23,13 @@ export function WhatsAppWidget({ branches = [] }) {
     };
   }, []);
 
+  // ── Handlers ──
+  const close = useCallback(() => setOpen(false), []);
+
   const single = list.length <= 1;
   const href = single && list[0] ? `https://wa.me/${list[0].whatsapp}` : undefined;
 
+  // ── Render ──
   return (
     <div ref={ref}>
       {open && list.length > 1 && (
@@ -36,7 +42,7 @@ export function WhatsAppWidget({ branches = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               role="menuitem"
-              onClick={() => setOpen(false)}
+              onClick={close}
             >
               <span className="ba-wa-pop-ic">
                 <svg viewBox="0 0 32 32" width="17" height="17" fill="#fff">

@@ -1,12 +1,20 @@
+// Next
 import { notFound } from "next/navigation";
 import Link from "next/link";
+
+// Data
 import { apiGetStatus, isMissing } from "@/lib/api";
-import { metaFromApi } from "@/lib/seo";
+
+// Components
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
+// Utils / SEO
+import { metaFromApi } from "@/lib/seo";
+
+// ── Metadata ──
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const { data } = await apiGetStatus(`/destinations/${slug}`);
@@ -19,12 +27,48 @@ export async function generateMetadata({ params }) {
   });
 }
 
+// ── Subcomponents ──
+/** "Universitetlər" list. */
+function UniversitiesList({ universities }) {
+  return (
+    <>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "36px 0 16px" }}>Universitetlər</h2>
+      <ul role="list" style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+        {universities.map((u, i) => (
+          <li key={i} style={{ display: "flex", gap: 11, fontSize: 16, color: "#3c3c47" }}>
+            <span style={{ color: "var(--accent)", fontWeight: 800 }}>🎓</span>
+            <span>{u.name}{u.city ? ` — ${u.city}` : ""}</span>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/** Sidebar with quick facts. */
+function FactsSidebar({ facts }) {
+  return (
+    <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF" }}>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+      {facts.map((f, i) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
+          <span style={{ color: "#63636F" }}>{f.label}</span>
+          <span style={{ color: "#16161C", fontWeight: 600 }}>{f.value}</span>
+        </div>
+      ))}
+    </aside>
+  );
+}
+
 export default async function DestinationPage({ params }) {
   const { slug } = await params;
+
+  // ── Data fetching + notFound guard ──
   const res = await apiGetStatus(`/destinations/${slug}`);
   if (isMissing(res, "destination")) notFound();
   const d = res.data.destination;
 
+  // ── Render ──
   return (
     <>
       <PageBanner
@@ -50,32 +94,10 @@ export default async function DestinationPage({ params }) {
               </p>
             )}
 
-            {(d.universities || []).length > 0 && (
-              <>
-                <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "36px 0 16px" }}>Universitetlər</h2>
-                <ul role="list" style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
-                  {d.universities.map((u, i) => (
-                    <li key={i} style={{ display: "flex", gap: 11, fontSize: 16, color: "#3c3c47" }}>
-                      <span style={{ color: "var(--accent)", fontWeight: 800 }}>🎓</span>
-                      <span>{u.name}{u.city ? ` — ${u.city}` : ""}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+            {(d.universities || []).length > 0 && <UniversitiesList universities={d.universities} />}
           </div>
 
-          {(d.facts || []).length > 0 && (
-            <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF" }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
-              {d.facts.map((f, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
-                  <span style={{ color: "#63636F" }}>{f.label}</span>
-                  <span style={{ color: "#16161C", fontWeight: 600 }}>{f.value}</span>
-                </div>
-              ))}
-            </aside>
-          )}
+          {(d.facts || []).length > 0 && <FactsSidebar facts={d.facts} />}
         </div>
       </section>
 

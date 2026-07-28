@@ -1,10 +1,27 @@
 "use client";
 
-import { useState } from "react";
+// React
+import { memo, useCallback, useState } from "react";
+// Next
 import Link from "next/link";
+// Data (RTK Query)
 import { useGetTeachersQuery } from "@/store/api/publicApi";
 
-function TeacherCard({ t }) {
+// ── Constants ──
+const chip = (active) => ({
+  padding: "9px 18px",
+  borderRadius: 99,
+  fontSize: 14,
+  fontWeight: 700,
+  cursor: "pointer",
+  border: "1px solid",
+  borderColor: active ? "var(--accent)" : "#E4E6EF",
+  background: active ? "var(--accent)" : "#fff",
+  color: active ? "#fff" : "#4C4C58",
+});
+
+// ── Subcomponents ──
+const TeacherCard = memo(function TeacherCard({ t }) {
   return (
     <Link
       href={`/muellimler/${t.slug}`}
@@ -29,7 +46,32 @@ function TeacherCard({ t }) {
       <span style={{ display: "inline-block", marginTop: 14, color: "var(--accent)", fontWeight: 700, fontSize: 13.5 }}>Profilə bax →</span>
     </Link>
   );
-}
+});
+
+const FilterBar = memo(function FilterBar({ courses, course, onReset, onChange }) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
+      <span style={{ fontWeight: 700, fontSize: 14.5, color: "#63636F" }}>Kursa görə süz:</span>
+      <button
+        onClick={onReset}
+        style={chip(!course)}
+      >
+        Hamısı
+      </button>
+      <select
+        value={course}
+        onChange={onChange}
+        className="ba-field"
+        style={{ border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "9px 14px", fontSize: 14.5, fontFamily: "inherit", cursor: "pointer", color: "#14141C", background: "#fff", minWidth: 220 }}
+      >
+        <option value="">Kurs seç…</option>
+        {courses.map((c) => (
+          <option key={c._id} value={c.slug}>{c.title}</option>
+        ))}
+      </select>
+    </div>
+  );
+});
 
 /**
  * Teacher grid with a course filter. Server passes the initial (unfiltered)
@@ -37,36 +79,25 @@ function TeacherCard({ t }) {
  * (`/api/teachers?course=<slug>`), so the first paint is SSR and instant.
  */
 export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
+  // ── State / data ──
   const [course, setCourse] = useState("");
   const { data, isFetching } = useGetTeachersQuery(
     course ? { course } : {},
     { skip: !course }, // no request until a filter is chosen — use SSR data
   );
+
+  // ── Derived ──
   const teachers = course ? data?.data?.teachers || [] : initialTeachers;
 
+  // ── Handlers ──
+  const handleReset = useCallback(() => setCourse(""), []);
+  const handleChange = useCallback((e) => setCourse(e.target.value), []);
+
+  // ── Render ──
   return (
     <>
       {courses.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
-          <span style={{ fontWeight: 700, fontSize: 14.5, color: "#63636F" }}>Kursa görə süz:</span>
-          <button
-            onClick={() => setCourse("")}
-            style={chip(!course)}
-          >
-            Hamısı
-          </button>
-          <select
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
-            className="ba-field"
-            style={{ border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "9px 14px", fontSize: 14.5, fontFamily: "inherit", cursor: "pointer", color: "#14141C", background: "#fff", minWidth: 220 }}
-          >
-            <option value="">Kurs seç…</option>
-            {courses.map((c) => (
-              <option key={c._id} value={c.slug}>{c.title}</option>
-            ))}
-          </select>
-        </div>
+        <FilterBar courses={courses} course={course} onReset={handleReset} onChange={handleChange} />
       )}
 
       {teachers.length === 0 ? (
@@ -79,15 +110,3 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
     </>
   );
 }
-
-const chip = (active) => ({
-  padding: "9px 18px",
-  borderRadius: 99,
-  fontSize: 14,
-  fontWeight: 700,
-  cursor: "pointer",
-  border: "1px solid",
-  borderColor: active ? "var(--accent)" : "#E4E6EF",
-  background: active ? "var(--accent)" : "#fff",
-  color: active ? "#fff" : "#4C4C58",
-});

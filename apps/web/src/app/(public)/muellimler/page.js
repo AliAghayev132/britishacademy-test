@@ -1,7 +1,12 @@
+// Data
 import { apiGet } from "@/lib/api";
-import { buildMetadata } from "@/lib/seo";
+
+// Components
 import { PageBanner } from "@/components/site/PageBanner";
 import { TeacherBrowser } from "@/components/site/TeacherBrowser";
+
+// Utils / SEO
+import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Müəllimlər",
@@ -11,6 +16,7 @@ export const metadata = buildMetadata({
 });
 
 export default async function TeachersPage() {
+  // ── data fetching ──
   const [teacherData, courseData] = await Promise.all([
     apiGet("/teachers"),
     apiGet("/courses"),
@@ -18,6 +24,7 @@ export default async function TeachersPage() {
   const teachers = teacherData?.teachers || [];
   const courses = courseData?.courses || [];
 
+  // ── render ──
   return (
     <>
       <PageBanner

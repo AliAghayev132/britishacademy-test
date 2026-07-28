@@ -1,16 +1,51 @@
+// Next
+import Link from "next/link";
+
+// Data
 import { apiGet } from "@/lib/api";
-import { buildMetadata } from "@/lib/seo";
+
+// Components
 import { Hero } from "@/components/site/Hero";
 import { CourseCard, DestinationCard, TestimonialCard, SectionHead } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
-import Link from "next/link";
+
+// Utils / SEO
+import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({ path: "/" });
 
 const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 
+// ── Subcomponents ──
+
+function AdvantageCard({ advantage, index }) {
+  const a = advantage;
+  return (
+    <div className="ba-adv2" style={{ position: "relative", background: "#F7F8FB", border: "1px solid #ECEDF2", borderRadius: 20, padding: "30px 26px", "--accent": a.color, "--accent-soft": `${a.color}1f` }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="ba-adv2-ic" style={{ width: 50, height: 50, borderRadius: 13, background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center", fontSize: 24 }}>★</div>
+        <span className="ba-adv2-n" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 34, color: "#E4E6EF" }}>{String(index + 1).padStart(2, "0")}</span>
+      </div>
+      <h3 className="ba-adv2-t" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "22px 0 0", color: "#17171F" }}>{a.title}</h3>
+      <p className="ba-adv2-d" style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{a.text}</p>
+    </div>
+  );
+}
+
+function PartnerCard({ partner }) {
+  return (
+    <div className="ba-partner" style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 14, height: 92, display: "grid", placeItems: "center", padding: 12 }}>
+      <div className="ba-pov"></div>
+      <span className="ba-partner-name" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 15, color: "#54545F", textAlign: "center" }}>{partner.name}</span>
+    </div>
+  );
+}
+
 export default async function HomePage() {
+  // ── data fetching ──
   const home = await apiGet("/home");
+
+  // ── derived values ──
   const s = home?.settings || {};
   const courses = home?.courses || [];
   const advantages = home?.advantages || [];
@@ -18,6 +53,7 @@ export default async function HomePage() {
   const testimonials = (home?.testimonials || []).filter((t) => t.type === "text");
   const partners = home?.partners || [];
 
+  // ── render ──
   return (
     <>
       <Hero hero={s.hero} stats={s.stats} />
@@ -34,16 +70,7 @@ export default async function HomePage() {
       <section style={{ ...wrap, padding: "84px 28px 20px" }}>
         <SectionHead title="Üstünlüklərimiz" sub="nəyə görə British Academy?" />
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
-          {advantages.map((a, i) => (
-            <div key={a._id} className="ba-adv2" style={{ position: "relative", background: "#F7F8FB", border: "1px solid #ECEDF2", borderRadius: 20, padding: "30px 26px", "--accent": a.color, "--accent-soft": `${a.color}1f` }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div className="ba-adv2-ic" style={{ width: 50, height: 50, borderRadius: 13, background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center", fontSize: 24 }}>★</div>
-                <span className="ba-adv2-n" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 34, color: "#E4E6EF" }}>{String(i + 1).padStart(2, "0")}</span>
-              </div>
-              <h3 className="ba-adv2-t" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "22px 0 0", color: "#17171F" }}>{a.title}</h3>
-              <p className="ba-adv2-d" style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{a.text}</p>
-            </div>
-          ))}
+          {advantages.map((a, i) => <AdvantageCard key={a._id} advantage={a} index={i} />)}
         </div>
       </section>
 
@@ -81,12 +108,7 @@ export default async function HomePage() {
           <div style={{ ...wrap, padding: "70px 28px" }}>
             <SectionHead title="Tərəfdaşlarımız" sub="bizə güvənənlər" />
             <div className="grid-6" style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 16 }}>
-              {partners.map((p) => (
-                <div key={p._id} className="ba-partner" style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 14, height: 92, display: "grid", placeItems: "center", padding: 12 }}>
-                  <div className="ba-pov"></div>
-                  <span className="ba-partner-name" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 15, color: "#54545F", textAlign: "center" }}>{p.name}</span>
-                </div>
-              ))}
+              {partners.map((p) => <PartnerCard key={p._id} partner={p} />)}
             </div>
           </div>
         </section>

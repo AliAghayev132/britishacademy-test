@@ -1,7 +1,12 @@
+// Data
 import { apiGet } from "@/lib/api";
-import { buildMetadata } from "@/lib/seo";
+
+// Components
 import { TestimonialCard, SectionHead } from "@/components/site/cards";
 import { PageBanner } from "@/components/site/PageBanner";
+
+// Utils / SEO
+import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Tələbələrimiz",
@@ -12,12 +17,41 @@ export const metadata = buildMetadata({
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
+// ── Subcomponents ──
+
+function VideoTestimonialCard({ video }) {
+  const v = video;
+  return (
+    <div style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: "#0F1020" }}>
+      {v.video?.poster && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={v.video.poster} alt={v.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />)}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,.42), transparent 30%, transparent 55%, rgba(0,0,0,.82))" }} />
+      <div style={{ position: "absolute", top: 12, left: 12, right: 12 }}>
+        <span style={{ display: "inline-block", background: "rgba(0,0,0,.55)", color: "#fff", fontSize: 12.5, fontWeight: 600, padding: "5px 10px", borderRadius: 8 }}>{v.name}</span>
+        {v.achievement && <span style={{ display: "block", marginTop: 6, fontSize: 11.5, fontWeight: 700, color: "#fff", background: "var(--accent)", padding: "4px 9px", borderRadius: 7, width: "fit-content" }}>{v.achievement}</span>}
+      </div>
+      {v.video?.url ? (
+        <a href={v.video.url} target="_blank" rel="noopener noreferrer" aria-label={`${v.name} — videonu izlə`} style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", display: "grid", placeItems: "center", boxShadow: "0 12px 28px rgba(0,0,0,.45)" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" style={{ fill: "#fff", marginLeft: 2 }}><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" /></svg>
+        </a>
+      ) : (
+        <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", display: "grid", placeItems: "center", opacity: 0.85 }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" style={{ fill: "#fff", marginLeft: 2 }}><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" /></svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default async function StudentsPage() {
+  // ── data fetching ──
   const data = await apiGet("/testimonials");
   const all = data?.testimonials || [];
+
+  // ── derived values ──
   const videos = all.filter((t) => t.type === "video");
   const texts = all.filter((t) => t.type === "text");
 
+  // ── render ──
   return (
     <>
       <PageBanner
@@ -30,25 +64,7 @@ export default async function StudentsPage() {
         <section style={{ ...wrap, padding: "64px 28px 0" }}>
           <SectionHead title="Onlar danışır" />
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
-            {videos.map((v) => (
-              <div key={v._id} style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: "#0F1020" }}>
-                {v.video?.poster && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={v.video.poster} alt={v.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />)}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,.42), transparent 30%, transparent 55%, rgba(0,0,0,.82))" }} />
-                <div style={{ position: "absolute", top: 12, left: 12, right: 12 }}>
-                  <span style={{ display: "inline-block", background: "rgba(0,0,0,.55)", color: "#fff", fontSize: 12.5, fontWeight: 600, padding: "5px 10px", borderRadius: 8 }}>{v.name}</span>
-                  {v.achievement && <span style={{ display: "block", marginTop: 6, fontSize: 11.5, fontWeight: 700, color: "#fff", background: "var(--accent)", padding: "4px 9px", borderRadius: 7, width: "fit-content" }}>{v.achievement}</span>}
-                </div>
-                {v.video?.url ? (
-                  <a href={v.video.url} target="_blank" rel="noopener noreferrer" aria-label={`${v.name} — videonu izlə`} style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", display: "grid", placeItems: "center", boxShadow: "0 12px 28px rgba(0,0,0,.45)" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" style={{ fill: "#fff", marginLeft: 2 }}><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" /></svg>
-                  </a>
-                ) : (
-                  <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", display: "grid", placeItems: "center", opacity: 0.85 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" style={{ fill: "#fff", marginLeft: 2 }}><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" /></svg>
-                  </div>
-                )}
-              </div>
-            ))}
+            {videos.map((v) => <VideoTestimonialCard key={v._id} video={v} />)}
           </div>
         </section>
       )}

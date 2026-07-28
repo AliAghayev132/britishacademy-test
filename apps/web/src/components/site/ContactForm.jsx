@@ -1,18 +1,45 @@
 "use client";
 
-import { useState } from "react";
+// React
+import { memo, useCallback, useState } from "react";
+// Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
 
+// ── Constants ──
+const field = {
+  border: "1.5px solid #E4E6EF",
+  borderRadius: 13,
+  padding: "14px 16px",
+  fontSize: 15,
+  fontFamily: "inherit",
+  outline: "none",
+  color: "#14141C",
+  background: "#fff",
+};
+
+// ── Subcomponents ──
+const SuccessCard = memo(function SuccessCard() {
+  return (
+    <div style={{ border: "1px solid #ECEDF2", borderRadius: 22, padding: 40, background: "#FAFBFF", textAlign: "center" }}>
+      <div style={{ fontSize: 44 }}>🎉</div>
+      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>Mesajın göndərildi!</h3>
+      <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>Tezliklə səninlə əlaqə saxlayacağıq.</p>
+    </div>
+  );
+});
+
 export function ContactForm({ branches = [] }) {
+  // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
   const [branch, setBranch] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
-  const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  // ── Handlers ──
+  const change = useCallback((e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value })), []);
 
-  const submit = async (e) => {
+  const submit = useCallback(async (e) => {
     e.preventDefault();
     setError("");
     try {
@@ -26,16 +53,11 @@ export function ContactForm({ branches = [] }) {
     } catch (err) {
       setError(err?.data?.message || "Xəta baş verdi. Yenidən cəhd et.");
     }
-  };
+  }, [createLead, form, branch]);
 
+  // ── Render ──
   if (done) {
-    return (
-      <div style={{ border: "1px solid #ECEDF2", borderRadius: 22, padding: 40, background: "#FAFBFF", textAlign: "center" }}>
-        <div style={{ fontSize: 44 }}>🎉</div>
-        <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>Mesajın göndərildi!</h3>
-        <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>Tezliklə səninlə əlaqə saxlayacağıq.</p>
-      </div>
-    );
+    return <SuccessCard />;
   }
 
   return (
@@ -58,14 +80,3 @@ export function ContactForm({ branches = [] }) {
     </form>
   );
 }
-
-const field = {
-  border: "1.5px solid #E4E6EF",
-  borderRadius: 13,
-  padding: "14px 16px",
-  fontSize: 15,
-  fontFamily: "inherit",
-  outline: "none",
-  color: "#14141C",
-  background: "#fff",
-};
