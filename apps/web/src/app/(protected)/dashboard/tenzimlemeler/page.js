@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import { notify } from "@/components/ui/feedback";
 import {
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
@@ -68,7 +68,7 @@ export default function SettingsPage() {
     try {
       stats = JSON.parse(form.stats);
     } catch {
-      Swal.fire({ icon: "error", title: "Statistika JSON düzgün deyil" });
+      notify.error("Statistika JSON düzgün deyil");
       return;
     }
     const csv = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
@@ -88,9 +88,9 @@ export default function SettingsPage() {
         robotsTxt: form.robotsTxt,
         maxImageSizeKb: Number(form.maxImageSizeKb) || 500,
       }).unwrap();
-      Swal.fire({ icon: "success", title: "Yadda saxlanıldı", timer: 1400, showConfirmButton: false });
+      notify.success("Yadda saxlanıldı");
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Xəta", text: err?.data?.message || "Yadda saxlanmadı" });
+      notify.error(err?.data?.message || "Yadda saxlanmadı");
     }
   };
 

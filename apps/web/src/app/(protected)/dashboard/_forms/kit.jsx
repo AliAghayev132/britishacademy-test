@@ -6,6 +6,7 @@
 // a form library.
 
 import { X } from "lucide-react";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 // ── Constants ──
 export const WEEKDAYS = [
@@ -40,11 +41,12 @@ export function NativeSelect({ options = [], placeholder, className, ...p }) {
   );
 }
 
-export function Field({ label, hint, required, children, className }) {
+export function Field({ label, hint, required, info, children, className }) {
   return (
     <label className={`block ${className || ""}`}>
-      <span className="mb-1.5 block text-sm font-medium text-gray-700">
-        {label}{required && <span className="text-red-500"> *</span>}
+      <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500">*</span>}
+        {info && <InfoTip text={info} />}
       </span>
       {children}
       {hint && <span className="mt-1 block text-xs text-gray-400">{hint}</span>}

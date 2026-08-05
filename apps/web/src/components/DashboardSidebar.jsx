@@ -103,20 +103,22 @@ export const DashboardSidebar = ({ children }) => {
         <div className="h-16 flex items-center px-4 border-b border-gray-100">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 overflow-hidden"
+            className="flex items-center gap-2.5 overflow-hidden"
           >
-            <div className="w-9 h-9 rounded-xl bg-cyan-500 text-white flex items-center justify-center font-bold shrink-0">
-              S
+            <div className="w-9 h-9 rounded-xl bg-[#00157A] text-white flex items-center justify-center shrink-0 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/shield.png" alt="British Academy" className="w-6 h-6 object-contain" />
             </div>
             <AnimatePresence>
               {sidebarOpen && (
                 <motion.span
-                  className="text-lg font-semibold text-gray-900 whitespace-nowrap"
+                  className="text-[15px] font-bold text-[#00157A] whitespace-nowrap leading-tight"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  Starter
+                  British Academy
                 </motion.span>
               )}
             </AnimatePresence>
@@ -124,24 +126,30 @@ export const DashboardSidebar = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-hidden">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => {
             const active = isActive(item)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                  active
-                    ? 'bg-cyan-500 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-50'
+                title={!sidebarOpen ? item.name : undefined}
+                className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+                  active ? 'text-white' : 'text-gray-500 hover:text-[#00157A] hover:bg-blue-50'
                 }`}
               >
-                <item.icon className="w-5 h-5 shrink-0" />
+                {active && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute inset-0 rounded-xl bg-[#00157A] shadow-md shadow-[#00157A]/25"
+                    transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                  />
+                )}
+                <item.icon className="w-5 h-5 shrink-0 relative z-10" />
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
-                      className="text-sm font-medium whitespace-nowrap"
+                      className="text-sm font-semibold whitespace-nowrap relative z-10"
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: 'auto' }}
                       exit={{ opacity: 0, width: 0 }}
@@ -160,18 +168,19 @@ export const DashboardSidebar = ({ children }) => {
         <div className="p-3 border-t border-gray-100">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+            title={!sidebarOpen ? 'Çıxış' : undefined}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-semibold"
           >
             <LogOut className="w-5 h-5 shrink-0" />
             <AnimatePresence>
               {sidebarOpen && (
                 <motion.span
-                  className="text-sm font-medium whitespace-nowrap"
+                  className="text-sm whitespace-nowrap"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  Logout
+                  Çıxış
                 </motion.span>
               )}
             </AnimatePresence>
@@ -190,7 +199,7 @@ export const DashboardSidebar = ({ children }) => {
             href="/dashboard/profile"
             className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
           >
-            <div className="w-9 h-9 rounded-xl bg-cyan-500 overflow-hidden flex items-center justify-center text-white text-sm font-medium">
+            <div className="w-9 h-9 rounded-xl bg-[#00157A] overflow-hidden flex items-center justify-center text-white text-sm font-semibold">
               {user?.firstName?.[0]}
               {user?.lastName?.[0]}
             </div>

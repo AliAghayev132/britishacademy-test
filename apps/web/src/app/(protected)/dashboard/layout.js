@@ -1,4 +1,5 @@
 import { DashboardSidebar } from '@/components/DashboardSidebar'
+import { FeedbackHost } from '@/components/ui/feedback'
 
 // The dashboard is private — keep it out of search indexes.
 export const metadata = {
@@ -9,5 +10,11 @@ export const metadata = {
 // Server Component wrapper that renders the client sidebar shell around every
 // protected page. Route protection itself is enforced by middleware.js.
 export default function DashboardLayout({ children }) {
-  return <DashboardSidebar>{children}</DashboardSidebar>
+  return (
+    <>
+      <DashboardSidebar>{children}</DashboardSidebar>
+      {/* Brand toast + confirm/alert host (custom, replaces SweetAlert) */}
+      <FeedbackHost />
+    </>
+  )
 }

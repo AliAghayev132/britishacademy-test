@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Swal from "sweetalert2";
+import { notify } from "@/components/ui/feedback";
 import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/adminApi";
 
 const STATUS = [
@@ -25,7 +25,7 @@ export default function LeadsPage() {
     try {
       await setStatus({ id: lead._id, status }).unwrap();
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Yenilənmədi", text: err?.data?.message || "Xəta" });
+      notify.error(err?.data?.message || "Yenilənmədi");
     }
   };
 

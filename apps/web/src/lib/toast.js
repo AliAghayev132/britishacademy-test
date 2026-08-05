@@ -1,40 +1,17 @@
 'use client'
 
 /**
- * Minimal toast helper backed by SweetAlert2 (already a project dependency).
- *
- * SweetAlert2 is imported lazily inside the browser only, so importing this
- * module never runs DOM code during SSR / the production build.
+ * Toast helper — now backed by the custom brand feedback system
+ * (components/ui/feedback.jsx), not SweetAlert. Kept as a thin re-export so
+ * existing `import toast from "@/lib/toast"` call-sites keep working.
  */
-
-let swalPromise
-
-function getSwal() {
-  if (!swalPromise) {
-    swalPromise = import('sweetalert2').then((m) => m.default)
-  }
-  return swalPromise
-}
-
-async function fire(icon, title) {
-  if (typeof window === 'undefined') return
-  const Swal = await getSwal()
-  Swal.fire({
-    toast: true,
-    position: 'top-end',
-    icon,
-    title,
-    timer: 3000,
-    showConfirmButton: false,
-    timerProgressBar: true,
-  })
-}
+import { notify } from '@/components/ui/feedback'
 
 export const toast = {
-  success: (message) => fire('success', message),
-  error: (message) => fire('error', message),
-  info: (message) => fire('info', message),
-  warning: (message) => fire('warning', message),
+  success: (message) => notify.success(message),
+  error: (message) => notify.error(message),
+  info: (message) => notify.info(message),
+  warning: (message) => notify.warning(message),
 }
 
 export default toast

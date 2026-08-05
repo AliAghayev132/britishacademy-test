@@ -7,7 +7,7 @@
 // React
 import { useState } from "react";
 // UI
-import Swal from "sweetalert2";
+import { confirmDialog, notify } from "@/components/ui/feedback";
 import { Database, TriangleAlert } from "lucide-react";
 // Data
 import { useAdminSeedMutation } from "@/store/api/adminApi";
@@ -18,23 +18,21 @@ export default function DeveloperPage() {
 
   // ── Handlers ──
   const runSeed = async () => {
-    const ok = await Swal.fire({
-      icon: "warning",
+    const ok = await confirmDialog({
+      tone: "error",
       title: "Mock data yüklənsin?",
-      html: "Bu əməliyyat <b>mövcud bütün content-i silir</b> (kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, menyu...) və yenidən demo data ilə doldurur.<br><br>Müraciətlər (leads) və istifadəçilər silinmir.",
-      showCancelButton: true,
-      confirmButtonText: "Bəli, yüklə",
-      cancelButtonText: "İmtina",
-      confirmButtonColor: "#B00E28",
+      text: "Bu əməliyyat <b>mövcud bütün content-i silir</b> (kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, menyu...) və yenidən demo data ilə doldurur.<br><br>Müraciətlər (leads) və istifadəçilər silinmir.",
+      confirmText: "Bəli, yüklə",
+      cancelText: "İmtina",
     });
-    if (!ok.isConfirmed) return;
+    if (!ok) return;
 
     try {
       const res = await seed().unwrap();
       setCounts(res?.data?.counts || null);
-      Swal.fire({ icon: "success", title: "Hazırdır!", text: res?.message || "Mock data yükləndi" });
+      notify.success(res?.message || "Mock data yükləndi");
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Alınmadı", text: err?.data?.message || "Xəta baş verdi" });
+      notify.error(err?.data?.message || "Xəta baş verdi");
     }
   };
 

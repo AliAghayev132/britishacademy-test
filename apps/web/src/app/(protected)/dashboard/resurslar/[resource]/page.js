@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
-import Swal from "sweetalert2";
+import { confirmDialog, notify } from "@/components/ui/feedback";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import {
   useAdminListQuery,
@@ -11,6 +11,7 @@ import {
 } from "@/store/api/adminApi";
 import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
 import { BESPOKE_FORMS } from "../../_forms";
+import { ActionsMenu } from "@/components/ui/ActionsMenu";
 
 /**
  * Generic admin resource browser.
@@ -64,26 +65,26 @@ export default function ResourceBrowserPage({ params }) {
         await createItem({ resource, data: body }).unwrap();
       }
       setEditing(null);
+      notify.success("Yadda saxlanıldı");
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Yadda saxlanmadı", text: err?.data?.message || "Xəta baş verdi" });
+      notify.error(err?.data?.message || "Yadda saxlanmadı");
     }
   };
 
   const removeItem = async (item) => {
-    const ok = await Swal.fire({
-      icon: "warning",
+    const ok = await confirmDialog({
+      tone: "error",
       title: "Silinsin?",
       text: field(item, cfg?.title || "name") || item._id,
-      showCancelButton: true,
-      confirmButtonText: "Sil",
-      cancelButtonText: "İmtina",
-      confirmButtonColor: "#E0533D",
+      confirmText: "Sil",
+      cancelText: "İmtina",
     });
-    if (!ok.isConfirmed) return;
+    if (!ok) return;
     try {
       await deleteItem({ resource, id: item._id }).unwrap();
+      notify.success("Silindi");
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Silinmədi", text: err?.data?.message || "Xəta" });
+      notify.error(err?.data?.message || "Silinmədi");
     }
   };
 
@@ -151,10 +152,12 @@ export default function ResourceBrowserPage({ params }) {
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => openEditor(item)} className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-100" aria-label="Redaktə et"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => removeItem(item)} className="rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50" aria-label="Sil"><Trash2 className="h-4 w-4" /></button>
-                    </div>
+                    <ActionsMenu
+                      actions={[
+                        { label: "Redaktə", icon: Pencil, onClick: () => openEditor(item) },
+                        { label: "Sil", icon: Trash2, tone: "danger", onClick: () => removeItem(item) },
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}
