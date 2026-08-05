@@ -16,25 +16,31 @@ const caret = (
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
+const ddArrow = (
+  <svg className="ba-dd-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+);
 
 // ── Subcomponents ──
 const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, destinations }) {
   if (item.variant === "mega") {
+    // Nested dropdown (category → hover → sub-links) — matches the static site.
     return (
-      <div className={`ba-nav-item has-mega${active ? " is-active" : ""}`}>
+      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
         <Link href={item.href}>{item.label} {caret}</Link>
-        <div className="ba-mega"><div className="ba-mega-inner">
+        <div className="ba-dd ba-dd--nest">
           {services.map((g) => (
-            <div key={g.category._id} className="ba-mega-col">
-              <Link className="ba-mega-title" href={`/kurslar/${g.category.slug}`}>{g.category.name}</Link>
-              <div className="ba-mega-links">
+            <div key={g.category._id} className="ba-dd-item">
+              <Link href={`/kurslar/${g.category.slug}`}><span>{g.category.name}</span>{ddArrow}</Link>
+              <div className="ba-dd-sub">
                 {g.courses.map((c) => (
                   <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
                 ))}
               </div>
             </div>
           ))}
-        </div></div>
+        </div>
       </div>
     );
   }
@@ -173,6 +179,18 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             <span>✉ {site?.contact?.email}</span>
             <span>☎ {site?.contact?.phone}</span>
             <span style={{ opacity: 0.65 }}>{site?.contact?.hours}</span>
+          </div>
+          {/* language switcher (visual — matches static) */}
+          <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
+            {["AZ", "EN", "RU"].map((l, i) => (
+              <button
+                key={l}
+                type="button"
+                style={{ border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: i === 0 ? "var(--accent)" : "transparent", color: i === 0 ? "#fff" : "rgba(255,255,255,.65)" }}
+              >
+                {l}
+              </button>
+            ))}
           </div>
         </div>
       </div>
