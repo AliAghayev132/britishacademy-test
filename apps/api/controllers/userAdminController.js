@@ -4,7 +4,7 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler } from "#utils";
+import { asyncHandler, fuzzyRegex } from "#utils";
 import { User, AuditLog } from "#models";
 import { HashService, logAction } from "#services";
 import { adminRoles } from "#constants";
@@ -23,7 +23,7 @@ const listUsers = asyncHandler(async (req, res) => {
   const filter = { isDeleted: false, role: { $in: adminRoles } };
   if (req.query.role && adminRoles.includes(req.query.role)) filter.role = req.query.role;
   if (req.query.search) {
-    const rx = { $regex: String(req.query.search).slice(0, 60), $options: "i" };
+    const rx = fuzzyRegex(req.query.search, 60);
     filter.$or = [{ firstName: rx }, { lastName: rx }, { email: rx }];
   }
   const [items, total] = await Promise.all([
@@ -103,7 +103,7 @@ const listLogs = asyncHandler(async (req, res) => {
   if (req.query.action) filter.action = req.query.action;
   if (req.query.resource) filter.resource = req.query.resource;
   if (req.query.search) {
-    const rx = { $regex: String(req.query.search).slice(0, 80), $options: "i" };
+    const rx = fuzzyRegex(req.query.search, 80);
     filter.$or = [{ summary: rx }, { "actor.name": rx }, { "actor.email": rx }];
   }
   const [items, total] = await Promise.all([

@@ -4,7 +4,7 @@
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { asyncHandler, fuzzyRegex } from "#utils";
 
 // Services
 import { logAction } from "#services";
@@ -31,8 +31,6 @@ function applyPopulate(query, populate) {
   return query;
 }
 
-/** Escape regex metacharacters so a search term is matched literally. */
-const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
  * List every document (including inactive/unpublished — this is the admin view).
@@ -50,7 +48,7 @@ const list = asyncHandler(async (req, res) => {
   const filter = {};
   if (softDelete) filter.isDeleted = false;
   if (req.query.search && search.length) {
-    const rx = { $regex: escapeRegex(req.query.search).slice(0, 100), $options: "i" };
+    const rx = fuzzyRegex(req.query.search); // AZ-tolerant (İ/ı/ə/ş/ç/ğ/ö/ü)
     filter.$or = search.map((f) => ({ [f]: rx }));
   }
 
