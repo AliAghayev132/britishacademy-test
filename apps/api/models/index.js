@@ -21,3 +21,4 @@ export { Advantage } from "./advantage.model.js";
 export { Media } from "./media.model.js";
 export { Faq } from "./faq.model.js";
 export { SiteSetting } from "./siteSetting.model.js";
+export { AuditLog } from "./auditLog.model.js";

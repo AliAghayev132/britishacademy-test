@@ -12,10 +12,11 @@ import {
 // UI / kit
 import { confirmDialog, notify } from "@/components/ui/feedback";
 import { ActionsMenu } from "@/components/ui/ActionsMenu";
+import { NativeSelect } from "../../_forms/kit";
 // Local
 import { BESPOKE_FORMS } from "../../_forms";
 // Utils
-import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
+import { ADMIN_RESOURCES, field, RESOURCE_FILTERS } from "@/lib/adminResources";
 // Icons
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
@@ -33,7 +34,13 @@ export default function ResourceBrowserPage({ params }) {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20 });
+  const [filters, setFilters] = useState({}); // { isActive:"true", status:"open", ... }
+  const resFilters = RESOURCE_FILTERS[resource] || [];
+  // Only send non-empty filter values.
+  const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
+  const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters });
+
+  const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
   const [createItem] = useAdminCreateMutation();
   const [updateItem] = useAdminUpdateMutation();
   const [deleteItem] = useAdminDeleteMutation();
@@ -124,6 +131,19 @@ export default function ResourceBrowserPage({ params }) {
           </button>
         </div>
       </div>
+
+      {resFilters.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {resFilters.map((f) => (
+            <div key={f.key} className="w-44">
+              <NativeSelect placeholder={f.label} options={f.options} value={filters[f.key] || ""} onChange={(e) => setFilter(f.key, e.target.value)} />
+            </div>
+          ))}
+          {Object.keys(activeFilters).length > 0 && (
+            <button onClick={() => { setFilters({}); setPage(1); }} className="text-sm font-semibold text-gray-500 hover:text-[#00157A]">Filtrləri təmizlə</button>
+          )}
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading ? (

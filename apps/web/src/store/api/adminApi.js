@@ -80,6 +80,30 @@ export const adminApi = baseApi.injectEndpoints({
       // Seed replaces everything — drop all cached admin/site data.
       invalidatesTags: ["Resource", "Site"],
     }),
+
+    // ── Admin users (multiple admins/editors) ──
+    adminUsers: builder.query({
+      query: (params) => ({ url: "/admin/users", params }),
+      providesTags: [{ type: "Resource", id: "users" }],
+    }),
+    adminCreateUser: builder.mutation({
+      query: (data) => ({ url: "/admin/users", method: "POST", body: data }),
+      invalidatesTags: [{ type: "Resource", id: "users" }, { type: "Resource", id: "logs" }],
+    }),
+    adminUpdateUser: builder.mutation({
+      query: ({ id, data }) => ({ url: `/admin/users/${id}`, method: "PUT", body: data }),
+      invalidatesTags: [{ type: "Resource", id: "users" }, { type: "Resource", id: "logs" }],
+    }),
+    adminDeleteUser: builder.mutation({
+      query: (id) => ({ url: `/admin/users/${id}`, method: "DELETE" }),
+      invalidatesTags: [{ type: "Resource", id: "users" }, { type: "Resource", id: "logs" }],
+    }),
+
+    // ── Audit log (read-only) ──
+    adminLogs: builder.query({
+      query: (params) => ({ url: "/admin/logs", params }),
+      providesTags: [{ type: "Resource", id: "logs" }],
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -106,4 +130,9 @@ export const {
   useAdminCreateCourseFullMutation,
   useAdminUpdateCourseFullMutation,
   useAdminSeedMutation,
+  useAdminUsersQuery,
+  useAdminCreateUserMutation,
+  useAdminUpdateUserMutation,
+  useAdminDeleteUserMutation,
+  useAdminLogsQuery,
 } = adminApi;

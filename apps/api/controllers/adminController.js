@@ -6,8 +6,15 @@ import { SiteSetting, Lead } from "#models";
 // Utils
 import { asyncHandler } from "#utils";
 
+// Services
+import { logAction } from "#services";
+
 // Local
 import { RESOURCES } from "./resourceRegistry.js";
+
+/** Human-readable label for a document (for audit summaries). */
+const labelOf = (doc) =>
+  doc?.title || doc?.name || doc?.fullName || doc?.question || doc?.label || doc?.country || String(doc?._id || "");
 
 /** Resolve `:resource` from the URL to its registry entry (or 404). */
 function resolve(req, res) {
@@ -47,6 +54,20 @@ const list = asyncHandler(async (req, res) => {
     filter.$or = search.map((f) => ({ [f]: rx }));
   }
 
+  // Generic equality filters — applied only for fields the model actually has,
+  // so any resource can be filtered via ?isActive=true&status=open&category=<id> etc.
+  const FILTERABLE = [
+    "isActive", "isFeatured", "isScholarship", "status", "type", "format",
+    "pricingMode", "location", "group", "region",
+    "category", "branch", "teacher", "course", "parent", "author",
+  ];
+  for (const key of FILTERABLE) {
+    const raw = req.query[key];
+    if (raw === undefined || raw === "") continue;
+    if (!entry.model.schema.path(key)) continue; // resource doesn't have this field
+    filter[key] = raw === "true" ? true : raw === "false" ? false : raw;
+  }
+
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
     model.countDocuments(filter),
@@ -81,6 +102,7 @@ const create = asyncHandler(async (req, res) => {
   if (!entry) return;
   // Slug/defaults are handled by each model's pre-save hook.
   const item = await entry.model.create(req.body);
+  await logAction(req, { action: "create", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yaradıldı: ${labelOf(item)}` });
   res.status(201).json({ success: true, message: "Yaradıldı", data: { item } });
 });
 
@@ -99,6 +121,7 @@ const update = asyncHandler(async (req, res) => {
   delete body.updatedAt;
   Object.assign(item, body);
   await item.save(); // runs pre-save hooks (slug, timeSlot, ...)
+  await logAction(req, { action: "update", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yeniləndi: ${labelOf(item)}` });
   res.json({ success: true, message: "Yeniləndi", data: { item } });
 });
 
@@ -111,6 +134,7 @@ const remove = asyncHandler(async (req, res) => {
   } else {
     await entry.model.findByIdAndUpdate(req.params.id, { isDeleted: true });
   }
+  await logAction(req, { action: "delete", resource: req.params.resource, resourceId: req.params.id, summary: `${req.params.resource} silindi` });
   res.json({ success: true, message: "Silindi" });
 });
 
@@ -144,6 +168,7 @@ const updateSettings = asyncHandler(async (req, res) => {
   delete body.updatedAt;
   Object.assign(settings, body);
   await settings.save();
+  await logAction(req, { action: "settings", resource: "settings", summary: "Sayt tənzimləmələri yeniləndi" });
   res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings } });
 });
 

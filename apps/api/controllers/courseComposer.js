@@ -10,6 +10,7 @@
 
 import { asyncHandler } from "#utils";
 import { Course, CourseGroup, Branch, Teacher, CourseCategory } from "#models";
+import { logAction } from "#services";
 
 // ── Helpers ──
 
@@ -152,6 +153,7 @@ const createCourseFull = asyncHandler(async (req, res) => {
     throw err;
   }
 
+  await logAction(req, { action: "create", resource: "courses", resourceId: created._id, summary: `Kurs yaradıldı: ${created.title}` });
   res.status(201).json({ success: true, message: "Kurs yaradıldı", data: { course: created } });
 });
 
@@ -181,6 +183,7 @@ const updateCourseFull = asyncHandler(async (req, res) => {
   }
   await syncTeacherLinks(doc._id, branches);
 
+  await logAction(req, { action: "update", resource: "courses", resourceId: doc._id, summary: `Kurs yeniləndi: ${doc.title}` });
   res.json({ success: true, message: "Kurs yeniləndi", data: { course: doc } });
 });
 

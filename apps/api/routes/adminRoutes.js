@@ -2,7 +2,7 @@
 import { Router, adminRoles } from "#constants";
 
 // Controllers
-import { adminController, leadController, courseComposer, devController } from "#controllers";
+import { adminController, leadController, courseComposer, devController, userAdminController } from "#controllers";
 
 // Middlewares
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
@@ -35,6 +35,14 @@ AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCour
 
 // Developer tools — reseed demo content (admin role enforced in the controller).
 AdminRouter.post("/dev/seed", writeRateLimiter, devController.runSeed);
+
+// Admin users (create multiple admins/editors) + audit log.
+// Fixed paths — must precede the generic /:resource matcher.
+AdminRouter.get("/users", userAdminController.listUsers);
+AdminRouter.post("/users", writeRateLimiter, userAdminController.createUser);
+AdminRouter.put("/users/:id", writeRateLimiter, userAdminController.updateUser);
+AdminRouter.delete("/users/:id", writeRateLimiter, userAdminController.removeUser);
+AdminRouter.get("/logs", userAdminController.listLogs);
 
 // Generic CRUD over the resource registry.
 AdminRouter.get("/:resource", adminController.list);

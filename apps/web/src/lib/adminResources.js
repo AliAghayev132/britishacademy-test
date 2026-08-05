@@ -28,3 +28,34 @@ export const ADMIN_RESOURCES = {
 
 export const field = (item, spec) =>
   typeof spec === "function" ? spec(item) : item?.[spec] ?? "";
+
+// Per-resource filter dropdowns for the list view. Each filter maps to a query
+// param the server understands (adminController generic filters). Bool filters
+// use string "true"/"false".
+const ACTIVE = { key: "isActive", label: "Status", options: [{ value: "true", label: "Aktiv" }, { value: "false", label: "Deaktiv" }] };
+const FEATURED = { key: "isFeatured", label: "Seçilmiş", options: [{ value: "true", label: "Bəli" }, { value: "false", label: "Xeyr" }] };
+
+export const RESOURCE_FILTERS = {
+  courses: [ACTIVE, FEATURED],
+  teachers: [ACTIVE, FEATURED],
+  branches: [ACTIVE],
+  "course-categories": [ACTIVE],
+  "course-groups": [
+    { key: "status", label: "Status", options: [
+      { value: "open", label: "Açıq" }, { value: "full", label: "Dolu" },
+      { value: "ongoing", label: "Davam edir" }, { value: "finished", label: "Bitib" },
+      { value: "cancelled", label: "Ləğv edilib" },
+    ] },
+    { key: "format", label: "Format", options: [{ value: "group", label: "Qrup" }, { value: "individual", label: "Fərdi" }] },
+  ],
+  testimonials: [ACTIVE, { key: "type", label: "Tip", options: [{ value: "video", label: "Video" }, { value: "text", label: "Mətn" }] }],
+  destinations: [ACTIVE, { key: "isScholarship", label: "Təqaüd", options: [{ value: "true", label: "Bəli" }, { value: "false", label: "Xeyr" }] }],
+  "blog-posts": [{ key: "status", label: "Status", options: [
+    { value: "draft", label: "Qaralama" }, { value: "published", label: "Dərc olunub" }, { value: "archived", label: "Arxiv" },
+  ] }],
+  "blog-categories": [ACTIVE],
+  partners: [ACTIVE],
+  advantages: [ACTIVE],
+  faqs: [ACTIVE],
+  pages: [ACTIVE],
+};

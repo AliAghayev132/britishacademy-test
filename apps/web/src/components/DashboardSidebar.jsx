@@ -31,6 +31,8 @@ import {
   Boxes,
   Settings,
   Database,
+  ShieldCheck,
+  ScrollText,
 } from 'lucide-react'
 
 // Utils
@@ -50,6 +52,8 @@ const navItems = [
   { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2 },
   { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText },
   { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true },
+  { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck },
+  { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText },
   { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings },
   { name: 'Developer', href: '/dashboard/developer', icon: Database },
   { name: 'Profil', href: '/dashboard/profile', icon: User },
@@ -151,11 +155,11 @@ export const DashboardSidebar = ({ children }) => {
                     : 'text-gray-700 hover:bg-[#00157A] hover:text-white'
                 }`}
               >
-                <item.icon className="w-5 h-5 shrink-0" style={active ? { color: '#fff' } : undefined} />
+                <item.icon className="w-5 h-5 shrink-0 group-hover:text-white" style={active ? { color: '#fff' } : undefined} />
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
-                      className="text-[15px] font-bold whitespace-nowrap"
+                      className="text-[15px] font-bold whitespace-nowrap group-hover:text-white"
                       style={active ? { color: '#fff' } : undefined}
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: 'auto' }}

@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase } from "#services/SeedService.js";
+import { seedDatabase, logAction } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -15,6 +15,7 @@ const runSeed = asyncHandler(async (req, res) => {
   }
 
   const { counts } = await seedDatabase();
+  await logAction(req, { action: "seed", resource: "dev", summary: "Mock data yükləndi (content əvəzləndi)" });
   res.json({
     success: true,
     message: "Mock data yükləndi (mövcud content əvəzləndi)",

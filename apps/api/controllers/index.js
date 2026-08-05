@@ -8,5 +8,6 @@ export * as publicController from "./publicController.js";
 export * as adminController from "./adminController.js";
 export * as courseComposer from "./courseComposer.js";
 export * as devController from "./devController.js";
+export * as userAdminController from "./userAdminController.js";
 export * as leadController from "./leadController.js";
 export * as seoController from "./seoController.js";
