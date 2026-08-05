@@ -10,6 +10,7 @@ import {
   useAdminDeleteMutation,
 } from "@/store/api/adminApi";
 import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
+import { BESPOKE_FORMS } from "../../_forms";
 
 /**
  * Generic admin resource browser.
@@ -21,6 +22,7 @@ import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
 export default function ResourceBrowserPage({ params }) {
   const { resource } = use(params);
   const cfg = ADMIN_RESOURCES[resource];
+  const Bespoke = BESPOKE_FORMS[resource]; // purpose-built form, or undefined → JSON editor
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -169,7 +171,12 @@ export default function ResourceBrowserPage({ params }) {
         </div>
       )}
 
-      {editing !== null && (
+      {/* Bespoke form (teachers / branches / courses) — renders its own modal. */}
+      {editing !== null && Bespoke && (
+        <Bespoke item={editing} onClose={() => setEditing(null)} />
+      )}
+
+      {editing !== null && !Bespoke && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && setEditing(null)}>
           <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">

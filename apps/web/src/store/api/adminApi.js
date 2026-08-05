@@ -43,6 +43,36 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => "/admin/stats",
       providesTags: [{ type: "Resource", id: "stats" }],
     }),
+
+    // ── Course composer (wizard) ──
+    // Select lists (branches / teachers / categories) for the wizard.
+    adminLookups: builder.query({
+      query: () => "/admin/lookups",
+      providesTags: [{ type: "Resource", id: "lookups" }],
+    }),
+    // A course + its timetable reshaped into branch rows (pre-fills the edit form).
+    adminCourseFull: builder.query({
+      query: (id) => `/admin/courses/full/${id}`,
+      providesTags: (r, e, id) => [{ type: "Resource", id: `courses-${id}` }],
+    }),
+    // Create a course together with pricing + CourseGroups in one call.
+    adminCreateCourseFull: builder.mutation({
+      query: (data) => ({ url: "/admin/courses/full", method: "POST", body: data }),
+      invalidatesTags: [
+        { type: "Resource", id: "courses" },
+        { type: "Resource", id: "course-groups" },
+        { type: "Resource", id: "teachers" },
+      ],
+    }),
+    adminUpdateCourseFull: builder.mutation({
+      query: ({ id, data }) => ({ url: `/admin/courses/full/${id}`, method: "PUT", body: data }),
+      invalidatesTags: (r, e, { id }) => [
+        { type: "Resource", id: "courses" },
+        { type: "Resource", id: `courses-${id}` },
+        { type: "Resource", id: "course-groups" },
+        { type: "Resource", id: "teachers" },
+      ],
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -64,4 +94,8 @@ export const {
   useAdminStatsQuery,
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
+  useAdminLookupsQuery,
+  useAdminCourseFullQuery,
+  useAdminCreateCourseFullMutation,
+  useAdminUpdateCourseFullMutation,
 } = adminApi;

@@ -1,0 +1,145 @@
+"use client";
+
+// ── Shared form kit ──
+// Small Tailwind primitives used by the bespoke admin forms (teacher, branch,
+// course wizard). Keeps the three forms visually consistent without pulling in
+// a form library.
+
+import { X } from "lucide-react";
+
+// ── Constants ──
+export const WEEKDAYS = [
+  { v: 1, l: "B.e" }, { v: 2, l: "Ç.a" }, { v: 3, l: "Çərş" },
+  { v: 4, l: "C.a" }, { v: 5, l: "Cümə" }, { v: 6, l: "Şənbə" }, { v: 7, l: "Bazar" },
+];
+export const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+export const FORMATS = [
+  { value: "group", label: "Qrup" },
+  { value: "individual", label: "Fərdi" },
+];
+
+/** Coerce a value that may be an id string or a populated {_id} doc → id string. */
+export const toId = (v) => (v && typeof v === "object" ? v._id : v) || "";
+
+const base =
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 disabled:bg-gray-100";
+
+// ── Inputs ──
+export const TextInput = ({ className, ...p }) => <input {...p} className={`${base} ${className || ""}`} />;
+export const NumberInput = ({ className, ...p }) => <input type="number" {...p} className={`${base} ${className || ""}`} />;
+export const TextArea = ({ className, ...p }) => <textarea {...p} className={`${base} ${className || ""}`} />;
+
+export function NativeSelect({ options = [], placeholder, className, ...p }) {
+  return (
+    <select {...p} className={`${base} bg-white ${className || ""}`}>
+      {placeholder !== undefined && <option value="">{placeholder}</option>}
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  );
+}
+
+export function Field({ label, hint, required, children, className }) {
+  return (
+    <label className={`block ${className || ""}`}>
+      <span className="mb-1.5 block text-sm font-medium text-gray-700">
+        {label}{required && <span className="text-red-500"> *</span>}
+      </span>
+      {children}
+      {hint && <span className="mt-1 block text-xs text-gray-400">{hint}</span>}
+    </label>
+  );
+}
+
+export function Toggle({ checked, onChange, label }) {
+  return (
+    <button type="button" onClick={() => onChange(!checked)} className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+      <span className={`relative h-6 w-11 rounded-full transition ${checked ? "bg-blue-900" : "bg-gray-300"}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
+      </span>
+      {label}
+    </button>
+  );
+}
+
+/** Multi-select rendered as toggleable chips. value = array of ids. */
+export function MultiSelectChips({ options = [], value = [], onChange, empty }) {
+  const set = new Set(value.map(String));
+  const toggle = (id) => {
+    const next = new Set(set);
+    if (next.has(String(id))) next.delete(String(id)); else next.add(String(id));
+    onChange([...next]);
+  };
+  if (!options.length) return <p className="text-sm text-gray-400">{empty || "Seçim yoxdur"}</p>;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const on = set.has(String(o.value));
+        return (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => toggle(o.value)}
+            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${on ? "border-blue-900 bg-blue-900 text-white" : "border-gray-300 bg-white text-gray-600 hover:border-gray-400"}`}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SectionTitle({ children, right }) {
+  return (
+    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+      <h3 className="text-sm font-bold uppercase tracking-wide text-gray-500">{children}</h3>
+      {right}
+    </div>
+  );
+}
+
+// ── Modal shell ──
+export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, children }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">{title}</h2>
+            {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="flex-1 space-y-6 overflow-auto p-6">{children}</div>
+        <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
+          <span className="text-sm font-semibold text-red-600">{error || ""}</span>
+          <div className="flex gap-3">
+            <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
+            <button onClick={onSave} disabled={saving} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+              {saving ? "Saxlanılır…" : "Yadda saxla"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Small "+ add" / remove helpers for repeatable rows. */
+export function AddButton({ onClick, children }) {
+  return (
+    <button type="button" onClick={onClick} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700">
+      + {children}
+    </button>
+  );
+}
+
+export function RemoveButton({ onClick }) {
+  return (
+    <button type="button" onClick={onClick} className="rounded-lg border border-gray-200 p-1.5 text-red-500 hover:bg-red-50" aria-label="Sil">
+      <X className="h-4 w-4" />
+    </button>
+  );
+}

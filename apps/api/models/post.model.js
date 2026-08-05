@@ -80,13 +80,12 @@ postSchema.virtual("url").get(function () {
 // ----- Pre-save hook -----
 // Auto-generate a slug from the title when missing (or when title changes and
 // no explicit slug was set). A short random suffix keeps slugs unique.
-postSchema.pre("save", function (next) {
+postSchema.pre("save", function () {
   if (!this.slug && this.title) {
     const base = EncryptionService.generateSlug(this.title);
     const suffix = Math.random().toString(36).slice(2, 7);
     this.slug = `${base}-${suffix}`;
   }
-  next();
 });
 
 // ----- Static method -----

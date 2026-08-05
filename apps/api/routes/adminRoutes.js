@@ -1,5 +1,5 @@
 import { Router, adminRoles } from "#constants";
-import { adminController, leadController } from "#controllers";
+import { adminController, leadController, courseComposer } from "#controllers";
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
 
 /**
@@ -19,6 +19,14 @@ AdminRouter.get("/stats", adminController.stats);
 AdminRouter.get("/settings", adminController.getSettings);
 AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
+
+// Course composer — select lists + atomic course-with-timetable create/edit.
+// Must precede the generic /:resource matcher (otherwise "lookups"/"full"
+// would be read as resource names).
+AdminRouter.get("/lookups", courseComposer.getLookups);
+AdminRouter.get("/courses/full/:id", courseComposer.getCourseFull);
+AdminRouter.post("/courses/full", writeRateLimiter, courseComposer.createCourseFull);
+AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCourseFull);
 
 // Generic CRUD over the resource registry.
 AdminRouter.get("/:resource", adminController.list);

@@ -91,7 +91,7 @@ courseGroupSchema.virtual("isFull").get(function () {
 });
 
 /** Keep timeSlot and status consistent with the data. */
-courseGroupSchema.pre("save", function (next) {
+courseGroupSchema.pre("save", function () {
   const first = this.schedule?.[0]?.from;
   if (first) {
     const hour = parseInt(String(first).split(":")[0], 10);
@@ -100,7 +100,6 @@ courseGroupSchema.pre("save", function (next) {
   if (this.status === "open" && this.capacity && this.enrolled >= this.capacity) {
     this.status = "full";
   }
-  next();
 });
 
 courseGroupSchema.statics.findPublic = function (filter = {}) {
