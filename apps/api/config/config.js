@@ -107,21 +107,18 @@ const config = {
   },
 };
 
-// CORS whitelist
+// CORS
+// ⚠️ MÜVƏQQƏTİ: bütün origin-lərə icazə verilir (deploy CORS problemini keçmək
+// üçün). `origin: true` gələn Origin-i əks etdirir, ona görə credentials (cookie)
+// işləməyə davam edir (`*` credentials ilə işləmir). Domen/HTTPS hazır olanda
+// aşağıdakı whitelist-ə qaytar:
+//   origin: isProduction
+//     ? [process.env.CLIENT_URL, `https://www.${domain}`, `https://${domain}`].filter(Boolean)
+//     : ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
 const corsConfig = {
-  origin: isProduction
-    ? [
-        process.env.CLIENT_URL,
-        `https://www.${domain}`,
-        `https://${domain}`,
-      ].filter(Boolean)
-    : [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-      ],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  allowedHeaders: ["Authorization", "Content-Type"],
+  origin: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type", "x-internal-key"],
   credentials: true,
 };
 
