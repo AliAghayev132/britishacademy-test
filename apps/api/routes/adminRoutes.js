@@ -1,5 +1,5 @@
 import { Router, adminRoles } from "#constants";
-import { adminController, leadController, courseComposer } from "#controllers";
+import { adminController, leadController, courseComposer, devController } from "#controllers";
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
 
 /**
@@ -27,6 +27,9 @@ AdminRouter.get("/lookups", courseComposer.getLookups);
 AdminRouter.get("/courses/full/:id", courseComposer.getCourseFull);
 AdminRouter.post("/courses/full", writeRateLimiter, courseComposer.createCourseFull);
 AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCourseFull);
+
+// Developer tools — reseed demo content (admin role enforced in the controller).
+AdminRouter.post("/dev/seed", writeRateLimiter, devController.runSeed);
 
 // Generic CRUD over the resource registry.
 AdminRouter.get("/:resource", adminController.list);

@@ -73,6 +73,13 @@ export const adminApi = baseApi.injectEndpoints({
         { type: "Resource", id: "teachers" },
       ],
     }),
+
+    // ── Developer: reseed demo content (WIPES + reloads) ──
+    adminSeed: builder.mutation({
+      query: () => ({ url: "/admin/dev/seed", method: "POST" }),
+      // Seed replaces everything — drop all cached admin/site data.
+      invalidatesTags: ["Resource", "Site"],
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -98,4 +105,5 @@ export const {
   useAdminCourseFullQuery,
   useAdminCreateCourseFullMutation,
   useAdminUpdateCourseFullMutation,
+  useAdminSeedMutation,
 } = adminApi;

@@ -21,6 +21,7 @@ import {
   Globe2,
   Boxes,
   Settings,
+  Database,
 } from 'lucide-react'
 
 import { logout } from '@/store/slices/authSlice'
@@ -40,6 +41,7 @@ const navItems = [
   { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText },
   { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true },
   { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings },
+  { name: 'Developer', href: '/dashboard/developer', icon: Database },
   { name: 'Profil', href: '/dashboard/profile', icon: User },
 ]
 
