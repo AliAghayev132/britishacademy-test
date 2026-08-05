@@ -1,7 +1,10 @@
 'use client';
 
+// Local
 import { uploadWithProgress } from './uploadWithProgress';
 import { getImageUrl } from './getImageUrl';
+
+// Utils
 import { API_URL } from '@/lib/variables';
 
 /**

@@ -13,10 +13,15 @@
  *      (download atributu + faylın adı + uzantı badge-i) əlavə edilir.
  * ===================================================================== */
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// Icons
 import {
   FileText, Upload, Check, X, HelpCircle, ChevronDown, Paperclip,
 } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 
 const ACCEPT = [

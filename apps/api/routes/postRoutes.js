@@ -1,5 +1,10 @@
+// Constants
 import { Router } from "#constants";
+
+// Controllers
 import { postController } from "#controllers";
+
+// Middlewares
 import { authenticate, writeRateLimiter } from "#middlewares";
 
 const PostRouter = Router();

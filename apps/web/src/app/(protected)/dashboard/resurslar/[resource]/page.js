@@ -1,17 +1,23 @@
 "use client";
 
+// React
 import { use, useMemo, useState } from "react";
-import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+// Data (RTK Query)
 import {
   useAdminListQuery,
   useAdminCreateMutation,
   useAdminUpdateMutation,
   useAdminDeleteMutation,
 } from "@/store/api/adminApi";
-import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
-import { BESPOKE_FORMS } from "../../_forms";
+// UI / kit
+import { confirmDialog, notify } from "@/components/ui/feedback";
 import { ActionsMenu } from "@/components/ui/ActionsMenu";
+// Local
+import { BESPOKE_FORMS } from "../../_forms";
+// Utils
+import { ADMIN_RESOURCES, field } from "@/lib/adminResources";
+// Icons
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
 
 /**
  * Generic admin resource browser.

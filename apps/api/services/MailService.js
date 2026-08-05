@@ -1,5 +1,10 @@
+// Utils
 import { nodemailer } from "#lib";
+
+// Config
 import { config } from "#config";
+
+// Templates
 import { otpTemplate, welcomeTemplate } from "#templates";
 
 /**

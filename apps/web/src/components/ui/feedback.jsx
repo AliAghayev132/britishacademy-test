@@ -6,8 +6,10 @@
 // pub/sub store; a single <FeedbackHost/> (mounted in the dashboard layout)
 // renders everything through a portal.
 
+// React
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+// Icons
 import { CheckCircle2, XCircle, Info, AlertTriangle, HelpCircle, X } from "lucide-react";
 
 // ── Store ──

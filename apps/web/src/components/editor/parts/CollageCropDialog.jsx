@@ -12,9 +12,14 @@
  *    - onConfirm(blob) : crop-dan keçmiş Blob qaytarır
  * ===================================================================== */
 
+// React
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+
+// UI / components
 import Cropper from 'react-easy-crop';
+
+// Icons
 import { X, Check, ZoomIn, ZoomOut, RotateCw, RotateCcw } from 'lucide-react';
 
 /** "4/3" → 4/3 ; "auto" → undefined (sərbəst crop) */

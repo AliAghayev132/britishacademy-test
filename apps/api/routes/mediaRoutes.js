@@ -1,6 +1,11 @@
+// Config / constants
 import { Router } from "#constants";
 import { config } from "#config";
+
+// Controllers
 import { mediaController } from "#controllers";
+
+// Middlewares
 import { authenticate, uploadLimit } from "#middlewares";
 
 const MediaRouter = Router();

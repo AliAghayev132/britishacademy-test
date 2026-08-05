@@ -1,8 +1,11 @@
 'use client';
 
+// React
 import { useState, useCallback } from 'react';
-import { toast } from '@/lib/toast';
+// Data (RTK Query)
 import { useProcessAIMutation } from '@/store/api';
+// Utils
+import { toast } from '@/lib/toast';
 
 export function useAI() {
   const [loadingFields, setLoadingFields] = useState({});

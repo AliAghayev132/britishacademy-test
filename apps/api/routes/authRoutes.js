@@ -1,5 +1,10 @@
+// Constants
 import { Router } from "#constants";
+
+// Controllers
 import { authController } from "#controllers";
+
+// Middlewares
 import {
   authenticate,
   authenticateRefreshToken,

@@ -5,11 +5,14 @@
 // progress bar (long uploads show %), stores the returned URL. Shows a preview
 // + "change" / "remove" once uploaded.
 
+// React
 import { useRef, useState } from "react";
-import { UploadCloud, X } from "lucide-react";
+// Utils
 import { uploadWithProgress } from "@/utils/uploadWithProgress";
 import { getImageUrl } from "@/utils/getImageUrl";
 import { API_URL } from "@/lib/variables";
+// Icons
+import { UploadCloud, X } from "lucide-react";
 
 export function FileUpload({ value, onChange, kind = "image" }) {
   const inputRef = useRef(null);

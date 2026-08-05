@@ -1,8 +1,11 @@
 'use client'
 
+// React
 import { useEffect } from 'react'
-import { X } from 'lucide-react'
+// Utils
 import { clsx } from 'clsx'
+// Icons
+import { X } from 'lucide-react'
 
 export const Modal = ({
   isOpen,

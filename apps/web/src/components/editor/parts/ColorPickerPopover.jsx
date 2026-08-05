@@ -10,8 +10,13 @@
  * Eyni komponentdir, lakin prop-larla davranışı dəyişir.
  */
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// Icons
 import { Palette, Highlighter } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from './constants';
 

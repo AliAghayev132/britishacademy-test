@@ -1,8 +1,11 @@
 "use client";
 
+// Next
 import Link from "next/link";
-import { Inbox, GraduationCap, Users, Building2, CalendarClock, MessageSquareQuote, Globe2, FileText } from "lucide-react";
+// Data (RTK Query)
 import { useAdminStatsQuery } from "@/store/api/adminApi";
+// Icons
+import { Inbox, GraduationCap, Users, Building2, CalendarClock, MessageSquareQuote, Globe2, FileText } from "lucide-react";
 
 const CARDS = [
   { key: "courses", name: "Kurslar", icon: GraduationCap, href: "/dashboard/resurslar/courses", color: "text-blue-700 bg-blue-50" },

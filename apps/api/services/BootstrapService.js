@@ -1,5 +1,10 @@
+// Models
 import { User } from "#models";
+
+// Services
 import { HashService } from "#services";
+
+// Config
 import { config } from "#config";
 
 /**

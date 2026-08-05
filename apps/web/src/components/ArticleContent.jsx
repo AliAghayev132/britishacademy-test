@@ -11,13 +11,20 @@
  * download wrapper-i ilə əhatə edir. SSR-də adi HTML qaytarır (faydalı SEO).
  */
 
+// React
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
+// Icons
 import { Download, X, Loader2 } from "lucide-react";
+
+// UI / components
 import EmblaCarousel from "embla-carousel";
 import Autoplay from "embla-carousel-autoplay";
 import katex from "katex";
 import "katex/dist/katex.min.css";
+
+// Utils
 import {
   getOriginalImageUrl,
   hasOriginalVariant,

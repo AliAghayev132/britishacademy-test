@@ -4,6 +4,8 @@
 import { memo, useCallback, useEffect, useState } from "react";
 // Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
+// Local
+import { SiteSelect } from "./SiteSelect";
 
 // ── Constants ──
 const INTERESTS = [
@@ -64,15 +66,9 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
         <input className="ba-field" name="phone" required placeholder="Telefon" value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
         <input className="ba-field" name="email" type="email" placeholder="E-poçt" value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
-      <select value={interest} onChange={(e) => setInterest(e.target.value)} className="ba-field" style={{ ...field, cursor: "pointer" }}>
-        <option value="">Nəyə müraciət edirsən?</option>
-        {INTERESTS.map((i) => <option key={i} value={i}>{i}</option>)}
-      </select>
+      <SiteSelect value={interest} onChange={setInterest} placeholder="Nəyə müraciət edirsən?" style={field} options={INTERESTS.map((i) => ({ value: i, label: i }))} />
       {branches.length > 0 && (
-        <select value={branch} onChange={(e) => setBranch(e.target.value)} className="ba-field" style={{ ...field, cursor: "pointer" }}>
-          <option value="">Hansı filial? (istəyə bağlı)</option>
-          {branches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
-        </select>
+        <SiteSelect value={branch} onChange={setBranch} placeholder="Hansı filial? (istəyə bağlı)" style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
       {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}
       <button type="submit" disabled={isLoading} className="ba-apply-btn" style={{ marginTop: 6, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: 16, borderRadius: 13, cursor: "pointer", opacity: isLoading ? 0.7 : 1 }}>

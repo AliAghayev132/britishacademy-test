@@ -4,7 +4,15 @@
 // Bespoke create/edit form covering the whole Testimonial model. `type: 'video'`
 // swaps in the video/poster uploaders; `type: 'text'` shows quote + rating.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminListQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -17,12 +25,8 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+// Utils
 import { getImageUrl } from "@/utils/getImageUrl";
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 const TYPE_OPTIONS = [
   { value: "text", label: "Mətn" },

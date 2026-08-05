@@ -5,9 +5,12 @@
 // course wizard). Keeps the three forms visually consistent without pulling in
 // a form library.
 
+// React
 import { useEffect, useRef, useState } from "react";
-import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
+// UI / kit
 import { InfoTip } from "@/components/ui/InfoTip";
+// Icons
+import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
 
 // ── Constants ──
 export const WEEKDAYS = [

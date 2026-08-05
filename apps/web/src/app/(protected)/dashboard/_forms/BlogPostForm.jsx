@@ -4,7 +4,15 @@
 // Bespoke create/edit form covering the whole BlogPost model. Body is HTML
 // (TipTap-produced on the real site); here it's a plain HTML textarea.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminListQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -16,12 +24,8 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+// Utils
 import { getImageUrl } from "@/utils/getImageUrl";
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 const STATUS_OPTIONS = [
   { value: "draft", label: "Qaralama" },

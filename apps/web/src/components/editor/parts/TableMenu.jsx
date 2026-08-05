@@ -17,7 +17,10 @@
  *  açılır-bağlanır izah bloku var.
  * ===================================================================== */
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// Icons
 import {
   Table as TableIcon, Trash2, X,
   AlignLeft, AlignCenter, AlignRight,
@@ -29,6 +32,8 @@ import {
   HelpCircle, ChevronDown,
   Maximize2, Move,
 } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 import {
   TABLE_CELL_BG_COLORS,

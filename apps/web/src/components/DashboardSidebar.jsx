@@ -1,10 +1,19 @@
 'use client'
 
+// React
 import { useState } from 'react'
+
+// Next
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+
+// Data
 import { useSelector, useDispatch } from 'react-redux'
+
+// UI / components
 import { motion, AnimatePresence } from 'framer-motion'
+
+// Icons
 import {
   FileText,
   LogOut,
@@ -24,6 +33,7 @@ import {
   Database,
 } from 'lucide-react'
 
+// Utils
 import { logout } from '@/store/slices/authSlice'
 import { useLogoutMutation } from '@/store/api'
 

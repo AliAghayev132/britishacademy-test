@@ -1,6 +1,12 @@
 // Generic admin CRUD over the resource registry.
-import { asyncHandler } from "#utils";
+
+// Models
 import { SiteSetting, Lead } from "#models";
+
+// Utils
+import { asyncHandler } from "#utils";
+
+// Local
 import { RESOURCES } from "./resourceRegistry.js";
 
 /** Resolve `:resource` from the URL to its registry entry (or 404). */

@@ -1,6 +1,13 @@
+// Utils
 import { jwt } from "#lib";
+
+// Config
 import { config } from "#config";
+
+// Models
 import { User } from "#models";
+
+// Services
 import { AuthTokenService } from "#services";
 
 /**

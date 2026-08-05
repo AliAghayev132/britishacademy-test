@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useState } from "react";
+// UI / kit
 import { notify } from "@/components/ui/feedback";
+// Data (RTK Query)
 import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/adminApi";
 
 const STATUS = [

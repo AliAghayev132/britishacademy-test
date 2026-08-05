@@ -1,5 +1,10 @@
+// Constants
 import { Router } from "#constants";
+
+// Controllers
 import { aiController } from "#controllers";
+
+// Middlewares
 import { authenticate } from "#middlewares";
 
 const AIRouter = Router();

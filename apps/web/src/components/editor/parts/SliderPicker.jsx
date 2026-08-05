@@ -18,12 +18,17 @@
  *    - Mövcud slider node seçildikdə avtomatik EDIT rejimi.
  * ===================================================================== */
 
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
+// Icons
 import {
   GalleryHorizontalEnd, X, Plus, Loader2, Trash2, Check, Pencil,
   ChevronLeft, ChevronRight, Play, Pause, Repeat,
 } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 import { SLIDER_DEFAULTS } from './ImageSliderExtension';
 

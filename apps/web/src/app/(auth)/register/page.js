@@ -1,12 +1,22 @@
 'use client'
 
+// React
 import { useState } from 'react'
+
+// Next
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+
+// Data
 import { useDispatch } from 'react-redux'
+
+// Icons
 import { Mail, Lock, User } from 'lucide-react'
 
+// UI / components
 import { Button, Input, Card } from '@/components/ui'
+
+// Store
 import {
   useRegisterMutation,
   useVerifyOTPMutation,

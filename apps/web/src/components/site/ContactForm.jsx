@@ -4,6 +4,8 @@
 import { memo, useCallback, useState } from "react";
 // Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
+// Local
+import { SiteSelect } from "./SiteSelect";
 
 // ── Constants ──
 const field = {
@@ -67,10 +69,7 @@ export function ContactForm({ branches = [] }) {
       <input className="ba-field" name="phone" required placeholder="Telefon" value={form.phone} onChange={change} style={field} />
       <input className="ba-field" name="email" type="email" placeholder="E-poçt" value={form.email} onChange={change} style={field} />
       {branches.length > 0 && (
-        <select value={branch} onChange={(e) => setBranch(e.target.value)} className="ba-field" style={{ ...field, cursor: "pointer" }}>
-          <option value="">Filial seç (istəyə bağlı)</option>
-          {branches.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
-        </select>
+        <SiteSelect value={branch} onChange={setBranch} placeholder="Filial seç (istəyə bağlı)" style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
       <textarea className="ba-field" name="message" rows={4} placeholder="Mesajın" value={form.message} onChange={change} style={{ ...field, resize: "vertical" }} />
       {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}

@@ -15,10 +15,14 @@
  *  məntiqinə sahibdir — beləliklə re-render xərcləri minimuma enir.
  * ===================================================================== */
 
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// Editor
 import { EditorContent, useEditor } from '@tiptap/react';
 import 'katex/dist/katex.min.css';
 
+// Icons
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code, CodeXml,
   List, ListOrdered, Quote, Undo, Redo, ImageIcon,
@@ -28,8 +32,11 @@ import {
   Superscript as SuperscriptIcon, Subscript as SubscriptIcon,
   RemoveFormatting,
 } from 'lucide-react';
-import Swal from 'sweetalert2';
 
+// UI / components
+import { confirmDialog } from '@/components/ui/feedback';
+
+// Local
 import { ToolbarButton, Divider } from './parts/Primitives';
 import HeadingDropdown from './parts/HeadingDropdown';
 import ColorPickerPopover from './parts/ColorPickerPopover';
@@ -43,6 +50,8 @@ import CollagePicker from './parts/CollagePicker';
 import SliderPicker from './parts/SliderPicker';
 import FontPicker from './parts/FontPicker';
 import { buildExtensions } from './parts/extensions';
+
+// Utils
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 export default function TiptapEditor({
@@ -150,18 +159,14 @@ export default function TiptapEditor({
 
   const clearContent = useCallback(async () => {
     if (!editor) return;
-    const r = await Swal.fire({
+    const ok = await confirmDialog({
+      tone: 'warning',
       title: 'Əminsiniz?',
       text: 'Bütün məzmun silinəcək.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#2C4B62',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Bəli, təmizlə',
-      cancelButtonText: 'Ləğv et',
-      reverseButtons: true,
+      confirmText: 'Bəli, təmizlə',
+      cancelText: 'Ləğv et',
     });
-    if (r.isConfirmed) editor.commands.clearContent();
+    if (ok) editor.commands.clearContent();
   }, [editor]);
 
   if (!editor) return null;

@@ -4,7 +4,15 @@
 // Bespoke create/edit form for the self-referencing course-category tree that
 // mirrors the "Xidmətlər" mega-menu. Matches the BranchForm style.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminListQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -15,11 +23,6 @@ import {
   SectionTitle,
   toId,
 } from "./kit";
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 export function CourseCategoryForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);

@@ -4,8 +4,13 @@
  * HeadingDropdown — paraqraf / H1..H4 seçimi.
  */
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// Icons
 import { ChevronDown, Type } from 'lucide-react';
+
+// Local
 import { HEADING_OPTIONS } from './constants';
 
 export default function HeadingDropdown({ editor }) {

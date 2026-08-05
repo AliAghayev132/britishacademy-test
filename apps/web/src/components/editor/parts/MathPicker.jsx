@@ -13,8 +13,13 @@
  *  - Ctrl/Cmd + Enter ilə əlavə et.
  */
 
+// React
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+// Icons
 import { Sigma, Search, X, ChevronRight } from 'lucide-react';
+
+// Local
 import { ToolbarButton, MathPreview } from './Primitives';
 import { MATH_CATEGORIES, ALL_MATH_ITEMS } from './constants';
 

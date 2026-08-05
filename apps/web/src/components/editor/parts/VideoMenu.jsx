@@ -10,8 +10,13 @@
  *    - Hər bölmənin altında açılır izah bloku.
  * ===================================================================== */
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// Icons
 import { Video, Upload, Check, HelpCircle, ChevronDown, X } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 
 const ACCEPT = 'video/mp4,video/webm,video/ogg';

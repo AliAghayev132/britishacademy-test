@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useEffect, useState } from "react";
+// UI / kit
 import { notify } from "@/components/ui/feedback";
+// Data (RTK Query)
 import {
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,

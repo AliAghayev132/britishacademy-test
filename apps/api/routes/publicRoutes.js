@@ -1,9 +1,14 @@
+// Constants
 import { Router } from "#constants";
+
+// Controllers
 import {
   publicController,
   leadController,
   seoController,
 } from "#controllers";
+
+// Middlewares
 import { writeRateLimiter } from "#middlewares";
 
 /**

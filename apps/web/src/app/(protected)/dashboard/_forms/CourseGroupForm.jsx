@@ -6,7 +6,16 @@
 // teacher runs which course, at which branch, on which days and at what time.
 // `timeSlot` is derived server-side from the first slot, so it is NOT exposed.
 
+// React
 import { useMemo, useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminListQuery,
+  useAdminLookupsQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -23,12 +32,6 @@ import {
   LEVELS,
   FORMATS,
 } from "./kit";
-import {
-  useAdminListQuery,
-  useAdminLookupsQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 // CourseGroup.status enum (apps/api/constants/shared/enums.js → groupStatus).
 const STATUS = [

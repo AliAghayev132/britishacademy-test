@@ -10,7 +10,10 @@
  * - Reset (bütün ölçü/style sıfırla)
  */
 
+// React
 import { useEffect, useMemo, useState } from 'react';
+
+// Icons
 import {
   AlignStartVertical,
   AlignCenterVertical,
@@ -18,6 +21,8 @@ import {
   RotateCcw,
   CaptionsIcon,
 } from 'lucide-react';
+
+// Local
 import { ToolbarButton, Divider, ImagePxInput } from './Primitives';
 import {
   getCurrentImageStyle,

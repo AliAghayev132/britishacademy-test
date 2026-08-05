@@ -1,7 +1,10 @@
 'use client';
 
+// React
 import { useState, useCallback } from 'react';
+// Local
 import { useAI } from '@/hooks/useAI';
+// Utils
 import { toast } from '@/lib/toast';
 
 /**

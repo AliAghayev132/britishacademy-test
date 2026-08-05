@@ -8,10 +8,13 @@
 //
 // ⚠️ seedDatabase() WIPES the BA content collections before inserting.
 
+// Models
 import {
   SiteSetting, Branch, Teacher, CourseCategory, Course, CourseGroup,
   Testimonial, Destination, MenuItem, Partner, Advantage, Page,
 } from "#models";
+
+// Local
 import { SlugService } from "./SlugService.js";
 import { COURSE_CONTENT } from "../data/courseContent.mjs";
 

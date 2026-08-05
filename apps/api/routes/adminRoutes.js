@@ -1,5 +1,10 @@
+// Constants
 import { Router, adminRoles } from "#constants";
+
+// Controllers
 import { adminController, leadController, courseComposer, devController } from "#controllers";
+
+// Middlewares
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
 
 /**

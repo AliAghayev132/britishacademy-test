@@ -4,8 +4,13 @@
  * LinkInput — link əlavə etmə inline forması və link silmə düyməsi.
  */
 
+// React
 import { useState } from 'react';
+
+// Icons
 import { Link as LinkIcon, Unlink, Check } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 
 export default function LinkInput({ editor }) {

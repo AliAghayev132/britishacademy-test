@@ -1,9 +1,11 @@
 'use client'
 
+// React
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-
+// UI / kit
 import { Button, Input, Card, PageLoader } from '@/components/ui'
+// Data (RTK Query)
 import { useGetMeQuery, useUpdateProfileMutation } from '@/store/api'
 import { updateUser } from '@/store/slices/authSlice'
 

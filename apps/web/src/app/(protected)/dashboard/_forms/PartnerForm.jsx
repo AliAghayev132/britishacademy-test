@@ -4,7 +4,14 @@
 // Bespoke create/edit form for corporate partner logos in the
 // "Tərəfdaşlarımız" strip. Media uses FileUpload (never raw URL inputs).
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -14,11 +21,8 @@ import {
   SectionTitle,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+// Utils
 import { getImageUrl } from "@/utils/getImageUrl";
-import {
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 export function PartnerForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);

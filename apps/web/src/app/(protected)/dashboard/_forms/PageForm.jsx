@@ -4,7 +4,14 @@
 // Bespoke create/edit form for editorial pages (Haqqımızda, Əlaqə copy, …).
 // Supports simple {heading, body} content blocks + SEO. Matches BranchForm style.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -16,10 +23,6 @@ import {
   AddButton,
   RemoveButton,
 } from "./kit";
-import {
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 const emptyBlock = { heading: "", body: "" };
 

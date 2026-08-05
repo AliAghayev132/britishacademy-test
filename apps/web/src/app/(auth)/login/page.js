@@ -1,11 +1,21 @@
 'use client'
 
+// React
 import { useState } from 'react'
+
+// Next
 import { useRouter, useSearchParams } from 'next/navigation'
+
+// Data
 import { useDispatch } from 'react-redux'
+
+// Icons
 import { Mail, Lock, GraduationCap, Users, Building2 } from 'lucide-react'
 
+// UI / components
 import { Button, Input } from '@/components/ui'
+
+// Store
 import { useLoginMutation } from '@/store/api'
 import { setCredentials } from '@/store/slices/authSlice'
 

@@ -15,12 +15,17 @@
  *  Crop: react-easy-crop (CollageCropDialog) — slot-a uyğun aspect-də.
  * ===================================================================== */
 
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
+// Icons
 import {
   LayoutGrid, X, Plus, Loader2, Trash2, Check, Pencil,
   AlignLeft, AlignCenter, AlignRight, Settings2, Crosshair,
 } from 'lucide-react';
+
+// Local
 import { ToolbarButton } from './Primitives';
 import { COLLAGE_LAYOUTS } from './ImageCollageExtension';
 import CollageCropDialog from './CollageCropDialog';

@@ -6,6 +6,8 @@ import { memo, useCallback, useState } from "react";
 import Link from "next/link";
 // Data (RTK Query)
 import { useGetTeachersQuery } from "@/store/api/publicApi";
+// Local
+import { SiteSelect } from "./SiteSelect";
 
 // ── Constants ──
 const chip = (active) => ({
@@ -88,17 +90,15 @@ const FilterBar = memo(function FilterBar({ courses, course, onReset, onChange }
       >
         Hamısı
       </button>
-      <select
-        value={course}
-        onChange={onChange}
-        className="ba-field"
-        style={{ border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "9px 14px", fontSize: 14.5, fontFamily: "inherit", cursor: "pointer", color: "#14141C", background: "#fff", minWidth: 220 }}
-      >
-        <option value="">Kurs seç…</option>
-        {courses.map((c) => (
-          <option key={c._id} value={c.slug}>{c.title}</option>
-        ))}
-      </select>
+      <div style={{ minWidth: 240 }}>
+        <SiteSelect
+          value={course}
+          onChange={onChange}
+          placeholder="Kurs seç…"
+          style={{ border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "10px 14px", fontSize: 14.5, fontFamily: "inherit", color: "#14141C", background: "#fff", width: "100%" }}
+          options={courses.map((c) => ({ value: c.slug, label: c.title }))}
+        />
+      </div>
     </div>
   );
 });
@@ -121,7 +121,7 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
 
   // ── Handlers ──
   const handleReset = useCallback(() => setCourse(""), []);
-  const handleChange = useCallback((e) => setCourse(e.target.value), []);
+  const handleChange = useCallback((v) => setCourse(v), []);
 
   // ── Render ──
   return (

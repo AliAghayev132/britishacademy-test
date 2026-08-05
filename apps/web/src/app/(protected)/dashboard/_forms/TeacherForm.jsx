@@ -4,7 +4,15 @@
 // Bespoke admin form covering the whole Teacher model. Uses the shared kit
 // primitives and the RTK Query admin hooks. Renders inside <Overlay>.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminLookupsQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -18,12 +26,8 @@ import {
   RemoveButton,
   toId,
 } from "./kit";
-import {
-  useAdminLookupsQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 import { FileUpload } from "@/components/ui/FileUpload";
+// Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
 export function TeacherForm({ item, onClose }) {

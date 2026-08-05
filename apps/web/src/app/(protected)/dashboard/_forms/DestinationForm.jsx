@@ -4,7 +4,14 @@
 // Bespoke create/edit form covering the whole Destination model (study-abroad
 // country / scholarship programme). Follows the teacher/branch form pattern.
 
+// React
 import { useState } from "react";
+// Data (RTK Query)
+import {
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+// Local
 import {
   Overlay,
   Field,
@@ -17,11 +24,8 @@ import {
   RemoveButton,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+// Utils
 import { getImageUrl } from "@/utils/getImageUrl";
-import {
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
 
 export function DestinationForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
