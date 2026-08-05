@@ -1,12 +1,14 @@
 "use client";
 
 // React
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 // Next
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 // Local
 import { useApply } from "./SiteProvider";
+import { ScrollProgress } from "./ScrollProgress";
+import { SearchOverlay } from "./SearchOverlay";
 
 // ── Constants ──
 const caret = (
@@ -82,18 +84,87 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
   );
 });
 
+// First-load intro overlay: the logo "walks" (reuses the ba-walk keyframe) with
+// a short progress fill, then fades out ~1.2s in. Shows once per session so it
+// doesn't reappear on client navigation (RouteLoader covers those). Lightweight
+// and non-blocking after the fade.
+function IntroLoader() {
+  const [show, setShow] = useState(false);
+  const [hide, setHide] = useState(false);
+  const [bar, setBar] = useState(8);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("ba-intro-shown")) return;
+    setShow(true);
+    const start = setTimeout(() => setBar(100), 60);
+    const fade = setTimeout(() => setHide(true), 1200);
+    const done = setTimeout(() => {
+      setShow(false);
+      sessionStorage.setItem("ba-intro-shown", "1");
+    }, 1780);
+    return () => {
+      clearTimeout(start);
+      clearTimeout(fade);
+      clearTimeout(done);
+    };
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div
+      className="ba-loader"
+      aria-hidden="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 200,
+        background: "#0C0D1A",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 26,
+        opacity: hide ? 0 : 1,
+        transition: "opacity .55s ease",
+        pointerEvents: hide ? "none" : "auto",
+      }}
+    >
+      <div
+        className="ba-loader-walk"
+        style={{ background: "#fff", borderRadius: 16, padding: "16px 22px", animation: "ba-walk 1.05s ease-in-out infinite", transformOrigin: "50% 90%" }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/logo-stack.png" alt="British Academy" width={377} height={200} style={{ height: 88, width: "auto", display: "block" }} />
+      </div>
+      <div style={{ width: 210, height: 4, borderRadius: 99, background: "rgba(255,255,255,.14)", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${bar}%`, background: "var(--accent)", borderRadius: 99, transition: "width 1.1s cubic-bezier(.4,.1,.2,1)" }} />
+      </div>
+    </div>
+  );
+}
+
 export function Header({ site, nav = [], services = [], destinations = [] }) {
   // ── State / derived ──
   const pathname = usePathname();
   const { open } = useApply();
   const [mobile, setMobile] = useState(false);
+  const [search, setSearch] = useState(false);
   const isActive = (href) => href && href !== "/" && pathname.startsWith(href);
 
   // ── Handlers ──
   const closeMobile = useCallback(() => setMobile(false), []);
+  const openSearch = useCallback(() => setSearch(true), []);
+  const closeSearch = useCallback(() => setSearch(false), []);
 
   // ── Render ──
   return (
+    <>
+    {/* first-load intro + site-wide scroll progress */}
+    <IntroLoader />
+    <ScrollProgress />
+
     <div className="ba-fixhead" style={{ position: "sticky", top: 0, zIndex: 60 }}>
       {/* top bar */}
       <div style={{ background: "#0F1020", color: "#C7C8DA", fontSize: 13 }}>
@@ -136,6 +207,19 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "none" }}>
             <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Axtar"
+              className="ba-search-btn"
+              style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", background: "#F1F2F6", border: "1px solid #E7E8EE", color: "#4C4C58", fontWeight: 600, fontSize: 14, height: 42, padding: "0 13px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit", transition: "background .2s, border-color .2s, color .2s" }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flex: "none" }} aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+              <span className="ba-search-txt" style={{ maxWidth: 0, opacity: 0, overflow: "hidden", whiteSpace: "nowrap", transition: "max-width .32s ease, opacity .25s ease, margin .32s ease" }}>Axtar</span>
+            </button>
+            <button
               onClick={() => open()}
               className="ba-apply-btn"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14.5, padding: "11px 20px", borderRadius: 99, cursor: "pointer", whiteSpace: "nowrap" }}
@@ -161,5 +245,8 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
         </div>
       </div>
     </div>
+
+    <SearchOverlay open={search} onClose={closeSearch} />
+    </>
   );
 }

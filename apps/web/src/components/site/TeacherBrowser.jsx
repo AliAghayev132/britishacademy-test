@@ -20,30 +20,60 @@ const chip = (active) => ({
   color: active ? "#fff" : "#4C4C58",
 });
 
+// ── Helpers ──
+// Badge text: certificate title → first segment of title before "·" → none.
+function badgeText(t) {
+  const cert = t.certificates?.[0]?.title;
+  if (cert && cert.trim()) return cert.trim();
+  const first = (t.title || "").split("·")[0].trim();
+  return first || "";
+}
+
 // ── Subcomponents ──
+// Portrait card mirroring the static `.mt-card` design.
 const TeacherCard = memo(function TeacherCard({ t }) {
+  const badge = badgeText(t);
   return (
     <Link
       href={`/muellimler/${t.slug}`}
-      className="ba-course"
-      style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, padding: 24, textAlign: "center", "--accent": t.color, "--accent-soft": `${t.color}1f` }}
+      className="mt-card"
+      style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 22, overflow: "hidden", "--accent": t.color }}
     >
-      <span className="ba-av" style={{ "--c": t.color, width: 84, height: 84, fontSize: 32, margin: "0 auto" }}>
+      {/* Portrait image area */}
+      <div style={{ position: "relative", aspectRatio: "4 / 4.4", overflow: "hidden", background: "#EEF0F6" }}>
         {t.photo ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={t.photo} alt={t.fullName} />
+          <img
+            className="mt-img"
+            src={t.photo}
+            alt={t.fullName}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transition: "transform .35s ease" }}
+          />
         ) : (
-          <span>{(t.fullName || "?").charAt(0)}</span>
+          <div
+            className="mt-img"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "grid", placeItems: "center", background: t.color, transition: "transform .35s ease" }}
+          >
+            <span style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 72, color: "#fff", lineHeight: 1 }}>
+              {(t.fullName || "?").charAt(0)}
+            </span>
+          </div>
         )}
-      </span>
-      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 18, margin: "16px 0 0", color: "#16161C" }}>{t.fullName}</h3>
-      <p style={{ fontSize: 13.5, color: t.color, fontWeight: 600, margin: "6px 0 0" }}>{t.title}</p>
-      {(t.branches || []).length > 0 && (
-        <p style={{ fontSize: 12.5, color: "#9A9AA6", margin: "10px 0 0" }}>
-          {t.branches.map((b) => b.name || "").filter(Boolean).join(" · ")}
-        </p>
-      )}
-      <span style={{ display: "inline-block", marginTop: 14, color: "var(--accent)", fontWeight: 700, fontSize: 13.5 }}>Profilə bax →</span>
+        {badge && (
+          <span style={{ position: "absolute", top: 14, left: 14, background: "var(--accent)", color: "#fff", fontSize: 12, fontWeight: 700, padding: "5px 12px", borderRadius: 99 }}>
+            {badge}
+          </span>
+        )}
+      </div>
+
+      {/* Bottom row: name + subject on the left, arrow on the right */}
+      <div style={{ padding: "22px 22px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 20, margin: 0, color: "#17171F" }}>{t.fullName}</h3>
+          {t.title && <div style={{ fontSize: 14, color: "#63636F", marginTop: 4 }}>{t.title}</div>}
+        </div>
+        <span className="mt-arrow" style={{ width: 40, height: 40, flex: "none", borderRadius: "50%", background: "#F1F2F6", color: "#4C4C58", display: "grid", placeItems: "center", transition: ".25s", fontSize: 18 }}>→</span>
+      </div>
     </Link>
   );
 });
@@ -103,7 +133,7 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
       {teachers.length === 0 ? (
         <p style={{ color: "#63636F", padding: "30px 0" }}>Bu kurs üzrə müəllim tapılmadı.</p>
       ) : (
-        <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, opacity: isFetching ? 0.6 : 1, transition: "opacity .15s" }}>
+        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24, opacity: isFetching ? 0.6 : 1, transition: "opacity .15s" }}>
           {teachers.map((t) => <TeacherCard key={t._id} t={t} />)}
         </div>
       )}

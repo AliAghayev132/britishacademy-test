@@ -29,17 +29,40 @@ function BranchCard({ branch, accent }) {
         <span className="ba-pricecard-addr">📍 {b.address}{b.metro ? ` · ${b.metro}` : ""}</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14.5, color: "#4a4a55" }}>
+        {b.district && <span>🏙 {b.district}</span>}
         {b.phone && <span>☎ {b.phone}</span>}
         {(b.workingHours || []).map((w, j) => <span key={j}>🕐 {w.days} {w.from}–{w.to}</span>)}
       </div>
-      <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
         {b.whatsapp && (
-          <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#25D366", color: "#fff", fontWeight: 700, fontSize: 13.5, padding: "10px 18px", borderRadius: 99 }}>WhatsApp</a>
+          <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "#25D366", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>WhatsApp</a>
         )}
         {b.phone && (
-          <a href={`tel:${b.phone.replace(/[^+\d]/g, "")}`} style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "var(--accent-soft)", color: "var(--accent)", fontWeight: 700, fontSize: 13.5, padding: "10px 18px", borderRadius: 99 }}>Zəng et</a>
+          <a href={`tel:${b.phone.replace(/[^+\d]/g, "")}`} style={{ flex: 1, textAlign: "center", background: "var(--accent)", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>Zəng et</a>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Full-width map placeholder below the branch grid (mirrors the static site). */
+function BranchMap({ branches }) {
+  const embed = branches.find((b) => b.mapEmbedUrl)?.mapEmbedUrl;
+  if (embed) {
+    return (
+      <iframe
+        src={embed}
+        title="Filiallar xəritəsi"
+        loading="lazy"
+        allowFullScreen
+        referrerPolicy="no-referrer-when-downgrade"
+        style={{ width: "100%", minHeight: 340, border: 0, borderRadius: 22, marginTop: 24, display: "block" }}
+      />
+    );
+  }
+  return (
+    <div className="img-slot" style={{ minHeight: 340, borderRadius: 22, marginTop: 24 }}>
+      <span>Xəritə buraya əlavə olunacaq<br />(Google Maps — bütün filiallar)</span>
     </div>
   );
 }
@@ -62,6 +85,7 @@ export default async function BranchesPage() {
         <div className="grid-2 ba-pricegrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 18 }}>
           {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} />)}
         </div>
+        <BranchMap branches={branches} />
       </section>
 
       <CtaBand />

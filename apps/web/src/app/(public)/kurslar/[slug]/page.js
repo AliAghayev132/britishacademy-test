@@ -98,6 +98,45 @@ function InfoSidebar({ course }) {
   );
 }
 
+/** "Üstünlüklər" — responsive icon-tile grid of course features. */
+function FeaturesGrid({ features }) {
+  return (
+    <section style={{ ...wrap, padding: "56px 28px 0" }}>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>Üstünlüklər</h2>
+      <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
+        {features.map((f, i) => (
+          <div key={i} style={{ border: "1px solid #ECEDF2", borderRadius: 18, padding: 24, background: "#fff" }}>
+            <span style={{ display: "grid", placeItems: "center", width: 48, height: 48, borderRadius: 13, background: "var(--accent-soft)", fontSize: 23 }}>{f.icon}</span>
+            <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 17, color: "#16161C", margin: "16px 0 8px" }}>{f.title}</h3>
+            <p style={{ fontSize: 14, color: "#63636F", lineHeight: 1.6, margin: 0 }}>{f.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** "Bu kursun müəllimləri" — unique teachers across all branches. */
+function CourseTeachers({ teachers }) {
+  return (
+    <section style={{ ...wrap, padding: "56px 28px 0" }}>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 8px" }}>Bu kursun müəllimləri</h2>
+      <p style={{ fontSize: 15, color: "#63636F", margin: "0 0 24px" }}>Beynəlxalq sertifikatlı, təcrübəli müəllim heyəti. <Link href="/muellimler" style={{ color: "var(--accent)", fontWeight: 700 }}>Hamısına bax →</Link></p>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+        {teachers.slice(0, 3).map((t) => (
+          <Link key={t._id} href={`/muellimler/${t.slug}`} style={{ display: "flex", alignItems: "center", gap: 14, border: "1px solid #ECEDF2", borderRadius: 18, padding: 18, background: "#fff" }}>
+            <span style={{ width: 52, height: 52, borderRadius: "50%", background: t.color || "#2E6BE6", color: "#fff", display: "grid", placeItems: "center", fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, flex: "none" }}>{(t.fullName || "?").charAt(0)}</span>
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: "block", fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16.5, color: "#16161C" }}>{t.fullName}</span>
+              {t.title && <span style={{ display: "block", fontSize: 13, color: "#63636F", marginTop: 3 }}>{t.title}</span>}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** "Digər istiqamətlər" related-courses grid. */
 function RelatedCourses({ related }) {
   return (
@@ -124,6 +163,18 @@ export default async function CoursePage({ params }) {
   }
 
   const { course, teachersByBranch = [], related = [] } = res.data;
+
+  // ── Unique teachers across all branches (for the standalone section) ──
+  const uniqueTeachers = [];
+  const seenTeachers = new Set();
+  for (const group of teachersByBranch) {
+    for (const t of group.teachers || []) {
+      const id = String(t._id);
+      if (seenTeachers.has(id)) continue;
+      seenTeachers.add(id);
+      uniqueTeachers.push(t);
+    }
+  }
 
   // ── JSON-LD ──
   // Course + Breadcrumb + FAQPage
@@ -199,6 +250,9 @@ export default async function CoursePage({ params }) {
         <p style={{ fontSize: 13.5, color: "#9A9AA6", margin: "14px 0 0" }}>Bütün <Link href="/filiallar" style={{ color: "var(--accent)", fontWeight: 700 }}>filiallara bax</Link> və ya dəqiq məlumat üçün <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>əlaqə saxla</Link>.</p>
       </section>
 
+      {/* Features */}
+      {course.features?.length > 0 && <FeaturesGrid features={course.features} />}
+
       {/* FAQ */}
       {course.faq?.length > 0 && (
         <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 28px" }}>
@@ -206,6 +260,9 @@ export default async function CoursePage({ params }) {
           <FaqAccordion items={course.faq} />
         </section>
       )}
+
+      {/* Course teachers */}
+      {uniqueTeachers.length > 0 && <CourseTeachers teachers={uniqueTeachers} />}
 
       {/* Related */}
       {related.length > 0 && <RelatedCourses related={related} />}
