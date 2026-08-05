@@ -106,12 +106,13 @@ export function SearchOverlay({ open, onClose }) {
         </div>
 
         <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-          {results.map((c) => (
+          {results.map((c, i) => (
             <Link
               key={c._id || c.slug}
               href={`/kurslar/${c.slug}`}
               onClick={onClose}
-              style={{ display: "flex", flexDirection: "column", gap: 2, textDecoration: "none", border: "1px solid #ECEDF2", borderRadius: 14, padding: "14px 16px", background: "#fff", color: "#14141C" }}
+              className="ba-sr-item"
+              style={{ display: "flex", flexDirection: "column", gap: 2, textDecoration: "none", border: "1px solid #ECEDF2", borderRadius: 14, padding: "14px 16px", background: "#fff", color: "#14141C", animationDelay: `${Math.min(i, 12) * 35}ms` }}
             >
               <span style={{ fontWeight: 700, fontSize: 16 }}>{c.title}</span>
               {c.category?.name && <span style={{ fontSize: 13, color: "#8A8A96" }}>{c.category.name}</span>}

@@ -120,8 +120,12 @@ img { display: block; max-width: 100%; }
 .ba-flink { color:#9A9BB0; transition:color .2s; }
 .ba-flink:hover { color:#fff; }
 .ba-faq:hover { border-color: rgba(20,20,60,.16) !important; }
-.ba-search-btn:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
-.ba-search-btn:hover .ba-search-txt { max-width:100px; opacity:1; margin-left:9px; }
+.ba-search-btn { transition: background .2s, border-color .2s, color .2s, box-shadow .2s; }
+.ba-search-btn:hover { border-color: var(--accent) !important; color: var(--accent) !important; background: #fff !important; box-shadow: 0 6px 18px rgba(0,21,122,.14); }
+/* base lives in CSS (not inline) so the :hover reveal can win — otherwise an
+   inline max-width:0 would override the hover rule and the "Axtar" word never shows */
+.ba-search-txt { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transition: max-width .32s ease, opacity .25s ease, margin .32s ease; }
+.ba-search-btn:hover .ba-search-txt { max-width: 100px; opacity: 1; margin-left: 9px; }
 .ba-apply-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .ba-wa:hover { transform: scale(1.08); }
 .ba-wa.is-open { transform: scale(1.06) rotate(6deg); }
@@ -623,10 +627,17 @@ body.ba-home #qeydiyyat > div {
 /* FAQ sualı klaviatura ilə işlənə bilir — fokus görünsün */
 .ba-faq-q:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; border-radius: 14px; }
 
+/* Search results — staggered fade/slide-in */
+@keyframes ba-sr-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.ba-sr-item { animation: ba-sr-in .28s ease both; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
   .ba-nav { display: none !important; }
   .ba-burger { display: flex !important; }
+  /* On mobile the header shows just logo + hamburger (far right); the desktop
+     search/apply cluster moves into the drawer. */
+  .ba-head-actions { display: none !important; }
 }
 /* header loqosu sabit 231px-dir — dar ekranda yer açmaq üçün kiçilir */
 @media (max-width: 620px) {

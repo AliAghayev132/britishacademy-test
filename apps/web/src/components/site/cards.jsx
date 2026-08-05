@@ -28,11 +28,24 @@ export function CourseCard({ course, index = 0 }) {
   );
 }
 
+// Country → flag emoji (used as a decorative wash when no SVG flag is stored).
+const COUNTRY_FLAGS = {
+  "Almaniya": "🇩🇪", "Türkiyə": "🇹🇷", "İngiltərə": "🇬🇧", "Kanada": "🇨🇦",
+  "Polşa": "🇵🇱", "Latviya": "🇱🇻", "Macarıstan": "🇭🇺", "Litva": "🇱🇹",
+  "Rusiya": "🇷🇺", "Gürcüstan": "🇬🇪", "Estoniya": "🇪🇪", "Amerika": "🇺🇸",
+  "Fransa": "🇫🇷", "İspaniya": "🇪🇸", "İtaliya": "🇮🇹", "Niderland": "🇳🇱",
+};
+
 /** Study-abroad destination card with the flag as a full-height wash. */
 export function DestinationCard({ dest }) {
+  const flag = COUNTRY_FLAGS[dest.country] || (dest.isScholarship ? "🎓" : "🌍");
   return (
     <Link href={`/xaricde-tehsil/${dest.slug}`} className="ba-fdest" style={{ "--cc": dest.color || "#2E6BE6" }}>
-      {dest.flag && <span className="ba-flag" aria-hidden="true" dangerouslySetInnerHTML={{ __html: dest.flag }} />}
+      {dest.flag ? (
+        <span className="ba-flag" aria-hidden="true" dangerouslySetInnerHTML={{ __html: dest.flag }} />
+      ) : (
+        <span aria-hidden="true" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 92, lineHeight: 1, opacity: 0.9, pointerEvents: "none", userSelect: "none", WebkitMaskImage: "linear-gradient(to left, #000 55%, transparent)", maskImage: "linear-gradient(to left, #000 55%, transparent)" }}>{flag}</span>
+      )}
       <span className="ba-fdest-body">
         <span className="ba-fdest-tag" style={{ display: "block" }}>{dest.region}</span>
         <span className="ba-fdest-name" style={{ display: "block" }}>{dest.country}</span>

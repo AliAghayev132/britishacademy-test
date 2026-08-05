@@ -18,14 +18,21 @@ export function RouteLoader() {
   const [active, setActive] = useState(false);
   const key = pathname + "?" + search.toString();
   const current = useRef(key);
+  const shownAt = useRef(0);
+  const MIN_MS = 550; // keep the loader up long enough to read (no flash-and-gone)
 
   // ── Effects ──
-  // Hide as soon as the route has changed.
+  // Hide once the route changed — but honour a minimum on-screen time.
   useEffect(() => {
-    if (current.current !== key) {
-      current.current = key;
+    if (current.current === key) return;
+    current.current = key;
+    const elapsed = Date.now() - shownAt.current;
+    if (elapsed >= MIN_MS) {
       setActive(false);
+      return;
     }
+    const t = setTimeout(() => setActive(false), MIN_MS - elapsed);
+    return () => clearTimeout(t);
   }, [key]);
 
   // Show on same-origin link navigations.
@@ -42,6 +49,7 @@ export function RouteLoader() {
       try { dest = new URL(href, window.location.href); } catch { return; }
       if (dest.origin !== window.location.origin) return;
       if (dest.pathname + dest.search === window.location.pathname + window.location.search) return;
+      shownAt.current = Date.now();
       setActive(true);
     };
     document.addEventListener("click", onClick, true);

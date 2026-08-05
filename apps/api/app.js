@@ -70,8 +70,19 @@ const setupSecurity = (app) => {
  * Configure general middlewares
  */
 const setupMiddlewares = (app) => {
-  // Gzip compression
-  app.use(compression());
+  // Gzip compression — sıxılmış cavablar daha sürətli gedir.
+  // level 6 = yaxşı ölçü/CPU balansı; 512 baytdan böyük cavablar sıxılır;
+  // klient `x-no-compression` göndərsə sıxılma keçilir.
+  app.use(
+    compression({
+      level: 6,
+      threshold: 512,
+      filter: (req, res) => {
+        if (req.headers["x-no-compression"]) return false;
+        return compression.filter(req, res);
+      },
+    }),
+  );
 
   // CORS
   app.use(cors(corsConfig));
