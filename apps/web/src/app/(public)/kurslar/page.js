@@ -7,6 +7,7 @@ import { apiGet } from "@/lib/api";
 // Components
 import { CourseCard, SectionHead } from "@/components/site/cards";
 import { PageBanner } from "@/components/site/PageBanner";
+import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -75,6 +76,8 @@ export default async function CoursesHubPage() {
       {groups.map((cat) => (
         <CourseCategorySection key={cat._id} category={cat} courses={byCat[String(cat._id)] || []} />
       ))}
+
+      <CtaBand />
     </>
   );
 }

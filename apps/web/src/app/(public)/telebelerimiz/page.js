@@ -4,6 +4,7 @@ import { apiGet } from "@/lib/api";
 // Components
 import { TestimonialCard, SectionHead } from "@/components/site/cards";
 import { PageBanner } from "@/components/site/PageBanner";
+import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -77,6 +78,8 @@ export default async function StudentsPage() {
           </div>
         </section>
       )}
+
+      <CtaBand />
     </>
   );
 }

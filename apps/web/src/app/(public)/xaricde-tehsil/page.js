@@ -4,6 +4,7 @@ import { apiGet } from "@/lib/api";
 // Components
 import { DestinationCard, SectionHead } from "@/components/site/cards";
 import { PageBanner } from "@/components/site/PageBanner";
+import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -53,6 +54,8 @@ export default async function DestinationsPage() {
           <DestinationGrid destinations={scholarships} />
         </section>
       )}
+
+      <CtaBand interest="Xaricdə təhsil" />
     </>
   );
 }

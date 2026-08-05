@@ -3,6 +3,7 @@ import { apiGet } from "@/lib/api";
 
 // Components
 import { PageBanner } from "@/components/site/PageBanner";
+import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -62,6 +63,8 @@ export default async function BranchesPage() {
           {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} />)}
         </div>
       </section>
+
+      <CtaBand />
     </>
   );
 }

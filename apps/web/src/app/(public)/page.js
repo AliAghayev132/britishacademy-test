@@ -8,6 +8,7 @@ import { apiGet } from "@/lib/api";
 import { Hero } from "@/components/site/Hero";
 import { CourseCard, DestinationCard, TestimonialCard, SectionHead } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
+import { HomeBodyClass } from "@/components/site/HomeBodyClass";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -56,6 +57,7 @@ export default async function HomePage() {
   // ── render ──
   return (
     <>
+      <HomeBodyClass />
       <Hero hero={s.hero} stats={s.stats} />
 
       {/* Courses */}

@@ -1,6 +1,35 @@
 @import "tailwindcss";
 
 /* ============================================================
+   Admin brend palitrası (Tailwind v4 @theme override)
+   Admin panel + auth səhifələri yalnız `blue-*` / `cyan-*` Tailwind
+   class-larını işlədir (public sayt inline + var(--accent) işlədir, bu
+   class-lara toxunmur). Həmin shade-ləri British Academy navy scale-inə
+   çeviririk ki, admin dizaynı main saytla eyni brenddə olsun — heç bir
+   fayl-fayl dəyişiklik olmadan.
+   ============================================================ */
+@theme {
+  /* primary (navy #00157A) — bg-blue-900 / bg-cyan-500 buna çevrilir */
+  --color-blue-900: #00157a;
+  --color-cyan-500: #00157a;
+  /* hover (daha tünd) */
+  --color-blue-800: #00105e;
+  --color-cyan-600: #00105e;
+  /* mətn linkləri / vurğu */
+  --color-blue-700: #142a86;
+  --color-cyan-700: #142a86;
+  /* fokus halqaları / kənarlar */
+  --color-blue-500: #2b46a0;
+  --color-cyan-400: #2b46a0;
+  --color-blue-200: #b0bdea;
+  /* açıq fon tintləri (ikon arxası, chip) */
+  --color-blue-100: #d3dbf4;
+  --color-cyan-100: #d3dbf4;
+  --color-blue-50: #eaeefb;
+  --color-cyan-50: #eaeefb;
+}
+
+/* ============================================================
    British Academy — global styles.
    Tailwind v4 (above) powers admin/UI primitives; the block below is the
    approved public-site design system ported from the legacy static build.
@@ -358,14 +387,14 @@ body.ba-home #xaricde { background: linear-gradient(165deg, #F4F7FF 0%, #FDF6F0 
 body.ba-home .ba-partners { background: linear-gradient(150deg, #F6F6FF 0%, #FFF6F2 100%) !important; }
 
 /* -- Destination cards with full-height flag art -- */
-body.ba-home .ba-fdest {
+.ba-fdest {
   position: relative; overflow: hidden; display: flex; align-items: flex-end;
   min-height: 138px; background: #fff; border: 1px solid #ECEDF2;
   border-radius: 18px; padding: 20px;
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
-body.ba-home .ba-fdest:hover { transform: translateY(-5px); box-shadow: 0 18px 38px rgba(20,20,45,.12); border-color: var(--cc); }
-body.ba-home .ba-flag {
+.ba-fdest:hover { transform: translateY(-5px); box-shadow: 0 18px 38px rgba(20,20,45,.12); border-color: var(--cc); }
+.ba-flag {
   position: absolute; top: 0; right: 0; bottom: 0; width: 60%;
   opacity: .17; filter: blur(2.5px) saturate(1.15);
   -webkit-mask-image: linear-gradient(to left, #000 55%, transparent);
@@ -373,17 +402,17 @@ body.ba-home .ba-flag {
   pointer-events: none;
   transition: opacity .35s ease, filter .35s ease, transform .45s cubic-bezier(.2,.7,.2,1);
 }
-body.ba-home .ba-flag svg { width: 100%; height: 100%; display: block; }
-body.ba-home .ba-fdest:hover .ba-flag { opacity: .4; filter: blur(0) saturate(1.25); transform: scale(1.06) translateX(-3px); }
-body.ba-home .ba-fdest-body { position: relative; z-index: 1; }
-body.ba-home .ba-fdest-tag { font-size: 11.5px; color: var(--cc); font-weight: 800; letter-spacing: .05em; }
-body.ba-home .ba-fdest-name { font-family: 'Poppins'; font-weight: 700; font-size: 18px; margin-top: 7px; color: #17171F; }
-body.ba-home .ba-fdest-sub { font-size: 13px; color: #6C6C7A; margin-top: 4px; line-height: 1.4; }
-body.ba-home .ba-fdest-all { background: linear-gradient(120deg, var(--accent), #7C4DFF 60%, #C13DBF 130%); border: none; }
-body.ba-home .ba-fdest-all .ba-fdest-tag,
-body.ba-home .ba-fdest-all .ba-fdest-name,
-body.ba-home .ba-fdest-all .ba-fdest-sub { color: #fff; }
-body.ba-home .ba-fdest-all:hover { border: none; box-shadow: 0 18px 40px rgba(96,61,240,.35); }
+.ba-flag svg { width: 100%; height: 100%; display: block; }
+.ba-fdest:hover .ba-flag { opacity: .4; filter: blur(0) saturate(1.25); transform: scale(1.06) translateX(-3px); }
+.ba-fdest-body { position: relative; z-index: 1; }
+.ba-fdest-tag { font-size: 11.5px; color: var(--cc); font-weight: 800; letter-spacing: .05em; }
+.ba-fdest-name { font-family: 'Poppins'; font-weight: 700; font-size: 18px; margin-top: 7px; color: #17171F; }
+.ba-fdest-sub { font-size: 13px; color: #6C6C7A; margin-top: 4px; line-height: 1.4; }
+.ba-fdest-all { background: linear-gradient(120deg, var(--accent), #7C4DFF 60%, #C13DBF 130%); border: none; }
+.ba-fdest-all .ba-fdest-tag,
+.ba-fdest-all .ba-fdest-name,
+.ba-fdest-all .ba-fdest-sub { color: #fff; }
+.ba-fdest-all:hover { border: none; box-shadow: 0 18px 40px rgba(96,61,240,.35); }
 
 /* -- CTA band: vivid gradient -- */
 body.ba-home #qeydiyyat > div {
