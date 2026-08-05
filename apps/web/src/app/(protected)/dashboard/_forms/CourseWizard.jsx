@@ -21,10 +21,11 @@ import {
   NativeSelect, Toggle, MultiSelectChips, AddButton, RemoveButton,
   WEEKDAYS, LEVELS, FORMATS, toId,
 } from "./kit";
+import { FileUpload } from "@/components/ui/FileUpload";
 
 // ── Defaults / helpers ──
 const emptyCourse = () => ({
-  title: "", category: "", h1: "", lead: "", excerpt: "",
+  title: "", slug: "", category: "", h1: "", lead: "", excerpt: "",
   levels: [],
   lesson: { perWeek: 2, minutes: 90, levelDurationMonths: [1.5, 2] },
   groupSize: { min: 3, max: 6 },
@@ -127,6 +128,8 @@ export function CourseWizard({ item, onClose }) {
     const body = {
       course: {
         title: course.title.trim(),
+        // Send slug only when set; blank lets the server auto-generate.
+        ...(course.slug?.trim() ? { slug: course.slug.trim() } : {}),
         category: course.category,
         h1: course.h1 || undefined,
         lead: course.lead || undefined,
@@ -176,6 +179,60 @@ export function CourseWizard({ item, onClose }) {
 
   const g2 = "grid grid-cols-2 gap-4";
 
+  // ── Preview (as it will look on the site) ──
+  const priceRows = rows
+    .filter((r) => r.branch)
+    .map((r) => {
+      const prices = [
+        r.pricing.group.day,
+        r.pricing.group.evening,
+        r.pricing.individual.day,
+        r.pricing.individual.evening,
+      ]
+        .map((v) => Number(v))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      const min = prices.length ? Math.min(...prices) : null;
+      return { name: branchName(r.branch), min };
+    });
+
+  const preview = (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-lg font-bold text-gray-900">
+        {course.icon && <span>{course.icon}</span>}
+        <span>{course.title.trim() || "Kurs adı"}</span>
+      </div>
+      {course.lead?.trim() && (
+        <p className="text-sm text-gray-600">{course.lead.trim()}</p>
+      )}
+      {course.levels?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {course.levels.map((l) => (
+            <span
+              key={l}
+              className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-900"
+            >
+              {l}
+            </span>
+          ))}
+        </div>
+      )}
+      {priceRows.length > 0 && (
+        <div className="space-y-1 text-sm text-gray-700">
+          {priceRows.map((p, i) => (
+            <div key={i} className="flex justify-between border-t border-gray-100 pt-1">
+              <span>{p.name}</span>
+              <span className="font-semibold">
+                {p.min != null
+                  ? `${p.min} ${course.currency || "AZN"}/ay`
+                  : "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <Overlay
       wide
@@ -185,6 +242,7 @@ export function CourseWizard({ item, onClose }) {
       onSave={save}
       saving={saving}
       error={error}
+      preview={preview}
     >
       {editingId && loadingFull ? (
         <p className="text-sm text-gray-500">Yüklənir…</p>
@@ -195,21 +253,22 @@ export function CourseWizard({ item, onClose }) {
             <SectionTitle>Kurs məlumatı</SectionTitle>
             <div className={g2}>
               <Field label="Kurs adı" required><TextInput value={course.title} onChange={(e) => patchCourse({ title: e.target.value })} /></Field>
-              <Field label="Kateqoriya" required><NativeSelect placeholder="Seç…" options={categoryOpts} value={course.category} onChange={(e) => patchCourse({ category: e.target.value })} /></Field>
+              <Field label="Kateqoriya" required info="Kursun aid olduğu bölmə (menyu/filtrləmə üçün)"><NativeSelect placeholder="Seç…" options={categoryOpts} value={course.category} onChange={(e) => patchCourse({ category: e.target.value })} /></Field>
             </div>
+            <Field label="Slug (linki)" info="Boş buraxsan addan avtomatik yaranır"><TextInput value={course.slug} onChange={(e) => patchCourse({ slug: e.target.value })} placeholder="ielts-hazirliq" /></Field>
             <Field label="SEO başlıq (H1)" hint="Boş qalsa kurs adı işlənir"><TextInput value={course.h1} onChange={(e) => patchCourse({ h1: e.target.value })} /></Field>
-            <Field label="Qısa təsvir (lead)"><TextArea rows={2} value={course.lead} onChange={(e) => patchCourse({ lead: e.target.value })} /></Field>
-            <Field label="Excerpt (kart mətni)"><TextInput value={course.excerpt} onChange={(e) => patchCourse({ excerpt: e.target.value })} /></Field>
-            <Field label="Səviyyələr"><MultiSelectChips options={LEVELS.map((l) => ({ value: l, label: l }))} value={course.levels} onChange={(v) => patchCourse({ levels: v })} /></Field>
+            <Field label="Qısa təsvir (lead)" info="Səhifə başında görünən qısa mətn"><TextArea rows={2} value={course.lead} onChange={(e) => patchCourse({ lead: e.target.value })} /></Field>
+            <Field label="Excerpt (kart mətni)" info="Kurs kartında görünən bir cümlə"><TextInput value={course.excerpt} onChange={(e) => patchCourse({ excerpt: e.target.value })} /></Field>
+            <Field label="Səviyyələr" info="Kursun əhatə etdiyi səviyyələr (A1–C2)"><MultiSelectChips options={LEVELS.map((l) => ({ value: l, label: l }))} value={course.levels} onChange={(v) => patchCourse({ levels: v })} /></Field>
             <div className="grid grid-cols-4 gap-4">
-              <Field label="Həftədə dərs"><NumberInput value={course.lesson.perWeek} onChange={(e) => patchCourse({ lesson: { ...course.lesson, perWeek: e.target.value } })} /></Field>
-              <Field label="Dəqiqə"><NumberInput value={course.lesson.minutes} onChange={(e) => patchCourse({ lesson: { ...course.lesson, minutes: e.target.value } })} /></Field>
-              <Field label="Qrup min"><NumberInput value={course.groupSize.min} onChange={(e) => patchCourse({ groupSize: { ...course.groupSize, min: e.target.value } })} /></Field>
-              <Field label="Qrup max"><NumberInput value={course.groupSize.max} onChange={(e) => patchCourse({ groupSize: { ...course.groupSize, max: e.target.value } })} /></Field>
+              <Field label="Həftədə dərs" info="Həftədə neçə dərs keçilir"><NumberInput value={course.lesson.perWeek} onChange={(e) => patchCourse({ lesson: { ...course.lesson, perWeek: e.target.value } })} /></Field>
+              <Field label="Dəqiqə" info="Bir dərsin uzunluğu (dəq)"><NumberInput value={course.lesson.minutes} onChange={(e) => patchCourse({ lesson: { ...course.lesson, minutes: e.target.value } })} /></Field>
+              <Field label="Qrup min" info="Qrupdakı minimum tələbə"><NumberInput value={course.groupSize.min} onChange={(e) => patchCourse({ groupSize: { ...course.groupSize, min: e.target.value } })} /></Field>
+              <Field label="Qrup max" info="Qrupdakı maksimum tələbə"><NumberInput value={course.groupSize.max} onChange={(e) => patchCourse({ groupSize: { ...course.groupSize, max: e.target.value } })} /></Field>
             </div>
             <div className={g2}>
-              <Field label="Şəkil (URL)"><TextInput value={course.image} onChange={(e) => patchCourse({ image: e.target.value })} /></Field>
-              <Field label="İkon (emoji/ad)"><TextInput value={course.icon} onChange={(e) => patchCourse({ icon: e.target.value })} /></Field>
+              <Field label="Şəkil" info="Kursun kart/başlıq şəkli"><FileUpload value={course.image} onChange={(url) => patchCourse({ image: url })} kind="image" /></Field>
+              <Field label="İkon (emoji/ad)" info="Kart üçün emoji, məs. 🎯"><TextInput value={course.icon} onChange={(e) => patchCourse({ icon: e.target.value })} /></Field>
             </div>
             <div className={g2}>
               <Field label="SEO meta başlıq"><TextInput value={course.seo.metaTitle} onChange={(e) => patchCourse({ seo: { ...course.seo, metaTitle: e.target.value } })} /></Field>
@@ -255,7 +314,7 @@ export function CourseWizard({ item, onClose }) {
                     <Field label="Fərdi · gündüz"><NumberInput value={r.pricing.individual.day} onChange={(e) => patchPricing(ri, "individual", "day", e.target.value)} /></Field>
                     <Field label="Fərdi · axşam"><NumberInput value={r.pricing.individual.evening} onChange={(e) => patchPricing(ri, "individual", "evening", e.target.value)} /></Field>
                   </div>
-                  <Field label="Qeyd" className="mt-3"><TextInput value={r.pricing.note} onChange={(e) => patchRow(ri, { pricing: { ...r.pricing, note: e.target.value } })} /></Field>
+                  <Field label="Qeyd" info="Qiymətə dair əlavə qeyd (məs. endirim)" className="mt-3"><TextInput value={r.pricing.note} onChange={(e) => patchRow(ri, { pricing: { ...r.pricing, note: e.target.value } })} /></Field>
                 </div>
 
                 {/* groups */}
@@ -270,8 +329,8 @@ export function CourseWizard({ item, onClose }) {
                       <div className="flex items-end gap-3">
                         <Field label="Müəllim" className="flex-1"><NativeSelect placeholder="Seç…" options={teacherOpts} value={g.teacher} onChange={(e) => patchGroup(ri, gi, { teacher: e.target.value })} /></Field>
                         <Field label="Səviyyə"><NativeSelect placeholder="—" options={LEVELS.map((l) => ({ value: l, label: l }))} value={g.level} onChange={(e) => patchGroup(ri, gi, { level: e.target.value })} /></Field>
-                        <Field label="Format"><NativeSelect options={FORMATS} value={g.format} onChange={(e) => patchGroup(ri, gi, { format: e.target.value })} /></Field>
-                        <Field label="Tutum"><NumberInput className="w-20" value={g.capacity} onChange={(e) => patchGroup(ri, gi, { capacity: e.target.value })} /></Field>
+                        <Field label="Format" info="Qrup və ya fərdi dərs"><NativeSelect options={FORMATS} value={g.format} onChange={(e) => patchGroup(ri, gi, { format: e.target.value })} /></Field>
+                        <Field label="Tutum" info="Qrupun yer sayı"><NumberInput className="w-20" value={g.capacity} onChange={(e) => patchGroup(ri, gi, { capacity: e.target.value })} /></Field>
                         <RemoveButton onClick={() => patchRow(ri, { groups: r.groups.filter((_, j) => j !== gi) })} />
                       </div>
 

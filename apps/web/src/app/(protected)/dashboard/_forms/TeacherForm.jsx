@@ -23,6 +23,8 @@ import {
   useAdminCreateMutation,
   useAdminUpdateMutation,
 } from "@/store/api/adminApi";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 export function TeacherForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
@@ -42,6 +44,7 @@ export function TeacherForm({ item, onClose }) {
   // ── Basic ──
   const [fullName, setFullName] = useState(item?.fullName || "");
   const [title, setTitle] = useState(item?.title || "");
+  const [slug, setSlug] = useState(item?.slug || "");
   const [photo, setPhoto] = useState(item?.photo || "");
   const [color, setColor] = useState(item?.color || "#2E6BE6");
   const [bio, setBio] = useState(item?.bio || "");
@@ -141,6 +144,9 @@ export function TeacherForm({ item, onClose }) {
       isActive,
     };
 
+    // Only send slug when set — server auto-generates from the name otherwise.
+    if (slug.trim()) body.slug = slug.trim();
+
     // Only send introVideo when a url exists.
     if (introUrl.trim()) {
       body.introVideo = { url: introUrl.trim(), poster: introPoster.trim() };
@@ -158,6 +164,35 @@ export function TeacherForm({ item, onClose }) {
     }
   };
 
+  // ── Preview (as it will look on the site) ──
+  const preview = (
+    <div className="flex items-center gap-4">
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={getImageUrl(photo)}
+          alt=""
+          className="h-20 w-20 rounded-full object-cover"
+        />
+      ) : (
+        <div
+          className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white"
+          style={{ background: color || "#2E6BE6" }}
+        >
+          {(fullName.trim()[0] || "?").toUpperCase()}
+        </div>
+      )}
+      <div className="min-w-0">
+        <div className="truncate text-lg font-bold text-gray-900">
+          {fullName.trim() || "Ad Soyad"}
+        </div>
+        {title.trim() && (
+          <div className="truncate text-sm text-gray-500">{title.trim()}</div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <Overlay
       title={isEdit ? "Müəllimi redaktə et" : "Yeni müəllim"}
@@ -165,6 +200,7 @@ export function TeacherForm({ item, onClose }) {
       onSave={handleSave}
       saving={saving}
       error={error}
+      preview={preview}
       wide
     >
       {/* ── Əsas ── */}
@@ -185,14 +221,14 @@ export function TeacherForm({ item, onClose }) {
               placeholder="IELTS 8.5 · İngilis dili"
             />
           </Field>
-          <Field label="Şəkil (URL)">
+          <Field label="Slug (linki)" info="Boş buraxsan addan avtomatik yaranır">
             <TextInput
-              value={photo}
-              onChange={(e) => setPhoto(e.target.value)}
-              placeholder="https://…"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="aygun-memmedova"
             />
           </Field>
-          <Field label="Rəng">
+          <Field label="Rəng" info="Şəkil yoxdursa avatar rəngi">
             <input
               type="color"
               value={color}
@@ -201,6 +237,13 @@ export function TeacherForm({ item, onClose }) {
             />
           </Field>
         </div>
+        <Field label="Şəkil" info="Kvadrat/portret şəkil daha yaxşı görünür">
+          <FileUpload
+            value={photo}
+            onChange={(url) => setPhoto(url)}
+            kind="image"
+          />
+        </Field>
         <Field label="Bio" hint="HTML dəstəklənir">
           <TextArea
             rows={4}
@@ -241,11 +284,11 @@ export function TeacherForm({ item, onClose }) {
                   placeholder="IELTS Academic"
                 />
               </Field>
-              <Field label="Şəkil (URL)" className="flex-1">
-                <TextInput
+              <Field label="Şəkil" className="flex-1">
+                <FileUpload
                   value={c.image}
-                  onChange={(e) => updateCertificate(i, { image: e.target.value })}
-                  placeholder="https://…"
+                  onChange={(url) => updateCertificate(i, { image: url })}
+                  kind="image"
                 />
               </Field>
               <Field label="İl" className="w-24">
@@ -300,18 +343,18 @@ export function TeacherForm({ item, onClose }) {
       <div className="space-y-4">
         <SectionTitle>Video (intro)</SectionTitle>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Video URL">
-            <TextInput
+          <Field label="Video" info="Qısa tanıtım videosu">
+            <FileUpload
               value={introUrl}
-              onChange={(e) => setIntroUrl(e.target.value)}
-              placeholder="https://…"
+              onChange={(url) => setIntroUrl(url)}
+              kind="video"
             />
           </Field>
-          <Field label="Poster (URL)">
-            <TextInput
+          <Field label="Poster" info="Video oynamadan görünən şəkil">
+            <FileUpload
               value={introPoster}
-              onChange={(e) => setIntroPoster(e.target.value)}
-              placeholder="https://…"
+              onChange={(url) => setIntroPoster(url)}
+              kind="image"
             />
           </Field>
         </div>
@@ -360,7 +403,7 @@ export function TeacherForm({ item, onClose }) {
       <div className="space-y-4">
         <SectionTitle>Parametrlər</SectionTitle>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Sıra">
+          <Field label="Sıra" info="Kiçik rəqəm əvvəl göstərilir">
             <NumberInput
               value={order}
               onChange={(e) => setOrder(e.target.value)}

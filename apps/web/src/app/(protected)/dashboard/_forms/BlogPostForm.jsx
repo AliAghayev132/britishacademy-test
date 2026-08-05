@@ -1,0 +1,221 @@
+"use client";
+
+// ── Blog post form ──
+// Bespoke create/edit form covering the whole BlogPost model. Body is HTML
+// (TipTap-produced on the real site); here it's a plain HTML textarea.
+
+import { useState } from "react";
+import {
+  Overlay,
+  Field,
+  TextInput,
+  NumberInput,
+  TextArea,
+  NativeSelect,
+  SectionTitle,
+  toId,
+} from "./kit";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { getImageUrl } from "@/utils/getImageUrl";
+import {
+  useAdminListQuery,
+  useAdminCreateMutation,
+  useAdminUpdateMutation,
+} from "@/store/api/adminApi";
+
+const STATUS_OPTIONS = [
+  { value: "draft", label: "Qaralama" },
+  { value: "published", label: "Dərc edilmiş" },
+  { value: "archived", label: "Arxivləşdirilmiş" },
+];
+
+export function BlogPostForm({ item, onClose }) {
+  const isEdit = Boolean(item?._id);
+
+  const { data: catData } = useAdminListQuery({ resource: "blog-categories", limit: 100 });
+  const categoryOptions = (catData?.data?.items || []).map((c) => ({
+    value: c._id,
+    label: c.name,
+  }));
+
+  const [create, { isLoading: creating }] = useAdminCreateMutation();
+  const [update, { isLoading: updating }] = useAdminUpdateMutation();
+  const saving = creating || updating;
+
+  const [error, setError] = useState("");
+
+  // ── Basic ──
+  const [title, setTitle] = useState(item?.title || "");
+  const [slug, setSlug] = useState(item?.slug || "");
+  const [excerpt, setExcerpt] = useState(item?.excerpt || "");
+  const [cover, setCover] = useState(item?.cover || "");
+  const [category, setCategory] = useState(toId(item?.category));
+  const [status, setStatus] = useState(item?.status || "draft");
+  const [tags, setTags] = useState((item?.tags || []).join(", "));
+  const [readMinutes, setReadMinutes] = useState(item?.readMinutes ?? 3);
+  const [content, setContent] = useState(item?.content || "");
+
+  // ── SEO ──
+  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
+  const [metaDescription, setMetaDescription] = useState(
+    item?.seo?.metaDescription || "",
+  );
+
+  // ── Save ──
+  const handleSave = async () => {
+    setError("");
+
+    const data = {
+      title: title.trim(),
+      excerpt: excerpt.trim(),
+      cover: cover.trim(),
+      status,
+      readMinutes: Number(readMinutes) || 0,
+      content,
+      tags: tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+      seo: {
+        metaTitle: metaTitle.trim(),
+        metaDescription: metaDescription.trim(),
+      },
+    };
+
+    if (slug.trim()) data.slug = slug.trim();
+    if (category) data.category = category;
+
+    try {
+      if (isEdit) {
+        await update({ resource: "blog-posts", id: item._id, data }).unwrap();
+      } else {
+        await create({ resource: "blog-posts", data }).unwrap();
+      }
+      onClose();
+    } catch (err) {
+      setError(err?.data?.message || "Xəta baş verdi");
+    }
+  };
+
+  // ── Preview (blog post card) ──
+  const categoryLabel = categoryOptions.find((o) => o.value === category)?.label;
+  const preview = (
+    <div className="max-w-sm overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {cover ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={getImageUrl(cover)} alt="" className="h-40 w-full object-cover" />
+      ) : (
+        <div className="h-40 w-full bg-gray-100" />
+      )}
+      <div className="p-4">
+        <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
+          {categoryLabel && (
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">
+              {categoryLabel}
+            </span>
+          )}
+          <span>{Number(readMinutes) || 0} dəq</span>
+        </div>
+        <h3 className="mt-2 text-lg font-bold text-gray-900">{title || "Başlıq"}</h3>
+        {excerpt && <p className="mt-1 text-sm text-gray-600">{excerpt}</p>}
+      </div>
+    </div>
+  );
+
+  return (
+    <Overlay
+      title={isEdit ? "Məqaləni redaktə et" : "Yeni məqalə"}
+      onClose={onClose}
+      onSave={handleSave}
+      saving={saving}
+      error={error}
+      preview={preview}
+      wide
+    >
+      {/* ── Əsas ── */}
+      <section className="space-y-4">
+        <SectionTitle>Əsas</SectionTitle>
+        <Field label="Başlıq" required>
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
+        </Field>
+        <Field label="Slug (linki)" info="Boş buraxsan avtomatik yaranır">
+          <TextInput
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="ielts-hazirliq-melumatlari"
+          />
+        </Field>
+        <Field label="Qısa təsvir (excerpt)">
+          <TextArea
+            rows={2}
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+          />
+        </Field>
+        <Field label="Örtük şəkli (cover)">
+          <FileUpload value={cover} onChange={setCover} kind="image" />
+        </Field>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field label="Kateqoriya">
+            <NativeSelect
+              options={categoryOptions}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Seçilməyib"
+            />
+          </Field>
+          <Field label="Status">
+            <NativeSelect
+              options={STATUS_OPTIONS}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            />
+          </Field>
+          <Field label="Oxu müddəti (dəq)">
+            <NumberInput
+              value={readMinutes}
+              onChange={(e) => setReadMinutes(e.target.value)}
+            />
+          </Field>
+        </div>
+        <Field label="Teqlər" info="Vergüllə ayır, məs: IELTS, təhsil, viza">
+          <TextInput
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="IELTS, təhsil, viza"
+          />
+        </Field>
+      </section>
+
+      {/* ── Məzmun ── */}
+      <section className="space-y-4">
+        <SectionTitle>Məzmun</SectionTitle>
+        <Field label="Mətn" hint="HTML dəstəklənir">
+          <TextArea
+            rows={10}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </Field>
+      </section>
+
+      {/* ── SEO ── */}
+      <section className="space-y-4">
+        <SectionTitle>SEO</SectionTitle>
+        <Field label="Meta başlıq">
+          <TextInput
+            value={metaTitle}
+            onChange={(e) => setMetaTitle(e.target.value)}
+          />
+        </Field>
+        <Field label="Meta təsvir">
+          <TextArea
+            rows={2}
+            value={metaDescription}
+            onChange={(e) => setMetaDescription(e.target.value)}
+          />
+        </Field>
+      </section>
+    </Overlay>
+  );
+}

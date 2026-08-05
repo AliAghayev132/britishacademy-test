@@ -5,7 +5,8 @@
 // course wizard). Keeps the three forms visually consistent without pulling in
 // a form library.
 
-import { X } from "lucide-react";
+import { useState } from "react";
+import { X, Eye, Pencil } from "lucide-react";
 import { InfoTip } from "@/components/ui/InfoTip";
 
 // ── Constants ──
@@ -103,7 +104,11 @@ export function SectionTitle({ children, right }) {
 }
 
 // ── Modal shell ──
-export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, children }) {
+// `preview` (optional node) enables a "Test kimi göstər" toggle that flips the
+// body to a live preview before saving.
+export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, children }) {
+  const [showPreview, setShowPreview] = useState(false);
+  const previewing = preview && showPreview;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
@@ -114,12 +119,24 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
         </div>
-        <div className="flex-1 space-y-6 overflow-auto p-6">{children}</div>
+        <div className="flex-1 space-y-6 overflow-auto p-6">
+          {previewing ? <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">{preview}</div> : children}
+        </div>
         <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
-          <span className="text-sm font-semibold text-red-600">{error || ""}</span>
+          <div className="flex items-center gap-3">
+            {preview && (
+              <button
+                onClick={() => setShowPreview((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                {previewing ? <><Pencil className="h-4 w-4" /> Redaktəyə qayıt</> : <><Eye className="h-4 w-4" /> Test kimi göstər</>}
+              </button>
+            )}
+            {error && <span className="text-sm font-semibold text-red-600">{error}</span>}
+          </div>
           <div className="flex gap-3">
             <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
-            <button onClick={onSave} disabled={saving} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+            <button onClick={onSave} disabled={saving} className="rounded-lg bg-[#00157A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#00105e] disabled:opacity-60">
               {saving ? "Saxlanılır…" : "Yadda saxla"}
             </button>
           </div>

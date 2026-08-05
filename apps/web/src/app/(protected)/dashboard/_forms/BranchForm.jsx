@@ -20,6 +20,7 @@ import {
   useAdminCreateMutation,
   useAdminUpdateMutation,
 } from "@/store/api/adminApi";
+import { FileUpload } from "@/components/ui/FileUpload";
 
 const emptyHour = { days: "", from: "", to: "" };
 
@@ -30,6 +31,7 @@ export function BranchForm({ item, onClose }) {
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
   const [name, setName] = useState(item?.name || "");
+  const [slug, setSlug] = useState(item?.slug || "");
   const [address, setAddress] = useState(item?.address || "");
   const [district, setDistrict] = useState(item?.district || "");
   const [metro, setMetro] = useState(item?.metro || "");
@@ -124,6 +126,9 @@ export function BranchForm({ item, onClose }) {
       images: images.map((u) => u.trim()).filter(Boolean),
     };
 
+    // Only send slug when set — server auto-generates from the name otherwise.
+    if (slug.trim()) data.slug = slug.trim();
+
     // Omit coords entirely if both are empty; otherwise send parsed numbers.
     const latVal = lat.trim();
     const lngVal = lng.trim();
@@ -145,6 +150,39 @@ export function BranchForm({ item, onClose }) {
     }
   };
 
+  // ── Preview (as it will look on the site) ──
+  const preview = (
+    <div className="space-y-3">
+      <div className="text-lg font-bold text-gray-900">
+        {name.trim() || "Filial adı"}
+        {isMain && (
+          <span className="ml-2 rounded-full bg-blue-900 px-2 py-0.5 text-xs font-semibold text-white">
+            Baş ofis
+          </span>
+        )}
+      </div>
+      {address.trim() && (
+        <div className="text-sm text-gray-500">
+          {address.trim()}
+          {district.trim() ? ` · ${district.trim()}` : ""}
+          {metro.trim() ? ` · ${metro.trim()} m.` : ""}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {phone.trim() && (
+          <span className="rounded-lg bg-blue-900 px-3 py-1.5 text-sm font-semibold text-white">
+            Zəng et
+          </span>
+        )}
+        {whatsapp.trim() && (
+          <span className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white">
+            WhatsApp
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <Overlay
       title={isEdit ? "Filialı redaktə et" : "Yeni filial"}
@@ -152,6 +190,7 @@ export function BranchForm({ item, onClose }) {
       onSave={onSave}
       saving={saving}
       error={error}
+      preview={preview}
       wide
     >
       {/* 1. Əsas */}
@@ -160,6 +199,13 @@ export function BranchForm({ item, onClose }) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Ad" required>
             <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+          <Field label="Slug (linki)" info="Boş buraxsan addan avtomatik yaranır">
+            <TextInput
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="nizami"
+            />
           </Field>
           <Field label="Ünvan" required>
             <TextInput
@@ -173,7 +219,7 @@ export function BranchForm({ item, onClose }) {
               onChange={(e) => setDistrict(e.target.value)}
             />
           </Field>
-          <Field label="Metro">
+          <Field label="Metro" info="Ən yaxın metro stansiyası">
             <TextInput
               value={metro}
               onChange={(e) => setMetro(e.target.value)}
@@ -192,7 +238,11 @@ export function BranchForm({ item, onClose }) {
               onChange={(e) => setPhone(e.target.value)}
             />
           </Field>
-          <Field label="WhatsApp" hint="yalnız rəqəmlər, məs. 994552124151">
+          <Field
+            label="WhatsApp"
+            info="yalnız rəqəmlər, wa.me linki üçün"
+            hint="yalnız rəqəmlər, məs. 994552124151"
+          >
             <TextInput
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
@@ -266,7 +316,11 @@ export function BranchForm({ item, onClose }) {
               onChange={(e) => setLng(e.target.value)}
             />
           </Field>
-          <Field label="Xəritə embed URL" className="sm:col-span-2">
+          <Field
+            label="Xəritə embed URL"
+            info="Google Maps → Paylaş → Xəritəni yerləşdir (iframe src)"
+            className="sm:col-span-2"
+          >
             <TextArea
               rows={3}
               value={mapEmbedUrl}
@@ -287,11 +341,11 @@ export function BranchForm({ item, onClose }) {
         <div className="space-y-3">
           {images.map((url, i) => (
             <div key={i} className="flex items-end gap-3">
-              <Field label={`Şəkil URL ${i + 1}`} className="flex-1">
-                <TextInput
+              <Field label={`Şəkil ${i + 1}`} className="flex-1">
+                <FileUpload
                   value={url}
-                  placeholder="https://…"
-                  onChange={(e) => setImage(i, e.target.value)}
+                  onChange={(u) => setImage(i, u)}
+                  kind="image"
                 />
               </Field>
               <div className="pb-1">
@@ -329,7 +383,7 @@ export function BranchForm({ item, onClose }) {
           <div className="flex items-center">
             <Toggle checked={isMain} onChange={setIsMain} label="Baş ofis" />
           </div>
-          <Field label="Sıra">
+          <Field label="Sıra" info="Kiçik rəqəm əvvəl göstərilir">
             <NumberInput
               value={order}
               onChange={(e) => setOrder(e.target.value)}
