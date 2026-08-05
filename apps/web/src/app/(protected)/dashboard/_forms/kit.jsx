@@ -5,8 +5,8 @@
 // course wizard). Keeps the three forms visually consistent without pulling in
 // a form library.
 
-import { useState } from "react";
-import { X, Eye, Pencil } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
 import { InfoTip } from "@/components/ui/InfoTip";
 
 // ── Constants ──
@@ -31,14 +31,95 @@ export const TextInput = ({ className, ...p }) => <input {...p} className={`${ba
 export const NumberInput = ({ className, ...p }) => <input type="number" {...p} className={`${base} ${className || ""}`} />;
 export const TextArea = ({ className, ...p }) => <textarea {...p} className={`${base} ${className || ""}`} />;
 
-export function NativeSelect({ options = [], placeholder, className, ...p }) {
+// Custom dropdown (keeps the native `onChange={(e)=>e.target.value}` contract so
+// every form keeps working). Options render with a custom design; lists longer
+// than 4 get a search box. Positioned fixed so it never clips inside the modal.
+export function NativeSelect({ options = [], placeholder, value, onChange, disabled, className }) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [coords, setCoords] = useState(null);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+
+  const searchable = options.length > 4;
+  const selected = options.find((o) => String(o.value) === String(value ?? ""));
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => {
+      if (triggerRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const toggle = () => {
+    if (disabled) return;
+    if (open) return setOpen(false);
+    const r = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - r.bottom;
+    const up = spaceBelow < 280 && r.top > spaceBelow;
+    setCoords({ left: r.left, width: r.width, top: up ? undefined : r.bottom + 4, bottom: up ? window.innerHeight - r.top + 4 : undefined });
+    setQ("");
+    setOpen(true);
+  };
+  const choose = (v) => { onChange?.({ target: { value: v } }); setOpen(false); };
+
+  const norm = (s) => String(s || "").toLowerCase();
+  const filtered = searchable && q ? options.filter((o) => norm(o.label).includes(norm(q))) : options;
+
   return (
-    <select {...p} className={`${base} bg-white ${className || ""}`}>
-      {placeholder !== undefined && <option value="">{placeholder}</option>}
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>{o.label}</option>
-      ))}
-    </select>
+    <div className={`relative ${className || ""}`}>
+      <button
+        ref={triggerRef}
+        type="button"
+        disabled={disabled}
+        onClick={toggle}
+        className={`${base} flex items-center justify-between gap-2 bg-white text-left ${disabled ? "opacity-60" : "cursor-pointer"}`}
+      >
+        <span className={`truncate ${selected ? "text-gray-900" : "text-gray-400"}`}>{selected ? selected.label : (placeholder || "Seç…")}</span>
+        <ChevronDown className={`h-4 w-4 flex-none text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && coords && (
+        <div
+          ref={menuRef}
+          style={{ position: "fixed", left: coords.left, width: coords.width, top: coords.top, bottom: coords.bottom, zIndex: 120 }}
+          className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl"
+        >
+          {searchable && (
+            <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
+              <Search className="h-3.5 w-3.5 flex-none text-gray-400" />
+              {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+              <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Axtar…" className="w-full text-sm text-gray-900 outline-none" />
+            </div>
+          )}
+          <div className="max-h-56 overflow-auto py-1">
+            {placeholder !== undefined && (
+              <button type="button" onClick={() => choose("")} className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-400 hover:bg-gray-50">{placeholder}</button>
+            )}
+            {filtered.map((o) => {
+              const on = String(o.value) === String(value ?? "");
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => choose(o.value)}
+                  className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm ${on ? "bg-blue-50 font-semibold text-[#00157A]" : "text-gray-700 hover:bg-gray-50"}`}
+                >
+                  <span className="truncate">{o.label}</span>
+                  {on && <Check className="h-4 w-4 flex-none text-[#00157A]" />}
+                </button>
+              );
+            })}
+            {filtered.length === 0 && <div className="px-3 py-3 text-center text-sm text-gray-400">Tapılmadı</div>}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

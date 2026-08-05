@@ -22,6 +22,8 @@ import {
   WEEKDAYS, LEVELS, FORMATS, toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { CourseGroupForm } from "./CourseGroupForm";
+import { Check } from "lucide-react";
 
 // ── Defaults / helpers ──
 const emptyCourse = () => ({
@@ -34,11 +36,10 @@ const emptyCourse = () => ({
   isFeatured: false, order: 0, isActive: true,
 });
 
-const emptyGroup = () => ({ teacher: "", level: "", format: "group", schedule: [], capacity: "" });
 const emptyRow = (branch = "") => ({
   branch,
   pricing: { group: { day: "", evening: "" }, individual: { day: "", evening: "" }, note: "" },
-  groups: [emptyGroup()],
+  groups: [], // teacher timetable is added after saving (Dərs qrafiki step)
 });
 
 const num = (v) => (v === "" || v === null || v === undefined ? undefined : Number(v));
@@ -68,6 +69,9 @@ export function CourseWizard({ item, onClose }) {
   const [course, setCourse] = useState(emptyCourse());
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
+  // After a successful save we show a "add schedule" step for the saved course.
+  const [saved, setSaved] = useState(null); // { id, title }
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Prefill from the composer response when editing.
   useEffect(() => {
@@ -169,9 +173,14 @@ export function CourseWizard({ item, onClose }) {
     };
 
     try {
+      let id = editingId;
       if (editingId) await update({ id: editingId, data: body }).unwrap();
-      else await create(body).unwrap();
-      onClose();
+      else {
+        const res = await create(body).unwrap();
+        id = res?.data?.course?._id;
+      }
+      // Show the post-save step (add schedule) instead of closing immediately.
+      setSaved({ id, title: course.title.trim() });
     } catch (err) {
       setError(err?.data?.message || "Yadda saxlanmadı");
     }
@@ -233,11 +242,35 @@ export function CourseWizard({ item, onClose }) {
     </div>
   );
 
+  // After save → offer to add the timetable for this course, right here.
+  if (saved && scheduleOpen) {
+    return <CourseGroupForm item={{ course: saved.id }} onClose={() => setScheduleOpen(false)} />;
+  }
+  if (saved) {
+    return (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="w-full max-w-md rounded-2xl bg-white p-7 text-center shadow-2xl">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <Check className="h-7 w-7" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Poppins'" }}>Kurs yadda saxlanıldı</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            «{saved.title}» hazırdır. İndi bu kursa dərs qrafiki — müəllim, filial və gün/saatlar — əlavə edə bilərsən.
+          </p>
+          <div className="mt-6 flex gap-3">
+            <button onClick={onClose} className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Bağla</button>
+            <button onClick={() => setScheduleOpen(true)} className="flex-1 rounded-lg bg-[#00157A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#00105e]">Dərs qrafiki əlavə et</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Overlay
       wide
       title={editingId ? "Kursu redaktə et" : "Yeni kurs"}
-      subtitle="Kurs məlumatı → filiallar → hər filiala müəllim və qrafik"
+      subtitle="Kurs məlumatı → filiallar → qiymət — sonra dərs qrafiki"
       onClose={onClose}
       onSave={save}
       saving={saving}
@@ -286,8 +319,9 @@ export function CourseWizard({ item, onClose }) {
             <SectionTitle
               right={<AddButton onClick={() => setRows((rs) => [...rs, emptyRow(freeBranchOpts[0]?.value || "")])}>Filial əlavə et</AddButton>}
             >
-              Filiallar və müəllimlər
+              Filiallar və qiymət
             </SectionTitle>
+            <p className="text-xs text-gray-400">Müəllim və dərs qrafiki kurs yadda saxlanandan sonra əlavə olunur.</p>
 
             {rows.length === 0 && <p className="text-sm text-gray-400">Hələ filial əlavə edilməyib. Bu kursun keçiriləcəyi filialları əlavə et.</p>}
 
@@ -317,39 +351,6 @@ export function CourseWizard({ item, onClose }) {
                   <Field label="Qeyd" info="Qiymətə dair əlavə qeyd (məs. endirim)" className="mt-3"><TextInput value={r.pricing.note} onChange={(e) => patchRow(ri, { pricing: { ...r.pricing, note: e.target.value } })} /></Field>
                 </div>
 
-                {/* groups */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Müəllim qrupları — {branchName(r.branch)}</span>
-                    <AddButton onClick={() => patchRow(ri, { groups: [...r.groups, emptyGroup()] })}>Qrup</AddButton>
-                  </div>
-
-                  {r.groups.map((g, gi) => (
-                    <div key={gi} className="rounded-lg border border-gray-200 p-3 space-y-3">
-                      <div className="flex items-end gap-3">
-                        <Field label="Müəllim" className="flex-1"><NativeSelect placeholder="Seç…" options={teacherOpts} value={g.teacher} onChange={(e) => patchGroup(ri, gi, { teacher: e.target.value })} /></Field>
-                        <Field label="Səviyyə"><NativeSelect placeholder="—" options={LEVELS.map((l) => ({ value: l, label: l }))} value={g.level} onChange={(e) => patchGroup(ri, gi, { level: e.target.value })} /></Field>
-                        <Field label="Format" info="Qrup və ya fərdi dərs"><NativeSelect options={FORMATS} value={g.format} onChange={(e) => patchGroup(ri, gi, { format: e.target.value })} /></Field>
-                        <Field label="Tutum" info="Qrupun yer sayı"><NumberInput className="w-20" value={g.capacity} onChange={(e) => patchGroup(ri, gi, { capacity: e.target.value })} /></Field>
-                        <RemoveButton onClick={() => patchRow(ri, { groups: r.groups.filter((_, j) => j !== gi) })} />
-                      </div>
-
-                      {/* schedule */}
-                      <div className="space-y-2 pl-1">
-                        {g.schedule.map((s, si) => (
-                          <div key={si} className="flex items-center gap-2">
-                            <NativeSelect className="w-28" placeholder="Gün" options={WEEKDAYS.map((w) => ({ value: w.v, label: w.l }))} value={s.weekday} onChange={(e) => patchSlot(ri, gi, si, { weekday: e.target.value })} />
-                            <TextInput className="w-24" placeholder="19:00" value={s.from} onChange={(e) => patchSlot(ri, gi, si, { from: e.target.value })} />
-                            <span className="text-gray-400">–</span>
-                            <TextInput className="w-24" placeholder="20:30" value={s.to} onChange={(e) => patchSlot(ri, gi, si, { to: e.target.value })} />
-                            <RemoveButton onClick={() => patchGroup(ri, gi, { schedule: g.schedule.filter((_, k) => k !== si) })} />
-                          </div>
-                        ))}
-                        <AddButton onClick={() => patchGroup(ri, gi, { schedule: [...g.schedule, { weekday: "", from: "", to: "" }] })}>Vaxt</AddButton>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             ))}
           </section>

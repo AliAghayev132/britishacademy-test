@@ -134,22 +134,19 @@ export const DashboardSidebar = ({ children }) => {
                 key={item.href}
                 href={item.href}
                 title={!sidebarOpen ? item.name : undefined}
+                style={active ? { background: '#00157A', color: '#fff' } : undefined}
                 className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                  active ? 'text-white' : 'text-gray-700 hover:bg-[#00157A] hover:text-white'
+                  active
+                    ? 'shadow-md shadow-[#00157A]/25'
+                    : 'text-gray-700 hover:bg-[#00157A] hover:text-white'
                 }`}
               >
-                {active && (
-                  <motion.span
-                    layoutId="nav-active"
-                    className="absolute inset-0 rounded-xl bg-[#00157A] shadow-md shadow-[#00157A]/25"
-                    transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-                  />
-                )}
-                <item.icon className="w-5 h-5 shrink-0 relative z-10" />
+                <item.icon className="w-5 h-5 shrink-0" style={active ? { color: '#fff' } : undefined} />
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
-                      className="text-[15px] font-bold whitespace-nowrap relative z-10"
+                      className="text-[15px] font-bold whitespace-nowrap"
+                      style={active ? { color: '#fff' } : undefined}
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: 'auto' }}
                       exit={{ opacity: 0, width: 0 }}
