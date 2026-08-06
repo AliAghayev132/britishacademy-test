@@ -1,5 +1,6 @@
 // Data
 import { apiGetStatus, apiGet } from "@/lib/api";
+import DOMPurify from "isomorphic-dompurify";
 
 // Components
 import { ContentBlocks } from "@/components/site/ContentBlocks";
@@ -106,7 +107,9 @@ export default async function AboutPage() {
       </section>
 
       <section style={{ maxWidth: 900, margin: "0 auto", padding: "56px 28px 0" }}>
-        {p.content?.length ? (
+        {p.contentHtml ? (
+          <article className="bz-body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p.contentHtml) }} />
+        ) : p.content?.length ? (
           <ContentBlocks blocks={p.content} />
         ) : (
           <p style={{ fontSize: 17, lineHeight: 1.85, color: "#3c3c47" }}>

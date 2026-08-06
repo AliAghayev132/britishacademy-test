@@ -192,41 +192,53 @@ export function SectionTitle({ children, right }) {
 // body to a live preview before saving.
 export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, children }) {
   const [showPreview, setShowPreview] = useState(false);
-  const previewing = preview && showPreview;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <div>
-            <h2 className="text-base font-bold text-gray-900">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
+          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <div>
+              <h2 className="text-base font-bold text-gray-900">{title}</h2>
+              {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
-        </div>
-        <div className="flex-1 space-y-6 overflow-auto p-6">
-          {previewing ? <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">{preview}</div> : children}
-        </div>
-        <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
-          <div className="flex items-center gap-3">
-            {preview && (
-              <button
-                onClick={() => setShowPreview((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                {previewing ? <><Pencil className="h-4 w-4" /> Redaktəyə qayıt</> : <><Eye className="h-4 w-4" /> Test kimi göstər</>}
+          <div className="flex-1 space-y-6 overflow-auto p-6">{children}</div>
+          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
+            <div className="flex items-center gap-3">
+              {preview && (
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  <Eye className="h-4 w-4" /> Test kimi göstər
+                </button>
+              )}
+              {error && <span className="text-sm font-semibold text-red-600">{error}</span>}
+            </div>
+            <div className="flex gap-3">
+              <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
+              <button onClick={onSave} disabled={saving} className="rounded-lg bg-[#00157A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#00105e] disabled:opacity-60">
+                {saving ? "Saxlanılır…" : "Yadda saxla"}
               </button>
-            )}
-            {error && <span className="text-sm font-semibold text-red-600">{error}</span>}
-          </div>
-          <div className="flex gap-3">
-            <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
-            <button onClick={onSave} disabled={saving} className="rounded-lg bg-[#00157A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#00105e] disabled:opacity-60">
-              {saving ? "Saxlanılır…" : "Yadda saxla"}
-            </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Fullscreen, site-styled preview (opens as a separate page, not the modal) */}
+      {preview && showPreview && (
+        <div className="fixed inset-0 z-[70] overflow-auto bg-white" style={{ fontFamily: "'Nunito Sans', system-ui, sans-serif" }}>
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white/95 px-5 py-3 backdrop-blur">
+            <span className="text-sm font-semibold text-gray-500">Önizləmə (test){title ? ` — ${title}` : ""}</span>
+            <button onClick={() => setShowPreview(false)} className="inline-flex items-center gap-1.5 rounded-lg bg-[#00157A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#00105e]">
+              <Pencil className="h-4 w-4" /> Redaktəyə qayıt
+            </button>
+          </div>
+          <div className="mx-auto max-w-5xl px-6 py-10">{preview}</div>
+        </div>
+      )}
+    </>
   );
 }
 

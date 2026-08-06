@@ -30,6 +30,7 @@ const destinationSchema = new Schema(
     tagline: { type: String, trim: true }, // "Ödənişsiz universitetlər"
 
     content: { type: [contentBlockSchema], default: [] },
+    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
     facts: { type: [factSchema], default: [] }, // təhsil dili, viza, haqq
     universities: { type: [universitySchema], default: [] },
     faq: { type: [faqItemSchema], default: [] },

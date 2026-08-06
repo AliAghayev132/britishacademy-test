@@ -23,6 +23,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 import { CourseGroupForm } from "./CourseGroupForm";
 import { Check } from "lucide-react";
 
@@ -69,6 +70,7 @@ export function CourseWizard({ item, onClose }) {
   // ── State ──
   const [course, setCourse] = useState(emptyCourse());
   const [seo, setSeo] = useState(emptyCourse().seo);
+  const [contentHtml, setContentHtml] = useState(editingId ? (full?.data?.course?.contentHtml || "") : "");
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
   // After a successful save we show a "add schedule" step for the saved course.
@@ -89,6 +91,7 @@ export function CourseWizard({ item, onClose }) {
       groupSize: { ...emptyCourse().groupSize, ...(c.groupSize || {}) },
     });
     setSeo(c.seo || emptyCourse().seo);
+    setContentHtml(c.contentHtml || "");
     setRows(
       (full.data.branches || []).map((r) => ({
         branch: toId(r.branch),
@@ -154,6 +157,7 @@ export function CourseWizard({ item, onClose }) {
         isFeatured: !!course.isFeatured,
         order: num(course.order) || 0,
         isActive: !!course.isActive,
+        contentHtml,
       },
       branches: rows.filter((r) => r.branch).map((r) => ({
         branch: r.branch,
@@ -241,6 +245,12 @@ export function CourseWizard({ item, onClose }) {
           ))}
         </div>
       )}
+      {contentHtml && (
+        <div
+          className="bz-body mt-4"
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
+        />
+      )}
     </div>
   );
 
@@ -310,6 +320,14 @@ export function CourseWizard({ item, onClose }) {
               <Toggle checked={course.isFeatured} onChange={(v) => patchCourse({ isFeatured: v })} label="Ana səhifədə göstər" />
               <Toggle checked={course.isActive} onChange={(v) => patchCourse({ isActive: v })} label="Aktiv" />
             </div>
+          </section>
+
+          {/* ── Məzmun ── */}
+          <section className="space-y-4">
+            <SectionTitle>Məzmun</SectionTitle>
+            <Field label="Məzmun">
+              <TiptapEditor content={contentHtml} onChange={setContentHtml} />
+            </Field>
           </section>
 
           {/* ── Branches + teachers ── */}

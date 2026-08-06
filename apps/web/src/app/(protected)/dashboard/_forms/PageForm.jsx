@@ -24,6 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 
 const emptyBlock = { heading: "", body: "" };
 
@@ -38,6 +39,7 @@ export function PageForm({ item, onClose }) {
   const [slug, setSlug] = useState(item?.slug || "");
   const [h1, setH1] = useState(item?.h1 || "");
   const [lead, setLead] = useState(item?.lead || "");
+  const [contentHtml, setContentHtml] = useState(item?.contentHtml || "");
 
   const [blocks, setBlocks] = useState(
     Array.isArray(item?.content) && item.content.length
@@ -70,6 +72,22 @@ export function PageForm({ item, onClose }) {
 
   const saving = creating || updating;
 
+  // ── Preview (as it will look on the site) ──
+  const preview = (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900">
+        {h1.trim() || title.trim() || "Başlıq"}
+      </h2>
+      {lead.trim() && <p className="mt-2 text-gray-600">{lead.trim()}</p>}
+      {contentHtml && (
+        <div
+          className="bz-body mt-4"
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
+        />
+      )}
+    </div>
+  );
+
   const onSave = async () => {
     setError("");
 
@@ -80,6 +98,7 @@ export function PageForm({ item, onClose }) {
       order: Number(order) || 0,
       isActive,
       seo,
+      contentHtml,
       // Simple paragraph blocks; prune empty rows.
       content: blocks
         .map((b) => ({
@@ -116,6 +135,7 @@ export function PageForm({ item, onClose }) {
       onSave={onSave}
       saving={saving}
       error={error}
+      preview={preview}
       wide
     >
       {/* 1. Əsas */}
@@ -195,6 +215,14 @@ export function PageForm({ item, onClose }) {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Məzmun (rich text) */}
+      <section className="space-y-4">
+        <SectionTitle>Məzmun</SectionTitle>
+        <Field label="Məzmun">
+          <TiptapEditor content={contentHtml} onChange={setContentHtml} />
+        </Field>
       </section>
 
       {/* 3. SEO */}

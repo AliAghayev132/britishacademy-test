@@ -1,6 +1,7 @@
 // Next
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import DOMPurify from "isomorphic-dompurify";
 
 // Data
 import { apiGetStatus, isMissing } from "@/lib/api";
@@ -108,7 +109,9 @@ export default async function DestinationPage({ params }) {
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 36, alignItems: "start" }}>
           <div>
-            {d.content?.length ? (
+            {d.contentHtml ? (
+              <article className="bz-body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(d.contentHtml) }} />
+            ) : d.content?.length ? (
               <ContentBlocks blocks={d.content} />
             ) : (
               <p style={{ fontSize: 16.5, lineHeight: 1.85, color: "#3c3c47" }}>

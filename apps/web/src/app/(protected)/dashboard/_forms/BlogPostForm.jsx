@@ -25,6 +25,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -117,6 +118,12 @@ export function BlogPostForm({ item, onClose }) {
         </div>
         <h3 className="mt-2 text-lg font-bold text-gray-900">{title || "Başlıq"}</h3>
         {excerpt && <p className="mt-1 text-sm text-gray-600">{excerpt}</p>}
+        {content && (
+          <div
+            className="bz-body mt-4"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        )}
       </div>
     </div>
   );
@@ -189,12 +196,8 @@ export function BlogPostForm({ item, onClose }) {
       {/* ── Məzmun ── */}
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Mətn" hint="HTML dəstəklənir">
-          <TextArea
-            rows={10}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
+        <Field label="Məzmun">
+          <TiptapEditor content={content} onChange={setContent} />
         </Field>
       </section>
 

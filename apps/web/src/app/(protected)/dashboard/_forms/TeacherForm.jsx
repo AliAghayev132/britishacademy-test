@@ -18,7 +18,6 @@ import {
   Field,
   TextInput,
   NumberInput,
-  TextArea,
   MultiSelectChips,
   Toggle,
   SectionTitle,
@@ -28,6 +27,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -165,7 +165,7 @@ export function TeacherForm({ item, onClose }) {
 
   // ── Preview (as it will look on the site) ──
   const preview = (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center gap-4">
       {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -189,6 +189,12 @@ export function TeacherForm({ item, onClose }) {
           <div className="truncate text-sm text-gray-500">{title.trim()}</div>
         )}
       </div>
+      {bio && (
+        <div
+          className="bz-body mt-4 basis-full"
+          dangerouslySetInnerHTML={{ __html: bio }}
+        />
+      )}
     </div>
   );
 
@@ -243,12 +249,8 @@ export function TeacherForm({ item, onClose }) {
             kind="image"
           />
         </Field>
-        <Field label="Bio" hint="HTML dəstəklənir">
-          <TextArea
-            rows={4}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-          />
+        <Field label="Bio">
+          <TiptapEditor content={bio} onChange={setBio} />
         </Field>
       </div>
 

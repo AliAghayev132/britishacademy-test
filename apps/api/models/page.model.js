@@ -17,6 +17,7 @@ const pageSchema = new Schema(
     h1: { type: String, trim: true },
     lead: { type: String, trim: true },
     content: { type: [contentBlockSchema], default: [] },
+    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
     facts: { type: [factSchema], default: [] },
     faq: { type: [faqItemSchema], default: [] },
 

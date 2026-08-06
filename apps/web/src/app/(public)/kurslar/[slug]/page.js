@@ -1,6 +1,7 @@
 // Next
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import DOMPurify from "isomorphic-dompurify";
 
 // Data
 import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
@@ -233,7 +234,9 @@ export default async function CoursePage({ params }) {
       <section style={{ ...wrap, padding: "60px 28px 0" }}>
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 36, alignItems: "start" }}>
           <div>
-            {course.content?.length ? (
+            {course.contentHtml ? (
+              <article className="bz-body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(course.contentHtml) }} />
+            ) : course.content?.length ? (
               <ContentBlocks blocks={course.content} />
             ) : (
               <>

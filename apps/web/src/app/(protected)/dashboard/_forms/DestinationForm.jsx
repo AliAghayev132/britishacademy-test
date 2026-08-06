@@ -25,6 +25,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
+import TiptapEditor from "@/components/editor/TiptapEditor";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -45,6 +46,7 @@ export function DestinationForm({ item, onClose }) {
   const [tagline, setTagline] = useState(item?.tagline || "");
   const [lead, setLead] = useState(item?.lead || "");
   const [image, setImage] = useState(item?.image || "");
+  const [contentHtml, setContentHtml] = useState(item?.contentHtml || "");
 
   // ── Facts (label/value) ──
   const [facts, setFacts] = useState(
@@ -96,6 +98,7 @@ export function DestinationForm({ item, onClose }) {
       tagline: tagline.trim(),
       lead: lead.trim(),
       image: image.trim(),
+      contentHtml,
       isScholarship,
       isFeatured,
       order: Number(order) || 0,
@@ -152,6 +155,12 @@ export function DestinationForm({ item, onClose }) {
           </p>
         )}
         {lead && <p className="mt-2 text-sm text-gray-600">{lead}</p>}
+        {contentHtml && (
+          <div
+            className="bz-body mt-4"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
+        )}
       </div>
     </div>
   );
@@ -216,6 +225,14 @@ export function DestinationForm({ item, onClose }) {
         </Field>
         <Field label="Şəkil">
           <FileUpload value={image} onChange={setImage} kind="image" />
+        </Field>
+      </section>
+
+      {/* ── Məzmun ── */}
+      <section className="space-y-4">
+        <SectionTitle>Məzmun</SectionTitle>
+        <Field label="Məzmun">
+          <TiptapEditor content={contentHtml} onChange={setContentHtml} />
         </Field>
       </section>
 

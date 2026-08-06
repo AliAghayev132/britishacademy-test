@@ -50,6 +50,7 @@ const courseSchema = new Schema(
 
     // Ordered body copy
     content: { type: [contentBlockSchema], default: [] },
+    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
     faq: { type: [faqItemSchema], default: [] },
     info: { type: [factSchema], default: [] }, // "Qısa məlumat" card
     features: { type: [featureSchema], default: [] }, // "Üstünlüklər"
