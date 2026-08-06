@@ -22,6 +22,7 @@ import {
   WEEKDAYS, LEVELS, FORMATS, toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { SeoFields } from "./SeoFields";
 import { CourseGroupForm } from "./CourseGroupForm";
 import { Check } from "lucide-react";
 
@@ -67,6 +68,7 @@ export function CourseWizard({ item, onClose }) {
 
   // ── State ──
   const [course, setCourse] = useState(emptyCourse());
+  const [seo, setSeo] = useState(emptyCourse().seo);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
   // After a successful save we show a "add schedule" step for the saved course.
@@ -85,8 +87,8 @@ export function CourseWizard({ item, onClose }) {
       levels: c.levels || [],
       lesson: { ...emptyCourse().lesson, ...(c.lesson || {}), levelDurationMonths: c.lesson?.levelDurationMonths || [1.5, 2] },
       groupSize: { ...emptyCourse().groupSize, ...(c.groupSize || {}) },
-      seo: { metaTitle: c.seo?.metaTitle || "", metaDescription: c.seo?.metaDescription || "" },
     });
+    setSeo(c.seo || emptyCourse().seo);
     setRows(
       (full.data.branches || []).map((r) => ({
         branch: toId(r.branch),
@@ -148,7 +150,7 @@ export function CourseWizard({ item, onClose }) {
         currency: course.currency || "AZN",
         image: course.image || undefined,
         icon: course.icon || undefined,
-        seo: { metaTitle: course.seo.metaTitle || undefined, metaDescription: course.seo.metaDescription || undefined },
+        seo,
         isFeatured: !!course.isFeatured,
         order: num(course.order) || 0,
         isActive: !!course.isActive,
@@ -303,11 +305,7 @@ export function CourseWizard({ item, onClose }) {
               <Field label="Şəkil" info="Kursun kart/başlıq şəkli"><FileUpload value={course.image} onChange={(url) => patchCourse({ image: url })} kind="image" /></Field>
               <Field label="İkon (emoji/ad)" info="Kart üçün emoji, məs. 🎯"><TextInput value={course.icon} onChange={(e) => patchCourse({ icon: e.target.value })} /></Field>
             </div>
-            <div className={g2}>
-              <Field label="SEO meta başlıq"><TextInput value={course.seo.metaTitle} onChange={(e) => patchCourse({ seo: { ...course.seo, metaTitle: e.target.value } })} /></Field>
-              <Field label="Sıra (order)"><NumberInput value={course.order} onChange={(e) => patchCourse({ order: e.target.value })} /></Field>
-            </div>
-            <Field label="SEO meta təsvir"><TextArea rows={2} value={course.seo.metaDescription} onChange={(e) => patchCourse({ seo: { ...course.seo, metaDescription: e.target.value } })} /></Field>
+            <Field label="Sıra (order)"><NumberInput value={course.order} onChange={(e) => patchCourse({ order: e.target.value })} /></Field>
             <div className="flex gap-8">
               <Toggle checked={course.isFeatured} onChange={(v) => patchCourse({ isFeatured: v })} label="Ana səhifədə göstər" />
               <Toggle checked={course.isActive} onChange={(v) => patchCourse({ isActive: v })} label="Aktiv" />
@@ -354,6 +352,9 @@ export function CourseWizard({ item, onClose }) {
               </div>
             ))}
           </section>
+
+          {/* ── SEO ── */}
+          <SeoFields value={seo} onChange={setSeo} />
         </>
       )}
     </Overlay>

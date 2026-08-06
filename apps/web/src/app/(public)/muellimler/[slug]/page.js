@@ -10,7 +10,7 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 
 // Utils / SEO
 import DOMPurify from "isomorphic-dompurify";
-import { metaFromApi } from "@/lib/seo";
+import { metaFromApi, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 const WD = ["", "B.e", "Ç.a", "Çərş", "C.a", "Cümə", "Şənbə", "Bazar"];
 
@@ -110,9 +110,34 @@ export default async function TeacherPage({ params }) {
   if (isMissing(res, "teacher")) notFound();
   const { teacher: t, groups = [] } = res.data;
 
+  // ── JSON-LD ── Person + Breadcrumb
+  const abs = (u) => (u ? (u.startsWith("http") ? u : `${SITE_URL}${u}`) : undefined);
+  const ld = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: t.fullName,
+      jobTitle: t.title || undefined,
+      worksFor: { "@type": "Organization", name: SITE_NAME },
+      url: `${SITE_URL}/muellimler/${t.slug || slug}`,
+      image: abs(t.photo),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Ana səhifə", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: "Müəllimlər", item: `${SITE_URL}/muellimler` },
+        { "@type": "ListItem", position: 3, name: t.fullName, item: `${SITE_URL}/muellimler/${t.slug || slug}` },
+      ],
+    },
+  ];
+
   // ── Render ──
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+
       <TeacherHero t={t} />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 28px 0" }}>

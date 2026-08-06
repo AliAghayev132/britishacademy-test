@@ -24,6 +24,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { SeoFields } from "./SeoFields";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -60,10 +61,7 @@ export function BlogPostForm({ item, onClose }) {
   const [content, setContent] = useState(item?.content || "");
 
   // ── SEO ──
-  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(
-    item?.seo?.metaDescription || "",
-  );
+  const [seo, setSeo] = useState(item?.seo || {});
 
   // ── Save ──
   const handleSave = async () => {
@@ -80,10 +78,7 @@ export function BlogPostForm({ item, onClose }) {
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
-      seo: {
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDescription.trim(),
-      },
+      seo,
     };
 
     if (slug.trim()) data.slug = slug.trim();
@@ -204,22 +199,7 @@ export function BlogPostForm({ item, onClose }) {
       </section>
 
       {/* ── SEO ── */}
-      <section className="space-y-4">
-        <SectionTitle>SEO</SectionTitle>
-        <Field label="Meta başlıq">
-          <TextInput
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-          />
-        </Field>
-        <Field label="Meta təsvir">
-          <TextArea
-            rows={2}
-            value={metaDescription}
-            onChange={(e) => setMetaDescription(e.target.value)}
-          />
-        </Field>
-      </section>
+      <SeoFields value={seo} onChange={setSeo} />
     </Overlay>
   );
 }

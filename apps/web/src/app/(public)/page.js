@@ -16,7 +16,9 @@ import RevealOnScroll from "@/components/site/RevealOnScroll";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({ path: "/" });
+export async function generateMetadata() {
+  return buildMetadata({ path: "/" });
+}
 
 const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 

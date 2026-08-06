@@ -24,6 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { SeoFields } from "./SeoFields";
 
 const emptyHour = { days: "", from: "", to: "" };
 
@@ -65,10 +66,7 @@ export function BranchForm({ item, onClose }) {
     Array.isArray(item?.images) && item.images.length ? [...item.images] : [],
   );
 
-  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(
-    item?.seo?.metaDescription || "",
-  );
+  const [seo, setSeo] = useState(item?.seo || {});
 
   const [isMain, setIsMain] = useState(Boolean(item?.isMain));
   const [order, setOrder] = useState(
@@ -113,10 +111,7 @@ export function BranchForm({ item, onClose }) {
       isMain,
       order: Number(order) || 0,
       isActive,
-      seo: {
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDescription.trim(),
-      },
+      seo,
       // Prune blank rows.
       workingHours: workingHours
         .map((h) => ({
@@ -360,24 +355,7 @@ export function BranchForm({ item, onClose }) {
       </section>
 
       {/* 6. SEO */}
-      <section className="space-y-4">
-        <SectionTitle>SEO</SectionTitle>
-        <div className="grid grid-cols-1 gap-4">
-          <Field label="Meta başlıq">
-            <TextInput
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
-            />
-          </Field>
-          <Field label="Meta təsvir">
-            <TextArea
-              rows={3}
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-            />
-          </Field>
-        </div>
-      </section>
+      <SeoFields value={seo} onChange={setSeo} />
 
       {/* 7. Parametrlər */}
       <section className="space-y-4">

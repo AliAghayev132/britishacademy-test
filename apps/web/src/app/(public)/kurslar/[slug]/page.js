@@ -178,13 +178,16 @@ export default async function CoursePage({ params }) {
 
   // ── JSON-LD ──
   // Course + Breadcrumb + FAQPage
+  const abs = (u) => (u ? (u.startsWith("http") ? u : `${SITE_URL}${u}`) : undefined);
   const ld = [
     {
       "@context": "https://schema.org",
       "@type": "Course",
       name: course.h1 || course.title,
-      description: course.lead,
+      description: course.lead || course.excerpt,
+      url: `${SITE_URL}/kurslar/${course.slug || slug}`,
       provider: { "@type": "EducationalOrganization", name: "British Academy", sameAs: SITE_URL },
+      image: abs(course.image),
     },
     {
       "@context": "https://schema.org",

@@ -12,7 +12,7 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
-import { metaFromApi } from "@/lib/seo";
+import { metaFromApi, SITE_URL } from "@/lib/seo";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {
@@ -68,9 +68,31 @@ export default async function DestinationPage({ params }) {
   if (isMissing(res, "destination")) notFound();
   const d = res.data.destination;
 
+  // ── JSON-LD ── Breadcrumb (+ FAQPage when present)
+  const ld = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Ana səhifə", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: "Xaricdə təhsil", item: `${SITE_URL}/xaricde-tehsil` },
+        { "@type": "ListItem", position: 3, name: d.country, item: `${SITE_URL}/xaricde-tehsil/${d.slug || slug}` },
+      ],
+    },
+  ];
+  if (d.faq?.length) {
+    ld.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: d.faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })),
+    });
+  }
+
   // ── Render ──
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+
       <PageBanner
         title={d.isScholarship ? d.country : `${d.country}-də təhsil`}
         subtitle={d.lead || d.tagline}

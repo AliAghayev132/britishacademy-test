@@ -10,12 +10,14 @@ import { PageBanner } from "@/components/site/PageBanner";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Bloq",
-  description:
-    "Təhsil, dil və karyera haqqında məsləhətlər, uğur hekayələri və xaricdə təhsil bələdçiləri — British Academy bloqu.",
-  path: "/bloq",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Bloq",
+    description:
+      "Təhsil, dil və karyera haqqında məsləhətlər, uğur hekayələri və xaricdə təhsil bələdçiləri — British Academy bloqu.",
+    path: "/bloq",
+  });
+}
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";

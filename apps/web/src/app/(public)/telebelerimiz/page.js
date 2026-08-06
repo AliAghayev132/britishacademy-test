@@ -10,12 +10,14 @@ import VideoCard from "@/components/site/VideoCard";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Tələbələrimiz",
-  description:
-    "British Academy məzunlarının rəyləri — video təcrübələr, qiymətləndirmələr və real geri bildirimlər.",
-  path: "/telebelerimiz",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Tələbələrimiz",
+    description:
+      "British Academy məzunlarının rəyləri — video təcrübələr, qiymətləndirmələr və real geri bildirimlər.",
+    path: "/telebelerimiz",
+  });
+}
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 

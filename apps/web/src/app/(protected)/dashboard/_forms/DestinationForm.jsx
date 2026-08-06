@@ -24,6 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { SeoFields } from "./SeoFields";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -60,10 +61,7 @@ export function DestinationForm({ item, onClose }) {
   );
 
   // ── SEO ──
-  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(
-    item?.seo?.metaDescription || "",
-  );
+  const [seo, setSeo] = useState(item?.seo || {});
 
   // ── Parameters ──
   const [isScholarship, setIsScholarship] = useState(Boolean(item?.isScholarship));
@@ -102,10 +100,7 @@ export function DestinationForm({ item, onClose }) {
       isFeatured,
       order: Number(order) || 0,
       isActive,
-      seo: {
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDescription.trim(),
-      },
+      seo,
       facts: facts
         .filter((f) => f.label.trim() && f.value.trim())
         .map((f) => ({ label: f.label.trim(), value: f.value.trim() })),
@@ -300,22 +295,7 @@ export function DestinationForm({ item, onClose }) {
       </section>
 
       {/* ── SEO ── */}
-      <section className="space-y-4">
-        <SectionTitle>SEO</SectionTitle>
-        <Field label="Meta başlıq">
-          <TextInput
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-          />
-        </Field>
-        <Field label="Meta təsvir">
-          <TextArea
-            rows={2}
-            value={metaDescription}
-            onChange={(e) => setMetaDescription(e.target.value)}
-          />
-        </Field>
-      </section>
+      <SeoFields value={seo} onChange={setSeo} />
 
       {/* ── Parametrlər ── */}
       <section className="space-y-4">

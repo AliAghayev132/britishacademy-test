@@ -9,12 +9,14 @@ import { CtaBand } from "@/components/site/CtaBand";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Xaricdə təhsil",
-  description:
-    "British Academy ilə xaricdə təhsil — Almaniya, Türkiyə, İngiltərə, Kanada və daha 7 ölkə. Universitet seçimi, sənədlər, viza dəstəyi.",
-  path: "/xaricde-tehsil",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Xaricdə təhsil",
+    description:
+      "British Academy ilə xaricdə təhsil — Almaniya, Türkiyə, İngiltərə, Kanada və daha 7 ölkə. Universitet seçimi, sənədlər, viza dəstəyi.",
+    path: "/xaricde-tehsil",
+  });
+}
 
 // ── Subcomponents ──
 

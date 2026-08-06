@@ -23,6 +23,7 @@ import {
   AddButton,
   RemoveButton,
 } from "./kit";
+import { SeoFields } from "./SeoFields";
 
 const emptyBlock = { heading: "", body: "" };
 
@@ -47,10 +48,7 @@ export function PageForm({ item, onClose }) {
       : [],
   );
 
-  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(
-    item?.seo?.metaDescription || "",
-  );
+  const [seo, setSeo] = useState(item?.seo || {});
 
   const [order, setOrder] = useState(
     item?.order != null ? String(item.order) : "0",
@@ -81,10 +79,7 @@ export function PageForm({ item, onClose }) {
       lead: lead.trim(),
       order: Number(order) || 0,
       isActive,
-      seo: {
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDescription.trim(),
-      },
+      seo,
       // Simple paragraph blocks; prune empty rows.
       content: blocks
         .map((b) => ({
@@ -203,24 +198,7 @@ export function PageForm({ item, onClose }) {
       </section>
 
       {/* 3. SEO */}
-      <section className="space-y-4">
-        <SectionTitle>SEO</SectionTitle>
-        <div className="grid grid-cols-1 gap-4">
-          <Field label="Meta başlıq">
-            <TextInput
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
-            />
-          </Field>
-          <Field label="Meta təsvir">
-            <TextArea
-              rows={3}
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-            />
-          </Field>
-        </div>
-      </section>
+      <SeoFields value={seo} onChange={setSeo} />
 
       {/* 4. Parametrlər */}
       <section className="space-y-4">

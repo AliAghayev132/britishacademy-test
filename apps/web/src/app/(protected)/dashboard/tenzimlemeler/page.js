@@ -49,6 +49,19 @@ export default function SettingsPage() {
         codeInjection: { head: s.codeInjection?.head || "", bodyEnd: s.codeInjection?.bodyEnd || "" },
         robotsTxt: s.robotsTxt || "",
         maxImageSizeKb: s.maxImageSizeKb || 500,
+        seo: {
+          titleTemplate: s.seo?.titleTemplate || "",
+          defaultTitle: s.seo?.defaultTitle || "",
+          defaultDescription: s.seo?.defaultDescription || "",
+          defaultOgImage: s.seo?.defaultOgImage || "",
+          twitterHandle: s.seo?.twitterHandle || "",
+          keywords: (s.seo?.keywords || []).join(", "),
+          verification: {
+            google: s.seo?.verification?.google || "",
+            yandex: s.seo?.verification?.yandex || "",
+            bing: s.seo?.verification?.bing || "",
+          },
+        },
       });
     }
   }, [data, form]);
@@ -90,6 +103,11 @@ export default function SettingsPage() {
         codeInjection: form.codeInjection,
         robotsTxt: form.robotsTxt,
         maxImageSizeKb: Number(form.maxImageSizeKb) || 500,
+        seo: {
+          ...form.seo,
+          keywords: csv(form.seo.keywords),
+          verification: { ...form.seo.verification },
+        },
       }).unwrap();
       notify.success("Yadda saxlanıldı");
     } catch (err) {
@@ -167,6 +185,46 @@ export default function SettingsPage() {
         <div>
           <label className={label}>Maks. şəkil ölçüsü (KB)</label>
           <input type="number" className={input} value={form.maxImageSizeKb} onChange={(e) => set("maxImageSizeKb", e.target.value)} />
+        </div>
+      </Section>
+
+      <Section title="SEO (qlobal)">
+        <div>
+          <label className={label}>Başlıq şablonu</label>
+          <input className={input} placeholder="%s — British Academy" value={form.seo.titleTemplate} onChange={(e) => set("seo.titleTemplate", e.target.value)} />
+          <p className="mt-1 text-xs text-gray-400">%s başlıq yerinə keçir, məs. &quot;%s — British Academy&quot;</p>
+        </div>
+        <div>
+          <label className={label}>Default başlıq</label>
+          <input className={input} value={form.seo.defaultTitle} onChange={(e) => set("seo.defaultTitle", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={label}>Default təsvir</label>
+          <textarea rows={3} className={input} value={form.seo.defaultDescription} onChange={(e) => set("seo.defaultDescription", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={label}>Açar sözlər (vergüllə)</label>
+          <input className={input} value={form.seo.keywords} onChange={(e) => set("seo.keywords", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={label}>Default OG şəkil (URL)</label>
+          <input className={input} value={form.seo.defaultOgImage} onChange={(e) => set("seo.defaultOgImage", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Twitter handle</label>
+          <input className={input} placeholder="@britishacademy" value={form.seo.twitterHandle} onChange={(e) => set("seo.twitterHandle", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Google doğrulama kodu</label>
+          <input className={input} value={form.seo.verification.google} onChange={(e) => set("seo.verification.google", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Yandex doğrulama</label>
+          <input className={input} value={form.seo.verification.yandex} onChange={(e) => set("seo.verification.yandex", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Bing doğrulama</label>
+          <input className={input} value={form.seo.verification.bing} onChange={(e) => set("seo.verification.bing", e.target.value)} />
         </div>
       </Section>
     </div>

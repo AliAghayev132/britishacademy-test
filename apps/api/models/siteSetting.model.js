@@ -59,6 +59,13 @@ const siteSettingSchema = new Schema(
       defaultTitle: { type: String },
       defaultDescription: { type: String },
       defaultOgImage: { type: String },
+      keywords: { type: [String], default: [] }, // default meta keywords
+      twitterHandle: { type: String, trim: true }, // @handle for twitter:site
+      verification: {
+        google: { type: String, trim: true }, // google-site-verification
+        yandex: { type: String, trim: true },
+        bing: { type: String, trim: true },
+      },
     },
 
     // ---- Client brief: admin-editable technical SEO ----

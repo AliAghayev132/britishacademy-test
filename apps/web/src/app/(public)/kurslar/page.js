@@ -12,12 +12,14 @@ import { CtaBand } from "@/components/site/CtaBand";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Kurslar",
-  description:
-    "British Academy kursları — dil kursları, beynəlxalq imtahanlara hazırlıq, kompüter və karyera proqramları. İstiqamətini seç.",
-  path: "/kurslar",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Kurslar",
+    description:
+      "British Academy kursları — dil kursları, beynəlxalq imtahanlara hazırlıq, kompüter və karyera proqramları. İstiqamətini seç.",
+    path: "/kurslar",
+  });
+}
 
 const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 

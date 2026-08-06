@@ -27,6 +27,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { SeoFields } from "./SeoFields";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -84,10 +85,7 @@ export function TeacherForm({ item, onClose }) {
   const [linkedin, setLinkedin] = useState(item?.socials?.linkedin || "");
 
   // ── SEO ──
-  const [metaTitle, setMetaTitle] = useState(item?.seo?.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(
-    item?.seo?.metaDescription || "",
-  );
+  const [seo, setSeo] = useState(item?.seo || {});
 
   // ── Parameters ──
   const [isFeatured, setIsFeatured] = useState(Boolean(item?.isFeatured));
@@ -139,10 +137,7 @@ export function TeacherForm({ item, onClose }) {
         instagram: instagram.trim(),
         linkedin: linkedin.trim(),
       },
-      seo: {
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDescription.trim(),
-      },
+      seo,
       isFeatured,
       order: Number(order) || 0,
       isActive,
@@ -386,22 +381,7 @@ export function TeacherForm({ item, onClose }) {
       </div>
 
       {/* ── SEO ── */}
-      <div className="space-y-4">
-        <SectionTitle>SEO</SectionTitle>
-        <Field label="Meta başlıq">
-          <TextInput
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-          />
-        </Field>
-        <Field label="Meta təsvir">
-          <TextArea
-            rows={2}
-            value={metaDescription}
-            onChange={(e) => setMetaDescription(e.target.value)}
-          />
-        </Field>
-      </div>
+      <SeoFields value={seo} onChange={setSeo} />
 
       {/* ── Parametrlər ── */}
       <div className="space-y-4">

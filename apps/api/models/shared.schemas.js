@@ -10,7 +10,9 @@ export const seoSchema = new Schema(
   {
     metaTitle: { type: String, trim: true },
     metaDescription: { type: String, trim: true },
+    keywords: { type: [String], default: undefined }, // per-page meta keywords
     ogImage: { type: String },
+    canonical: { type: String, trim: true }, // override canonical URL (optional)
     noindex: { type: Boolean, default: false },
   },
   { _id: false },

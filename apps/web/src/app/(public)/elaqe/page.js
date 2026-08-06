@@ -8,12 +8,14 @@ import { PageBanner } from "@/components/site/PageBanner";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Əlaqə",
-  description:
-    "British Academy ilə əlaqə — ünvan, telefon, e-poçt və iş saatları. Sualların üçün bizə yaz.",
-  path: "/elaqe",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Əlaqə",
+    description:
+      "British Academy ilə əlaqə — ünvan, telefon, e-poçt və iş saatları. Sualların üçün bizə yaz.",
+    path: "/elaqe",
+  });
+}
 
 // ── Subcomponents ──
 

@@ -6,14 +6,16 @@ import { PageBanner } from "@/components/site/PageBanner";
 import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, SITE_NAME } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Filiallar",
-  description:
-    "British Academy filialları — Caspian Plaza, Nərimanov, Əhmədli və Elmlər Akademiyası. Ünvan, telefon, iş saatları və WhatsApp.",
-  path: "/filiallar",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Filiallar",
+    description:
+      "British Academy filialları — Caspian Plaza, Nərimanov, Əhmədli və Elmlər Akademiyası. Ünvan, telefon, iş saatları və WhatsApp.",
+    path: "/filiallar",
+  });
+}
 
 const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];
 
@@ -72,9 +74,27 @@ export default async function BranchesPage() {
   const data = await apiGet("/branches");
   const branches = data?.branches || [];
 
+  // ── JSON-LD ── ItemList of branch EducationalOrganizations
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: branches.map((b, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "EducationalOrganization",
+        name: `${SITE_NAME} — ${b.name}`,
+        address: { "@type": "PostalAddress", streetAddress: b.address, addressLocality: "Bakı", addressCountry: "AZ" },
+        telephone: b.phone || undefined,
+      },
+    })),
+  };
+
   // ── render ──
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+
       <PageBanner
         title="Filiallar"
         subtitle={`Bakının ${branches.length} nöqtəsində — sənə ən yaxın filialı seç.`}

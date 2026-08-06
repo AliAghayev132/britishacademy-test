@@ -8,12 +8,14 @@ import { TeacherBrowser } from "@/components/site/TeacherBrowser";
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata = buildMetadata({
-  title: "Müəllimlər",
-  description:
-    "British Academy müəllimləri — IELTS 8.0–8.5 sertifikatlı, xaricdə təhsil almış, beynəlxalq təcrübəli müəllim heyəti. Kursa görə süz.",
-  path: "/muellimler",
-});
+export async function generateMetadata() {
+  return buildMetadata({
+    title: "Müəllimlər",
+    description:
+      "British Academy müəllimləri — IELTS 8.0–8.5 sertifikatlı, xaricdə təhsil almış, beynəlxalq təcrübəli müəllim heyəti. Kursa görə süz.",
+    path: "/muellimler",
+  });
+}
 
 export default async function TeachersPage() {
   // ── data fetching ──
