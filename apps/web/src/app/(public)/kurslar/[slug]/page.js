@@ -264,7 +264,7 @@ export default async function CoursePage({ params }) {
 
       {/* FAQ */}
       {course.faq?.length > 0 && (
-        <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 28px" }}>
+        <section style={{ ...wrap, padding: "56px 28px 0" }}>
           <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 24px" }}>Tez-tez verilən suallar</h2>
           <FaqAccordion items={course.faq} />
         </section>
