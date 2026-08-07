@@ -16,30 +16,28 @@ const caret = (
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
-const ddArrow = (
-  <svg className="ba-dd-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="m9 6 6 6-6 6" />
-  </svg>
-);
 
 // ── Subcomponents ──
 const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, destinations }) {
   if (item.variant === "mega") {
-    // Nested dropdown (category → hover → sub-links) — matches the static site.
+    // Single mega panel: every category + its courses shown at once in a grid
+    // (no hover-to-open nested flyout — cleaner and easier to scan).
     return (
-      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
+      <div className={`ba-nav-item has-mega${active ? " is-active" : ""}`}>
         <Link href={item.href}>{item.label} {caret}</Link>
-        <div className="ba-dd ba-dd--nest">
-          {services.map((g) => (
-            <div key={g.category._id} className="ba-dd-item">
-              <Link href={`/kurslar/${g.category.slug}`}><span>{g.category.name}</span>{ddArrow}</Link>
-              <div className="ba-dd-sub">
-                {g.courses.map((c) => (
-                  <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
-                ))}
+        <div className="ba-mega">
+          <div className="ba-mega-inner">
+            {services.map((g) => (
+              <div key={g.category._id} className="ba-mega-col">
+                <Link className="ba-mega-title" href={`/kurslar/${g.category.slug}`}>{g.category.name}</Link>
+                <div className="ba-mega-links">
+                  {g.courses.map((c) => (
+                    <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -163,6 +161,16 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
   const closeMobile = useCallback(() => setMobile(false), []);
   const openSearch = useCallback(() => setSearch(true), []);
   const closeSearch = useCallback(() => setSearch(false), []);
+
+  // Close the mobile drawer whenever the route changes…
+  useEffect(() => { setMobile(false); }, [pathname]);
+
+  // …and when the viewport grows back to the desktop nav breakpoint (1000px).
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 1000) setMobile(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // ── Render ──
   return (
