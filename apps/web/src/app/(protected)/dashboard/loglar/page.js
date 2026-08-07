@@ -46,10 +46,7 @@ export default function LogsPage() {
 
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900">Loglar</h1>
-        <p className="mt-0.5 text-sm text-gray-500">Əməliyyat tarixçəsi</p>
-      </div>
+      <p className="mb-5 text-sm text-gray-500">Əməliyyat tarixçəsi</p>
 
       {/* Filter bar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">

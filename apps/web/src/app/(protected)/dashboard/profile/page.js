@@ -51,12 +51,9 @@ function ProfileForm({ user }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-sm text-gray-500">
-          Manage your account information.
-        </p>
-      </div>
+      <p className="text-sm text-gray-500">
+        Hesab məlumatlarını buradan idarə et.
+      </p>
 
       <Card padding="lg">
         <form onSubmit={handleSubmit} className="space-y-4">

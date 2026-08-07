@@ -37,7 +37,8 @@ export const adminApi = baseApi.injectEndpoints({
     }),
     adminLeadStatus: builder.mutation({
       query: ({ id, status, note }) => ({ url: `/admin/leads/${id}/status`, method: "PATCH", body: { status, note } }),
-      invalidatesTags: [{ type: "Resource", id: "leads" }],
+      // Also refresh the dashboard home (stats + latestLeads) after a status change.
+      invalidatesTags: [{ type: "Resource", id: "leads" }, { type: "Resource", id: "stats" }],
     }),
     adminStats: builder.query({
       query: () => "/admin/stats",

@@ -177,25 +177,22 @@ export default function UsersPage() {
 
   return (
     <div style={{ fontFamily: "'Poppins', sans-serif" }}>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold text-gray-900">İstifadəçilər</h1>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={onSearch}
-              placeholder="Axtar…"
-              className="w-56 rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm text-gray-900 outline-none focus:border-blue-500"
-            />
-          </div>
-          <button
-            onClick={() => setModal("create")}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#00157A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#00105e]"
-          >
-            <Plus className="h-4 w-4" /> Yeni istifadəçi
-          </button>
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            value={search}
+            onChange={onSearch}
+            placeholder="Axtar…"
+            className="w-56 rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm text-gray-900 outline-none focus:border-blue-500"
+          />
         </div>
+        <button
+          onClick={() => setModal("create")}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-[#00157A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#00105e]"
+        >
+          <Plus className="h-4 w-4" /> Yeni istifadəçi
+        </button>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">

@@ -38,6 +38,7 @@ import {
 // Utils
 import { logout } from '@/store/slices/authSlice'
 import { useLogoutMutation } from '@/store/api'
+import { ADMIN_RESOURCES } from '@/lib/adminResources'
 
 // British Academy admin navigation. Resource pages use the generic browser
 // at /dashboard/resurslar/<resource> (see resourceRegistry on the server).
@@ -74,12 +75,16 @@ export const DashboardSidebar = ({ children }) => {
   const isActive = (item) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href)
 
-  const currentTitle =
-    [...navItems]
-      .reverse()
-      .find((item) =>
-        item.exact ? pathname === item.href : pathname.startsWith(item.href)
-      )?.name || 'Dashboard'
+  // Generic resource sub-pages (/dashboard/resurslar/<resource>) aren't all in
+  // the sidebar, so resolve their header title from the resource registry.
+  const resourceMatch = pathname.match(/^\/dashboard\/resurslar\/([^/]+)/)
+  const currentTitle = resourceMatch
+    ? ADMIN_RESOURCES[resourceMatch[1]]?.name || 'Resurs'
+    : [...navItems]
+        .reverse()
+        .find((item) =>
+          item.exact ? pathname === item.href : pathname.startsWith(item.href)
+        )?.name || 'Dashboard'
 
   const handleLogout = async () => {
     try {

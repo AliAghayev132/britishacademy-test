@@ -4,6 +4,7 @@
 import { useState } from "react";
 // UI / kit
 import { notify } from "@/components/ui/feedback";
+import { NativeSelect } from "../_forms/kit";
 // Data (RTK Query)
 import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/adminApi";
 
@@ -13,6 +14,8 @@ const STATUS = [
   { key: "enrolled", label: "Qeydiyyatdan keçdi", cls: "bg-emerald-100 text-emerald-700" },
   { key: "rejected", label: "İmtina", cls: "bg-gray-200 text-gray-600" },
 ];
+
+const STATUS_OPTIONS = STATUS.map((s) => ({ value: s.key, label: s.label }));
 
 const fmt = (d) => new Date(d).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -34,7 +37,6 @@ export default function LeadsPage() {
 
   return (
     <div>
-      <h1 className="mb-5 text-xl font-bold text-gray-900">Müraciətlər</h1>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading ? (
           <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
@@ -68,12 +70,12 @@ export default function LeadsPage() {
                     <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(l.createdAt)}</td>
                     <td className="px-4 py-3">
                       <span className={`mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
-                      <div className="flex flex-wrap gap-1">
-                        {STATUS.filter((s) => s.key !== l.status).map((s) => (
-                          <button key={s.key} onClick={() => change(l, s.key)} className="rounded border border-gray-200 px-2 py-0.5 text-[11px] font-semibold text-gray-500 hover:bg-gray-100">
-                            {s.label}
-                          </button>
-                        ))}
+                      <div className="w-48">
+                        <NativeSelect
+                          options={STATUS_OPTIONS}
+                          value={l.status}
+                          onChange={(e) => change(l, e.target.value)}
+                        />
                       </div>
                     </td>
                   </tr>

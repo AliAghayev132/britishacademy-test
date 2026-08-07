@@ -117,8 +117,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Sayt tənzimləmələri</h1>
+      <div className="flex items-center justify-end">
         <button onClick={save} disabled={saving} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
           {saving ? "Saxlanılır…" : "Yadda saxla"}
         </button>

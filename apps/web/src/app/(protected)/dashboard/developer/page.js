@@ -39,7 +39,6 @@ export default function DeveloperPage() {
   // ── Render ──
   return (
     <div>
-      <h1 className="mb-1 text-xl font-bold text-gray-900">Developer</h1>
       <p className="mb-6 text-sm text-gray-500">Yalnız admin üçün texniki alətlər.</p>
 
       <div className="max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

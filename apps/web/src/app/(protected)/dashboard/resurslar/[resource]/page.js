@@ -114,36 +114,29 @@ export default function ResourceBrowserPage({ params }) {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Axtar…"
-              className="rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-            />
+      {/* Toolbar: axtarış + filtrlər + Yeni yan yana */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Axtar…"
+            className="rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+          />
+        </div>
+        {resFilters.map((f) => (
+          <div key={f.key} className="w-44">
+            <NativeSelect placeholder={f.label} options={f.options} value={filters[f.key] || ""} onChange={(e) => setFilter(f.key, e.target.value)} />
           </div>
-          <button onClick={() => openEditor(null)} className="inline-flex items-center gap-2 rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
-            <Plus className="h-4 w-4" /> Yeni
-          </button>
-        </div>
+        ))}
+        {Object.keys(activeFilters).length > 0 && (
+          <button onClick={() => { setFilters({}); setPage(1); }} className="text-sm font-semibold text-gray-500 hover:text-[#00157A]">Filtrləri təmizlə</button>
+        )}
+        <button onClick={() => openEditor(null)} className="ml-auto inline-flex items-center gap-2 rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+          <Plus className="h-4 w-4" /> Yeni
+        </button>
       </div>
-
-      {resFilters.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {resFilters.map((f) => (
-            <div key={f.key} className="w-44">
-              <NativeSelect placeholder={f.label} options={f.options} value={filters[f.key] || ""} onChange={(e) => setFilter(f.key, e.target.value)} />
-            </div>
-          ))}
-          {Object.keys(activeFilters).length > 0 && (
-            <button onClick={() => { setFilters({}); setPage(1); }} className="text-sm font-semibold text-gray-500 hover:text-[#00157A]">Filtrləri təmizlə</button>
-          )}
-        </div>
-      )}
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading ? (
