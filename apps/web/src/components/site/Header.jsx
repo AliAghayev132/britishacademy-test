@@ -180,18 +180,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             <span>☎ {site?.contact?.phone}</span>
             <span style={{ opacity: 0.65 }}>{site?.contact?.hours}</span>
           </div>
-          {/* language switcher (visual — matches static) */}
-          <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
-            {["AZ", "EN", "RU"].map((l, i) => (
-              <button
-                key={l}
-                type="button"
-                style={{ border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: i === 0 ? "var(--accent)" : "transparent", color: i === 0 ? "#fff" : "rgba(255,255,255,.65)" }}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
+          {/* language switcher hidden for now (single-language site) */}
         </div>
       </div>
 

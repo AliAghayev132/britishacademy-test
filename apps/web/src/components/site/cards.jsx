@@ -16,9 +16,9 @@ export function CourseCard({ course, index = 0 }) {
         <span style={{ fontSize: 12, fontWeight: 700, color: "#9A9AA6", letterSpacing: ".05em", textTransform: "uppercase" }}>{course.category?.name || "Kurs"}</span>
         {course.isFeatured && <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--accent)", background: "var(--accent-soft)", padding: "4px 9px", borderRadius: 99 }}>Populyar</span>}
       </div>
-      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "14px 0 0", letterSpacing: "-.01em", color: "#17171F" }}>{course.title}</h3>
-      {course.lead && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55, flex: 1 }}>{course.lead}</p>}
-      <div style={{ borderTop: "1px solid #EEEFF3", marginTop: 20, paddingTop: 18, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, lineHeight: 1.25, margin: "14px 0 0", letterSpacing: "-.01em", color: "#17171F", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.5em" }}>{course.title}</h3>
+      <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", height: "4.65em" }}>{course.lead}</p>
+      <div style={{ borderTop: "1px solid #EEEFF3", marginTop: "auto", paddingTop: 18, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
         {from ? (
           <div><span style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 26, color: "#14141C" }}>{from}</span><span style={{ fontSize: 13, color: "#9A9AA6", marginLeft: 4 }}>AZN-dən / ay</span></div>
         ) : <span style={{ fontSize: 14, color: "#54545F", fontWeight: 700 }}>Ətraflı</span>}
