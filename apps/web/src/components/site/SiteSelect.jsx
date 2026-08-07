@@ -47,8 +47,8 @@ export function SiteSelect({ value, onChange, options = [], placeholder = "SeÃ§â
   const filtered = searchable && q ? options.filter((o) => o.label.toLowerCase().includes(q.toLowerCase())) : options;
 
   return (
-    <div style={{ position: "relative" }}>
-      <button ref={tRef} type="button" onClick={toggle} className="ba-field" style={{ ...style, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer", textAlign: "left" }}>
+    <div style={{ position: "relative", width: "100%" }}>
+      <button ref={tRef} type="button" onClick={toggle} className="ba-field" style={{ ...style, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer", textAlign: "left" }}>
         <span style={{ color: sel ? "#14141C" : "#9A9AA6", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sel ? sel.label : placeholder}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9AA6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
