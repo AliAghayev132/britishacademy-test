@@ -80,28 +80,48 @@ const TeacherCard = memo(function TeacherCard({ t }) {
   );
 });
 
-const FilterBar = memo(function FilterBar({ courses, course, onReset, onChange }) {
+const inputStyle = {
+  border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "11px 14px",
+  fontSize: 14.5, fontFamily: "inherit", color: "#14141C", background: "#fff", width: "100%",
+};
+
+const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCourse, onReset, hasFilter }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
-      <span style={{ fontWeight: 700, fontSize: 14.5, color: "#63636F" }}>Kursa görə süz:</span>
-      <button
-        onClick={onReset}
-        style={chip(!course)}
-      >
-        Hamısı
-      </button>
-      <div style={{ minWidth: 240 }}>
+      {/* Name search */}
+      <div style={{ position: "relative", flex: "1 1 260px", minWidth: 220, maxWidth: 360 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9AA6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+          <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          value={name}
+          onChange={(e) => onName(e.target.value)}
+          placeholder="Müəllim adı ilə axtar…"
+          className="ba-field"
+          style={{ ...inputStyle, paddingLeft: 42 }}
+        />
+      </div>
+      {/* Course filter */}
+      <div style={{ flex: "0 1 260px", minWidth: 220 }}>
         <SiteSelect
           value={course}
-          onChange={onChange}
-          placeholder="Kurs seç…"
-          style={{ border: "1.5px solid #E4E6EF", borderRadius: 11, padding: "10px 14px", fontSize: 14.5, fontFamily: "inherit", color: "#14141C", background: "#fff", width: "100%" }}
+          onChange={onCourse}
+          placeholder="Bütün kurslar"
+          style={inputStyle}
           options={courses.map((c) => ({ value: c.slug, label: c.title }))}
         />
       </div>
+      {hasFilter && (
+        <button onClick={onReset} style={{ ...chip(false), fontWeight: 600, color: "#63636F" }}>
+          Sıfırla
+        </button>
+      )}
     </div>
   );
 });
+
+// Azerbaijani-tolerant lowercase for the client-side name match.
+const norm = (s) => (s || "").toLocaleLowerCase("az");
 
 /**
  * Teacher grid with a course filter. Server passes the initial (unfiltered)
@@ -111,27 +131,44 @@ const FilterBar = memo(function FilterBar({ courses, course, onReset, onChange }
 export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
   // ── State / data ──
   const [course, setCourse] = useState("");
+  const [name, setName] = useState("");
   const { data, isFetching } = useGetTeachersQuery(
     course ? { course } : {},
-    { skip: !course }, // no request until a filter is chosen — use SSR data
+    { skip: !course }, // no request until a course is chosen — use SSR data
   );
 
   // ── Derived ──
-  const teachers = course ? data?.data?.teachers || [] : initialTeachers;
+  // Course filter is server-side (SSR list or /teachers?course=…); the name
+  // filter is applied client-side on top of whichever list is showing.
+  const base = course ? data?.data?.teachers || [] : initialTeachers;
+  const q = norm(name.trim());
+  const teachers = q ? base.filter((t) => norm(t.fullName).includes(q)) : base;
+  const hasFilter = Boolean(course || name.trim());
 
   // ── Handlers ──
-  const handleReset = useCallback(() => setCourse(""), []);
-  const handleChange = useCallback((v) => setCourse(v), []);
+  const handleReset = useCallback(() => { setCourse(""); setName(""); }, []);
+  const handleCourse = useCallback((v) => setCourse(v), []);
+  const handleName = useCallback((v) => setName(v), []);
 
   // ── Render ──
   return (
     <>
       {courses.length > 0 && (
-        <FilterBar courses={courses} course={course} onReset={handleReset} onChange={handleChange} />
+        <FilterBar
+          courses={courses}
+          course={course}
+          name={name}
+          onName={handleName}
+          onCourse={handleCourse}
+          onReset={handleReset}
+          hasFilter={hasFilter}
+        />
       )}
 
       {teachers.length === 0 ? (
-        <p style={{ color: "#63636F", padding: "30px 0" }}>Bu kurs üzrə müəllim tapılmadı.</p>
+        <p style={{ color: "#63636F", padding: "30px 0" }}>
+          {hasFilter ? "Axtarışa uyğun müəllim tapılmadı." : "Hələ müəllim əlavə edilməyib."}
+        </p>
       ) : (
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24, opacity: isFetching ? 0.6 : 1, transition: "opacity .15s" }}>
           {teachers.map((t) => <TeacherCard key={t._id} t={t} />)}
