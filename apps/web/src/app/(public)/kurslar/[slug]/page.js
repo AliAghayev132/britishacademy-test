@@ -10,7 +10,7 @@ import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
 import { ContentBlocks } from "@/components/site/ContentBlocks";
 import { PriceCards } from "@/components/site/PriceCards";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
-import { CourseCard, SectionHead } from "@/components/site/cards";
+import { CourseCard } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
@@ -142,7 +142,7 @@ function CourseTeachers({ teachers }) {
 function RelatedCourses({ related }) {
   return (
     <section style={{ ...wrap, padding: "56px 28px 0" }}>
-      <SectionHead title="Digər istiqamətlər" />
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>Digər istiqamətlər</h2>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
         {related.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
       </div>
@@ -259,6 +259,9 @@ export default async function CoursePage({ params }) {
       {/* Features */}
       {course.features?.length > 0 && <FeaturesGrid features={course.features} />}
 
+      {/* Course teachers */}
+      {uniqueTeachers.length > 0 && <CourseTeachers teachers={uniqueTeachers} />}
+
       {/* FAQ */}
       {course.faq?.length > 0 && (
         <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 28px" }}>
@@ -266,9 +269,6 @@ export default async function CoursePage({ params }) {
           <FaqAccordion items={course.faq} />
         </section>
       )}
-
-      {/* Course teachers */}
-      {uniqueTeachers.length > 0 && <CourseTeachers teachers={uniqueTeachers} />}
 
       {/* Related */}
       {related.length > 0 && <RelatedCourses related={related} />}
