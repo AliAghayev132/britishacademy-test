@@ -11,12 +11,12 @@ import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/admin
 import { Search } from "lucide-react";
 
 const STATUS = [
-  { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700" },
-  { key: "contacted", label: "Əlaqə saxlanıldı", cls: "bg-amber-100 text-amber-700" },
-  { key: "enrolled", label: "Qeydiyyatdan keçdi", cls: "bg-emerald-100 text-emerald-700" },
-  { key: "rejected", label: "İmtina", cls: "bg-gray-200 text-gray-600" },
+  { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },
+  { key: "contacted", label: "Əlaqə saxlanıldı", cls: "bg-amber-100 text-amber-700", color: "#D97706" },
+  { key: "enrolled", label: "Qeydiyyatdan keçdi", cls: "bg-emerald-100 text-emerald-700", color: "#059669" },
+  { key: "rejected", label: "İmtina", cls: "bg-gray-200 text-gray-600", color: "#6B7280" },
 ];
-const STATUS_OPTIONS = STATUS.map((s) => ({ value: s.key, label: s.label }));
+const STATUS_OPTIONS = STATUS.map((s) => ({ value: s.key, label: s.label, color: s.color }));
 
 const SOURCE_OPTIONS = [
   { value: "apply-modal", label: "Müraciət formu" },

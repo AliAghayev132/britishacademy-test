@@ -84,7 +84,10 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
         onClick={toggle}
         className={`${base} flex items-center justify-between gap-2 bg-white text-left ${disabled ? "opacity-60" : "cursor-pointer"}`}
       >
-        <span className={`truncate ${selected ? "text-gray-900" : "text-gray-400"}`}>{selected ? selected.label : (placeholder || "Seç…")}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          {selected?.color && <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: selected.color }} />}
+          <span className={`truncate ${selected ? "text-gray-900" : "text-gray-400"}`} style={selected?.color ? { color: selected.color, fontWeight: 600 } : undefined}>{selected ? selected.label : (placeholder || "Seç…")}</span>
+        </span>
         <ChevronDown className={`h-4 w-4 flex-none text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
@@ -114,7 +117,10 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
                   onClick={() => choose(o.value)}
                   className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm ${on ? "bg-blue-50 font-semibold text-[#00157A]" : "text-gray-700 hover:bg-gray-50"}`}
                 >
-                  <span className="truncate">{o.label}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {o.color && <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: o.color }} />}
+                    <span className="truncate">{o.label}</span>
+                  </span>
                   {on && <Check className="h-4 w-4 flex-none text-[#00157A]" />}
                 </button>
               );
