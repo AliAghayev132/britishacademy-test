@@ -7,7 +7,7 @@
  *    - Tiptap `useEditor` hook-unu çağırır.
  *    - Bütün toolbar UI-ı `parts/` qovluğundakı kiçik komponentlərdən
  *      yığır (HeadingDropdown, ColorPickerPopover, TableMenu,
- *      MathPicker, ImageToolbar, LinkInput, VideoMenu, ...).
+ *      ImageToolbar, LinkInput, VideoMenu, ...).
  *    - Tam ekran rejimi, önizləmə, statistika və ümumi əməliyyatlar
  *      (kopyala, təmizlə) burada idarə olunur.
  *
@@ -20,7 +20,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Editor
 import { EditorContent, useEditor } from '@tiptap/react';
-import 'katex/dist/katex.min.css';
 
 // Icons
 import {
@@ -41,7 +40,6 @@ import { ToolbarButton, Divider } from './parts/Primitives';
 import HeadingDropdown from './parts/HeadingDropdown';
 import ColorPickerPopover from './parts/ColorPickerPopover';
 import TableMenu from './parts/TableMenu';
-import MathPicker from './parts/MathPicker';
 import ImageToolbar from './parts/ImageToolbar';
 import LinkInput from './parts/LinkInput';
 import VideoMenu from './parts/VideoMenu';
@@ -307,7 +305,7 @@ export default function TiptapEditor({
 
           <Divider />
 
-          {/* İndekslər, cədvəl, düstur */}
+          {/* İndekslər, cədvəl */}
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleSuperscript().run()}
             isActive={editor.isActive('superscript')}
@@ -325,9 +323,6 @@ export default function TiptapEditor({
 
           {/* Cədvəl menyusu (xana birləşdirmə, düzləndirmə, fon rəngi və s.) */}
           <TableMenu editor={editor} />
-
-          {/* Düstur seçici (kateqoriyalar + axtarış + canlı önizləmə) */}
-          <MathPicker editor={editor} />
 
           <ToolbarButton
             onClick={() =>

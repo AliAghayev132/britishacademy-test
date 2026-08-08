@@ -123,6 +123,7 @@ export default function FontPicker({ editor }) {
       <div className="relative" data-font-family-popover>
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => setFamilyOpen((p) => !p)}
           title="Şrift ailəsi"
           className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-200 rounded-md text-xs hover:bg-gray-100 transition min-w-[140px]"
@@ -146,6 +147,7 @@ export default function FontPicker({ editor }) {
                 <button
                   key={i}
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => applyFamily(f)}
                   className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 text-xs text-left hover:bg-gray-50 transition ${
                     isCurrent ? 'bg-secondary/10 text-secondary font-medium' : 'text-gray-700'

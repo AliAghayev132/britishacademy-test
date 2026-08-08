@@ -17,8 +17,6 @@
  * ===================================================================== */
 
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import ImageBase from '@tiptap/extension-image';
 import { mergeAttributes } from '@tiptap/core';
 import TextAlign from '@tiptap/extension-text-align';
@@ -27,14 +25,14 @@ import Placeholder from '@tiptap/extension-placeholder';
 import CharacterCount from '@tiptap/extension-character-count';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
-import Color from '@tiptap/extension-color';
-import { TextStyle } from '@tiptap/extension-text-style';
+// TextStyle + rəsmi FontSize/FontFamily/Color (v3 text-style paketindən).
+// StarterKit v3 artıq Underline və Link daxil edir — onları ayrıca əlavə etmirik.
+import { TextStyle, FontSize, FontFamily, Color } from '@tiptap/extension-text-style';
 import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
-import { MathBlock, MathInline } from '../MathExtension';
 import { ImageCollage } from './ImageCollageExtension';
 import { ImageSlider } from './ImageSliderExtension';
 
@@ -234,49 +232,6 @@ export const Image = ImageBase.extend({
 });
 
 /* ------------------------------------------------------------------ */
-/*  TextStyle genişləndirilməsi — fontSize, fontFamily inline mark    */
-/* ------------------------------------------------------------------ */
-export const StyledTextStyle = TextStyle.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      fontSize: {
-        default: null,
-        parseHTML: (el) => el.style?.fontSize?.replace(/['"]+/g, '') || null,
-        renderHTML: (attrs) => (attrs.fontSize ? { style: `font-size: ${attrs.fontSize}` } : {}),
-      },
-      fontFamily: {
-        default: null,
-        parseHTML: (el) => el.style?.fontFamily?.replace(/['"]+/g, '') || null,
-        renderHTML: (attrs) => (attrs.fontFamily ? { style: `font-family: ${attrs.fontFamily}` } : {}),
-      },
-    };
-  },
-
-  addCommands() {
-    return {
-      ...this.parent?.(),
-      setFontSize:
-        (size) =>
-        ({ chain }) =>
-          chain().setMark('textStyle', { fontSize: size }).run(),
-      unsetFontSize:
-        () =>
-        ({ chain }) =>
-          chain().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run(),
-      setFontFamily:
-        (family) =>
-        ({ chain }) =>
-          chain().setMark('textStyle', { fontFamily: family }).run(),
-      unsetFontFamily:
-        () =>
-        ({ chain }) =>
-          chain().setMark('textStyle', { fontFamily: null }).removeEmptyTextStyle().run(),
-    };
-  },
-});
-
-/* ------------------------------------------------------------------ */
 /*  Cədvəl xanaları üçün ümumi köməkçilər                              */
 /* ------------------------------------------------------------------ */
 
@@ -413,11 +368,24 @@ export const StyledTableHeader = withCellStyling(TableHeader);
 /* ------------------------------------------------------------------ */
 export function buildExtensions({ placeholder, maxCharacters }) {
   return [
-    StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }),
-    Underline,
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3, 4] },
+      // StarterKit-in daxili Link-i (ayrıca Link əlavə etmirik — dublikat olmasın).
+      link: {
+        openOnClick: false,
+        autolink: true,
+        linkOnPaste: true,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline hover:text-blue-800 cursor-pointer',
+        },
+      },
+    }),
     Subscript,
     Superscript,
-    StyledTextStyle,
+    // Şrift ölçüsü/ailəsi/rəngi — hamısı textStyle mark-ına bağlanır.
+    TextStyle,
+    FontSize,
+    FontFamily,
     Color,
     Highlight.configure({ multicolor: true }),
 
@@ -431,14 +399,6 @@ export function buildExtensions({ placeholder, maxCharacters }) {
     StyledTableCell,
     StyledTableHeader,
 
-    Link.configure({
-      openOnClick: false,
-      autolink: true,
-      linkOnPaste: true,
-      HTMLAttributes: {
-        class: 'text-blue-600 underline hover:text-blue-800 cursor-pointer',
-      },
-    }),
     Image.configure({
       inline: false,
       allowBase64: true,
@@ -464,8 +424,6 @@ export function buildExtensions({ placeholder, maxCharacters }) {
     }),
 
     Placeholder.configure({ placeholder }),
-    MathBlock,
-    MathInline,
     maxCharacters
       ? CharacterCount.configure({ limit: maxCharacters })
       : CharacterCount,

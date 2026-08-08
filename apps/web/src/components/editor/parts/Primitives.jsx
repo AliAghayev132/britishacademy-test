@@ -6,8 +6,7 @@
  * yaradılmasın və focus oğurluğu (input remount) baş verməsin.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import katex from 'katex';
+import { useEffect, useState } from 'react';
 
 /* ------------------------------------------------------------------ */
 /*  ToolbarButton — yuvarlaqlaşdırılmış kvadrat düymə.                 */
@@ -90,32 +89,5 @@ export function ImagePxInput({ label, value, onCommit, min = 16, max = 4000 }) {
         className="w-16 px-1.5 py-0.5 border border-gray-300 rounded text-xs"
       />
     </label>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  MathPreview — KaTeX ilə canlı LaTeX önizləməsi                     */
-/* ------------------------------------------------------------------ */
-export function MathPreview({ latex, displayMode = false }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    try {
-      katex.render(latex || ' ', ref.current, {
-        displayMode,
-        throwOnError: false,
-        output: 'html',
-      });
-    } catch {
-      ref.current.textContent = latex;
-    }
-  }, [latex, displayMode]);
-
-  return (
-    <div
-      ref={ref}
-      className="min-h-[2rem] px-3 py-2 bg-gray-50 border border-gray-200 rounded text-center overflow-x-auto"
-    />
   );
 }
