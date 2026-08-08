@@ -2,6 +2,8 @@
 
 // React
 import { use, useMemo, useState } from "react";
+// Next
+import { useRouter, useSearchParams } from "next/navigation";
 // Data (RTK Query)
 import {
   useAdminListQuery,
@@ -18,7 +20,7 @@ import { BESPOKE_FORMS } from "../../_forms";
 // Utils
 import { ADMIN_RESOURCES, field, RESOURCE_FILTERS } from "@/lib/adminResources";
 // Icons
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, CalendarClock, X } from "lucide-react";
 
 /**
  * Generic admin resource browser.
@@ -32,13 +34,18 @@ export default function ResourceBrowserPage({ params }) {
   const cfg = ADMIN_RESOURCES[resource];
   const Bespoke = BESPOKE_FORMS[resource]; // purpose-built form, or undefined → JSON editor
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // "Dərs qrafiki" düyməsindən gələn kurs filtri (?course=<id>) — course-groups üçün.
+  const courseParam = searchParams.get("course") || "";
+
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({}); // { isActive:"true", status:"open", ... }
   const resFilters = RESOURCE_FILTERS[resource] || [];
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
-  const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters });
+  const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
   const [createItem] = useAdminCreateMutation();
@@ -48,6 +55,7 @@ export default function ResourceBrowserPage({ params }) {
   const [editing, setEditing] = useState(null); // null | {} (new) | item
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState("");
+  const [jsonDirty, setJsonDirty] = useState(false);
 
   const items = data?.data?.items || [];
   const pagination = data?.data?.pagination;
@@ -60,6 +68,22 @@ export default function ResourceBrowserPage({ params }) {
     setEditing(item || {});
     setJsonText(JSON.stringify(doc, null, 2));
     setJsonError("");
+    setJsonDirty(false);
+  };
+
+  // JSON redaktorunu bağla — dəyişiklik varsa təsdiq istə.
+  const closeJsonEditor = async () => {
+    if (jsonDirty) {
+      const ok = await confirmDialog({
+        tone: "warning",
+        title: "Çıxılsın?",
+        text: "Yadda saxlanılmamış dəyişikliklər var — çıxsanız itəcək.",
+        confirmText: "Bəli, çıx",
+        cancelText: "Ləğv et",
+      });
+      if (!ok) return;
+    }
+    setEditing(null);
   };
 
   const save = async () => {
@@ -133,6 +157,11 @@ export default function ResourceBrowserPage({ params }) {
         {Object.keys(activeFilters).length > 0 && (
           <button onClick={() => { setFilters({}); setPage(1); }} className="text-sm font-semibold text-gray-500 hover:text-[#00157A]">Filtrləri təmizlə</button>
         )}
+        {courseParam && (
+          <button onClick={() => router.push(`/dashboard/resurslar/${resource}`)} className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#00157A] hover:bg-blue-100">
+            <X className="h-3.5 w-3.5" /> Kurs üzrə süzülür
+          </button>
+        )}
         <button onClick={() => openEditor(null)} className="ml-auto inline-flex items-center gap-2 rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
           <Plus className="h-4 w-4" /> Yeni
         </button>
@@ -174,6 +203,11 @@ export default function ResourceBrowserPage({ params }) {
                     <ActionsMenu
                       actions={[
                         { label: "Redaktə", icon: Pencil, onClick: () => openEditor(item) },
+                        resource === "courses" && {
+                          label: "Dərs qrafiki",
+                          icon: CalendarClock,
+                          onClick: () => router.push(`/dashboard/resurslar/course-groups?course=${item._id}`),
+                        },
                         { label: "Sil", icon: Trash2, tone: "danger", onClick: () => removeItem(item) },
                       ]}
                     />
@@ -199,11 +233,11 @@ export default function ResourceBrowserPage({ params }) {
       )}
 
       {editing !== null && !Bespoke && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && setEditing(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && closeJsonEditor()}>
           <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-base font-bold text-gray-900">{editing?._id ? "Redaktə et" : "Yeni element"} — {title}</h2>
-              <button onClick={() => setEditing(null)} className="text-gray-400 hover:text-gray-700">✕</button>
+              <button onClick={closeJsonEditor} className="text-gray-400 hover:text-gray-700">✕</button>
             </div>
             <div className="flex-1 overflow-auto p-6">
               <p className="mb-3 text-xs text-gray-500">
@@ -211,14 +245,14 @@ export default function ResourceBrowserPage({ params }) {
               </p>
               <textarea
                 value={jsonText}
-                onChange={(e) => setJsonText(e.target.value)}
+                onChange={(e) => { setJsonText(e.target.value); setJsonDirty(true); }}
                 spellCheck={false}
                 className="h-96 w-full rounded-lg border border-gray-200 p-3 font-mono text-xs outline-none focus:border-blue-500"
               />
               {jsonError && <div className="mt-2 text-sm font-semibold text-red-600">{jsonError}</div>}
             </div>
             <div className="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
-              <button onClick={() => setEditing(null)} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
+              <button onClick={closeJsonEditor} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">İmtina</button>
               <button onClick={save} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800">Yadda saxla</button>
             </div>
           </div>
