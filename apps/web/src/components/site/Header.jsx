@@ -70,13 +70,21 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
         <summary>{item.label}</summary>
         <div className="ba-macc-body">
           <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{item.label} — hamısı</Link>
+
+          {/* Xidmətlər — iç-içə açılan: kateqoriya → kliklə → kursları açılır */}
           {item.variant === "mega" &&
-            services.flatMap((g) => [
-              <Link key={g.category._id} className="ba-msub ba-msub--head" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name}</Link>,
-              ...g.courses.map((c) => (
-                <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={onClose}>{c.title}</Link>
-              )),
-            ])}
+            services.map((g) => (
+              <details key={g.category._id} className="ba-macc ba-macc--sub">
+                <summary>{g.category.name}</summary>
+                <div className="ba-macc-body">
+                  <Link className="ba-msub ba-msub--all" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name} — hamısı</Link>
+                  {g.courses.map((c) => (
+                    <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={onClose}>{c.title}</Link>
+                  ))}
+                </div>
+              </details>
+            ))}
+
           {item.variant === "destinations" &&
             destinations.map((d) => (
               <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
