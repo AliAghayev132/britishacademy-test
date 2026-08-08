@@ -56,7 +56,7 @@ const list = asyncHandler(async (req, res) => {
   // so any resource can be filtered via ?isActive=true&status=open&category=<id> etc.
   const FILTERABLE = [
     "isActive", "isFeatured", "isScholarship", "status", "type", "format",
-    "pricingMode", "location", "group", "region",
+    "pricingMode", "location", "group", "region", "source",
     "category", "branch", "teacher", "course", "parent", "author",
   ];
   for (const key of FILTERABLE) {
