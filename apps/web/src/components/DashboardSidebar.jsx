@@ -38,6 +38,7 @@ import {
 // Utils
 import { logout } from '@/store/slices/authSlice'
 import { useLogoutMutation } from '@/store/api'
+import { useAdminStatsQuery } from '@/store/api/adminApi'
 import { ADMIN_RESOURCES } from '@/lib/adminResources'
 
 // British Academy admin navigation. Resource pages use the generic browser
@@ -71,6 +72,11 @@ export const DashboardSidebar = ({ children }) => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
   const [logoutApi] = useLogoutMutation()
+
+  // Yeni (baxılmamış) müraciət sayı — sidebar-da qırmızı badge. Status
+  // dəyişəndə adminLeadStatus "stats" tag-ını invalidate etdiyi üçün yenilənir.
+  const { data: stats } = useAdminStatsQuery()
+  const newLeads = stats?.data?.newLeads ?? 0
 
   const isActive = (item) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href)
@@ -148,6 +154,7 @@ export const DashboardSidebar = ({ children }) => {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => {
             const active = isActive(item)
+            const badge = item.href === '/dashboard/muracietler' ? newLeads : 0
             return (
               <Link
                 key={item.href}
@@ -175,6 +182,17 @@ export const DashboardSidebar = ({ children }) => {
                     </motion.span>
                   )}
                 </AnimatePresence>
+
+                {/* Yeni müraciət badge-i (varsa) */}
+                {badge > 0 && (
+                  sidebarOpen ? (
+                    <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  ) : (
+                    <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+                  )
+                )}
               </Link>
             )
           })}
