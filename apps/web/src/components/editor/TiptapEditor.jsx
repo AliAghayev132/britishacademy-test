@@ -20,6 +20,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Editor
 import { EditorContent, useEditor } from '@tiptap/react';
+// Editor canvas stilləri (.ProseMirror h1..h4, siyahılar, cədvəl və s.)
+// Bunsuz Tailwind preflight başlıqları sıfırlayır → başlıqlar "işləmir" görünür.
+import '@/styles/editor-content.css';
 
 // Icons
 import {
@@ -86,7 +89,11 @@ export default function TiptapEditor({
     extensions,
     content: content || '',
     editorProps: {
-      attributes: { class: 'focus:outline-none min-h-[300px] px-6 py-4' },
+      attributes: {
+        class: 'focus:outline-none min-h-[300px] px-6 py-4',
+        // Brauzerin yazma-təklifi/format popup-unu söndür (kliklədikdə narahat edirdi).
+        spellcheck: 'false',
+      },
     },
     onUpdate: ({ editor: e }) => onChange?.(e.getHTML()),
   });
