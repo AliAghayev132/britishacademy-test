@@ -23,7 +23,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { CourseGroupForm } from "./CourseGroupForm";
 import { Check } from "lucide-react";
 
@@ -54,15 +54,15 @@ export function CourseWizard({ item, onClose }) {
   const { data: full, isFetching: loadingFull } = useAdminCourseFullQuery(editingId, { skip: !editingId });
 
   const branchOpts = useMemo(
-    () => (lk?.data?.branches || []).map((b) => ({ value: b._id, label: b.name })),
+    () => (lk?.data?.branches || []).map((b) => ({ value: b._id, label: locAz(b.name) })),
     [lk],
   );
   const teacherOpts = useMemo(
-    () => (lk?.data?.teachers || []).map((t) => ({ value: t._id, label: t.title ? `${t.fullName} · ${t.title}` : t.fullName })),
+    () => (lk?.data?.teachers || []).map((t) => ({ value: t._id, label: locAz(t.title) ? `${locAz(t.fullName)} · ${locAz(t.title)}` : locAz(t.fullName) })),
     [lk],
   );
   const categoryOpts = useMemo(
-    () => (lk?.data?.categories || []).map((c) => ({ value: c._id, label: c.name })),
+    () => (lk?.data?.categories || []).map((c) => ({ value: c._id, label: locAz(c.name) })),
     [lk],
   );
   const branchName = (id) => branchOpts.find((b) => String(b.value) === String(id))?.label || "Filial";
@@ -131,18 +131,29 @@ export function CourseWizard({ item, onClose }) {
 
   const save = async () => {
     setError("");
-    if (!course.title.trim()) return setError("Kurs adı tələb olunur");
     if (!course.category) return setError("Kateqoriya seçin");
+
+    const guard = await confirmLocalized([
+      { label: "Kurs adı", value: course.title, required: true },
+      { label: "SEO başlıq (H1)", value: course.h1 },
+      { label: "Qısa təsvir (lead)", value: course.lead },
+      { label: "Excerpt", value: course.excerpt },
+      { label: "Məzmun", value: contentHtml },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
 
     const body = {
       course: {
-        title: course.title.trim(),
+        title: trimLoc(course.title),
         // Send slug only when set; blank lets the server auto-generate.
         ...(course.slug?.trim() ? { slug: course.slug.trim() } : {}),
         category: course.category,
-        h1: course.h1 || undefined,
-        lead: course.lead || undefined,
-        excerpt: course.excerpt || undefined,
+        h1: trimLoc(course.h1),
+        lead: trimLoc(course.lead),
+        excerpt: trimLoc(course.excerpt),
         levels: course.levels,
         lesson: {
           perWeek: num(course.lesson.perWeek),
@@ -157,7 +168,7 @@ export function CourseWizard({ item, onClose }) {
         isFeatured: !!course.isFeatured,
         order: num(course.order) || 0,
         isActive: !!course.isActive,
-        contentHtml,
+        contentHtml: trimLoc(contentHtml),
       },
       branches: rows.filter((r) => r.branch).map((r) => ({
         branch: r.branch,
@@ -186,7 +197,7 @@ export function CourseWizard({ item, onClose }) {
         id = res?.data?.course?._id;
       }
       // Show the post-save step (add schedule) instead of closing immediately.
-      setSaved({ id, title: course.title.trim() });
+      setSaved({ id, title: locAz(course.title) });
     } catch (err) {
       setError(err?.data?.message || "Yadda saxlanmadı");
     }
@@ -214,10 +225,10 @@ export function CourseWizard({ item, onClose }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-lg font-bold text-gray-900">
         {course.icon && <span>{course.icon}</span>}
-        <span>{course.title.trim() || "Kurs adı"}</span>
+        <span>{locAz(course.title) || "Kurs adı"}</span>
       </div>
-      {course.lead?.trim() && (
-        <p className="text-sm text-gray-600">{course.lead.trim()}</p>
+      {locAz(course.lead) && (
+        <p className="text-sm text-gray-600">{locAz(course.lead)}</p>
       )}
       {course.levels?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -245,10 +256,10 @@ export function CourseWizard({ item, onClose }) {
           ))}
         </div>
       )}
-      {contentHtml && (
+      {locAz(contentHtml) && (
         <div
           className="bz-body mt-4"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
+          dangerouslySetInnerHTML={{ __html: locAz(contentHtml) }}
         />
       )}
     </div>
@@ -297,13 +308,13 @@ export function CourseWizard({ item, onClose }) {
           <section className="space-y-4">
             <SectionTitle>Kurs məlumatı</SectionTitle>
             <div className={g2}>
-              <Field label="Kurs adı" required><TextInput value={course.title} onChange={(e) => patchCourse({ title: e.target.value })} /></Field>
+              <Field label="Kurs adı" required info="3 dildə — AZ mütləqdir"><LocalizedInput value={course.title} onChange={(v) => patchCourse({ title: v })} /></Field>
               <Field label="Kateqoriya" required info="Kursun aid olduğu bölmə (menyu/filtrləmə üçün)"><NativeSelect placeholder="Seç…" options={categoryOpts} value={course.category} onChange={(e) => patchCourse({ category: e.target.value })} /></Field>
             </div>
             <Field label="Slug (linki)" info="Boş buraxsan addan avtomatik yaranır"><TextInput value={course.slug} onChange={(e) => patchCourse({ slug: e.target.value })} placeholder="ielts-hazirliq" /></Field>
-            <Field label="SEO başlıq (H1)" hint="Boş qalsa kurs adı işlənir"><TextInput value={course.h1} onChange={(e) => patchCourse({ h1: e.target.value })} /></Field>
-            <Field label="Qısa təsvir (lead)" info="Səhifə başında görünən qısa mətn"><TextArea rows={2} value={course.lead} onChange={(e) => patchCourse({ lead: e.target.value })} /></Field>
-            <Field label="Excerpt (kart mətni)" info="Kurs kartında görünən bir cümlə"><TextInput value={course.excerpt} onChange={(e) => patchCourse({ excerpt: e.target.value })} /></Field>
+            <Field label="SEO başlıq (H1)" hint="3 dildə — boş qalsa kurs adı işlənir"><LocalizedInput value={course.h1} onChange={(v) => patchCourse({ h1: v })} /></Field>
+            <Field label="Qısa təsvir (lead)" info="3 dildə — səhifə başında görünən qısa mətn"><LocalizedInput value={course.lead} onChange={(v) => patchCourse({ lead: v })} multiline rows={2} /></Field>
+            <Field label="Excerpt (kart mətni)" info="3 dildə — kurs kartında görünən bir cümlə"><LocalizedInput value={course.excerpt} onChange={(v) => patchCourse({ excerpt: v })} /></Field>
             <Field label="Səviyyələr" info="Kursun əhatə etdiyi səviyyələr (A1–C2)"><MultiSelectChips options={LEVELS.map((l) => ({ value: l, label: l }))} value={course.levels} onChange={(v) => patchCourse({ levels: v })} /></Field>
             <div className="grid grid-cols-4 gap-4">
               <Field label="Həftədə dərs" info="Həftədə neçə dərs keçilir"><NumberInput value={course.lesson.perWeek} onChange={(e) => patchCourse({ lesson: { ...course.lesson, perWeek: e.target.value } })} /></Field>
@@ -325,8 +336,8 @@ export function CourseWizard({ item, onClose }) {
           {/* ── Məzmun ── */}
           <section className="space-y-4">
             <SectionTitle>Məzmun</SectionTitle>
-            <Field label="Məzmun">
-              <TiptapEditor content={contentHtml} onChange={setContentHtml} />
+            <Field label="Məzmun" info="3 dildə">
+              <LocalizedEditor value={contentHtml} onChange={setContentHtml} />
             </Field>
           </section>
 

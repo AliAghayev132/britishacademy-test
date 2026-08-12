@@ -25,7 +25,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -39,14 +39,14 @@ export function DestinationForm({ item, onClose }) {
   const [error, setError] = useState("");
 
   // ── Basic ──
-  const [country, setCountry] = useState(item?.country || "");
-  const [region, setRegion] = useState(item?.region || "");
+  const [country, setCountry] = useState(toLoc(item?.country));
+  const [region, setRegion] = useState(toLoc(item?.region));
   const [slug, setSlug] = useState(item?.slug || "");
   const [color, setColor] = useState(item?.color || "#2E6BE6");
-  const [tagline, setTagline] = useState(item?.tagline || "");
-  const [lead, setLead] = useState(item?.lead || "");
+  const [tagline, setTagline] = useState(toLoc(item?.tagline));
+  const [lead, setLead] = useState(toLoc(item?.lead));
   const [image, setImage] = useState(item?.image || "");
-  const [contentHtml, setContentHtml] = useState(item?.contentHtml || "");
+  const [contentHtml, setContentHtml] = useState(toLoc(item?.contentHtml));
 
   // ── Facts (label/value) ──
   const [facts, setFacts] = useState(
@@ -91,14 +91,26 @@ export function DestinationForm({ item, onClose }) {
   const handleSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Ölkə", value: country, required: true },
+      { label: "Region", value: region },
+      { label: "Şüar", value: tagline },
+      { label: "Giriş mətni", value: lead },
+      { label: "Məzmun", value: contentHtml },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      country: country.trim(),
-      region: region.trim(),
+      country: trimLoc(country),
+      region: trimLoc(region),
       color: color || "#2E6BE6",
-      tagline: tagline.trim(),
-      lead: lead.trim(),
+      tagline: trimLoc(tagline),
+      lead: trimLoc(lead),
       image: image.trim(),
-      contentHtml,
+      contentHtml: trimLoc(contentHtml),
       isScholarship,
       isFeatured,
       order: Number(order) || 0,
@@ -141,24 +153,24 @@ export function DestinationForm({ item, onClose }) {
       )}
       <div className="p-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-bold text-gray-900">{country || "Ölkə"}</h3>
+          <h3 className="text-lg font-bold text-gray-900">{locAz(country) || "Ölkə"}</h3>
           {isScholarship && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
               Təqaüd
             </span>
           )}
         </div>
-        {region && <p className="text-xs font-medium text-gray-400">{region}</p>}
-        {tagline && (
+        {locAz(region) && <p className="text-xs font-medium text-gray-400">{locAz(region)}</p>}
+        {locAz(tagline) && (
           <p className="mt-1 text-sm font-semibold" style={{ color }}>
-            {tagline}
+            {locAz(tagline)}
           </p>
         )}
-        {lead && <p className="mt-2 text-sm text-gray-600">{lead}</p>}
-        {contentHtml && (
+        {locAz(lead) && <p className="mt-2 text-sm text-gray-600">{locAz(lead)}</p>}
+        {locAz(contentHtml) && (
           <div
             className="bz-body mt-4"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
+            dangerouslySetInnerHTML={{ __html: locAz(contentHtml) }}
           />
         )}
       </div>
@@ -179,17 +191,17 @@ export function DestinationForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ölkə" required>
-            <TextInput
+          <Field label="Ölkə" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              onChange={setCountry}
               placeholder="Böyük Britaniya"
             />
           </Field>
-          <Field label="Region" info="Məs: Avropa, Şimali Amerika">
-            <TextInput
+          <Field label="Region" info="3 dildə — məs: Avropa, Şimali Amerika">
+            <LocalizedInput
               value={region}
-              onChange={(e) => setRegion(e.target.value)}
+              onChange={setRegion}
               placeholder="Avropa"
             />
           </Field>
@@ -201,10 +213,10 @@ export function DestinationForm({ item, onClose }) {
               className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
             />
           </Field>
-          <Field label="Şüar (tagline)" info="Qısa cəlbedici ifadə">
-            <TextInput
+          <Field label="Şüar (tagline)" info="3 dildə — qısa cəlbedici ifadə">
+            <LocalizedInput
               value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
+              onChange={setTagline}
               placeholder="Ödənişsiz universitetlər"
             />
           </Field>
@@ -220,8 +232,8 @@ export function DestinationForm({ item, onClose }) {
             />
           </Field>
         </div>
-        <Field label="Giriş mətni (lead)">
-          <TextArea rows={3} value={lead} onChange={(e) => setLead(e.target.value)} />
+        <Field label="Giriş mətni (lead)" info="3 dildə">
+          <LocalizedInput value={lead} onChange={setLead} multiline rows={3} />
         </Field>
         <Field label="Şəkil">
           <FileUpload value={image} onChange={setImage} kind="image" />
@@ -231,8 +243,8 @@ export function DestinationForm({ item, onClose }) {
       {/* ── Məzmun ── */}
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Məzmun">
-          <TiptapEditor content={contentHtml} onChange={setContentHtml} />
+        <Field label="Məzmun" info="3 dildə">
+          <LocalizedEditor value={contentHtml} onChange={setContentHtml} />
         </Field>
       </section>
 
