@@ -6,13 +6,14 @@ import { apiGet } from "@/lib/api";
 
 // Components
 import { Hero } from "@/components/site/Hero";
-import { CourseCard, DestinationCard, TestimonialCard, SectionHead } from "@/components/site/cards";
+import { DestinationCard, TestimonialCard, SectionHead } from "@/components/site/cards";
 import { ApplyButton } from "@/components/site/ApplyButton";
 import { HomeBodyClass } from "@/components/site/HomeBodyClass";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import Marquee from "@/components/site/Marquee";
 import RevealOnScroll from "@/components/site/RevealOnScroll";
 import PartnersCarousel from "@/components/site/PartnersCarousel";
+import ServicesShowcase from "@/components/site/ServicesShowcase";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -101,13 +102,10 @@ export default async function HomePage() {
       {/* Marquee */}
       <Marquee />
 
-      {/* Courses */}
-      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-        <SectionHead title="Kurslarımız" sub="istiqamətini seç" />
-        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginTop: 42 }}>
-          {courses.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
-        </div>
-      </section>
+      {/* Courses / services — interaktiv Swiper (kliklə yuxarıda inline açılır) */}
+      <div id="kurslar">
+        <ServicesShowcase courses={courses} />
+      </div>
 
       {/* Advantages */}
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>

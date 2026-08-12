@@ -106,6 +106,11 @@ img { display: block; max-width: 100%; }
   75%     { transform: translateY(-10px) rotate(2.5deg) scale(1.015); }
 }
 @media (prefers-reduced-motion: reduce) { .ba-hero-mascot { animation: none !important; } }
+/* Xidmətlər inline paneli — mobildə tək sütun */
+@media (max-width: 720px) {
+  .ba-svc-panel { grid-template-columns: 1fr !important; }
+  .ba-svc-panel > div:last-child { text-align: left !important; }
+}
 @keyframes ba-blobA { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(70px,40px) scale(1.15); } 66% { transform: translate(-40px,60px) scale(.92); } }
 @keyframes ba-blobB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-80px,-50px) scale(1.22); } }
 
