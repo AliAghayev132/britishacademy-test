@@ -7,6 +7,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
+import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   return buildMetadata({
@@ -21,13 +22,13 @@ const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];
 
 // ── Subcomponents ──
 
-function BranchCard({ branch, accent }) {
+function BranchCard({ branch, accent, tr }) {
   const b = branch;
   const cc = accent;
   return (
     <div className="ba-pricecard" style={{ "--c": cc }}>
       <div className="ba-pricecard-head">
-        <span className="ba-pricecard-name" style={{ fontSize: 19 }}>{b.name} {b.isMain && <span style={{ fontSize: 11, fontWeight: 800, color: cc, background: `${cc}1a`, padding: "3px 9px", borderRadius: 99, verticalAlign: "middle", marginLeft: 6 }}>MƏRKƏZ</span>}</span>
+        <span className="ba-pricecard-name" style={{ fontSize: 19 }}>{b.name} {b.isMain && <span style={{ fontSize: 11, fontWeight: 800, color: cc, background: `${cc}1a`, padding: "3px 9px", borderRadius: 99, verticalAlign: "middle", marginLeft: 6 }}>{tr("branch.main")}</span>}</span>
         <span className="ba-pricecard-addr">📍 {b.address}{b.metro ? ` · ${b.metro}` : ""}</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14.5, color: "#4a4a55" }}>
@@ -40,7 +41,7 @@ function BranchCard({ branch, accent }) {
           <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "#25D366", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>WhatsApp</a>
         )}
         {b.phone && (
-          <a href={`tel:${b.phone.replace(/[^+\d]/g, "")}`} style={{ flex: 1, textAlign: "center", background: "var(--accent)", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>Zəng et</a>
+          <a href={`tel:${b.phone.replace(/[^+\d]/g, "")}`} style={{ flex: 1, textAlign: "center", background: "var(--accent)", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>{tr("common.callNow")}</a>
         )}
       </div>
     </div>
@@ -48,13 +49,13 @@ function BranchCard({ branch, accent }) {
 }
 
 /** Full-width map placeholder below the branch grid (mirrors the static site). */
-function BranchMap({ branches }) {
+function BranchMap({ branches, tr }) {
   const embed = branches.find((b) => b.mapEmbedUrl)?.mapEmbedUrl;
   if (embed) {
     return (
       <iframe
         src={embed}
-        title="Filiallar xəritəsi"
+        title={tr("page.branchesMap")}
         loading="lazy"
         allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
@@ -64,12 +65,13 @@ function BranchMap({ branches }) {
   }
   return (
     <div className="img-slot" style={{ minHeight: 340, borderRadius: 22, marginTop: 24 }}>
-      <span>Xəritə buraya əlavə olunacaq<br />(Google Maps — bütün filiallar)</span>
+      <span>{tr("common.mapSoon")}<br />{tr("page.mapNote")}</span>
     </div>
   );
 }
 
 export default async function BranchesPage() {
+  const tr = await getT();
   // ── data fetching ──
   const data = await apiGet("/branches");
   const branches = data?.branches || [];
@@ -96,16 +98,16 @@ export default async function BranchesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
       <PageBanner
-        title="Filiallar"
-        subtitle={`Bakının ${branches.length} nöqtəsində — sənə ən yaxın filialı seç.`}
+        title={tr("page.branches.title")}
+        subtitle={tr("page.branches.sub")}
         mascot="filiallar"
       />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-2 ba-pricegrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 18 }}>
-          {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} />)}
+          {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} tr={tr} />)}
         </div>
-        <BranchMap branches={branches} />
+        <BranchMap branches={branches} tr={tr} />
       </section>
 
       <CtaBand />

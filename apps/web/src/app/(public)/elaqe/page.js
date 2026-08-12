@@ -7,6 +7,7 @@ import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
+import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   return buildMetadata({
@@ -30,6 +31,7 @@ function ContactInfoCard({ icon, title, value }) {
 }
 
 export default async function ContactPage() {
+  const tr = await getT();
   // ── data fetching ──
   const [siteData, branchData] = await Promise.all([
     apiGet("/site"),
@@ -41,18 +43,18 @@ export default async function ContactPage() {
   const branches = branchData?.branches || [];
 
   const cards = [
-    ["📍", "Ünvan", c.address],
-    ["☎", "Telefon", [c.phone, c.phone2].filter(Boolean).join(" · ")],
-    ["✉", "E-poçt", c.email],
-    ["🕐", "İş saatları", c.hours],
+    ["📍", tr("common.address"), c.address],
+    ["☎", tr("common.phone"), [c.phone, c.phone2].filter(Boolean).join(" · ")],
+    ["✉", tr("common.email"), c.email],
+    ["🕐", tr("common.hours"), c.hours],
   ].filter(([, , v]) => v);
 
   // ── render ──
   return (
     <>
       <PageBanner
-        title="Əlaqə"
-        subtitle="Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır."
+        title={tr("page.contact.title")}
+        subtitle={tr("page.contact.sub")}
         mascot="contact"
       />
 
@@ -63,7 +65,7 @@ export default async function ContactPage() {
 
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 32, alignItems: "stretch" }}>
           <div className="img-slot" style={{ minHeight: 340, borderRadius: 22 }}>
-            <span>Xəritə buraya əlavə olunacaq<br />(Google Maps embed)</span>
+            <span>{tr("common.mapSoon")}<br />(Google Maps embed)</span>
           </div>
           <ContactForm branches={branches} />
         </div>

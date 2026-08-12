@@ -8,6 +8,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
+import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   return buildMetadata({
@@ -29,6 +30,7 @@ function DestinationGrid({ destinations }) {
 }
 
 export default async function DestinationsPage() {
+  const tr = await getT();
   // ── data fetching ──
   const data = await apiGet("/destinations");
   const all = data?.destinations || [];
@@ -41,8 +43,8 @@ export default async function DestinationsPage() {
   return (
     <>
       <PageBanner
-        title="Xaricdə təhsil"
-        subtitle="Arzuladığın ölkədə oxu — universitet seçimindən vizaya qədər yanındayıq."
+        title={tr("page.abroad.title")}
+        subtitle={tr("page.abroad.sub")}
         mascot="destinations"
       />
 
@@ -52,7 +54,7 @@ export default async function DestinationsPage() {
 
       {scholarships.length > 0 && (
         <section style={{ maxWidth: 1200, margin: "0 auto", padding: "64px 28px 0" }}>
-          <SectionHead title="Təqaüd proqramları" />
+          <SectionHead title={tr("page.scholarships")} />
           <DestinationGrid destinations={scholarships} />
         </section>
       )}

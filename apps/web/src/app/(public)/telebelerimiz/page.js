@@ -9,6 +9,7 @@ import VideoCard from "@/components/site/VideoCard";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
+import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   return buildMetadata({
@@ -50,6 +51,7 @@ function StatsBar() {
 }
 
 export default async function StudentsPage() {
+  const tr = await getT();
   // ── data fetching ──
   const data = await apiGet("/testimonials");
   const all = data?.testimonials || [];
@@ -62,8 +64,8 @@ export default async function StudentsPage() {
   return (
     <>
       <PageBanner
-        title="Tələbələrimiz"
-        subtitle="Məzunlarımız British Academy təcrübəsini öz sözləri ilə danışır."
+        title={tr("page.students.title")}
+        subtitle={tr("page.students.sub")}
         mascot="students"
       />
 
@@ -71,7 +73,7 @@ export default async function StudentsPage() {
 
       {videos.length > 0 && (
         <section style={{ ...wrap, padding: "64px 28px 0" }}>
-          <SectionHead title="Onlar danışır" sub="Məzunlarımız təcrübələrini öz sözləri ilə paylaşır." />
+          <SectionHead title={tr("page.students.speak")} sub={tr("page.students.speakSub")} />
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
             {videos.map((t) => <VideoCard key={t._id} t={t} />)}
           </div>
@@ -80,7 +82,7 @@ export default async function StudentsPage() {
 
       {texts.length > 0 && (
         <section style={{ ...wrap, padding: "70px 28px 0" }}>
-          <SectionHead title="Tələbə rəyləri" />
+          <SectionHead title={tr("home.reviews.title")} />
           <div className="ba-wall">
             {texts.map((t) => <TestimonialCard key={t._id} t={t} />)}
           </div>

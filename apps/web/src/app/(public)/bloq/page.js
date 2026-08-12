@@ -9,6 +9,7 @@ import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
+import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   return buildMetadata({
@@ -54,6 +55,7 @@ function PaginationLink({ page, currentPage, category }) {
 }
 
 export default async function BlogPage({ searchParams }) {
+  const tr = await getT();
   // ── data fetching ──
   const sp = await searchParams;
   const category = sp?.kateqoriya || "";
@@ -68,15 +70,15 @@ export default async function BlogPage({ searchParams }) {
   return (
     <>
       <PageBanner
-        title="Bloq"
-        subtitle="Dil öyrənmə, imtahanlar və xaricdə təhsil haqqında faydalı yazılar."
+        title={tr("page.blog.title")}
+        subtitle={tr("page.blog.sub")}
         mascot="blog"
       />
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 28px 0" }}>
         {categories.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
-            <CategoryChip href="/bloq" label="Hamısı" active={!category} />
+            <CategoryChip href="/bloq" label={tr("common.all")} active={!category} />
             {categories.map((c) => (
               <CategoryChip key={c._id} href={`/bloq?kateqoriya=${c.slug}`} label={c.name} active={category === c.slug} />
             ))}
@@ -84,7 +86,7 @@ export default async function BlogPage({ searchParams }) {
         )}
 
         {posts.length === 0 ? (
-          <p style={{ color: "#63636F", padding: "40px 0" }}>Bu kateqoriyada hələ yazı yoxdur.</p>
+          <p style={{ color: "#63636F", padding: "40px 0" }}>{tr("blog.emptyCat")}</p>
         ) : (
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
             {posts.map((p) => <BlogPostCard key={p._id} post={p} />)}
