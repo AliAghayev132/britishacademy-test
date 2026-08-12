@@ -6,6 +6,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { useCreateLeadMutation } from "@/store/api/leadApi";
 // Local
 import { SiteSelect } from "./SiteSelect";
+import { useT } from "@/lib/i18n/useT";
 
 // ── Constants ──
 const INTERESTS = [
@@ -31,6 +32,7 @@ const field = {
 
 // ── Subcomponents ──
 const ModalHeader = memo(function ModalHeader({ onClose }) {
+  const t = useT();
   return (
     <div style={{ position: "relative", background: "var(--accent)", padding: "34px 34px 40px", overflow: "hidden" }}>
       <button onClick={onClose} className="ba-modal-close" style={{ position: "absolute", top: 20, right: 20, width: 38, height: 38, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.22)", color: "#fff", cursor: "pointer", fontSize: 15 }}>✕</button>
@@ -39,42 +41,44 @@ const ModalHeader = memo(function ModalHeader({ onClose }) {
         <img src="/assets/shield.png" alt="British Academy" style={{ height: 34, width: "auto" }} />
         <span style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16, color: "#00157A" }}>British Academy</span>
       </div>
-      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 30, margin: "22px 0 0", color: "#fff" }}>Müraciət et</h3>
+      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 30, margin: "22px 0 0", color: "#fff" }}>{t("apply.title")}</h3>
       <p style={{ fontSize: 15, color: "rgba(255,255,255,.92)", margin: "9px 0 0", lineHeight: 1.55, maxWidth: 370 }}>
-        Gələcəyinə bu gün başla — dil biliyini British Academy ilə növbəti səviyyəyə qaldır.
+        {t("apply.subtitle")}
       </p>
     </div>
   );
 });
 
 const SuccessCard = memo(function SuccessCard({ onClose }) {
+  const t = useT();
   return (
     <div style={{ padding: "40px 34px", textAlign: "center" }}>
       <div style={{ fontSize: 46 }}>🎉</div>
-      <h4 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>Müraciətin qəbul edildi!</h4>
-      <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>Tezliklə səninlə əlaqə saxlayacağıq.</p>
-      <button onClick={onClose} className="ba-apply-btn" style={{ marginTop: 22, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13, cursor: "pointer" }}>Bağla</button>
+      <h4 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>{t("apply.successTitle")}</h4>
+      <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>{t("apply.successText")}</p>
+      <button onClick={onClose} className="ba-apply-btn" style={{ marginTop: 22, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13, cursor: "pointer" }}>{t("apply.close")}</button>
     </div>
   );
 });
 
 const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch, setBranch, branches, error, isLoading, onChange, onSubmit }) {
+  const t = useT();
   return (
     <form onSubmit={onSubmit} style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
-      <input className="ba-field" name="name" required placeholder="Ad Soyad" value={form.name} onChange={onChange} style={field} />
+      <input className="ba-field" name="name" required placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <input className="ba-field" name="phone" required placeholder="Telefon" value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
-        <input className="ba-field" name="email" type="email" placeholder="E-poçt" value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
+        <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
+        <input className="ba-field" name="email" type="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
-      <SiteSelect value={interest} onChange={setInterest} placeholder="Nəyə müraciət edirsən?" style={field} options={INTERESTS.map((i) => ({ value: i, label: i }))} />
+      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} style={field} options={INTERESTS.map((i) => ({ value: i, label: i }))} />
       {branches.length > 0 && (
-        <SiteSelect value={branch} onChange={setBranch} placeholder="Hansı filial? (istəyə bağlı)" style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
+        <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
       {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}
       <button type="submit" disabled={isLoading} className="ba-apply-btn" style={{ marginTop: 6, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: 16, borderRadius: 13, cursor: "pointer", opacity: isLoading ? 0.7 : 1 }}>
-        {isLoading ? "Göndərilir…" : "Müraciəti göndər"}
+        {isLoading ? t("apply.sending") : t("apply.submit")}
       </button>
-      <p style={{ textAlign: "center", fontSize: 12.5, color: "#63636E", margin: 0 }}>Məlumatların üçüncü tərəflə paylaşılmır.</p>
+      <p style={{ textAlign: "center", fontSize: 12.5, color: "#63636E", margin: 0 }}>{t("apply.privacy")}</p>
     </form>
   );
 });

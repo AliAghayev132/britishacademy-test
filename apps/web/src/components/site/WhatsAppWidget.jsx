@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/useT";
 
 // İstənilən sabit filial sırası (ada görə açar sözlə uyğunlaşdırılır).
 const BRANCH_ORDER = ["caspian", "akademiya", "nərimanov", "əhmədli"];
@@ -16,6 +17,7 @@ const cleanBranchName = (name) =>
 /** Floating WhatsApp button that opens an upward branch picker. */
 export function WhatsAppWidget({ branches = [] }) {
   // ── State / derived ──
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const list = useMemo(
@@ -48,7 +50,7 @@ export function WhatsAppWidget({ branches = [] }) {
     <div ref={ref}>
       {open && list.length > 1 && (
         <div className="ba-wa-pop open" role="menu">
-          <div className="ba-wa-pop-h">Filial seç · WhatsApp</div>
+          <div className="ba-wa-pop-h">{t("wa.pick")}</div>
           {list.map((b) => (
             <a
               key={b._id || b.whatsapp}

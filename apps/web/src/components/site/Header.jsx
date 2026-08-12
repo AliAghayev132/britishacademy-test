@@ -10,6 +10,7 @@ import { useLocale, stripLocale } from "./LocaleProvider";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
+import { useT } from "@/lib/i18n/useT";
 
 // ── Dil seçicisi (AZ/EN/RU) ──
 const LanguageSwitcher = memo(function LanguageSwitcher() {
@@ -193,6 +194,7 @@ function IntroLoader() {
 
 export function Header({ site, nav = [], services = [], destinations = [] }) {
   // ── State / derived ──
+  const t = useT();
   const pathname = usePathname();
   const { open } = useApply();
   const [mobile, setMobile] = useState(false);
@@ -257,7 +259,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             <button
               type="button"
               onClick={openSearch}
-              aria-label="Axtar"
+              aria-label={t("nav.search")}
               className="ba-search-btn"
               style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", background: "#F1F2F6", border: "1px solid #E7E8EE", color: "#4C4C58", fontWeight: 600, fontSize: 14, height: 42, padding: "0 13px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit" }}
             >
@@ -265,14 +267,14 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
                 <circle cx="11" cy="11" r="7"></circle>
                 <path d="m21 21-4.3-4.3"></path>
               </svg>
-              <span className="ba-search-txt">Axtar</span>
+              <span className="ba-search-txt">{t("nav.search")}</span>
             </button>
             <button
               onClick={() => open()}
               className="ba-apply-btn"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14.5, padding: "11px 20px", borderRadius: 99, cursor: "pointer", whiteSpace: "nowrap" }}
             >
-              Müraciət et
+              {t("nav.apply")}
             </button>
           </div>
 
@@ -307,7 +309,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
               style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#F1F2F6", border: "1px solid #E7E8EE", color: "#4C4C58", fontWeight: 700, fontSize: 14.5, padding: "12px 16px", borderRadius: 12, cursor: "pointer" }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-              Axtar
+              {t("nav.search")}
             </button>
             <button
               type="button"
@@ -315,7 +317,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
               className="ba-apply-btn"
               style={{ flex: 1, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14.5, padding: "12px 16px", borderRadius: 12, cursor: "pointer" }}
             >
-              Müraciət et
+              {t("nav.apply")}
             </button>
           </div>
         </div>

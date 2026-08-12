@@ -4,25 +4,31 @@
 // Karta klik edəndə səhifə naviqasiya etmir; seçilmiş xidmətin məlumatı
 // YUXARIDAKI panel-də inline açılır. Sağ yuxarıda "Bütün xidmətlər" düyməsi.
 import { useState } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "./LocaleLink";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode, Mousewheel } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import { ApplyButton } from "./ApplyButton";
+import { useT } from "@/lib/i18n/useT";
 
 const CAT_COLORS = ["#2E6BE6", "#F5A524", "#7C4DFF", "#E0533D", "#12B5A5", "#FF3D8B", "#0EA5E9", "#22B07D"];
 const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 
 export default function ServicesShowcase({
   courses = [],
-  title = "Kurslarımız",
-  sub = "istiqamətini seç",
+  title,
+  sub,
   allHref = "/kurslar",
-  allLabel = "Bütün xidmətlər",
+  allLabel,
 }) {
+  const t = useT();
   const [active, setActive] = useState(0);
   if (!courses.length) return null;
+
+  title = title || t("home.courses.title");
+  sub = sub || t("home.courses.sub");
+  allLabel = allLabel || t("svc.all");
 
   const cur = courses[active] || courses[0];
   const accent = CAT_COLORS[active % CAT_COLORS.length];
@@ -52,23 +58,23 @@ export default function ServicesShowcase({
       >
         <div>
           <span style={{ display: "inline-block", fontSize: 12, fontWeight: 700, color: accent, background: soft, padding: "5px 12px", borderRadius: 99, letterSpacing: ".05em", textTransform: "uppercase" }}>
-            {cur.category?.name || "Xidmət"}
+            {cur.category?.name || t("svc.service")}
           </span>
           <h3 style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: "clamp(24px,3vw,32px)", color: "#16161C", margin: "16px 0 0", letterSpacing: "-.01em" }}>{cur.title}</h3>
           {cur.lead && <p style={{ fontSize: 16, color: "#4B4B57", lineHeight: 1.7, margin: "12px 0 0", maxWidth: 560 }}>{cur.lead}</p>}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 22 }}>
-            <Link href={`/kurslar/${cur.slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: accent, color: "#fff", fontWeight: 700, fontSize: 15, padding: "13px 24px", borderRadius: 13 }}>Ətraflı →</Link>
+            <Link href={`/kurslar/${cur.slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: accent, color: "#fff", fontWeight: 700, fontSize: 15, padding: "13px 24px", borderRadius: 13 }}>{t("card.more")} →</Link>
             <ApplyButton interest={cur.title} style={{ background: soft, color: accent, border: "none", fontWeight: 700, fontSize: 15, padding: "13px 24px", borderRadius: 13, cursor: "pointer" }} />
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
           {cur.priceFrom ? (
             <>
-              <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>başlanğıc qiymət</div>
-              <div style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 44, color: "#14141C", lineHeight: 1.1 }}>{cur.priceFrom}<span style={{ fontSize: 16, color: "#63636E", fontWeight: 700 }}> AZN/ay</span></div>
+              <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{t("svc.priceFrom")}</div>
+              <div style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 44, color: "#14141C", lineHeight: 1.1 }}>{cur.priceFrom}<span style={{ fontSize: 16, color: "#63636E", fontWeight: 700 }}> {t("svc.perMonth")}</span></div>
             </>
           ) : (
-            <div style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 30, color: accent }}>Fərdi yanaşma</div>
+            <div style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 30, color: accent }}>{t("svc.individual")}</div>
           )}
         </div>
       </div>
@@ -103,7 +109,7 @@ export default function ServicesShowcase({
                   {(c.category?.name || c.title || "?").charAt(0)}
                 </span>
                 <span style={{ display: "block", fontFamily: "'Poppins'", fontWeight: 700, fontSize: 17, color: "#17171F", marginTop: 14, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-                <span style={{ display: "block", fontSize: 13.5, color: "#63636F", marginTop: 6 }}>{c.category?.name || "Xidmət"}</span>
+                <span style={{ display: "block", fontSize: 13.5, color: "#63636F", marginTop: 6 }}>{c.category?.name || t("svc.service")}</span>
               </button>
             </SwiperSlide>
           );

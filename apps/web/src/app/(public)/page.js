@@ -3,6 +3,7 @@ import Link from "next/link";
 
 // Data
 import { apiGet } from "@/lib/api";
+import { getT } from "@/lib/i18n/serverT";
 
 // Components
 import { Hero } from "@/components/site/Hero";
@@ -73,6 +74,7 @@ function NewsCard({ post }) {
 }
 
 export default async function HomePage() {
+  const t = await getT();
   // ── data fetching ──
   const home = await apiGet("/home");
 
@@ -109,7 +111,7 @@ export default async function HomePage() {
 
       {/* Advantages */}
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-        <SectionHead title="Üstünlüklərimiz" sub="nəyə görə British Academy?" />
+        <SectionHead title={t("home.adv.title")} sub={t("home.adv.sub")} />
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
           {advantages.map((a, i) => <AdvantageCard key={a._id} advantage={a} index={i} />)}
         </div>
@@ -119,11 +121,11 @@ export default async function HomePage() {
       {destinations.length > 0 && (
         <section className="ba-reveal" style={{ background: "linear-gradient(165deg,#F4F7FF,#FDF6F0 55%,#F3FAF6)", marginTop: 84 }}>
           <div style={{ ...wrap, padding: "80px 28px" }}>
-            <SectionHead title="Xaricdə təhsil" sub="arzuladığın ölkədə oxu" />
+            <SectionHead title={t("home.abroad.title")} sub={t("home.abroad.sub")} />
             <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
               {destinations.map((d) => <DestinationCard key={d._id} dest={d} />)}
               <Link href="/xaricde-tehsil" className="ba-fdest ba-fdest-all" style={{ "--cc": "#fff" }}>
-                <span className="ba-fdest-body"><span className="ba-fdest-tag" style={{ display: "block" }}>XARİCDƏ TƏHSİL</span><span className="ba-fdest-name" style={{ display: "block" }}>Bütün ölkələr →</span></span>
+                <span className="ba-fdest-body"><span className="ba-fdest-tag" style={{ display: "block" }}>{t("home.abroad.tag")}</span><span className="ba-fdest-name" style={{ display: "block" }}>{t("home.abroad.all")}</span></span>
               </Link>
             </div>
           </div>
@@ -133,12 +135,12 @@ export default async function HomePage() {
       {/* Testimonials */}
       {testimonials.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-          <SectionHead title="Tələbə rəyləri" sub="real geri bildirimlər" />
+          <SectionHead title={t("home.reviews.title")} sub={t("home.reviews.sub")} />
           <div className="ba-wall">
             {testimonials.map((t) => <TestimonialCard key={t._id} t={t} />)}
           </div>
           <div style={{ textAlign: "center", marginTop: 30 }}>
-            <Link href="/telebelerimiz" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>Bütün rəylərə bax →</Link>
+            <Link href="/telebelerimiz" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.reviews.all")}</Link>
           </div>
         </section>
       )}
@@ -147,8 +149,8 @@ export default async function HomePage() {
       {posts.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 40 }}>
-            <SectionHead title="Bloq" sub="son yazılar" />
-            <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>Hamısına bax →</Link>
+            <SectionHead title={t("home.blog.title")} sub={t("home.blog.sub")} />
+            <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("nav.all")}</Link>
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
             {posts.map((p) => <NewsCard key={p._id} post={p} />)}
@@ -158,7 +160,7 @@ export default async function HomePage() {
 
       {/* FAQ */}
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-        <SectionHead title="Tez-tez verilən suallar" sub="ən çox soruşulanlar" />
+        <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
         <FaqAccordion items={HOME_FAQ} />
       </section>
 
@@ -166,7 +168,7 @@ export default async function HomePage() {
       {partners.length > 0 && (
         <section className="ba-reveal ba-partners" style={{ background: "#F6F7FA", marginTop: 84, borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2" }}>
           <div style={{ ...wrap, padding: "70px 28px" }}>
-            <SectionHead title="Tərəfdaşlarımız" sub="bizə güvənənlər" />
+            <SectionHead title={t("home.partners.title")} sub={t("home.partners.sub")} />
             <PartnersCarousel partners={partners} />
           </div>
         </section>
@@ -175,8 +177,8 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="ba-reveal" style={{ ...wrap, padding: "80px 28px 20px" }}>
         <div style={{ background: "linear-gradient(115deg, var(--accent) 0%, #7C4DFF 52%, #C13DBF 115%)", borderRadius: 28, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,40px)", color: "#fff", margin: 0, letterSpacing: "-.02em" }}>Pulsuz sınaq dərsinə bu gün yazıl</h2>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,.9)", margin: "14px auto 0", maxWidth: 520, lineHeight: 1.6 }}>Səviyyəni pulsuz təyin edək və sənə uyğun kurs planını təklif edək.</p>
+          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,40px)", color: "#fff", margin: 0, letterSpacing: "-.02em" }}>{t("home.cta.title")}</h2>
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,.9)", margin: "14px auto 0", maxWidth: 520, lineHeight: 1.6 }}>{t("home.cta.text")}</p>
           <ApplyButton style={{ marginTop: 26, background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 13, cursor: "pointer" }} />
         </div>
       </section>
