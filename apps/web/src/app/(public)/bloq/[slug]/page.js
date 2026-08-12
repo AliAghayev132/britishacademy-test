@@ -1,6 +1,7 @@
 // Next
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
+import { getT } from "@/lib/i18n/serverT";
 
 // Data
 import { apiGetStatus, isMissing } from "@/lib/api";
@@ -64,6 +65,7 @@ export default async function BlogPostPage({ params }) {
   const res = await apiGetStatus(`/blog/${slug}`);
   if (isMissing(res, "post")) notFound();
   const p = res.data.post;
+  const tr = await getT();
 
   // TipTap emits HTML; sanitize before rendering.
   const html = DOMPurify.sanitize(p.content || "");
@@ -97,7 +99,7 @@ export default async function BlogPostPage({ params }) {
       />
 
       <div style={{ maxWidth: 760, margin: "48px auto 0", padding: "0 28px" }}>
-        <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>← Bütün yazılar</Link>
+        <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{tr("blog.allPosts")}</Link>
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 // Next
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
+import { getT } from "@/lib/i18n/serverT";
 import DOMPurify from "isomorphic-dompurify";
 
 // Data
@@ -30,10 +31,10 @@ export async function generateMetadata({ params }) {
 
 // ── Subcomponents ──
 /** "Universitetlər" list. */
-function UniversitiesList({ universities }) {
+function UniversitiesList({ universities, tr }) {
   return (
     <>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "36px 0 16px" }}>Universitetlər</h2>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "36px 0 16px" }}>{tr("dest.universities")}</h2>
       <ul role="list" style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
         {universities.map((u, i) => (
           <li key={i} style={{ display: "flex", gap: 11, fontSize: 16, color: "#3c3c47" }}>
@@ -47,10 +48,10 @@ function UniversitiesList({ universities }) {
 }
 
 /** Sidebar with quick facts. */
-function FactsSidebar({ facts }) {
+function FactsSidebar({ facts, tr }) {
   return (
     <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF" }}>
-      <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>{tr("course.info")}</div>
       {facts.map((f, i) => (
         <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
           <span style={{ color: "#63636F" }}>{f.label}</span>
@@ -68,6 +69,7 @@ export default async function DestinationPage({ params }) {
   const res = await apiGetStatus(`/destinations/${slug}`);
   if (isMissing(res, "destination")) notFound();
   const d = res.data.destination;
+  const tr = await getT();
 
   // ── JSON-LD ── Breadcrumb (+ FAQPage when present)
   const ld = [
@@ -95,11 +97,11 @@ export default async function DestinationPage({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
       <PageBanner
-        title={d.isScholarship ? d.country : `${d.country}-də təhsil`}
+        title={d.country}
         subtitle={d.lead || d.tagline}
         mascot="destinations"
         breadcrumb={[
-          { label: "Xaricdə təhsil", href: "/xaricde-tehsil" },
+          { label: tr("page.abroad.title"), href: "/xaricde-tehsil" },
           { label: d.country },
         ]}
       >
@@ -119,16 +121,16 @@ export default async function DestinationPage({ params }) {
               </p>
             )}
 
-            {(d.universities || []).length > 0 && <UniversitiesList universities={d.universities} />}
+            {(d.universities || []).length > 0 && <UniversitiesList universities={d.universities} tr={tr} />}
           </div>
 
-          {(d.facts || []).length > 0 && <FactsSidebar facts={d.facts} />}
+          {(d.facts || []).length > 0 && <FactsSidebar facts={d.facts} tr={tr} />}
         </div>
       </section>
 
       {(d.faq || []).length > 0 && (
         <section style={{ maxWidth: 900, margin: "56px auto 0", padding: "0 28px" }}>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", margin: "0 0 24px" }}>Tez-tez verilən suallar</h2>
+          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", margin: "0 0 24px" }}>{tr("common.faq")}</h2>
           <FaqAccordion items={d.faq} />
         </section>
       )}
