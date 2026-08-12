@@ -12,6 +12,7 @@ import { HomeBodyClass } from "@/components/site/HomeBodyClass";
 import { FaqAccordion } from "@/components/site/FaqAccordion";
 import Marquee from "@/components/site/Marquee";
 import RevealOnScroll from "@/components/site/RevealOnScroll";
+import PartnersCarousel from "@/components/site/PartnersCarousel";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -67,15 +68,6 @@ function NewsCard({ post }) {
         {post.excerpt && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{post.excerpt}</p>}
       </div>
     </Link>
-  );
-}
-
-function PartnerCard({ partner }) {
-  return (
-    <div className="ba-partner" style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 14, height: 92, display: "grid", placeItems: "center", padding: 12 }}>
-      <div className="ba-pov"></div>
-      <span className="ba-partner-name" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 15, color: "#54545F", textAlign: "center" }}>{partner.name}</span>
-    </div>
   );
 }
 
@@ -177,9 +169,7 @@ export default async function HomePage() {
         <section className="ba-reveal ba-partners" style={{ background: "#F6F7FA", marginTop: 84, borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2" }}>
           <div style={{ ...wrap, padding: "70px 28px" }}>
             <SectionHead title="Tərəfdaşlarımız" sub="bizə güvənənlər" />
-            <div className="grid-6" style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 16 }}>
-              {partners.map((p) => <PartnerCard key={p._id} partner={p} />)}
-            </div>
+            <PartnersCarousel partners={partners} />
           </div>
         </section>
       )}

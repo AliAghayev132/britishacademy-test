@@ -179,7 +179,7 @@ export function buildGraph() {
       titlePrefix: "British Academy ilə",
       words: ["ingiliscə danış", "IELTS 7+ al", "rus dili öyrən", "almanca danış", "xaricdə oxu"],
       colors: ["#001478", "#0B2A9C", "#C8102E", "#00105E", "#1438B8"],
-      subtitle: "Böyük Britaniyada hazırlanmış xüsusi metodika ilə dilləri 4 dəfə sürətli öyrən.",
+      subtitle: "British Academy ilə top universitetlərə qəbul ol.",
     },
     stats: [
       { label: "məzun tələbə", value: "20 000+" },

@@ -163,7 +163,7 @@ export function Hero({ hero, stats = [] }) {
           </span>
         </h1>
         <p style={{ fontSize: 19, lineHeight: 1.6, color: "rgba(255,255,255,.9)", maxWidth: 600, margin: "24px auto 0" }}>
-          {hero?.subtitle}
+          {hero?.subtitle || "British Academy ilə top universitetlərə qəbul ol."}
         </p>
 
         {stats.length > 0 && (
