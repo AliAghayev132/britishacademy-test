@@ -19,6 +19,7 @@ import {
   Toggle,
   SectionTitle,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function BlogCategoryForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
@@ -29,7 +30,7 @@ export function BlogCategoryForm({ item, onClose }) {
 
   const [error, setError] = useState("");
 
-  const [name, setName] = useState(item?.name || "");
+  const [name, setName] = useState(toLoc(item?.name));
   const [slug, setSlug] = useState(item?.slug || "");
   const [color, setColor] = useState(item?.color || "#2E6BE6");
   const [order, setOrder] = useState(item?.order ?? 0);
@@ -38,8 +39,14 @@ export function BlogCategoryForm({ item, onClose }) {
   const handleSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([{ label: "Ad", value: name, required: true }]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      name: name.trim(),
+      name: trimLoc(name),
       color: color || "#2E6BE6",
       order: Number(order) || 0,
       isActive,
@@ -66,7 +73,7 @@ export function BlogCategoryForm({ item, onClose }) {
       style={{ borderColor: color, color }}
     >
       <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-      {name || "Kateqoriya"}
+      {locAz(name) || "Kateqoriya"}
     </span>
   );
 
@@ -81,8 +88,8 @@ export function BlogCategoryForm({ item, onClose }) {
     >
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
-        <Field label="Ad" required>
-          <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+        <Field label="Ad" required info="3 dildə — AZ mütləqdir">
+          <LocalizedInput value={name} onChange={setName} />
         </Field>
         <Field label="Slug (linki)" info="Boş buraxsan avtomatik yaranır">
           <TextInput

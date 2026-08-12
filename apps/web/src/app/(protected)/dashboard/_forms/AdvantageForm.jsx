@@ -21,6 +21,7 @@ import {
   Toggle,
   SectionTitle,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function AdvantageForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
@@ -28,8 +29,8 @@ export function AdvantageForm({ item, onClose }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  const [title, setTitle] = useState(item?.title || "");
-  const [text, setText] = useState(item?.text || "");
+  const [title, setTitle] = useState(toLoc(item?.title));
+  const [text, setText] = useState(toLoc(item?.text));
   const [color, setColor] = useState(item?.color || "#7C4DFF");
   const [icon, setIcon] = useState(item?.icon || "");
   const [order, setOrder] = useState(
@@ -45,17 +46,23 @@ export function AdvantageForm({ item, onClose }) {
 
   const onSave = async () => {
     setError("");
-    if (!title.trim()) return setError("Başlıq tələb olunur");
+
+    const guard = await confirmLocalized([
+      { label: "Başlıq", value: title, required: true },
+      { label: "Mətn", value: text },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
 
     const data = {
-      title: title.trim(),
+      title: trimLoc(title),
+      text: trimLoc(text),
       color: color.trim() || "#7C4DFF",
       order: Number(order) || 0,
       isActive,
     };
-    // Prune empties so we don't overwrite defaults with blanks.
-    const textVal = text.trim();
-    if (textVal) data.text = textVal;
     const iconVal = icon.trim();
     if (iconVal) data.icon = iconVal;
 
@@ -81,9 +88,9 @@ export function AdvantageForm({ item, onClose }) {
         {icon || "★"}
       </div>
       <h4 className="text-base font-bold text-gray-900">
-        {title || "Üstünlük başlığı"}
+        {locAz(title) || "Üstünlük başlığı"}
       </h4>
-      {text && <p className="mt-2 text-sm text-gray-600">{text}</p>}
+      {locAz(text) && <p className="mt-2 text-sm text-gray-600">{locAz(text)}</p>}
     </div>
   );
 
@@ -98,15 +105,11 @@ export function AdvantageForm({ item, onClose }) {
     >
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Başlıq" required>
-          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Field label="Başlıq" required info="3 dildə — AZ mütləqdir">
+          <LocalizedInput value={title} onChange={setTitle} />
         </Field>
-        <Field label="Mətn">
-          <TextArea
-            rows={3}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+        <Field label="Mətn" info="3 dildə">
+          <LocalizedInput value={text} onChange={setText} multiline rows={3} />
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field

@@ -20,6 +20,7 @@ import {
   Toggle,
   SectionTitle,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
@@ -30,7 +31,7 @@ export function PartnerForm({ item, onClose }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  const [name, setName] = useState(item?.name || "");
+  const [name, setName] = useState(toLoc(item?.name));
   const [logo, setLogo] = useState(item?.logo || "");
   const [url, setUrl] = useState(item?.url || "");
   const [order, setOrder] = useState(
@@ -47,8 +48,14 @@ export function PartnerForm({ item, onClose }) {
   const onSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([{ label: "Ad", value: name, required: true }]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      name: name.trim(),
+      name: trimLoc(name),
       logo: logo.trim(),
       order: Number(order) || 0,
       isActive,
@@ -77,7 +84,7 @@ export function PartnerForm({ item, onClose }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={getImageUrl(logo)}
-          alt={name || "Partner"}
+          alt={locAz(name) || "Partner"}
           className="h-12 w-12 rounded object-contain"
         />
       ) : (
@@ -86,7 +93,7 @@ export function PartnerForm({ item, onClose }) {
         </div>
       )}
       <span className="text-sm font-semibold text-gray-800">
-        {name || "Partnyor adı"}
+        {locAz(name) || "Partnyor adı"}
       </span>
     </div>
   );
@@ -103,8 +110,8 @@ export function PartnerForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ad" required>
-            <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+          <Field label="Ad" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={name} onChange={setName} />
           </Field>
           <Field label="Sayt (url)" info="Loqoya klikləyəndə açılan ünvan">
             <TextInput

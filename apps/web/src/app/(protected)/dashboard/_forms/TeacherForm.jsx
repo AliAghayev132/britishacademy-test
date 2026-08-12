@@ -27,7 +27,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -46,13 +46,13 @@ export function TeacherForm({ item, onClose }) {
 
   const [error, setError] = useState("");
 
-  // ── Basic ──
-  const [fullName, setFullName] = useState(item?.fullName || "");
-  const [title, setTitle] = useState(item?.title || "");
+  // ── Basic ── (fullName/title/bio çoxdillidir)
+  const [fullName, setFullName] = useState(toLoc(item?.fullName));
+  const [title, setTitle] = useState(toLoc(item?.title));
   const [slug, setSlug] = useState(item?.slug || "");
   const [photo, setPhoto] = useState(item?.photo || "");
   const [color, setColor] = useState(item?.color || "#2E6BE6");
-  const [bio, setBio] = useState(item?.bio || "");
+  const [bio, setBio] = useState(toLoc(item?.bio));
 
   // ── Branches ──
   const [branches, setBranches] = useState(
@@ -116,12 +116,22 @@ export function TeacherForm({ item, onClose }) {
   const handleSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Ad Soyad", value: fullName, required: true },
+      { label: "Başlıq", value: title },
+      { label: "Bio", value: bio },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const body = {
-      fullName: fullName.trim(),
-      title: title.trim(),
+      fullName: trimLoc(fullName),
+      title: trimLoc(title),
       photo: photo.trim(),
       color: color || "#2E6BE6",
-      bio,
+      bio: trimLoc(bio),
       branches,
       certificates: certificates
         .filter((c) => c.title.trim())
@@ -163,7 +173,10 @@ export function TeacherForm({ item, onClose }) {
     }
   };
 
-  // ── Preview (as it will look on the site) ──
+  // ── Preview (as it will look on the site) — AZ variantı ──
+  const azName = locAz(fullName).trim();
+  const azTitle = locAz(title).trim();
+  const azBio = locAz(bio);
   const preview = (
     <div className="flex flex-wrap items-center gap-4">
       {photo ? (
@@ -178,21 +191,21 @@ export function TeacherForm({ item, onClose }) {
           className="flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white"
           style={{ background: color || "#2E6BE6" }}
         >
-          {(fullName.trim()[0] || "?").toUpperCase()}
+          {(azName[0] || "?").toUpperCase()}
         </div>
       )}
       <div className="min-w-0">
         <div className="truncate text-lg font-bold text-gray-900">
-          {fullName.trim() || "Ad Soyad"}
+          {azName || "Ad Soyad"}
         </div>
-        {title.trim() && (
-          <div className="truncate text-sm text-gray-500">{title.trim()}</div>
+        {azTitle && (
+          <div className="truncate text-sm text-gray-500">{azTitle}</div>
         )}
       </div>
-      {bio && (
+      {azBio && (
         <div
           className="bz-body mt-4 basis-full"
-          dangerouslySetInnerHTML={{ __html: bio }}
+          dangerouslySetInnerHTML={{ __html: azBio }}
         />
       )}
     </div>
@@ -212,17 +225,17 @@ export function TeacherForm({ item, onClose }) {
       <div className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Ad Soyad" required>
-            <TextInput
+          <Field label="Ad Soyad" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={setFullName}
               placeholder="Aygün Məmmədova"
             />
           </Field>
           <Field label="Başlıq" hint="Məs: IELTS 8.5 · İngilis dili">
-            <TextInput
+            <LocalizedInput
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={setTitle}
               placeholder="IELTS 8.5 · İngilis dili"
             />
           </Field>
@@ -249,8 +262,8 @@ export function TeacherForm({ item, onClose }) {
             kind="image"
           />
         </Field>
-        <Field label="Bio">
-          <TiptapEditor content={bio} onChange={setBio} />
+        <Field label="Bio" info="3 dildə">
+          <LocalizedEditor value={bio} onChange={setBio} />
         </Field>
       </div>
 

@@ -21,6 +21,7 @@ import {
   Toggle,
   SectionTitle,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function FaqForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
@@ -28,8 +29,8 @@ export function FaqForm({ item, onClose }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  const [question, setQuestion] = useState(item?.question || "");
-  const [answer, setAnswer] = useState(item?.answer || "");
+  const [question, setQuestion] = useState(toLoc(item?.question));
+  const [answer, setAnswer] = useState(toLoc(item?.answer));
   const [group, setGroup] = useState(item?.group || "");
   const [order, setOrder] = useState(
     item?.order != null ? String(item.order) : "0",
@@ -44,12 +45,19 @@ export function FaqForm({ item, onClose }) {
 
   const onSave = async () => {
     setError("");
-    if (!question.trim()) return setError("Sual tələb olunur");
-    if (!answer.trim()) return setError("Cavab tələb olunur");
+
+    const guard = await confirmLocalized([
+      { label: "Sual", value: question, required: true },
+      { label: "Cavab", value: answer, required: true },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
 
     const data = {
-      question: question.trim(),
-      answer: answer.trim(),
+      question: trimLoc(question),
+      answer: trimLoc(answer),
       order: Number(order) || 0,
       isActive,
     };
@@ -74,12 +82,12 @@ export function FaqForm({ item, onClose }) {
     <div className="mx-auto max-w-lg overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <span className="text-sm font-bold text-gray-900">
-          {question || "Sualınız buraya yazılır?"}
+          {locAz(question) || "Sualınız buraya yazılır?"}
         </span>
         <span className="text-gray-400">−</span>
       </div>
       <div className="border-t border-gray-100 px-4 py-3 text-sm text-gray-600">
-        {answer || "Cavab mətni buraya yazılır."}
+        {locAz(answer) || "Cavab mətni buraya yazılır."}
       </div>
     </div>
   );
@@ -95,18 +103,11 @@ export function FaqForm({ item, onClose }) {
     >
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Sual" required>
-          <TextInput
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
+        <Field label="Sual" required info="3 dildə — AZ mütləqdir">
+          <LocalizedInput value={question} onChange={setQuestion} />
         </Field>
-        <Field label="Cavab" required>
-          <TextArea
-            rows={4}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-          />
+        <Field label="Cavab" required info="3 dildə — AZ mütləqdir">
+          <LocalizedInput value={answer} onChange={setAnswer} multiline rows={4} />
         </Field>
       </section>
 

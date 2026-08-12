@@ -23,6 +23,7 @@ import {
   SectionTitle,
   toId,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 const TYPE_OPTIONS = [
   { value: "link", label: "Link" },
@@ -49,9 +50,9 @@ export function MenuItemForm({ item, onClose }) {
   });
   const parentOptions = (menuData?.data?.items || [])
     .filter((m) => m._id !== item?._id)
-    .map((m) => ({ value: m._id, label: m.label }));
+    .map((m) => ({ value: m._id, label: locAz(m.label) }));
 
-  const [label, setLabel] = useState(item?.label || "");
+  const [label, setLabel] = useState(toLoc(item?.label));
   const [href, setHref] = useState(item?.href || "");
   const [type, setType] = useState(item?.type || "link");
   const [location, setLocation] = useState(item?.location || "header");
@@ -71,8 +72,14 @@ export function MenuItemForm({ item, onClose }) {
   const onSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([{ label: "Başlıq", value: label, required: true }]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      label: label.trim(),
+      label: trimLoc(label),
       href: href.trim(),
       type,
       location,
@@ -108,11 +115,8 @@ export function MenuItemForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Başlıq" required>
-            <TextInput
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-            />
+          <Field label="Başlıq" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={label} onChange={setLabel} />
           </Field>
           <Field
             label="Link (href)"
