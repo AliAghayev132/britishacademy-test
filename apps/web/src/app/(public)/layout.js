@@ -1,11 +1,13 @@
 // React
 import { Suspense } from "react";
+import { headers } from "next/headers";
 
 // Data
 import { apiGet } from "@/lib/api";
 
 // Components
 import { SiteProvider } from "@/components/site/SiteProvider";
+import { LocaleProvider } from "@/components/site/LocaleProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { RouteLoader } from "@/components/site/RouteLoader";
@@ -16,6 +18,9 @@ import { RouteLoader } from "@/components/site/RouteLoader";
  * client apply-modal/WhatsApp overlays.
  */
 export default async function PublicLayout({ children }) {
+  // ── cari dil (middleware x-lang) ──
+  const locale = (await headers()).get("x-lang") || "az";
+
   // ── data fetching ──
   const [site, cats, coursesData, destData, branchData] = await Promise.all([
     apiGet("/site"),
@@ -56,13 +61,15 @@ export default async function PublicLayout({ children }) {
 
   // ── render ──
   return (
-    <SiteProvider branches={branches}>
-      <Suspense fallback={null}>
-        <RouteLoader />
-      </Suspense>
-      <Header site={settings} nav={nav} services={services} destinations={destinations} />
-      <main>{children}</main>
-      <Footer site={settings} />
-    </SiteProvider>
+    <LocaleProvider locale={locale}>
+      <SiteProvider branches={branches}>
+        <Suspense fallback={null}>
+          <RouteLoader />
+        </Suspense>
+        <Header site={settings} nav={nav} services={services} destinations={destinations} />
+        <main>{children}</main>
+        <Footer site={settings} />
+      </SiteProvider>
+    </LocaleProvider>
   );
 }

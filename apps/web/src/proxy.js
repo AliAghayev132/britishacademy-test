@@ -1,38 +1,65 @@
 import { NextResponse } from 'next/server'
 
+// URL prefiksli dillər: /en, /ru. AZ default-dur (prefikssiz).
+const PREFIXED = ['en', 'ru']
+
 /**
- * Auth guard middleware.
+ * Proxy (middleware): auth guard + public dil aşkarlanması.
  *
- * The RTK auth slice (see src/store/slices/authSlice.js) keeps the source of
- * truth for tokens in `localStorage`, which the Edge middleware cannot read.
- * To make server-side route protection possible, the client MIRRORS the access
- * token into a readable cookie named `token` on login/refresh and clears it on
- * logout. This middleware only checks for the presence of that mirrored cookie
- * to decide whether to allow access to protected routes.
- *
- * NOTE: This is a lightweight UX guard, not a security boundary. The real
- * authorization always happens on the API server, which validates the JWT.
+ * 1) Auth: /dashboard mühafizə olunur; giriş edilməyibsə /login-ə yönləndirir.
+ * 2) Dil: public route-larda /en, /ru prefiksi (və ya `lang` cookie) → `x-lang`
+ *    request header-i; prefiks varsa daxili route-a rewrite (URL qalır).
+ *    Admin (dashboard/login) AZ-only-dur, dil məntiqindən kənardır.
  */
 export function proxy(request) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('token')?.value
 
-  // Protect the dashboard area: unauthenticated users are sent to /login.
+  // ── Auth guard ──
   if (pathname.startsWith('/dashboard') && !token) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('from', pathname)
     return NextResponse.redirect(loginUrl)
   }
-
-  // Keep authenticated users out of the auth pages.
   if ((pathname === '/login' || pathname === '/register') && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
+  // Admin sahəsi dil idarəçiliyindən kənardır.
+  if (pathname.startsWith('/dashboard') || pathname === '/login' || pathname === '/register') {
+    return NextResponse.next()
+  }
 
-  return NextResponse.next()
+  // ── Public dil aşkarlanması ──
+  const seg = pathname.split('/')[1]
+  const cookieLang = request.cookies.get('lang')?.value
+
+  let lang = 'az'
+  let stripped = pathname
+  let viaPrefix = false
+  if (PREFIXED.includes(seg)) {
+    lang = seg
+    stripped = pathname.slice(seg.length + 1) || '/'
+    viaPrefix = true
+  } else if (['az', 'en', 'ru'].includes(cookieLang)) {
+    lang = cookieLang
+  }
+
+  const headers = new Headers(request.headers)
+  headers.set('x-lang', lang)
+
+  let res
+  if (viaPrefix) {
+    const url = request.nextUrl.clone()
+    url.pathname = stripped
+    res = NextResponse.rewrite(url, { request: { headers } })
+    res.cookies.set('lang', lang, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+  } else {
+    res = NextResponse.next({ request: { headers } })
+  }
+  return res
 }
 
-// Only run the middleware on the routes that need the guard.
+// api/_next/static/faylları istisna et; qalan hər şeydə işlə (dashboard + public).
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|assets|.*\\..*).*)'],
 }

@@ -1,6 +1,24 @@
 // Server-side API helper. Used by Server Components (pages/layout) to fetch from
 // the Express API during SSR. Client interactivity uses RTK Query (store/api).
+import { headers } from "next/headers";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+// Cari dil (middleware-in qoyduğu x-lang header-i). Static kontekstdə "az".
+async function currentLang() {
+  try {
+    const h = await headers();
+    return h.get("x-lang") || "az";
+  } catch {
+    return "az";
+  }
+}
+
+// path-a ?lang=<dil> əlavə et.
+function withLang(path, lang) {
+  const sep = path.includes("?") ? "&" : "?";
+  return `${path}${sep}lang=${lang}`;
+}
 
 // Server-only secret (NOT NEXT_PUBLIC_): marks SSR calls as trusted so the
 // API's per-IP rate limiter doesn't throttle the whole site through one IP.
@@ -19,7 +37,8 @@ const INTERNAL_HEADERS = process.env.INTERNAL_API_KEY
  */
 export async function apiGet(path, { revalidate = 60 } = {}) {
   try {
-    const res = await fetch(`${API_URL}/api${path}`, {
+    const lang = await currentLang();
+    const res = await fetch(`${API_URL}/api${withLang(path, lang)}`, {
       next: { revalidate },
       headers: { Accept: "application/json", ...INTERNAL_HEADERS },
     });
@@ -40,7 +59,8 @@ export async function apiGet(path, { revalidate = 60 } = {}) {
  */
 export async function apiGetStatus(path, { revalidate = 60 } = {}) {
   try {
-    const res = await fetch(`${API_URL}/api${path}`, {
+    const lang = await currentLang();
+    const res = await fetch(`${API_URL}/api${withLang(path, lang)}`, {
       next: { revalidate },
       headers: { Accept: "application/json", ...INTERNAL_HEADERS },
     });

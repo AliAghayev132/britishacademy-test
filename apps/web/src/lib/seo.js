@@ -48,7 +48,16 @@ export async function resolveMetadata({
     description: desc,
     metadataBase: new URL(SITE_URL),
     keywords: kw.length ? kw : undefined,
-    alternates: { canonical: canon },
+    alternates: {
+      canonical: canon,
+      // hreflang — hər dil üçün ayrı URL (az prefikssiz, en/ru prefiksli).
+      languages: {
+        az: `${SITE_URL}${path}`,
+        en: `${SITE_URL}/en${path}`,
+        ru: `${SITE_URL}/ru${path}`,
+        "x-default": `${SITE_URL}${path}`,
+      },
+    },
     openGraph: {
       title: composed, description: desc, url, siteName: name, locale: "az_AZ", type,
       images: [{ url: fullImg, width: 1200, height: 630, alt: composed }],

@@ -3,12 +3,44 @@
 // React
 import { memo, useCallback, useEffect, useState } from "react";
 // Next
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 // Local
+import { LocaleLink as Link } from "./LocaleLink";
+import { useLocale, stripLocale } from "./LocaleProvider";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
+
+// ── Dil seçicisi (AZ/EN/RU) ──
+const LanguageSwitcher = memo(function LanguageSwitcher() {
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+  const base = stripLocale(pathname);
+  const go = (l) => {
+    document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    const target = l === "az" ? base : `/${l}${base === "/" ? "" : base}`;
+    router.push(target);
+    router.refresh();
+  };
+  return (
+    <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
+      {["az", "en", "ru"].map((l) => {
+        const on = l === locale;
+        return (
+          <button
+            key={l}
+            type="button"
+            onClick={() => go(l)}
+            style={{ border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: on ? "var(--accent)" : "transparent", color: on ? "#fff" : "rgba(255,255,255,.65)" }}
+          >
+            {l.toUpperCase()}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
 
 // ── Constants ──
 const caret = (
@@ -198,7 +230,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             <span>☎ {site?.contact?.phone}</span>
             <span style={{ opacity: 0.65 }}>{site?.contact?.hours}</span>
           </div>
-          {/* language switcher hidden for now (single-language site) */}
+          <LanguageSwitcher />
         </div>
       </div>
 

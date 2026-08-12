@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { apiGet } from "@/lib/api";
+import { LocaleLink as Link } from "./LocaleLink";
+import { useLocale } from "./LocaleProvider";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
  * Full-screen search overlay mirroring the static site's #ba-search-overlay.
@@ -11,23 +13,27 @@ import { apiGet } from "@/lib/api";
  * and links matches to /kurslar/<slug>. Escape or backdrop click closes it.
  */
 export function SearchOverlay({ open, onClose }) {
+  const locale = useLocale();
   const [courses, setCourses] = useState(null); // null = not yet loaded
   const [q, setQ] = useState("");
   const inputRef = useRef(null);
   const loadedRef = useRef(false);
 
-  // Fetch the course list once, lazily on first open.
+  // Fetch the course list once, lazily on first open (cari dildə).
   useEffect(() => {
     if (!open || loadedRef.current) return;
     loadedRef.current = true;
     let alive = true;
-    apiGet("/courses").then((data) => {
-      if (alive) setCourses(Array.isArray(data?.courses) ? data.courses : []);
-    });
+    fetch(`${API_URL}/api/courses?lang=${locale}`, { headers: { Accept: "application/json" } })
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive) setCourses(Array.isArray(j?.data?.courses) ? j.data.courses : []);
+      })
+      .catch(() => alive && setCourses([]));
     return () => {
       alive = false;
     };
-  }, [open]);
+  }, [open, locale]);
 
   // Focus the input and wire Escape-to-close while open.
   useEffect(() => {
