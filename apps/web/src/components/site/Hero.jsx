@@ -9,7 +9,7 @@ import { ApplyButton } from "./ApplyButton";
 const CHIPS = [
   { label: "Speaking", pos: { top: 66, left: "6%" }, rot: -8, anim: "ba-float 6s ease-in-out infinite", weight: 600 },
   { label: "Привет", pos: { top: 118, right: "7%" }, rot: 7, anim: "ba-float 7s ease-in-out infinite .6s", weight: 600 },
-  { label: "IELTS 7.0", pos: { top: 300, left: "4%" }, rot: 6, anim: "ba-float 8s ease-in-out infinite 1.1s", weight: 700 },
+  { label: "IELTS 8.5", pos: { top: 300, left: "4%" }, rot: 6, anim: "ba-float 8s ease-in-out infinite 1.1s", weight: 700 },
   { label: "A1 → C1", pos: { top: 360, right: "5%" }, rot: -6, anim: "ba-float 6.5s ease-in-out infinite .3s", weight: 700 },
   { label: "Hallo", pos: { bottom: 172, left: "9%" }, rot: -5, anim: "ba-float 7.5s ease-in-out infinite .9s", weight: 600 },
   { label: "Konfrans", pos: { bottom: 150, right: "10%" }, rot: 8, anim: "ba-float 6.8s ease-in-out infinite 1.4s", weight: 600 },
@@ -140,7 +140,7 @@ export function Hero({ hero, stats = [] }) {
       {/* mascot — /public/assets/mascot/hero.png (shows nothing if absent) */}
       <span
         aria-hidden="true"
-        style={{ position: "absolute", right: "3%", bottom: 0, width: 240, height: "84%", maxHeight: 300, backgroundImage: "url(/assets/mascot/hero.png)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 18px 30px rgba(0,0,0,.28))", pointerEvents: "none", zIndex: 0 }}
+        style={{ position: "absolute", right: "3%", bottom: 0, width: 240, height: "84%", maxHeight: 300, backgroundImage: "url(/assets/mascot/hero.png)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 18px 30px rgba(0,0,0,.28))", pointerEvents: "none", zIndex: 0, animation: reduced ? "none" : "ba-mascot-bob 4.5s ease-in-out infinite", transformOrigin: "50% 100%" }}
         className="ba-hero-mascot"
       />
 
@@ -186,7 +186,7 @@ export function Hero({ hero, stats = [] }) {
               {p}
             </a>
           ))}
-          <a href="#qeydiyyat" style={{ ...PILL_BASE, background: "#0F1020", color: "#fff", fontWeight: 700, boxShadow: "none" }}>
+          <a href="#qeydiyyat" style={{ ...PILL_BASE, background: "#001452", color: "#fff", fontWeight: 700, boxShadow: "none" }}>
             Pulsuz sınaq dərsi →
           </a>
         </div>

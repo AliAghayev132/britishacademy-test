@@ -91,7 +91,7 @@ export default async function AboutPage() {
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 52, alignItems: "center" }}>
           <div>
             <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 40, letterSpacing: "-.02em", margin: 0, lineHeight: 1.1, color: "#14141C" }}>
-              Missiyamız<br /><span style={{ color: "#B9BAC4" }}>keyfiyyətli təhsil</span>
+              Missiyamız<br /><span style={{ color: "#7C7D8C" }}>keyfiyyətli təhsil</span>
             </h2>
             <p style={{ fontSize: 16.5, color: "#54545F", margin: "20px 0 0", lineHeight: 1.7 }}>
               Fəaliyyət dövrümüzdə 20.000-dən çox tələbəmiz məzun olub, 30-dan artıq korporativ şirkətlə əməkdaşlıq etmişik. Böyük Britaniyada xüsusi metodika ilə hazırlanmış kitablar sayəsində dili ana diliniz kimi, sistemli şəkildə öyrənirsiniz.
@@ -122,7 +122,7 @@ export default async function AboutPage() {
       <section style={{ background: "#F6F7FA", borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2", margin: "64px 0 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "64px 28px" }}>
           <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 40, letterSpacing: "-.02em", margin: "0 0 40px", lineHeight: 1.1, color: "#14141C" }}>
-            Dəyərlərimiz<br /><span style={{ color: "#B9BAC4" }}>sizə nə vəd edirik</span>
+            Dəyərlərimiz<br /><span style={{ color: "#7C7D8C" }}>sizə nə vəd edirik</span>
           </h2>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
             {VALUES.map((v) => <ValueCard key={v.title} value={v} />)}

@@ -74,7 +74,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
       <button type="submit" disabled={isLoading} className="ba-apply-btn" style={{ marginTop: 6, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: 16, borderRadius: 13, cursor: "pointer", opacity: isLoading ? 0.7 : 1 }}>
         {isLoading ? "Göndərilir…" : "Müraciəti göndər"}
       </button>
-      <p style={{ textAlign: "center", fontSize: 12.5, color: "#9A9AA6", margin: 0 }}>Məlumatların üçüncü tərəflə paylaşılmır.</p>
+      <p style={{ textAlign: "center", fontSize: 12.5, color: "#63636E", margin: 0 }}>Məlumatların üçüncü tərəflə paylaşılmır.</p>
     </form>
   );
 });

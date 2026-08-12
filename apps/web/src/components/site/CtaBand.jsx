@@ -11,7 +11,7 @@ export function CtaBand({
 }) {
   return (
     <section style={{ maxWidth: 1240, margin: "0 auto", padding: "64px 28px 0" }}>
-      <div style={{ position: "relative", overflow: "hidden", background: "#0C0D1A", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>
+      <div style={{ position: "relative", overflow: "hidden", background: "#00103D", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>
         <div style={{ position: "absolute", top: -60, left: -30, width: 220, height: 220, borderRadius: "50%", background: "var(--accent-wm)", filter: "blur(10px)", pointerEvents: "none" }} />
         <span
           aria-hidden="true"

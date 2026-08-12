@@ -87,7 +87,7 @@ async function CategoryHub({ cat }) {
 function InfoSidebar({ course }) {
   return (
     <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF", position: "sticky", top: 100 }}>
-      <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
       {(course.info || []).map((r, i) => (
         <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
           <span style={{ color: "#63636F" }}>{r.label}</span>
@@ -253,7 +253,7 @@ export default async function CoursePage({ params }) {
       <section id="qiymetler" style={{ ...wrap, padding: "56px 28px 0" }}>
         <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 22px" }}>{course.pricingMode === "custom" ? "Qiymətlər" : "Filiallar üzrə qiymətlər"}</h2>
         <PriceCards course={course} teachersByBranch={teachersByBranch} />
-        <p style={{ fontSize: 13.5, color: "#9A9AA6", margin: "14px 0 0" }}>Bütün <Link href="/filiallar" style={{ color: "var(--accent)", fontWeight: 700 }}>filiallara bax</Link> və ya dəqiq məlumat üçün <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>əlaqə saxla</Link>.</p>
+        <p style={{ fontSize: 13.5, color: "#63636E", margin: "14px 0 0" }}>Bütün <Link href="/filiallar" style={{ color: "var(--accent)", fontWeight: 700 }}>filiallara bax</Link> və ya dəqiq məlumat üçün <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>əlaqə saxla</Link>.</p>
       </section>
 
       {/* Features */}

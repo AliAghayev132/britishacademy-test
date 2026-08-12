@@ -94,7 +94,7 @@ function ToastItem({ t, onClose }) {
         <Icon className="h-[18px] w-[18px]" />
       </span>
       <span style={{ flex: 1, fontSize: 14, lineHeight: 1.45, color: "#1c1c26", paddingTop: 4 }}>{t.message}</span>
-      <button onClick={() => onClose(t.id)} style={{ color: "#9a9aa6", padding: 2 }} aria-label="Bağla"><X className="h-4 w-4" /></button>
+      <button onClick={() => onClose(t.id)} style={{ color: "#63636E", padding: 2 }} aria-label="Bağla"><X className="h-4 w-4" /></button>
     </div>
   );
 }

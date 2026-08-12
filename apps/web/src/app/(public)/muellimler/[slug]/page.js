@@ -78,7 +78,7 @@ function TeacherSidebar({ t }) {
     <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF" }}>
       {(t.stats || []).length > 0 && (
         <>
-          <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
           {t.stats.map((s, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
               <span style={{ color: "#63636F" }}>{s.label}</span>
@@ -89,7 +89,7 @@ function TeacherSidebar({ t }) {
       )}
       {(t.branches || []).length > 0 && (
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, color: "#9A9AA6", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10 }}>Filiallar</div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 10 }}>Filiallar</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {t.branches.map((b) => (
               <span key={b._id} style={{ fontSize: 13, fontWeight: 600, color: "#4a4a55", background: "#F5F6FA", borderRadius: 99, padding: "6px 13px" }}>{b.name}</span>

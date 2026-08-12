@@ -121,7 +121,7 @@ export function SearchOverlay({ open, onClose }) {
         </div>
 
         {showEmpty && (
-          <div style={{ textAlign: "center", color: "#9A9AA6", padding: 28, fontSize: 16 }}>Nəticə tapılmadı</div>
+          <div style={{ textAlign: "center", color: "#63636E", padding: 28, fontSize: 16 }}>Nəticə tapılmadı</div>
         )}
       </div>
     </div>

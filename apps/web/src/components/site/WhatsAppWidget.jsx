@@ -2,12 +2,26 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+// İstənilən sabit filial sırası (ada görə açar sözlə uyğunlaşdırılır).
+const BRANCH_ORDER = ["caspian", "akademiya", "nərimanov", "əhmədli"];
+const branchRank = (name) => {
+  const n = (name || "").toLocaleLowerCase("az");
+  const i = BRANCH_ORDER.findIndex((k) => n.includes(k));
+  return i === -1 ? 99 : i;
+};
+// "filialı"/"filial" sözünü addan sil (yuxarıda onsuz da "Filial seç" yazılıb).
+const cleanBranchName = (name) =>
+  (name || "").split(/\s+/).filter((w) => !/^filial/i.test(w)).join(" ").trim();
+
 /** Floating WhatsApp button that opens an upward branch picker. */
 export function WhatsAppWidget({ branches = [] }) {
   // ── State / derived ──
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const list = useMemo(() => branches.filter((b) => b.whatsapp), [branches]);
+  const list = useMemo(
+    () => branches.filter((b) => b.whatsapp).slice().sort((a, b) => branchRank(a.name) - branchRank(b.name)),
+    [branches],
+  );
 
   // ── Effects ──
   useEffect(() => {
@@ -49,7 +63,7 @@ export function WhatsAppWidget({ branches = [] }) {
                   <path d="M16 .5C7.4.5.5 7.4.5 16c0 2.8.7 5.5 2.1 7.9L.4 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.5-6.9 15.5-15.5S24.6.5 16 .5zm0 28c-2.4 0-4.7-.6-6.7-1.8l-.5-.3-4.7 1.2 1.3-4.6-.3-.5c-1.3-2.1-2-4.5-2-7 0-7.1 5.8-12.9 13-12.9s12.9 5.8 12.9 12.9-5.8 12.9-13 13zm7.1-9.7c-.4-.2-2.3-1.1-2.6-1.3-.3-.1-.6-.2-.8.2-.2.4-.9 1.3-1.2 1.5-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8.2-.2.4-.4.5-.7.2-.2.2-.4.4-.7.1-.3 0-.5 0-.7-.1-.2-.8-2-1.1-2.7-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.5 3.8 6 5.3.8.4 1.5.6 2 .8.8.3 1.6.2 2.2.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.4z" />
                 </svg>
               </span>
-              <span>{b.name}</span>
+              <span>{cleanBranchName(b.name)}</span>
             </a>
           ))}
         </div>

@@ -90,7 +90,7 @@ const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCou
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
       {/* Name search */}
       <div style={{ position: "relative", flex: "1 1 260px", minWidth: 220, maxWidth: 360 }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9AA6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#63636E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
           <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
         </svg>
         <input

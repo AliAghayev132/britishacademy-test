@@ -46,7 +46,7 @@ function AdvantageCard({ advantage, index }) {
     <div className="ba-adv2" style={{ position: "relative", background: "#F7F8FB", border: "1px solid #ECEDF2", borderRadius: 20, padding: "30px 26px", "--accent": a.color, "--accent-soft": `${a.color}1f` }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div className="ba-adv2-ic" style={{ width: 50, height: 50, borderRadius: 13, background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center", fontSize: 24 }}>{ADV_ICONS[index % ADV_ICONS.length]}</div>
-        <span className="ba-adv2-n" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 34, color: "#E4E6EF" }}>{String(index + 1).padStart(2, "0")}</span>
+        <span className="ba-adv2-n" style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 34, color: "#AAB0CC" }}>{String(index + 1).padStart(2, "0")}</span>
       </div>
       <h3 className="ba-adv2-t" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "22px 0 0", color: "#17171F" }}>{a.title}</h3>
       <p className="ba-adv2-d" style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{a.text}</p>
@@ -62,7 +62,7 @@ function NewsCard({ post }) {
         {post.category && <span style={{ position: "absolute", top: 12, left: 12, background: post.category.color || "var(--accent)", color: "#fff", fontSize: 11.5, fontWeight: 700, padding: "5px 11px", borderRadius: 99, zIndex: 2 }}>{post.category.name}</span>}
       </div>
       <div style={{ padding: "22px 22px 26px" }}>
-        <div style={{ fontSize: 13, color: "#9A9AA6", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
+        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
         <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "8px 0 0", lineHeight: 1.3, color: "#17171F" }}>{post.title}</h3>
         {post.excerpt && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{post.excerpt}</p>}
       </div>

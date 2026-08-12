@@ -10,6 +10,7 @@ import {
   useAdminCreateMutation,
   useAdminUpdateMutation,
   useAdminDeleteMutation,
+  useAdminLookupsQuery,
 } from "@/store/api/adminApi";
 // UI / kit
 import { confirmDialog, notify } from "@/components/ui/feedback";
@@ -43,6 +44,18 @@ export default function ResourceBrowserPage({ params }) {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({}); // { isActive:"true", status:"open", ... }
   const resFilters = RESOURCE_FILTERS[resource] || [];
+
+  // Dinamik filtr seçimləri (filial/müəllim) — yalnız lazım olduqda çək.
+  const needsLookups = resFilters.some((f) => f.dynamic);
+  const { data: lookups } = useAdminLookupsQuery(undefined, { skip: !needsLookups });
+  const dynOptions = useMemo(() => {
+    const lk = lookups?.data || {};
+    return {
+      branches: (lk.branches || []).map((b) => ({ value: b._id, label: b.name })),
+      teachers: (lk.teachers || []).map((t) => ({ value: t._id, label: t.fullName })),
+      categories: (lk.categories || []).map((c) => ({ value: c._id, label: c.name })),
+    };
+  }, [lookups]);
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
   const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
@@ -151,7 +164,7 @@ export default function ResourceBrowserPage({ params }) {
         </div>
         {resFilters.map((f) => (
           <div key={f.key} className="w-44">
-            <NativeSelect placeholder={f.label} options={f.options} value={filters[f.key] || ""} onChange={(e) => setFilter(f.key, e.target.value)} />
+            <NativeSelect placeholder={f.label} options={f.dynamic ? (dynOptions[f.dynamic] || []) : f.options} value={filters[f.key] || ""} onChange={(e) => setFilter(f.key, e.target.value)} />
           </div>
         ))}
         {Object.keys(activeFilters).length > 0 && (

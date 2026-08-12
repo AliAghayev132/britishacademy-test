@@ -32,7 +32,7 @@ export default function Marquee() {
   return (
     <div
       className="ba-mqband"
-      style={{ background: "#0F1020", transform: "rotate(-1.2deg)", width: "104%", margin: "70px -2% -8px", padding: "15px 0", overflow: "hidden" }}
+      style={{ background: "#001452", transform: "rotate(-1.2deg)", width: "104%", margin: "70px -2% -8px", padding: "15px 0", overflow: "hidden" }}
     >
       <div
         id="ba-mq"

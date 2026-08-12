@@ -98,6 +98,14 @@ img { display: block; max-width: 100%; }
   100%  { opacity:0; transform: translate(-50%, -80%) rotateX(80deg); }
 }
 @keyframes ba-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+/* Maskot üçün canlı yellənmə: yüngül qalxma + yüngül döngü/miqyas */
+@keyframes ba-mascot-bob {
+  0%,100% { transform: translateY(0) rotate(0deg) scale(1); }
+  25%     { transform: translateY(-10px) rotate(-2.5deg) scale(1.015); }
+  50%     { transform: translateY(-14px) rotate(0deg) scale(1.03); }
+  75%     { transform: translateY(-10px) rotate(2.5deg) scale(1.015); }
+}
+@media (prefers-reduced-motion: reduce) { .ba-hero-mascot { animation: none !important; } }
 @keyframes ba-blobA { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(70px,40px) scale(1.15); } 66% { transform: translate(-40px,60px) scale(.92); } }
 @keyframes ba-blobB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-80px,-50px) scale(1.22); } }
 
@@ -140,7 +148,7 @@ img { display: block; max-width: 100%; }
   transition: opacity .2s ease, transform .22s cubic-bezier(.2,.8,.25,1), visibility .2s;
 }
 .ba-wa-pop.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-.ba-wa-pop-h { font-size: 11.5px; font-weight: 700; color: #9A9AA6; letter-spacing: .05em; text-transform: uppercase; padding: 8px 12px 7px; }
+.ba-wa-pop-h { font-size: 11.5px; font-weight: 700; color: #63636E; letter-spacing: .05em; text-transform: uppercase; padding: 8px 12px 7px; }
 .ba-wa-pop a { display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 11px; font-size: 14.5px; font-weight: 600; color: #22323A; transition: background .15s, color .15s; }
 .ba-wa-pop a:hover { background: #EAF8EF; color: #128C3E; }
 .ba-wa-pop-ic { width: 30px; height: 30px; border-radius: 9px; background: #25D366; display: grid; place-items: center; flex: none; }
@@ -202,7 +210,7 @@ img { display: block; max-width: 100%; }
   place-items: center;
   background:
     linear-gradient(135deg, #EEF0F6 0%, #E4E7F5 100%);
-  color: #9A9AA6;
+  color: #63636E;
   font-size: 13px;
   font-weight: 600;
   text-align: center;
@@ -377,7 +385,7 @@ body.ba-home .ba-adv2:hover { background: color-mix(in srgb, var(--accent) 58%, 
 body.ba-home .ba-adv2:hover .ba-adv2-n { color: rgba(255,255,255,.55) !important; }
 
 /* -- Marquee band: gradient + multicolored stars -- */
-body.ba-home .ba-mqband { background: linear-gradient(90deg, #0F1020, #201A4E 50%, #0F1020) !important; }
+body.ba-home .ba-mqband { background: linear-gradient(90deg, #001452, #0A2A8A 50%, #001452) !important; }
 body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+1) > span { color: #FF5A3C !important; }
 body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+2) > span { color: #F5A524 !important; }
 body.ba-home .ba-mqband #ba-mq > span:nth-child(7n+3) > span { color: #2EE6C8 !important; }
@@ -476,22 +484,22 @@ body.ba-home #qeydiyyat > div {
   font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
   color: var(--c); border-bottom: 2px solid color-mix(in srgb, var(--c) 22%, #fff);
 }
-.ba-ptable thead th span { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #9A9AA6; margin-top: 2px; }
+.ba-ptable thead th span { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #63636E; margin-top: 2px; }
 .ba-ptable tbody th {
   font-size: 13.5px; font-weight: 700; color: #33333D; white-space: nowrap;
   border-bottom: 1px solid #F0F1F5;
 }
-.ba-ptable tbody th span { display: block; font-size: 11.5px; font-weight: 500; color: #9A9AA6; }
+.ba-ptable tbody th span { display: block; font-size: 11.5px; font-weight: 500; color: #63636E; }
 .ba-ptable tbody td {
   font-family: 'Poppins'; font-weight: 700; font-size: 17px; color: #16161C;
   border-bottom: 1px solid #F0F1F5; white-space: nowrap;
 }
-.ba-ptable tbody td i { font-style: normal; font-family: 'Nunito Sans'; font-size: 12px; font-weight: 600; color: #9A9AA6; margin-left: 2px; }
+.ba-ptable tbody td i { font-style: normal; font-family: 'Nunito Sans'; font-size: 12px; font-weight: 600; color: #63636E; margin-left: 2px; }
 .ba-ptable tbody tr:last-child th, .ba-ptable tbody tr:last-child td { border-bottom: 0; }
 .ba-ptable th:first-child, .ba-ptable td:first-child { padding-left: 0; }
 
 .ba-pricecard-t { margin-top: 16px; padding-top: 15px; border-top: 1px dashed #E4E6EF; display: flex; flex-direction: column; gap: 9px; }
-.ba-pricecard-tlabel { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #9A9AA6; }
+.ba-pricecard-tlabel { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #63636E; }
 .ba-pricecard-t a { transition: background .18s, transform .18s; }
 .ba-pricecard-t a:hover { background: color-mix(in srgb, var(--c) 14%, #fff) !important; transform: translateY(-1px); }
 

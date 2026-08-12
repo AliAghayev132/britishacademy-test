@@ -49,8 +49,8 @@ export function SiteSelect({ value, onChange, options = [], placeholder = "Seç�
   return (
     <div style={{ position: "relative", width: "100%" }}>
       <button ref={tRef} type="button" onClick={toggle} className="ba-field" style={{ ...style, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer", textAlign: "left" }}>
-        <span style={{ color: sel ? "#14141C" : "#9A9AA6", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sel ? sel.label : placeholder}</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9AA6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        <span style={{ color: sel ? "#14141C" : "#63636E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sel ? sel.label : placeholder}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#63636E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       {open && coords && (
         <div ref={mRef} style={{ position: "fixed", left: coords.left, width: coords.width, top: coords.top, bottom: coords.bottom, zIndex: 200, background: "#fff", border: "1px solid #E4E6EF", borderRadius: 13, boxShadow: "0 16px 40px rgba(20,20,45,.18)", overflow: "hidden" }}>
@@ -61,14 +61,14 @@ export function SiteSelect({ value, onChange, options = [], placeholder = "Seç�
             </div>
           )}
           <div style={{ maxHeight: 230, overflowY: "auto", padding: "4px 0" }}>
-            {placeholder && <button type="button" onClick={() => pick("")} style={{ ...optStyle, background: "transparent", color: "#9A9AA6", fontWeight: 500 }}>{placeholder}</button>}
+            {placeholder && <button type="button" onClick={() => pick("")} style={{ ...optStyle, background: "transparent", color: "#63636E", fontWeight: 500 }}>{placeholder}</button>}
             {filtered.map((o) => {
               const on = String(o.value) === String(value ?? "");
               return (
                 <button key={o.value} type="button" onClick={() => pick(o.value)} style={{ ...optStyle, background: on ? "var(--accent-soft)" : "transparent", color: on ? "var(--accent)" : "#1C1C26", fontWeight: on ? 700 : 500 }}>{o.label}</button>
               );
             })}
-            {filtered.length === 0 && <div style={{ padding: 12, textAlign: "center", color: "#9A9AA6", fontSize: 14 }}>Tapılmadı</div>}
+            {filtered.length === 0 && <div style={{ padding: 12, textAlign: "center", color: "#63636E", fontSize: 14 }}>Tapılmadı</div>}
           </div>
         </div>
       )}

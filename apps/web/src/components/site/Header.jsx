@@ -134,7 +134,7 @@ function IntroLoader() {
         position: "fixed",
         inset: 0,
         zIndex: 200,
-        background: "#0C0D1A",
+        background: "#00103D",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -191,7 +191,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
 
     <div className="ba-fixhead" style={{ position: "sticky", top: 0, zIndex: 60 }}>
       {/* top bar */}
-      <div style={{ background: "#0F1020", color: "#C7C8DA", fontSize: 13 }}>
+      <div style={{ background: "#001452", color: "#C7C8DA", fontSize: 13 }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "8px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap" }}>
             <span>✉ {site?.contact?.email}</span>

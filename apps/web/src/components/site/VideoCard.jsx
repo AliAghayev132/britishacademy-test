@@ -105,7 +105,7 @@ export default function VideoCard({ t }) {
       <div>
         <div
           className="ba-vcard"
-          style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: poster ? "#0F1020" : color }}
+          style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: poster ? "#001452" : color }}
         >
           {poster ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -140,7 +140,7 @@ export default function VideoCard({ t }) {
       <div
         ref={wrapRef}
         className="ba-vcard"
-        style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: "#0F1020" }}
+        style={{ position: "relative", aspectRatio: "3/4", borderRadius: 20, overflow: "hidden", background: "#001452" }}
       >
         <video
           ref={videoRef}
@@ -156,7 +156,7 @@ export default function VideoCard({ t }) {
             if (Number.isFinite(e.currentTarget.duration)) setDuration(e.currentTarget.duration);
           }}
           onEnded={() => setPlaying(false)}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", cursor: "pointer", background: "#0F1020" }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", cursor: "pointer", background: "#001452" }}
         />
 
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,.42), transparent 26%, transparent 52%, rgba(0,0,0,.82))", pointerEvents: "none", opacity: playing ? 0 : 1, transition: "opacity .25s" }} />

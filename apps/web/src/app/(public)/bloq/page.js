@@ -38,7 +38,7 @@ function BlogPostCard({ post }) {
         {post.category && <span style={{ position: "absolute", top: 12, left: 12, background: post.category.color || "var(--accent)", color: "#fff", fontSize: 11.5, fontWeight: 700, padding: "5px 11px", borderRadius: 99, zIndex: 2 }}>{post.category.name}</span>}
       </div>
       <div style={{ padding: "22px 22px 26px" }}>
-        <div style={{ fontSize: 13, color: "#9A9AA6", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
+        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
         <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "8px 0 0", lineHeight: 1.3, color: "#17171F" }}>{post.title}</h3>
         {post.excerpt && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{post.excerpt}</p>}
       </div>

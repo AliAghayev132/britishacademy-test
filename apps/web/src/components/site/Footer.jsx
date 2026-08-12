@@ -17,9 +17,9 @@ export function Footer({ site }) {
   const c = s.contact || {};
   const soc = s.socials || {};
   return (
-    <footer style={{ position: "relative", background: "#0C0D1A", color: "#C4C5D6", overflow: "visible", marginTop: 70 }}>
+    <footer style={{ position: "relative", background: "#00103D", color: "#C4C5D6", overflow: "visible", marginTop: 70 }}>
       <div style={{ height: 5, background: "var(--accent)" }} />
-      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 104, height: 104, borderRadius: "50%", background: "#fff", border: "7px solid #0C0D1A", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 104, height: 104, borderRadius: "50%", background: "#fff", border: "7px solid #00103D", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={s.brand?.badge || "/assets/badge11.png"} alt="11 il sizinlə" style={{ width: 74, height: "auto" }} />
       </div>

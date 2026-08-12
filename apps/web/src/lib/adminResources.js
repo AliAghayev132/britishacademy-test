@@ -47,6 +47,9 @@ export const RESOURCE_FILTERS = {
       { value: "cancelled", label: "Ləğv edilib" },
     ] },
     { key: "format", label: "Format", options: [{ value: "group", label: "Qrup" }, { value: "individual", label: "Fərdi" }] },
+    // Dinamik seçimlər — options /admin/lookups-dan gəlir (bax: [resource]/page.js).
+    { key: "branch", label: "Filial", dynamic: "branches" },
+    { key: "teacher", label: "Müəllim", dynamic: "teachers" },
   ],
   testimonials: [ACTIVE, { key: "type", label: "Tip", options: [{ value: "video", label: "Video" }, { value: "text", label: "Mətn" }] }],
   destinations: [ACTIVE, { key: "isScholarship", label: "Təqaüd", options: [{ value: "true", label: "Bəli" }, { value: "false", label: "Xeyr" }] }],
