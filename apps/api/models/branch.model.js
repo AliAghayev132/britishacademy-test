@@ -1,5 +1,6 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { seoSchema } from "./shared.schemas.js";
 
 /**
@@ -19,11 +20,11 @@ const workingHourSchema = new Schema(
 
 const branchSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: localizedField(),
     slug: { type: String, unique: true, index: true },
 
-    address: { type: String, required: true, trim: true },
-    district: { type: String, trim: true },
+    address: localizedField(),
+    district: localizedField(),
     metro: { type: String, trim: true },
 
     phone: { type: String, trim: true },
@@ -66,8 +67,10 @@ branchSchema.virtual("whatsappUrl").get(function () {
   return this.whatsapp ? `https://wa.me/${this.whatsapp}` : null;
 });
 
+branchSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Branch });
+
 branchSchema.pre("save", async function () {
-  if (!this.slug && this.name) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
 

@@ -8,13 +8,33 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Database, TriangleAlert } from "lucide-react";
+import { Database, TriangleAlert, Languages } from "lucide-react";
 // Data
-import { useAdminSeedMutation } from "@/store/api/adminApi";
+import { useAdminSeedMutation, useAdminMigrateI18nMutation } from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
   const [seed, { isLoading }] = useAdminSeedMutation();
+  const [migrate, { isLoading: migrating }] = useAdminMigrateI18nMutation();
   const [counts, setCounts] = useState(null);
+  const [migrateReport, setMigrateReport] = useState(null);
+
+  const runMigrateI18n = async () => {
+    const ok = await confirmDialog({
+      tone: "warning",
+      title: "Çoxdilli miqrasiya işə salınsın?",
+      text: "Mövcud məzmun (kurs, müəllim, filial, səhifə və s.) tək dildən <b>3-dilli { az, en, ru }</b> formasına çevrilir.<br><br>Data <b>itmir</b> — mövcud mətn AZ variantı olur, EN/RU boş qalır. Təhlükəsiz və təkrar-icra oluna bilər.",
+      confirmText: "Bəli, miqrasiya et",
+      cancelText: "İmtina",
+    });
+    if (!ok) return;
+    try {
+      const res = await migrate().unwrap();
+      setMigrateReport(res?.data?.report || null);
+      notify.success(res?.message || "Miqrasiya tamamlandı");
+    } catch (err) {
+      notify.error(err?.data?.message || "Xəta baş verdi");
+    }
+  };
 
   // ── Handlers ──
   const runSeed = async () => {
@@ -74,6 +94,45 @@ export default function DeveloperPage() {
                   {Object.entries(counts).map(([k, v]) => (
                     <div key={k} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
                       <span className="font-bold text-gray-900">{v}</span>{" "}
+                      <span className="text-gray-500">{k}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* i18n miqrasiya */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+            <Languages className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Çoxdilli (3 dil) miqrasiya</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Köhnə tək-dilli məzmunu <b>{"{ az, en, ru }"}</b> formasına çevirir. Mövcud mətn AZ variantı
+              olur, EN/RU sonradan admin paneldən doldurulur. Data itmir, təkrar-icra təhlükəsizdir.
+            </p>
+
+            <button
+              onClick={runMigrateI18n}
+              disabled={migrating}
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+            >
+              <Languages className="h-4 w-4" />
+              {migrating ? "Miqrasiya olunur…" : "Çoxdilli formata keçir"}
+            </button>
+
+            {migrateReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">Nəticə</div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {Object.entries(migrateReport).map(([k, v]) => (
+                    <div key={k} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
+                      <span className="font-bold text-gray-900">{v.changedDocs ?? 0}</span>{" "}
                       <span className="text-gray-500">{k}</span>
                     </div>
                   ))}

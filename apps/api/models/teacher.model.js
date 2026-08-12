@@ -1,5 +1,6 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS, pickLocale } from "#utils";
 import { seoSchema, videoSchema, factSchema } from "./shared.schemas.js";
 
 /**
@@ -21,16 +22,16 @@ const certificateSchema = new Schema(
 
 const teacherSchema = new Schema(
   {
-    fullName: { type: String, required: true, trim: true },
+    fullName: localizedField(),
     slug: { type: String, unique: true, index: true },
 
     // "IELTS 8.5 · İngilis dili" — shown under the name everywhere
-    title: { type: String, trim: true },
+    title: localizedField(),
     photo: { type: String, trim: true },
     // Fallback avatar tint when no photo is uploaded
     color: { type: String, trim: true, default: "#2E6BE6" },
 
-    bio: { type: String }, // rich text (TipTap HTML)
+    bio: localizedField(), // rich text (TipTap HTML)
 
     branches: [{ type: Schema.Types.ObjectId, ref: "Branch" }],
     courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
@@ -68,11 +69,13 @@ teacherSchema.virtual("url").get(function () {
 
 /** First letter, used by the UI when no photo exists. */
 teacherSchema.virtual("initial").get(function () {
-  return (this.fullName || "?").trim().charAt(0).toUpperCase();
+  return (pickLocale(this.fullName) || "?").trim().charAt(0).toUpperCase();
 });
 
+teacherSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Teacher });
+
 teacherSchema.pre("save", async function () {
-  if (!this.slug && this.fullName) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(
       this.constructor,
       this.fullName,

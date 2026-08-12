@@ -1,4 +1,5 @@
 import { Schema, Model, testimonialTypes } from "#constants";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { videoSchema } from "./shared.schemas.js";
 
 /**
@@ -20,10 +21,10 @@ const testimonialSchema = new Schema(
     course: { type: Schema.Types.ObjectId, ref: "Course" },
     branch: { type: Schema.Types.ObjectId, ref: "Branch" },
     // Free-text label under the name, e.g. "IELTS Hazırlıq · 7.5 bal"
-    achievement: { type: String, trim: true },
+    achievement: localizedField(),
 
     // type: 'text'
-    quote: { type: String },
+    quote: localizedField(),
     rating: { type: Number, min: 1, max: 5, default: 5 },
 
     // type: 'video'
@@ -44,6 +45,8 @@ const testimonialSchema = new Schema(
 
 testimonialSchema.index({ type: 1, isActive: 1, order: 1 });
 testimonialSchema.index({ isFeatured: 1, isActive: 1 });
+
+testimonialSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Testimonial });
 
 testimonialSchema.virtual("initial").get(function () {
   return (this.name || "?").trim().charAt(0).toUpperCase();

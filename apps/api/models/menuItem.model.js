@@ -1,4 +1,5 @@
 import { Schema, Model, menuTypes } from "#constants";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /**
  * MenuItem — the navigation, editable from the admin panel (we reshaped it many
@@ -10,7 +11,7 @@ import { Schema, Model, menuTypes } from "#constants";
  */
 const menuItemSchema = new Schema(
   {
-    label: { type: String, required: true, trim: true },
+    label: localizedField(),
     href: { type: String, trim: true, default: "" },
     type: { type: String, enum: menuTypes, default: "link" },
 
@@ -29,6 +30,8 @@ const menuItemSchema = new Schema(
   },
   { timestamps: true, versionKey: false, toJSON: { virtuals: true } },
 );
+
+menuItemSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.MenuItem });
 
 menuItemSchema.index({ location: 1, parent: 1, order: 1 });
 

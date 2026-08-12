@@ -59,7 +59,12 @@ class SlugService {
    * @param {string|null} excludeId           document being updated (ignored in the check)
    */
   static async unique(model, text, excludeId = null) {
-    const base = this.slugify(text) || "element";
+    // Çoxdilli { az, en, ru } dəyər gələ bilər — slug AZ variantından qurulur.
+    const src =
+      text && typeof text === "object" && !Array.isArray(text)
+        ? text.az || text.en || text.ru || ""
+        : text;
+    const base = this.slugify(src) || "element";
     let slug = base;
     let n = 1;
     // Bounded loop: practically resolves on the first or second try.

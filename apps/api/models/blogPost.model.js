@@ -1,5 +1,6 @@
 import { Schema, Model, postStatus } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { seoSchema } from "./shared.schemas.js";
 
 /**
@@ -8,10 +9,10 @@ import { seoSchema } from "./shared.schemas.js";
  */
 const blogPostSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: localizedField(),
     slug: { type: String, unique: true, index: true },
-    excerpt: { type: String, trim: true },
-    content: { type: String, default: "" }, // sanitized HTML
+    excerpt: localizedField(),
+    content: localizedField(), // sanitized HTML
 
     cover: { type: String, trim: true },
     category: { type: Schema.Types.ObjectId, ref: "BlogCategory" },
@@ -42,8 +43,10 @@ blogPostSchema.virtual("url").get(function () {
   return `/bloq/${this.slug}`;
 });
 
+blogPostSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.BlogPost });
+
 blogPostSchema.pre("save", async function () {
-  if (!this.slug && this.title) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
   if (this.status === "published" && !this.publishedAt) {

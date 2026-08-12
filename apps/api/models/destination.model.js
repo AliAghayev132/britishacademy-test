@@ -1,5 +1,6 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { seoSchema, contentBlockSchema, factSchema, faqItemSchema } from "./shared.schemas.js";
 
 /**
@@ -17,20 +18,20 @@ const universitySchema = new Schema(
 
 const destinationSchema = new Schema(
   {
-    country: { type: String, required: true, trim: true },
+    country: localizedField(),
     slug: { type: String, unique: true, index: true },
 
-    region: { type: String, trim: true }, // "Avropa", "Şimali Amerika"
+    region: localizedField(), // "Avropa", "Şimali Amerika"
     // Inline SVG or asset path for the flag artwork used on the cards
     flag: { type: String },
     // Accent colour taken from the flag (card border/hover)
     color: { type: String, trim: true, default: "#2E6BE6" },
 
-    lead: { type: String, trim: true },
-    tagline: { type: String, trim: true }, // "Ödənişsiz universitetlər"
+    lead: localizedField(),
+    tagline: localizedField(), // "Ödənişsiz universitetlər"
 
     content: { type: [contentBlockSchema], default: [] },
-    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
+    contentHtml: localizedField(), // rich-text body (TipTap); rendered when set, else `content` blocks
     facts: { type: [factSchema], default: [] }, // təhsil dili, viza, haqq
     universities: { type: [universitySchema], default: [] },
     faq: { type: [faqItemSchema], default: [] },
@@ -60,8 +61,10 @@ destinationSchema.virtual("url").get(function () {
   return `/xaricde-tehsil/${this.slug}`;
 });
 
+destinationSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Destination });
+
 destinationSchema.pre("save", async function () {
-  if (!this.slug && this.country) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(
       this.constructor,
       this.country,

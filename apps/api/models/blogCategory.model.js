@@ -1,10 +1,11 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /** BlogCategory — the chip filter on the Bloq page. */
 const blogCategorySchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: localizedField(),
     slug: { type: String, unique: true, index: true },
     color: { type: String, trim: true, default: "#2E6BE6" },
     order: { type: Number, default: 0 },
@@ -14,8 +15,10 @@ const blogCategorySchema = new Schema(
   { timestamps: true, versionKey: false, toJSON: { virtuals: true } },
 );
 
+blogCategorySchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.BlogCategory });
+
 blogCategorySchema.pre("save", async function () {
-  if (!this.slug && this.name) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
 

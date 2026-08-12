@@ -9,7 +9,7 @@ import {
 } from "#controllers";
 
 // Middlewares
-import { writeRateLimiter } from "#middlewares";
+import { writeRateLimiter, localizeResponse } from "#middlewares";
 
 /**
  * PUBLIC API — mounted at /api. No authentication.
@@ -19,6 +19,9 @@ import { writeRateLimiter } from "#middlewares";
  * Anything that mutates content lives in adminRoutes.js instead.
  */
 const PublicRouter = Router();
+
+// Bütün public cavabları seçilmiş dilə görə yastılaşdır ({az,en,ru} → mətn).
+PublicRouter.use(localizeResponse);
 
 // Site chrome
 PublicRouter.get("/site", publicController.getSite);

@@ -82,6 +82,12 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["Resource", "Site"],
     }),
 
+    // ── Developer: köhnə məzmunu 3-dilli { az,en,ru } formasına miqrasiya et ──
+    adminMigrateI18n: builder.mutation({
+      query: () => ({ url: "/admin/dev/migrate-i18n", method: "POST" }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+
     // ── Admin users (multiple admins/editors) ──
     adminUsers: builder.query({
       query: (params) => ({ url: "/admin/users", params }),
@@ -131,6 +137,7 @@ export const {
   useAdminCreateCourseFullMutation,
   useAdminUpdateCourseFullMutation,
   useAdminSeedMutation,
+  useAdminMigrateI18nMutation,
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,

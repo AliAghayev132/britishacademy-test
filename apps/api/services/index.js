@@ -7,5 +7,6 @@ export { SlugService } from "./SlugService.js";
 export { buildGraph, validateGraph, seedDatabase } from "./SeedService.js";
 export { logAction } from "./LogService.js";
 export { bootstrapAdmin } from "./BootstrapService.js";
+export { migrateI18n } from "./I18nMigrationService.js";
 export { default as socketService } from "./SocketService.js";
 export { MongoDBService, mongoDBService } from "./MongoDBService.js";

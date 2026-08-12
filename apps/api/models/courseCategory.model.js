@@ -1,5 +1,6 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { seoSchema } from "./shared.schemas.js";
 
 /**
@@ -16,13 +17,13 @@ import { seoSchema } from "./shared.schemas.js";
  */
 const courseCategorySchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: localizedField(),
     slug: { type: String, unique: true, index: true },
 
     parent: { type: Schema.Types.ObjectId, ref: "CourseCategory", default: null },
 
-    description: { type: String },
-    lead: { type: String },
+    description: localizedField(),
+    lead: localizedField(),
     icon: { type: String, trim: true }, // emoji or icon name
     image: { type: String, trim: true },
     // Optional mascot shown on the hub page hero
@@ -61,8 +62,10 @@ courseCategorySchema.virtual("courses", {
   foreignField: "category",
 });
 
+courseCategorySchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.CourseCategory });
+
 courseCategorySchema.pre("save", async function () {
-  if (!this.slug && this.name) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.name, this._id);
   }
 

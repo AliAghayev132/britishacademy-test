@@ -1,5 +1,6 @@
 import { Schema, Model } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import { seoSchema, contentBlockSchema, factSchema, faqItemSchema } from "./shared.schemas.js";
 
 /**
@@ -11,13 +12,13 @@ import { seoSchema, contentBlockSchema, factSchema, faqItemSchema } from "./shar
  */
 const pageSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: localizedField(),
     slug: { type: String, unique: true, index: true },
 
-    h1: { type: String, trim: true },
-    lead: { type: String, trim: true },
+    h1: localizedField(),
+    lead: localizedField(),
     content: { type: [contentBlockSchema], default: [] },
-    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
+    contentHtml: localizedField(), // rich-text body (TipTap); rendered when set, else `content` blocks
     facts: { type: [factSchema], default: [] },
     faq: { type: [faqItemSchema], default: [] },
 
@@ -42,8 +43,10 @@ pageSchema.virtual("url").get(function () {
   return `/${this.slug}`;
 });
 
+pageSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Page });
+
 pageSchema.pre("save", async function () {
-  if (!this.slug && this.title) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
 

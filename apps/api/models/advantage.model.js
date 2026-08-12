@@ -1,10 +1,11 @@
 import { Schema, Model } from "#constants";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /** Advantage — the numbered "Üstünlüklərimiz" cards on the homepage. */
 const advantageSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
-    text: { type: String, trim: true },
+    title: localizedField(),
+    text: localizedField(),
     icon: { type: String, trim: true }, // svg path id or icon name
     color: { type: String, trim: true, default: "#7C4DFF" },
     order: { type: Number, default: 0 },
@@ -13,6 +14,8 @@ const advantageSchema = new Schema(
   },
   { timestamps: true, versionKey: false },
 );
+
+advantageSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Advantage });
 
 advantageSchema.statics.findPublic = function () {
   return this.find({ isActive: true, isDeleted: false }).sort({ order: 1 });

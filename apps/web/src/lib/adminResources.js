@@ -7,9 +7,9 @@ export const ADMIN_RESOURCES = {
   branches: { name: "Filiallar", title: "name", sub: "address" },
   "course-groups": {
     name: "Dərs qrafiki",
-    title: (i) => `${i.course?.title || "Kurs"} — ${i.branch?.name || "Filial"}`,
+    title: (i) => `${pickAz(i.course?.title) || "Kurs"} — ${pickAz(i.branch?.name) || "Filial"}`,
     sub: (i) =>
-      `${i.teacher?.fullName || ""} · ${(i.schedule || [])
+      `${pickAz(i.teacher?.fullName) || ""} · ${(i.schedule || [])
         .map((s) => `${["", "B.e", "Ç.a", "Çərş", "C.a", "Cümə", "Şən", "Baz"][s.weekday]} ${s.from}`)
         .join(", ")}`,
   },
@@ -26,8 +26,14 @@ export const ADMIN_RESOURCES = {
   leads: { name: "Müraciətlər", title: "name", sub: "phone" },
 };
 
+// Çoxdilli { az,en,ru } dəyəri admin siyahısında AZ variantı ilə göstər.
+export const pickAz = (v) =>
+  v && typeof v === "object" && !Array.isArray(v) && ("az" in v || "en" in v || "ru" in v)
+    ? v.az || v.en || v.ru || ""
+    : v;
+
 export const field = (item, spec) =>
-  typeof spec === "function" ? spec(item) : item?.[spec] ?? "";
+  typeof spec === "function" ? pickAz(spec(item)) : pickAz(item?.[spec] ?? "");
 
 // Per-resource filter dropdowns for the list view. Each filter maps to a query
 // param the server understands (adminController generic filters). Bool filters

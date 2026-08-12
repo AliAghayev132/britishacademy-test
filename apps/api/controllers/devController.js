@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction } from "#services";
+import { seedDatabase, logAction, migrateI18n } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -23,4 +23,27 @@ const runSeed = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed };
+/**
+ * POST /api/admin/dev/migrate-i18n
+ * Köhnə string məzmun sahələrini { az, en, ru } formasına çevirir (idempotent).
+ * Mövcud data itmir — mövcud dəyər AZ variantı olur.
+ */
+const runMigrateI18n = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  }
+
+  const result = await migrateI18n();
+  await logAction(req, {
+    action: "settings",
+    resource: "dev",
+    summary: `i18n miqrasiya: ${result.totalDocs} sənəd, ${result.totalFields} sahə çevrildi`,
+  });
+  res.json({
+    success: true,
+    message: `Miqrasiya tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə çevrildi`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n };

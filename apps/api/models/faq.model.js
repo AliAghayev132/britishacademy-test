@@ -1,4 +1,5 @@
 import { Schema, Model } from "#constants";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /**
  * Faq — site-wide questions (homepage FAQ section). Course- and destination-
@@ -7,8 +8,8 @@ import { Schema, Model } from "#constants";
  */
 const faqSchema = new Schema(
   {
-    question: { type: String, required: true, trim: true },
-    answer: { type: String, required: true },
+    question: localizedField(),
+    answer: localizedField(),
     // Optional grouping, e.g. "Qeydiyyat", "Ödəniş"
     group: { type: String, trim: true },
     color: { type: String, trim: true, default: "#7C4DFF" },
@@ -18,6 +19,8 @@ const faqSchema = new Schema(
   },
   { timestamps: true, versionKey: false },
 );
+
+faqSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Faq });
 
 faqSchema.statics.findPublic = function (filter = {}) {
   return this.find({ ...filter, isActive: true, isDeleted: false }).sort({

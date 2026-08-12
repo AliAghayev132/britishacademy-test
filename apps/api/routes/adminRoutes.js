@@ -35,6 +35,7 @@ AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCour
 
 // Developer tools — reseed demo content (admin role enforced in the controller).
 AdminRouter.post("/dev/seed", writeRateLimiter, devController.runSeed);
+AdminRouter.post("/dev/migrate-i18n", writeRateLimiter, devController.runMigrateI18n);
 
 // Admin users (create multiple admins/editors) + audit log.
 // Fixed paths — must precede the generic /:resource matcher.

@@ -1,5 +1,6 @@
 import { Schema, Model, cefrLevels, pricingModes } from "#constants";
 import { SlugService } from "#services/SlugService.js";
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 import {
   seoSchema,
   contentBlockSchema,
@@ -35,7 +36,7 @@ const branchPriceSchema = new Schema(
 
 const courseSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: localizedField(),
     slug: { type: String, unique: true, index: true },
     category: {
       type: Schema.Types.ObjectId,
@@ -44,13 +45,13 @@ const courseSchema = new Schema(
     },
 
     // Hero
-    h1: { type: String, trim: true }, // long SEO headline; falls back to title
-    lead: { type: String, trim: true },
-    excerpt: { type: String, trim: true },
+    h1: localizedField(), // long SEO headline; falls back to title
+    lead: localizedField(),
+    excerpt: localizedField(),
 
     // Ordered body copy
     content: { type: [contentBlockSchema], default: [] },
-    contentHtml: { type: String }, // rich-text body (TipTap); rendered when set, else `content` blocks
+    contentHtml: localizedField(), // rich-text body (TipTap); rendered when set, else `content` blocks
     faq: { type: [faqItemSchema], default: [] },
     info: { type: [factSchema], default: [] }, // "Qısa məlumat" card
     features: { type: [featureSchema], default: [] }, // "Üstünlüklər"
@@ -72,7 +73,7 @@ const courseSchema = new Schema(
     pricing: { type: [branchPriceSchema], default: [] },
     // pricingMode: 'custom' — session-based prices (e.g. conversation clubs)
     customPricing: { type: [factSchema], default: [] },
-    pricingNote: { type: String, trim: true },
+    pricingNote: localizedField(),
     currency: { type: String, default: "AZN" },
 
     image: { type: String, trim: true },
@@ -115,8 +116,10 @@ courseSchema.virtual("priceFrom").get(function () {
   return values.length ? Math.min(...values) : null;
 });
 
+courseSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Course });
+
 courseSchema.pre("save", async function () {
-  if (!this.slug && this.title) {
+  if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }
 

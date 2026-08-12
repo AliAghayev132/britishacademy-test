@@ -49,7 +49,10 @@ const list = asyncHandler(async (req, res) => {
   if (softDelete) filter.isDeleted = false;
   if (req.query.search && search.length) {
     const rx = fuzzyRegex(req.query.search); // AZ-tolerant (İ/ı/ə/ş/ç/ğ/ö/ü)
-    filter.$or = search.map((f) => ({ [f]: rx }));
+    // Həm köhnə string, həm yeni { az,en,ru } formasını axtar (miqrasiya keçidi).
+    filter.$or = search.flatMap((f) => [
+      { [f]: rx }, { [`${f}.az`]: rx }, { [`${f}.en`]: rx }, { [`${f}.ru`]: rx },
+    ]);
   }
 
   // Generic equality filters — applied only for fields the model actually has,
