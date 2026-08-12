@@ -25,7 +25,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -41,7 +41,7 @@ export function BlogPostForm({ item, onClose }) {
   const { data: catData } = useAdminListQuery({ resource: "blog-categories", limit: 100 });
   const categoryOptions = (catData?.data?.items || []).map((c) => ({
     value: c._id,
-    label: c.name,
+    label: locAz(c.name),
   }));
 
   const [create, { isLoading: creating }] = useAdminCreateMutation();
@@ -51,15 +51,15 @@ export function BlogPostForm({ item, onClose }) {
   const [error, setError] = useState("");
 
   // ── Basic ──
-  const [title, setTitle] = useState(item?.title || "");
+  const [title, setTitle] = useState(toLoc(item?.title));
   const [slug, setSlug] = useState(item?.slug || "");
-  const [excerpt, setExcerpt] = useState(item?.excerpt || "");
+  const [excerpt, setExcerpt] = useState(toLoc(item?.excerpt));
   const [cover, setCover] = useState(item?.cover || "");
   const [category, setCategory] = useState(toId(item?.category));
   const [status, setStatus] = useState(item?.status || "draft");
   const [tags, setTags] = useState((item?.tags || []).join(", "));
   const [readMinutes, setReadMinutes] = useState(item?.readMinutes ?? 3);
-  const [content, setContent] = useState(item?.content || "");
+  const [content, setContent] = useState(toLoc(item?.content));
 
   // ── SEO ──
   const [seo, setSeo] = useState(item?.seo || {});
@@ -68,13 +68,23 @@ export function BlogPostForm({ item, onClose }) {
   const handleSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Başlıq", value: title, required: true },
+      { label: "Qısa təsvir", value: excerpt },
+      { label: "Məzmun", value: content },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      title: title.trim(),
-      excerpt: excerpt.trim(),
+      title: trimLoc(title),
+      excerpt: trimLoc(excerpt),
       cover: cover.trim(),
       status,
       readMinutes: Number(readMinutes) || 0,
-      content,
+      content: trimLoc(content),
       tags: tags
         .split(",")
         .map((t) => t.trim())
@@ -116,12 +126,12 @@ export function BlogPostForm({ item, onClose }) {
           )}
           <span>{Number(readMinutes) || 0} dəq</span>
         </div>
-        <h3 className="mt-2 text-lg font-bold text-gray-900">{title || "Başlıq"}</h3>
-        {excerpt && <p className="mt-1 text-sm text-gray-600">{excerpt}</p>}
-        {content && (
+        <h3 className="mt-2 text-lg font-bold text-gray-900">{locAz(title) || "Başlıq"}</h3>
+        {locAz(excerpt) && <p className="mt-1 text-sm text-gray-600">{locAz(excerpt)}</p>}
+        {locAz(content) && (
           <div
             className="bz-body mt-4"
-            dangerouslySetInnerHTML={{ __html: content }}
+            dangerouslySetInnerHTML={{ __html: locAz(content) }}
           />
         )}
       </div>
@@ -141,8 +151,8 @@ export function BlogPostForm({ item, onClose }) {
       {/* ── Əsas ── */}
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
-        <Field label="Başlıq" required>
-          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Field label="Başlıq" required info="3 dildə — AZ mütləqdir">
+          <LocalizedInput value={title} onChange={setTitle} />
         </Field>
         <Field label="Slug (linki)" info="Boş buraxsan avtomatik yaranır">
           <TextInput
@@ -151,12 +161,8 @@ export function BlogPostForm({ item, onClose }) {
             placeholder="ielts-hazirliq-melumatlari"
           />
         </Field>
-        <Field label="Qısa təsvir (excerpt)">
-          <TextArea
-            rows={2}
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-          />
+        <Field label="Qısa təsvir (excerpt)" info="3 dildə">
+          <LocalizedInput value={excerpt} onChange={setExcerpt} multiline rows={2} />
         </Field>
         <Field label="Örtük şəkli (cover)">
           <FileUpload value={cover} onChange={setCover} kind="image" />
@@ -196,8 +202,8 @@ export function BlogPostForm({ item, onClose }) {
       {/* ── Məzmun ── */}
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Məzmun">
-          <TiptapEditor content={content} onChange={setContent} />
+        <Field label="Məzmun" info="3 dildə">
+          <LocalizedEditor value={content} onChange={setContent} />
         </Field>
       </section>
 

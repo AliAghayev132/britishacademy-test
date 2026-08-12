@@ -24,7 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 const emptyBlock = { heading: "", body: "" };
 
@@ -35,11 +35,11 @@ export function PageForm({ item, onClose }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  const [title, setTitle] = useState(item?.title || "");
+  const [title, setTitle] = useState(toLoc(item?.title));
   const [slug, setSlug] = useState(item?.slug || "");
-  const [h1, setH1] = useState(item?.h1 || "");
-  const [lead, setLead] = useState(item?.lead || "");
-  const [contentHtml, setContentHtml] = useState(item?.contentHtml || "");
+  const [h1, setH1] = useState(toLoc(item?.h1));
+  const [lead, setLead] = useState(toLoc(item?.lead));
+  const [contentHtml, setContentHtml] = useState(toLoc(item?.contentHtml));
 
   const [blocks, setBlocks] = useState(
     Array.isArray(item?.content) && item.content.length
@@ -76,13 +76,13 @@ export function PageForm({ item, onClose }) {
   const preview = (
     <div>
       <h2 className="text-2xl font-bold text-gray-900">
-        {h1.trim() || title.trim() || "Başlıq"}
+        {locAz(h1).trim() || locAz(title).trim() || "Başlıq"}
       </h2>
-      {lead.trim() && <p className="mt-2 text-gray-600">{lead.trim()}</p>}
-      {contentHtml && (
+      {locAz(lead).trim() && <p className="mt-2 text-gray-600">{locAz(lead).trim()}</p>}
+      {locAz(contentHtml) && (
         <div
           className="bz-body mt-4"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
+          dangerouslySetInnerHTML={{ __html: locAz(contentHtml) }}
         />
       )}
     </div>
@@ -91,14 +91,25 @@ export function PageForm({ item, onClose }) {
   const onSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Başlıq", value: title, required: true },
+      { label: "H1 başlıq", value: h1 },
+      { label: "Giriş mətni", value: lead },
+      { label: "Məzmun", value: contentHtml },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      title: title.trim(),
-      h1: h1.trim(),
-      lead: lead.trim(),
+      title: trimLoc(title),
+      h1: trimLoc(h1),
+      lead: trimLoc(lead),
       order: Number(order) || 0,
       isActive,
       seo,
-      contentHtml,
+      contentHtml: trimLoc(contentHtml),
       // Simple paragraph blocks; prune empty rows.
       content: blocks
         .map((b) => ({
@@ -142,11 +153,8 @@ export function PageForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Başlıq" required>
-            <TextInput
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+          <Field label="Başlıq" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={title} onChange={setTitle} />
           </Field>
           {isSystem ? (
             <Field
@@ -164,8 +172,8 @@ export function PageForm({ item, onClose }) {
               />
             </Field>
           )}
-          <Field label="H1 başlıq" info="Səhifədə görünən əsas başlıq">
-            <TextInput value={h1} onChange={(e) => setH1(e.target.value)} />
+          <Field label="H1 başlıq" info="3 dildə — səhifədə görünən əsas başlıq">
+            <LocalizedInput value={h1} onChange={setH1} />
           </Field>
           <Field label="Sıra" info="Kiçik rəqəm əvvəldə görünür">
             <NumberInput
@@ -173,12 +181,8 @@ export function PageForm({ item, onClose }) {
               onChange={(e) => setOrder(e.target.value)}
             />
           </Field>
-          <Field label="Giriş mətni (lead)" className="sm:col-span-2">
-            <TextArea
-              rows={3}
-              value={lead}
-              onChange={(e) => setLead(e.target.value)}
-            />
+          <Field label="Giriş mətni (lead)" info="3 dildə" className="sm:col-span-2">
+            <LocalizedInput value={lead} onChange={setLead} multiline rows={3} />
           </Field>
         </div>
       </section>
@@ -220,8 +224,8 @@ export function PageForm({ item, onClose }) {
       {/* Məzmun (rich text) */}
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Məzmun">
-          <TiptapEditor content={contentHtml} onChange={setContentHtml} />
+        <Field label="Məzmun" info="3 dildə">
+          <LocalizedEditor value={contentHtml} onChange={setContentHtml} />
         </Field>
       </section>
 
