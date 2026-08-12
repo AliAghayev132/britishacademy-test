@@ -1,14 +1,16 @@
+"use client";
+
 import { ApplyButton } from "./ApplyButton";
+import { useT } from "@/lib/i18n/useT";
 
 /**
  * Shared "Hazırsan? Elə bu gün başla." dark CTA band (mirrors the static
  * ctaBand()). Dropped at the bottom of most content pages.
  */
-export function CtaBand({
-  interest,
-  title = "Hazırsan? Elə bu gün başla.",
-  text = "Pulsuz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.",
-}) {
+export function CtaBand({ interest, title, text }) {
+  const t = useT();
+  title = title ?? t("cta.title");
+  text = text ?? t("cta.text");
   return (
     <section style={{ maxWidth: 1240, margin: "0 auto", padding: "64px 28px 0" }}>
       <div style={{ position: "relative", overflow: "hidden", background: "#00103D", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ApplyButton } from "./ApplyButton";
+import { useT } from "@/lib/i18n/useT";
 
 /** Floating glass chips — direct children divs of the hero so the per-position
  *  colour tints in globals.css (body.ba-home .ba-hero > div:nth-of-type(4..9)
@@ -91,6 +92,7 @@ function StatValue({ raw }) {
  */
 export function Hero({ hero, stats = [] }) {
   // ── Derived / state ──
+  const t = useT();
   const words = hero?.words?.length ? hero.words : ["ingiliscə danış"];
   const colors = hero?.colors?.length ? hero.colors : ["#001478"];
   const [i, setI] = useState(0);
@@ -187,13 +189,13 @@ export function Hero({ hero, stats = [] }) {
             </a>
           ))}
           <a href="#qeydiyyat" style={{ ...PILL_BASE, background: "#001452", color: "#fff", fontWeight: 700, boxShadow: "none" }}>
-            Pulsuz sınaq dərsi →
+            {t("hero.trial")}
           </a>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 44 }}>
           <ApplyButton className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }}>
-            Pulsuz sınaq dərsinə yazıl →
+            {t("hero.trialCta")}
           </ApplyButton>
         </div>
       </div>

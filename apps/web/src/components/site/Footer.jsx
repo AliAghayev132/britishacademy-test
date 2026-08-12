@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "./LocaleLink";
+import { getT } from "@/lib/i18n/serverT";
 
 const col = (title, links) => (
   <div>
@@ -11,8 +12,9 @@ const col = (title, links) => (
   </div>
 );
 
-/** Site footer. Pure render (no hooks) so it stays a Server Component. */
-export function Footer({ site }) {
+/** Site footer (server component; dil getT ilə). */
+export async function Footer({ site }) {
+  const t = await getT();
   const s = site || {};
   const c = s.contact || {};
   const soc = s.socials || {};
@@ -30,19 +32,19 @@ export function Footer({ site }) {
             <img src={s.brand?.logoStack || "/assets/logo-stack.png"} alt="British Academy" style={{ height: 74, width: "auto" }} />
           </div>
           <p style={{ fontSize: 14.5, lineHeight: 1.65, margin: "20px 0 0", maxWidth: 330, color: "#9A9BB0" }}>
-            English UK akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti. 2014-cü ildən keyfiyyətli dil təhsili və xaricdə təhsil.
+            {t("footer.intro")}
           </p>
           <div style={{ fontSize: 14, color: "#8788A0", marginTop: 20, lineHeight: 1.75 }}>
             {c.address}<br />{c.phone}{c.phone2 ? ` · ${c.phone2}` : ""}<br />{c.email}
           </div>
         </div>
-        {col("Kurslar", [["Dil Kursları", "/kurslar/dil-kurslari"], ["Beynəlxalq imtahanlar", "/kurslar/imtahanlar"], ["Kompüter Kursu", "/kurslar/komputer"], ["Karyera kursları", "/kurslar/karyera"]])}
-        {col("Akademiya", [["Haqqımızda", "/haqqimizda"], ["Filiallar", "/filiallar"], ["Xaricdə təhsil", "/xaricde-tehsil"], ["Müəllimlər", "/muellimler"], ["Tələbələrimiz", "/telebelerimiz"]])}
-        {col("Əlaqə", [["Instagram", soc.instagram || "#"], ["Facebook", soc.facebook || "#"], ["YouTube", soc.youtube || "#"], ["Əlaqə", "/elaqe"], ["Bloq", "/bloq"]])}
+        {col(t("footer.col.courses"), [[t("footer.link.langCourses"), "/kurslar/dil-kurslari"], [t("footer.link.exams"), "/kurslar/imtahanlar"], [t("footer.link.computer"), "/kurslar/komputer"], [t("footer.link.career"), "/kurslar/karyera"]])}
+        {col(t("footer.col.academy"), [[t("footer.link.about"), "/haqqimizda"], [t("footer.link.branches"), "/filiallar"], [t("footer.link.abroad"), "/xaricde-tehsil"], [t("footer.link.teachers"), "/muellimler"], [t("footer.link.students"), "/telebelerimiz"]])}
+        {col(t("footer.col.contact"), [["Instagram", soc.instagram || "#"], ["Facebook", soc.facebook || "#"], ["YouTube", soc.youtube || "#"], [t("footer.link.contact"), "/elaqe"], [t("footer.link.blog"), "/bloq"]])}
       </div>
       <div style={{ position: "relative", zIndex: 2, borderTop: "1px solid rgba(255,255,255,.1)", marginTop: 24 }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "22px 28px", display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", fontSize: 13, color: "#7B7C94" }}>
-          <span>© 2014–2026 British Academy. Bütün hüquqlar qorunur.</span>
+          <span>© 2014–2026 British Academy. {t("footer.rights")}</span>
           <span>English UK · Cambridge · British Council · Duolingo · TOEFL</span>
         </div>
       </div>
