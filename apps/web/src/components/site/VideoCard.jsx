@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/useT";
 
 // ── helpers ──
 function fmt(sec) {
@@ -16,6 +17,7 @@ function fmt(sec) {
  *   video?: { url?: string, poster?: string, durationSeconds?: number } } }} props
  */
 export default function VideoCard({ t }) {
+  const tr = useT();
   const v = t || {};
   const url = v.video?.url || "";
   const poster = v.video?.poster || "";
@@ -123,7 +125,7 @@ export default function VideoCard({ t }) {
           )}
           {/* disabled play affordance */}
           <div
-            aria-label="Video hazır deyil"
+            aria-label={tr("video.notReady")}
             style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", display: "grid", placeItems: "center", boxShadow: "0 12px 28px rgba(0,0,0,.45)", opacity: 0.55, cursor: "default" }}
           >
             <PlayIcon />
@@ -174,7 +176,7 @@ export default function VideoCard({ t }) {
         <button
           className="ba-vplay"
           onClick={togglePlay}
-          aria-label={playing ? "Dayandır" : "Oynat"}
+          aria-label={playing ? tr("video.pause") : tr("video.play")}
           style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: 64, height: 64, borderRadius: 20, background: "var(--accent)", border: "none", cursor: "pointer", display: "grid", placeItems: "center", boxShadow: "0 12px 28px rgba(0,0,0,.45)", opacity: playing ? 0 : 1, transition: "opacity .25s, transform .2s" }}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
@@ -185,7 +187,7 @@ export default function VideoCard({ t }) {
           <button
             className="ba-vmini"
             onClick={togglePlay}
-            aria-label="Oynat / Dayandır"
+            aria-label={tr("video.playPause")}
             style={{ width: 26, height: 26, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.92)", cursor: "pointer", display: "grid", placeItems: "center", flex: "none" }}
           >
             {playing ? <PauseIcon size={13} fill="#14141C" /> : <PlayIcon size={14} fill="#14141C" ml={2} />}
@@ -196,7 +198,7 @@ export default function VideoCard({ t }) {
             className="ba-vtrack"
             onClick={seek}
             role="slider"
-            aria-label="Video vaxtı"
+            aria-label={tr("video.time")}
             aria-valuemin={0}
             aria-valuemax={Math.round(duration)}
             aria-valuenow={Math.round(current)}
@@ -211,7 +213,7 @@ export default function VideoCard({ t }) {
 
           <button
             onClick={toggleMute}
-            aria-label={muted ? "Səsi aç" : "Səssiz et"}
+            aria-label={muted ? tr("video.unmute") : tr("video.mute")}
             style={{ width: 26, height: 26, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.92)", cursor: "pointer", display: "grid", placeItems: "center", flex: "none" }}
           >
             {muted ? (
@@ -223,7 +225,7 @@ export default function VideoCard({ t }) {
 
           <button
             onClick={toggleFs}
-            aria-label={isFs ? "Tam ekrandan çıx" : "Tam ekran"}
+            aria-label={isFs ? tr("video.exitFs") : tr("video.fullscreen")}
             style={{ width: 26, height: 26, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.92)", cursor: "pointer", display: "grid", placeItems: "center", flex: "none" }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#14141C" aria-hidden="true"><path d="M4 9V4h5v2H6v3H4zm11-5h5v5h-2V6h-3V4zM4 15h2v3h3v2H4v-5zm14 3v-3h2v5h-5v-2h3z" /></svg>

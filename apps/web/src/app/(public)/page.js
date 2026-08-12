@@ -28,15 +28,6 @@ const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 // Per-advantage icon (by index) so each of the 6 cards differs.
 const ADV_ICONS = ["⚡", "🎯", "🎓", "🗣️", "📚", "🏆"];
 
-// Homepage FAQ copy (mirrors the static index.html FAQ block).
-const HOME_FAQ = [
-  { question: "Digər mərkəzlərdən üstün cəhətləriniz nələrdir?", answer: "British Academy ingilis dilini xüsusi metodlarla standart üsullardan 4 dəfə daha sürətli və effektiv tədris edir. Dili sistemli şəkildə, ana diliniz kimi öyrənirsiniz." },
-  { question: "Sınaq dərsi mövcuddur?", answer: "Bəli. İlk dərs sınaq dərsidir; davam etsəniz dərs saatı kimi qeydə alınır." },
-  { question: "Müəllimlərin sertifikatı var?", answer: "British Academy müəllimləri xaricdə təhsil almış, beynəlxalq sertifikatlara malik (IELTS 8.0–8.5) müəllimlərdir." },
-  { question: "Bir səviyyə nə qədər çəkir?", answer: "Hər dil səviyyəsi 1.5–2 ay müddətində tədris olunur, sonra növbəti səviyyəyə keçilir." },
-  { question: "Dərsliklərlə təmin edirsinizmi?", answer: "Böyük Britaniyada hazırlanmış xüsusi tədris kitabları ilə tələbələr ödənişsiz təmin olunur." },
-  { question: "Danışıq klubu üçün əlavə ödəniş var?", answer: "Xeyr. Conversation Club tələbələrimiz üçün ödənişsizdir — həftənin 3 günü, 8 fərqli klub formatında." },
-];
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";
@@ -161,7 +152,7 @@ export default async function HomePage() {
       {/* FAQ */}
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
         <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
-        <FaqAccordion items={HOME_FAQ} />
+        <FaqAccordion items={[1, 2, 3, 4, 5, 6].map((n) => ({ question: t(`hfaq.q${n}`), answer: t(`hfaq.a${n}`) }))} />
       </section>
 
       {/* Partners */}

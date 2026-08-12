@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { LocaleLink as Link } from "./LocaleLink";
+import { useT } from "@/lib/i18n/useT";
 
 // ── Constants ──
 const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];
@@ -24,6 +27,7 @@ function CustomPricing({ course }) {
 }
 
 function BranchPriceCard({ p, cc, teachers }) {
+  const t = useT();
   const b = p.branch;
   return (
     <div className="ba-pricecard" style={{ "--c": cc }}>
@@ -34,27 +38,27 @@ function BranchPriceCard({ p, cc, teachers }) {
       <table className="ba-ptable">
         <thead>
           <tr>
-            <th scope="col"><span className="ba-sr">Vaxt</span></th>
-            <th scope="col">Qrup <span>3–6 nəfər</span></th>
-            <th scope="col">Fərdi <span>1 nəfər</span></th>
+            <th scope="col"><span className="ba-sr">{t("price.time")}</span></th>
+            <th scope="col">{t("price.groupLabel")} <span>{t("price.group")}</span></th>
+            <th scope="col">{t("price.individual")} <span>{t("price.onePerson")}</span></th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th scope="row">Gündüz <span>09:00–17:00</span></th>
-            <td>{p.group?.day} <i>AZN/ay</i></td>
-            <td>{p.individual?.day} <i>AZN/ay</i></td>
+            <th scope="row">{t("price.day")} <span>09:00–17:00</span></th>
+            <td>{p.group?.day} <i>{t("svc.perMonth")}</i></td>
+            <td>{p.individual?.day} <i>{t("svc.perMonth")}</i></td>
           </tr>
           <tr>
-            <th scope="row">Axşam <span>17:00-dan sonra</span></th>
-            <td>{p.group?.evening} <i>AZN/ay</i></td>
-            <td>{p.individual?.evening} <i>AZN/ay</i></td>
+            <th scope="row">{t("price.evening")} <span>{t("price.afterEvening")}</span></th>
+            <td>{p.group?.evening} <i>{t("svc.perMonth")}</i></td>
+            <td>{p.individual?.evening} <i>{t("svc.perMonth")}</i></td>
           </tr>
         </tbody>
       </table>
       {teachers.length > 0 && (
         <div className="ba-pricecard-t">
-          <span className="ba-pricecard-tlabel">Bu filialda dərs deyir</span>
+          <span className="ba-pricecard-tlabel">{t("price.teachesHere")}</span>
           <span style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {teachers.map((t) => (
               <Link key={t._id} href={`/muellimler/${t.slug}`} title={t.title} style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#F5F6FA", borderRadius: 99, padding: "4px 12px 4px 4px" }}>
@@ -74,6 +78,7 @@ function BranchPriceCard({ p, cc, teachers }) {
  * teachers who run the course at that branch (from teachersByBranch).
  */
 export function PriceCards({ course, teachersByBranch = [] }) {
+  const t = useT();
   // ── Custom pricing mode ──
   if (course.pricingMode === "custom") {
     return <CustomPricing course={course} />;
@@ -81,13 +86,13 @@ export function PriceCards({ course, teachersByBranch = [] }) {
 
   // ── Derived values ──
   const teachersFor = (branchId) =>
-    teachersByBranch.find((t) => String(t.branch._id) === String(branchId))?.teachers || [];
+    teachersByBranch.find((tt) => String(tt.branch._id) === String(branchId))?.teachers || [];
 
   // ── Render ──
   return (
     <>
       <p style={{ fontSize: 15.5, color: "#63636F", margin: "0 0 24px" }}>
-        Qiymət filiala, dərs formatına (qrup / fərdi) və saata görə dəyişir. Axşam qrupları — qrup dərsi üçün +10 AZN, fərdi dərs üçün +20 AZN.
+        {t("price.intro")}
       </p>
       <div className="ba-pricegrid">
         {course.pricing.map((p, i) => {

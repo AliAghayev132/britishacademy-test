@@ -1,7 +1,8 @@
 // Next
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import DOMPurify from "isomorphic-dompurify";
+import { getT } from "@/lib/i18n/serverT";
 
 // Data
 import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
@@ -58,17 +59,18 @@ export async function generateMetadata({ params }) {
 // ── Category hub ──
 /** Category hub: boxes of the category's courses. */
 async function CategoryHub({ cat }) {
+  const tr = await getT();
   const courseData = await apiGet(`/courses?category=${cat.slug}`);
   const courses = courseData?.courses || [];
   return (
     <>
       <PageBanner
         title={cat.name}
-        subtitle={cat.lead || `${cat.name} üzrə bütün proqramlar və qeydiyyat.`}
+        subtitle={cat.lead || cat.name}
         mascot="courses"
         breadcrumb={[
-          { label: "Ana səhifə", href: "/" },
-          { label: "Kurslar", href: "/kurslar" },
+          { label: tr("common.home"), href: "/" },
+          { label: tr("common.courses"), href: "/kurslar" },
           { label: cat.name },
         ]}
       />
@@ -76,7 +78,7 @@ async function CategoryHub({ cat }) {
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
           {courses.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
         </div>
-        {!courses.length && <p style={{ color: "#63636F" }}>Bu kateqoriyada hələ kurs yoxdur.</p>}
+        {!courses.length && <p style={{ color: "#63636F" }}>{tr("course.emptyCat")}</p>}
       </section>
     </>
   );
@@ -84,10 +86,10 @@ async function CategoryHub({ cat }) {
 
 // ── Subcomponents ──
 /** Sidebar with course info rows + apply CTA. */
-function InfoSidebar({ course }) {
+function InfoSidebar({ course, tr }) {
   return (
     <aside style={{ border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, background: "#FAFBFF", position: "sticky", top: 100 }}>
-      <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>Qısa məlumat</div>
+      <div style={{ fontWeight: 700, fontSize: 13, color: "#63636E", letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 16 }}>{tr("course.info")}</div>
       {(course.info || []).map((r, i) => (
         <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: "1px solid #ECEDF2", fontSize: 15 }}>
           <span style={{ color: "#63636F" }}>{r.label}</span>
@@ -100,10 +102,10 @@ function InfoSidebar({ course }) {
 }
 
 /** "Üstünlüklər" — responsive icon-tile grid of course features. */
-function FeaturesGrid({ features }) {
+function FeaturesGrid({ features, tr }) {
   return (
     <section style={{ ...wrap, padding: "56px 28px 0" }}>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>Üstünlüklər</h2>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>{tr("course.features")}</h2>
       <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
         {features.map((f, i) => (
           <div key={i} style={{ border: "1px solid #ECEDF2", borderRadius: 18, padding: 24, background: "#fff" }}>
@@ -118,11 +120,11 @@ function FeaturesGrid({ features }) {
 }
 
 /** "Bu kursun müəllimləri" — unique teachers across all branches. */
-function CourseTeachers({ teachers }) {
+function CourseTeachers({ teachers, tr }) {
   return (
     <section style={{ ...wrap, padding: "56px 28px 0" }}>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 8px" }}>Bu kursun müəllimləri</h2>
-      <p style={{ fontSize: 15, color: "#63636F", margin: "0 0 24px" }}>Beynəlxalq sertifikatlı, təcrübəli müəllim heyəti. <Link href="/muellimler" style={{ color: "var(--accent)", fontWeight: 700 }}>Hamısına bax →</Link></p>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 8px" }}>{tr("course.teachers")}</h2>
+      <p style={{ fontSize: 15, color: "#63636F", margin: "0 0 24px" }}>{tr("course.teachersSub")} <Link href="/muellimler" style={{ color: "var(--accent)", fontWeight: 700 }}>{tr("nav.all")}</Link></p>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
         {teachers.slice(0, 3).map((t) => (
           <Link key={t._id} href={`/muellimler/${t.slug}`} style={{ display: "flex", alignItems: "center", gap: 14, border: "1px solid #ECEDF2", borderRadius: 18, padding: 18, background: "#fff" }}>
@@ -139,10 +141,10 @@ function CourseTeachers({ teachers }) {
 }
 
 /** "Digər istiqamətlər" related-courses grid. */
-function RelatedCourses({ related }) {
+function RelatedCourses({ related, tr }) {
   return (
     <section style={{ ...wrap, padding: "56px 28px 0" }}>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>Digər istiqamətlər</h2>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>{tr("course.related")}</h2>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
         {related.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
       </div>
@@ -163,6 +165,7 @@ export default async function CoursePage({ params }) {
     notFound();
   }
 
+  const tr = await getT();
   const { course, teachersByBranch = [], related = [] } = res.data;
 
   // ── Unique teachers across all branches (for the standalone section) ──
@@ -219,14 +222,14 @@ export default async function CoursePage({ params }) {
         subtitle={course.lead}
         mascot="courses"
         breadcrumb={[
-          { label: "Ana səhifə", href: "/" },
-          { label: course.category?.name || "Kurslar", href: `/kurslar/${course.category?.slug || ""}` },
+          { label: tr("common.home"), href: "/" },
+          { label: course.category?.name || tr("common.courses"), href: `/kurslar/${course.category?.slug || ""}` },
           { label: course.title },
         ]}
       >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
           <ApplyButton interest={course.title} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
-          <Link href="/elaqe" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)", color: "#fff", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99 }}>Əlaqə saxla</Link>
+          <Link href="/elaqe" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)", color: "#fff", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99 }}>{tr("course.contactSave")}</Link>
         </div>
       </PageBanner>
 
@@ -240,44 +243,44 @@ export default async function CoursePage({ params }) {
               <ContentBlocks blocks={course.content} />
             ) : (
               <>
-                <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", margin: "0 0 16px" }}>Kurs haqqında</h2>
+                <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", margin: "0 0 16px" }}>{tr("course.about")}</h2>
                 <p style={{ fontSize: 17, lineHeight: 1.8, color: "#33333D" }}>{course.lead}</p>
               </>
             )}
           </div>
-          <InfoSidebar course={course} />
+          <InfoSidebar course={course} tr={tr} />
         </div>
       </section>
 
       {/* Prices */}
       <section id="qiymetler" style={{ ...wrap, padding: "56px 28px 0" }}>
-        <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 22px" }}>{course.pricingMode === "custom" ? "Qiymətlər" : "Filiallar üzrə qiymətlər"}</h2>
+        <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 22px" }}>{course.pricingMode === "custom" ? tr("course.prices") : tr("course.pricesByBranch")}</h2>
         <PriceCards course={course} teachersByBranch={teachersByBranch} />
-        <p style={{ fontSize: 13.5, color: "#63636E", margin: "14px 0 0" }}>Bütün <Link href="/filiallar" style={{ color: "var(--accent)", fontWeight: 700 }}>filiallara bax</Link> və ya dəqiq məlumat üçün <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>əlaqə saxla</Link>.</p>
+        <p style={{ fontSize: 13.5, color: "#63636E", margin: "14px 0 0" }}>{tr("course.priceHelp")} <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>{tr("course.contactSave")}</Link>.</p>
       </section>
 
       {/* Features */}
-      {course.features?.length > 0 && <FeaturesGrid features={course.features} />}
+      {course.features?.length > 0 && <FeaturesGrid features={course.features} tr={tr} />}
 
       {/* Course teachers */}
-      {uniqueTeachers.length > 0 && <CourseTeachers teachers={uniqueTeachers} />}
+      {uniqueTeachers.length > 0 && <CourseTeachers teachers={uniqueTeachers} tr={tr} />}
 
       {/* FAQ */}
       {course.faq?.length > 0 && (
         <section style={{ ...wrap, padding: "56px 28px 0" }}>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 24px" }}>Tez-tez verilən suallar</h2>
+          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 24px" }}>{tr("common.faq")}</h2>
           <FaqAccordion items={course.faq} />
         </section>
       )}
 
       {/* Related */}
-      {related.length > 0 && <RelatedCourses related={related} />}
+      {related.length > 0 && <RelatedCourses related={related} tr={tr} />}
 
       {/* CTA */}
       <section style={{ ...wrap, padding: "64px 28px 0" }}>
-        <div style={{ background: "#0C0D1A", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(26px,3.4vw,36px)", color: "#fff", margin: 0 }}>Hazırsan? Elə bu gün başla.</h2>
-          <p style={{ fontSize: 16, color: "#B9BAD0", margin: "14px auto 26px", maxWidth: 520, lineHeight: 1.6 }}>Pulsuz səviyyə təyini və məsləhət üçün müraciət et.</p>
+        <div style={{ background: "#00103D", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(26px,3.4vw,36px)", color: "#fff", margin: 0 }}>{tr("cta.title")}</h2>
+          <p style={{ fontSize: 16, color: "#B9BAD0", margin: "14px auto 26px", maxWidth: 520, lineHeight: 1.6 }}>{tr("cta.text")}</p>
           <ApplyButton interest={course.title} style={{ background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 99, cursor: "pointer" }} />
         </div>
       </section>
