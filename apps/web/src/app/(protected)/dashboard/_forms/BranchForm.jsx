@@ -25,6 +25,7 @@ import {
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { SeoFields } from "./SeoFields";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 const emptyHour = { days: "", from: "", to: "" };
 
@@ -34,10 +35,10 @@ export function BranchForm({ item, onClose }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  const [name, setName] = useState(item?.name || "");
+  const [name, setName] = useState(toLoc(item?.name));
   const [slug, setSlug] = useState(item?.slug || "");
-  const [address, setAddress] = useState(item?.address || "");
-  const [district, setDistrict] = useState(item?.district || "");
+  const [address, setAddress] = useState(toLoc(item?.address));
+  const [district, setDistrict] = useState(toLoc(item?.district));
   const [metro, setMetro] = useState(item?.metro || "");
 
   const [phone, setPhone] = useState(item?.phone || "");
@@ -99,10 +100,20 @@ export function BranchForm({ item, onClose }) {
   const onSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Ad", value: name, required: true },
+      { label: "Ünvan", value: address, required: true },
+      { label: "Rayon", value: district },
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      name: name.trim(),
-      address: address.trim(),
-      district: district.trim(),
+      name: trimLoc(name),
+      address: trimLoc(address),
+      district: trimLoc(district),
       metro: metro.trim(),
       phone: phone.trim(),
       whatsapp: whatsapp.trim(),
@@ -152,17 +163,17 @@ export function BranchForm({ item, onClose }) {
   const preview = (
     <div className="space-y-3">
       <div className="text-lg font-bold text-gray-900">
-        {name.trim() || "Filial adı"}
+        {locAz(name).trim() || "Filial adı"}
         {isMain && (
           <span className="ml-2 rounded-full bg-blue-900 px-2 py-0.5 text-xs font-semibold text-white">
             Baş ofis
           </span>
         )}
       </div>
-      {address.trim() && (
+      {locAz(address).trim() && (
         <div className="text-sm text-gray-500">
-          {address.trim()}
-          {district.trim() ? ` · ${district.trim()}` : ""}
+          {locAz(address).trim()}
+          {locAz(district).trim() ? ` · ${locAz(district).trim()}` : ""}
           {metro.trim() ? ` · ${metro.trim()} m.` : ""}
         </div>
       )}
@@ -195,8 +206,8 @@ export function BranchForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ad" required>
-            <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+          <Field label="Ad" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={name} onChange={setName} />
           </Field>
           <Field label="Slug (linki)" info="Boş buraxsan addan avtomatik yaranır">
             <TextInput
@@ -205,17 +216,11 @@ export function BranchForm({ item, onClose }) {
               placeholder="nizami"
             />
           </Field>
-          <Field label="Ünvan" required>
-            <TextInput
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+          <Field label="Ünvan" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={address} onChange={setAddress} />
           </Field>
-          <Field label="Rayon">
-            <TextInput
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-            />
+          <Field label="Rayon" info="3 dildə">
+            <LocalizedInput value={district} onChange={setDistrict} />
           </Field>
           <Field label="Metro" info="Ən yaxın metro stansiyası">
             <TextInput

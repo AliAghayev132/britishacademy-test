@@ -23,6 +23,7 @@ import {
   SectionTitle,
   toId,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function CourseCategoryForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);
@@ -37,9 +38,9 @@ export function CourseCategoryForm({ item, onClose }) {
   });
   const parentOptions = (catData?.data?.items || [])
     .filter((c) => c._id !== item?._id)
-    .map((c) => ({ value: c._id, label: c.name }));
+    .map((c) => ({ value: c._id, label: locAz(c.name) }));
 
-  const [name, setName] = useState(item?.name || "");
+  const [name, setName] = useState(toLoc(item?.name));
   const [slug, setSlug] = useState(item?.slug || "");
   const [icon, setIcon] = useState(item?.icon || "");
   const [parent, setParent] = useState(toId(item?.parent));
@@ -57,8 +58,14 @@ export function CourseCategoryForm({ item, onClose }) {
   const onSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([{ label: "Ad", value: name, required: true }]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
-      name: name.trim(),
+      name: trimLoc(name),
       icon: icon.trim(),
       parent: parent || null,
       order: Number(order) || 0,
@@ -96,8 +103,8 @@ export function CourseCategoryForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Əsas</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ad" required>
-            <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+          <Field label="Ad" required info="3 dildə — AZ mütləqdir">
+            <LocalizedInput value={name} onChange={setName} />
           </Field>
           <Field
             label="Slug (linki)"

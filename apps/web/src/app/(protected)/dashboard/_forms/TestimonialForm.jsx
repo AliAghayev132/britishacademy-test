@@ -24,6 +24,7 @@ import {
   SectionTitle,
   toId,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
@@ -41,11 +42,11 @@ export function TestimonialForm({ item, onClose }) {
   const { data: branchesData } = useAdminListQuery({ resource: "branches", limit: 100 });
   const courseOptions = (coursesData?.data?.items || []).map((c) => ({
     value: c._id,
-    label: c.title || c.name || c.slug || c._id,
+    label: locAz(c.title) || locAz(c.name) || c.slug || c._id,
   }));
   const branchOptions = (branchesData?.data?.items || []).map((b) => ({
     value: b._id,
-    label: b.name,
+    label: locAz(b.name),
   }));
 
   const [create, { isLoading: creating }] = useAdminCreateMutation();
@@ -57,7 +58,7 @@ export function TestimonialForm({ item, onClose }) {
   // ── Basic ──
   const [name, setName] = useState(item?.name || "");
   const [type, setType] = useState(item?.type || "text");
-  const [achievement, setAchievement] = useState(item?.achievement || "");
+  const [achievement, setAchievement] = useState(toLoc(item?.achievement));
   const [color, setColor] = useState(item?.color || "#2E6BE6");
   const [photo, setPhoto] = useState(item?.photo || "");
 
@@ -65,7 +66,7 @@ export function TestimonialForm({ item, onClose }) {
   const [branch, setBranch] = useState(toId(item?.branch));
 
   // ── Text type ──
-  const [quote, setQuote] = useState(item?.quote || "");
+  const [quote, setQuote] = useState(toLoc(item?.quote));
   const [rating, setRating] = useState(item?.rating ?? 5);
 
   // ── Video type ──
@@ -83,10 +84,19 @@ export function TestimonialForm({ item, onClose }) {
   const handleSave = async () => {
     setError("");
 
+    const guard = await confirmLocalized([
+      { label: "Nailiyyət", value: achievement },
+      ...(isVideo ? [] : [{ label: "Rəy (sitat)", value: quote }]),
+    ]);
+    if (!guard.ok) {
+      if (guard.error) setError(guard.error);
+      return;
+    }
+
     const data = {
       name: name.trim(),
       type,
-      achievement: achievement.trim(),
+      achievement: trimLoc(achievement),
       color: color || "#2E6BE6",
       photo: photo.trim(),
       isFeatured,
@@ -102,7 +112,7 @@ export function TestimonialForm({ item, onClose }) {
         data.video = { url: videoUrl.trim(), poster: videoPoster.trim() };
       }
     } else {
-      data.quote = quote.trim();
+      data.quote = trimLoc(quote);
       data.rating = Number(rating) || 5;
     }
 
@@ -143,8 +153,8 @@ export function TestimonialForm({ item, onClose }) {
           <div className="mb-2 text-amber-500">{"★".repeat(Math.min(5, Number(rating) || 0))}</div>
         )
       )}
-      {!isVideo && quote && (
-        <p className="mb-4 text-sm italic text-gray-700">“{quote}”</p>
+      {!isVideo && locAz(quote) && (
+        <p className="mb-4 text-sm italic text-gray-700">“{locAz(quote)}”</p>
       )}
       <div className="flex items-center gap-3">
         {photo ? (
@@ -164,8 +174,8 @@ export function TestimonialForm({ item, onClose }) {
         )}
         <div>
           <p className="text-sm font-bold text-gray-900">{name || "Ad"}</p>
-          {achievement && (
-            <p className="text-xs text-gray-500">{achievement}</p>
+          {locAz(achievement) && (
+            <p className="text-xs text-gray-500">{locAz(achievement)}</p>
           )}
         </div>
       </div>
@@ -196,10 +206,10 @@ export function TestimonialForm({ item, onClose }) {
               onChange={(e) => setType(e.target.value)}
             />
           </Field>
-          <Field label="Nailiyyət" info="Ad altında yazı, məs: IELTS · 7.5 bal">
-            <TextInput
+          <Field label="Nailiyyət" info="3 dildə — ad altında yazı, məs: IELTS · 7.5 bal">
+            <LocalizedInput
               value={achievement}
-              onChange={(e) => setAchievement(e.target.value)}
+              onChange={setAchievement}
               placeholder="IELTS Hazırlıq · 7.5 bal"
             />
           </Field>
@@ -247,12 +257,8 @@ export function TestimonialForm({ item, onClose }) {
       ) : (
         <section className="space-y-4">
           <SectionTitle>Rəy</SectionTitle>
-          <Field label="Sitat (quote)">
-            <TextArea
-              rows={3}
-              value={quote}
-              onChange={(e) => setQuote(e.target.value)}
-            />
+          <Field label="Sitat (quote)" info="3 dildə">
+            <LocalizedInput value={quote} onChange={setQuote} multiline rows={3} />
           </Field>
           <Field label="Reytinq" info="1–5 arası ulduz" className="w-32">
             <NumberInput
