@@ -1,7 +1,7 @@
+// Constants
 import { Schema, Model, postStatus } from "#constants";
-// Imported directly (not via the #services barrel) to avoid a models <-> services
-// circular import through BootstrapService.
-import { EncryptionService } from "#services/EncryptionService.js";
+// Services
+import { EncryptionService } from "#services";
 
 /**
  * Post model — the reference/example model for this template.

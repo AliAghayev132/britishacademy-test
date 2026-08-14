@@ -8,8 +8,8 @@
  *   node scripts/seed.js          # wipe BA collections and reseed
  *   node scripts/seed.js --dry    # build + validate every doc, no DB needed
  */
-import { mongoDBService } from "#services";
-import { buildGraph, validateGraph, seedDatabase } from "#services/SeedService.js";
+// Services
+import { mongoDBService, buildGraph, validateGraph, seedDatabase } from "#services";
 
 const DRY = process.argv.includes("--dry");
 

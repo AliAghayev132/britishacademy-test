@@ -1,5 +1,8 @@
+// Constants
 import { Schema, Model } from "#constants";
-import { SlugService } from "#services/SlugService.js";
+// Services
+import { SlugService } from "#services";
+// Utils
 import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /** BlogCategory — the chip filter on the Bloq page. */

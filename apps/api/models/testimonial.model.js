@@ -1,5 +1,8 @@
+// Constants
 import { Schema, Model, testimonialTypes } from "#constants";
+// Utils
 import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
+// Local schemas
 import { videoSchema } from "./shared.schemas.js";
 
 /**

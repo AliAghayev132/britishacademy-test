@@ -1,4 +1,6 @@
+// Constants
 import { Schema, Model } from "#constants";
+// Local schemas
 import { factSchema } from "./shared.schemas.js";
 
 /**
