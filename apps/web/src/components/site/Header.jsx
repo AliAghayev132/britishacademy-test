@@ -3,7 +3,7 @@
 // React
 import { memo, useCallback, useEffect, useState } from "react";
 // Next
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 // Local
 import { LocaleLink as Link } from "./LocaleLink";
 import { useLocale, stripLocale } from "./LocaleProvider";
@@ -16,13 +16,13 @@ import { useT } from "@/lib/i18n/useT";
 const LanguageSwitcher = memo(function LanguageSwitcher() {
   const locale = useLocale();
   const pathname = usePathname();
-  const router = useRouter();
   const base = stripLocale(pathname);
   const go = (l) => {
+    if (l === locale) return;
     document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
     const target = l === "az" ? base : `/${l}${base === "/" ? "" : base}`;
-    router.push(target);
-    router.refresh();
+    // Hard reload — serverdən tam yenidən render (nav/menyu daxil) yeni dildə.
+    window.location.assign(target || "/");
   };
   return (
     <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
