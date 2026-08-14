@@ -19,6 +19,7 @@ export function RouteLoader() {
   const key = pathname + "?" + search.toString();
   const current = useRef(key);
   const shownAt = useRef(0);
+  const downPos = useRef(null); // son pointerdown mövqeyi (drag aşkarı üçün)
   const MIN_MS = 550; // keep the loader up long enough to read (no flash-and-gone)
 
   // ── Effects ──
@@ -37,8 +38,13 @@ export function RouteLoader() {
 
   // Show on same-origin link navigations.
   useEffect(() => {
+    // Sürüşdürmə (məs. Swiper) başladığı pointerdown mövqeyini yadda saxla.
+    const onDown = (e) => { downPos.current = { x: e.clientX, y: e.clientY }; };
     const onClick = (e) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      // Drag nəticəsində yaranan fantom klik (Swiper swipe və s.) — ötür.
+      const d = downPos.current;
+      if (d && (Math.abs(e.clientX - d.x) > 10 || Math.abs(e.clientY - d.y) > 10)) return;
       const a = e.target.closest?.("a");
       if (!a) return;
       const href = a.getAttribute("href");
@@ -52,11 +58,13 @@ export function RouteLoader() {
       shownAt.current = Date.now();
       setActive(true);
     };
+    document.addEventListener("pointerdown", onDown, true);
     document.addEventListener("click", onClick, true);
     // Safety: also hide on back/forward and on full load.
     const onHide = () => setActive(false);
     window.addEventListener("pageshow", onHide);
     return () => {
+      document.removeEventListener("pointerdown", onDown, true);
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("pageshow", onHide);
     };
