@@ -14,6 +14,14 @@ const langs = (path) => ({
 
 export default async function sitemap() {
   const now = new Date();
+  // lastmod-u təhlükəsiz Date-ə çevir; boş/qeyri-etibarlı olarsa `now`
+  // (əks halda Next `toISOString()`-də "Invalid time value" atır).
+  const safeDate = (v) => {
+    if (!v) return now;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? now : d;
+  };
+
   const corePaths = [
     { path: "/", priority: 1 },
     { path: "/kurslar", priority: 0.8 },
@@ -44,7 +52,7 @@ export default async function sitemap() {
     })
     .map((u) => ({
       url: `${SITE_URL}${u.path}`,
-      lastModified: u.lastmod ? new Date(u.lastmod) : now,
+      lastModified: safeDate(u.lastmod),
       changeFrequency: "weekly",
       priority: u.priority ?? 0.6,
       alternates: langs(u.path),

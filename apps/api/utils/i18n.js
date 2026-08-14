@@ -56,14 +56,29 @@ export function pickLocale(val, lang = DEFAULT_LOCALE) {
   return val[lang] || val.az || val.en || val.ru || "";
 }
 
+/** Yalnız sadə obyekt (POJO) — Date/ObjectId/Buffer və s. rekursiyaya düşməsin. */
+function isPlainObject(v) {
+  if (v == null || typeof v !== "object" || Array.isArray(v)) return false;
+  const p = Object.getPrototypeOf(v);
+  return p === Object.prototype || p === null;
+}
+
 /**
- * İxtiyari JSON-u (massiv/obyekt) rekursiv gəz və { az,en,ru } formalı
- * obyektləri seçilmiş dildə mətnə çevir. String/number/… toxunulmur.
+ * İxtiyari data-nı rekursiv gəz və { az,en,ru } formalı obyektləri seçilmiş
+ * dildə mətnə çevir. Date/ObjectId/Mongoose-doc kimi obyektlər `toJSON` ilə
+ * düzgün emal olunur (Date → ISO, ObjectId → hex) — dəyər itmir.
  */
 export function deepLocalize(data, lang = DEFAULT_LOCALE) {
+  if (data == null || typeof data !== "object") return data;
   if (Array.isArray(data)) return data.map((x) => deepLocalize(x, lang));
   if (looksLocalized(data)) return pickLocale(data, lang);
-  if (isPlainObj(data)) {
+
+  // Date/ObjectId/Mongoose sənəd və s. → toJSON (Date→ISO, ObjectId→hex, doc→POJO)
+  if (!isPlainObject(data) && typeof data.toJSON === "function") {
+    const j = data.toJSON();
+    return j === data ? data : deepLocalize(j, lang);
+  }
+  if (isPlainObject(data)) {
     const out = {};
     for (const k of Object.keys(data)) out[k] = deepLocalize(data[k], lang);
     return out;
