@@ -8,6 +8,7 @@ export const STRINGS = {
     "nav.search": "Axtar",
     "nav.apply": "Müraciət et",
     "nav.all": "Hamısına bax →",
+    "nav.services": "Xidmətlər",
     // Cards
     "card.course": "Kurs",
     "card.popular": "Populyar",
@@ -209,6 +210,7 @@ export const STRINGS = {
     "nav.search": "Search",
     "nav.apply": "Apply now",
     "nav.all": "See all →",
+    "nav.services": "Services",
     "card.course": "Course",
     "card.popular": "Popular",
     "card.view": "View course →",
@@ -391,6 +393,7 @@ export const STRINGS = {
     "nav.search": "Поиск",
     "nav.apply": "Записаться",
     "nav.all": "Смотреть все →",
+    "nav.services": "Услуги",
     "card.course": "Курс",
     "card.popular": "Популярный",
     "card.view": "Смотреть курс →",

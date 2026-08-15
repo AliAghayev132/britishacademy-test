@@ -55,13 +55,38 @@ const ddArrow = (
   </svg>
 );
 
+// Standart nav bəndləri üçün tərcümə açarı (menyu EN/RU boş olsa belə tərcümə olsun).
+const NAV_KEY_BY_HREF = {
+  "/": "common.home",
+  "/kurslar": "common.courses",
+  "/muellimler": "common.teachers",
+  "/filiallar": "page.branches.title",
+  "/bloq": "home.blog.title",
+  "/elaqe": "footer.link.contact",
+  "/haqqimizda": "about.eyebrow",
+  "/telebelerimiz": "page.students.title",
+  "/xaricde-tehsil": "home.abroad.title",
+};
+function navKey(item) {
+  if (item.variant === "mega") return "nav.services";
+  if (item.variant === "destinations") return "home.abroad.title";
+  return NAV_KEY_BY_HREF[item.href] || null;
+}
+/** Nav bəndinin göstəriləcək adı: tanınan standart bənd → t(); əks halda DB label. */
+function useNavLabel(item) {
+  const t = useT();
+  const k = navKey(item);
+  return k ? t(k) : item.label;
+}
+
 // ── Subcomponents ──
 const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, destinations }) {
+  const label = useNavLabel(item);
   if (item.variant === "mega") {
     // Nested dropdown (category → hover → sub-links) — matches the static site.
     return (
       <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-        <Link href={item.href}>{item.label} {caret}</Link>
+        <Link href={item.href}>{label} {caret}</Link>
         <div className="ba-dd ba-dd--nest">
           {services.map((g) => (
             <div key={g.category._id} className="ba-dd-item">
@@ -80,7 +105,7 @@ const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, de
   if (item.variant === "destinations") {
     return (
       <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-        <Link href={item.href}>{item.label} {caret}</Link>
+        <Link href={item.href}>{label} {caret}</Link>
         <div className="ba-dd ba-dd--right ba-dd--2col">
           {destinations.map((d) => (
             <Link key={d._id} href={`/xaricde-tehsil/${d.slug}`}>{d.country}</Link>
@@ -91,18 +116,20 @@ const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, de
   }
   return (
     <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-      <Link href={item.href}>{item.label}</Link>
+      <Link href={item.href}>{label}</Link>
     </div>
   );
 });
 
 const MobileNavItem = memo(function MobileNavItem({ item, services, destinations, onClose }) {
+  const t = useT();
+  const label = useNavLabel(item);
   if (item.variant) {
     return (
       <details className="ba-macc">
-        <summary>{item.label}</summary>
+        <summary>{label}</summary>
         <div className="ba-macc-body">
-          <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{item.label} — hamısı</Link>
+          <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{label} — {t("common.all")}</Link>
 
           {/* Xidmətlər — iç-içə açılan: kateqoriya → kliklə → kursları açılır */}
           {item.variant === "mega" &&
@@ -110,7 +137,7 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
               <details key={g.category._id} className="ba-macc ba-macc--sub">
                 <summary>{g.category.name}</summary>
                 <div className="ba-macc-body">
-                  <Link className="ba-msub ba-msub--all" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name} — hamısı</Link>
+                  <Link className="ba-msub ba-msub--all" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
                   {g.courses.map((c) => (
                     <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={onClose}>{c.title}</Link>
                   ))}
@@ -127,7 +154,7 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
     );
   }
   return (
-    <Link className="ba-mrow" href={item.href} onClick={onClose}>{item.label}</Link>
+    <Link className="ba-mrow" href={item.href} onClick={onClose}>{label}</Link>
   );
 });
 

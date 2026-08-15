@@ -9,6 +9,10 @@ import { apiGetStatus, isMissing } from "@/lib/api";
 // Utils / SEO
 import DOMPurify from "isomorphic-dompurify";
 import { metaFromApi, SITE_URL } from "@/lib/seo";
+import { getLocale } from "@/lib/i18n/serverT";
+
+// Mütləq URL (şəkil relativdirsə SITE_URL əlavə et).
+const abs = (u) => (!u ? undefined : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";
@@ -19,12 +23,27 @@ export async function generateMetadata({ params }) {
   const { data } = await apiGetStatus(`/blog/${slug}`);
   const p = data?.post;
   if (!p) return {};
-  return metaFromApi(p.seo, {
+  const meta = metaFromApi(p.seo, {
     title: p.title,
     description: p.excerpt,
     path: `/bloq/${slug}`,
     image: p.cover,
+    type: "article",
   });
+  // Article-spesifik Open Graph (paylaşımlar + Google Discover üçün).
+  const authorName = p.author ? `${p.author.firstName || ""} ${p.author.lastName || ""}`.trim() : undefined;
+  return {
+    ...meta,
+    openGraph: {
+      ...meta.openGraph,
+      type: "article",
+      publishedTime: p.publishedAt || undefined,
+      modifiedTime: p.updatedAt || undefined,
+      authors: authorName ? [authorName] : undefined,
+      section: p.category?.name || undefined,
+      tags: p.tags?.length ? p.tags : undefined,
+    },
+  };
 }
 
 // ── Subcomponents ──
@@ -66,24 +85,52 @@ export default async function BlogPostPage({ params }) {
   if (isMissing(res, "post")) notFound();
   const p = res.data.post;
   const tr = await getT();
+  const locale = await getLocale();
 
   // TipTap emits HTML; sanitize before rendering.
   const html = DOMPurify.sanitize(p.content || "");
 
-  // ── JSON-LD ──
-  const ld = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: p.title,
-    description: p.excerpt,
-    datePublished: p.publishedAt,
-    dateModified: p.updatedAt,
-    image: p.cover ? [p.cover] : undefined,
-    author: p.author
-      ? { "@type": "Person", name: `${p.author.firstName || ""} ${p.author.lastName || ""}`.trim() }
-      : { "@type": "Organization", name: "British Academy" },
-    publisher: { "@type": "Organization", name: "British Academy", url: SITE_URL },
-  };
+  const url = `${SITE_URL}/bloq/${slug}`;
+  const authorName = p.author ? `${p.author.firstName || ""} ${p.author.lastName || ""}`.trim() : "";
+
+  // ── JSON-LD ── BlogPosting + BreadcrumbList
+  const ld = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      url,
+      headline: p.title,
+      description: p.excerpt || undefined,
+      datePublished: p.publishedAt || undefined,
+      dateModified: p.updatedAt || p.publishedAt || undefined,
+      image: abs(p.cover) ? [abs(p.cover)] : undefined,
+      articleSection: p.category?.name || undefined,
+      keywords: p.tags?.length ? p.tags.join(", ") : undefined,
+      inLanguage: locale,
+      author: authorName
+        ? { "@type": "Person", name: authorName }
+        : { "@type": "Organization", name: "British Academy" },
+      publisher: {
+        "@type": "Organization",
+        name: "British Academy",
+        url: SITE_URL,
+        logo: { "@type": "ImageObject", url: `${SITE_URL}/assets/logo.png` },
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: tr("common.home"), item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: tr("home.blog.title"), item: `${SITE_URL}/bloq` },
+        ...(p.category
+          ? [{ "@type": "ListItem", position: 3, name: p.category.name, item: `${SITE_URL}/bloq?kateqoriya=${p.category.slug}` }]
+          : []),
+        { "@type": "ListItem", position: p.category ? 4 : 3, name: p.title, item: url },
+      ],
+    },
+  ];
 
   // ── Render ──
   return (
