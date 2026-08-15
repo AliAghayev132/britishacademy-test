@@ -5,7 +5,7 @@ import { apiGet } from "@/lib/api";
 import { TestimonialCard, SectionHead } from "@/components/site/cards";
 import { PageBanner } from "@/components/site/PageBanner";
 import { CtaBand } from "@/components/site/CtaBand";
-import VideoCard from "@/components/site/VideoCard";
+import VideoSwiper from "@/components/site/VideoSwiper";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -74,9 +74,7 @@ export default async function StudentsPage() {
       {videos.length > 0 && (
         <section style={{ ...wrap, padding: "64px 28px 0" }}>
           <SectionHead title={tr("page.students.speak")} sub={tr("page.students.speakSub")} />
-          <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }}>
-            {videos.map((t) => <VideoCard key={t._id} t={t} />)}
-          </div>
+          <VideoSwiper videos={videos} />
         </section>
       )}
 

@@ -27,6 +27,10 @@
   --color-cyan-100: #d3dbf4;
   --color-blue-50: #eaeefb;
   --color-cyan-50: #eaeefb;
+  /* editor toolbar aktiv/vurğu rəngi — bg-secondary/text-secondary/ring-secondary
+     buna bağlıdır (təyin olunmasaydı aktiv "Önizləmə" düyməsi ağ-ağ görünməz olurdu) */
+  --color-secondary: #00157a;
+  --color-primary: #00157a;
 }
 
 /* ============================================================

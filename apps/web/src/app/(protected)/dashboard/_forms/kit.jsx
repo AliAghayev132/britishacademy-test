@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 // UI / kit
 import { InfoTip } from "@/components/ui/InfoTip";
 import { confirmDialog } from "@/components/ui/feedback";
-import { LocalizedFormProvider, LocaleSwitcher } from "./Localized";
+import { LocalizedFormProvider, LocaleSwitcher, GlobalAiBar } from "./Localized";
 // Icons
 import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
 
@@ -229,11 +229,15 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
               <h2 className="truncate text-base font-bold text-gray-900">{title}</h2>
               {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
             </div>
-            <div className="flex flex-none items-center gap-3">
-              {localized && <LocaleSwitcher />}
-              <button onClick={requestClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
-            </div>
+            <button onClick={requestClose} className="flex-none text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
           </div>
+          {/* Çoxdilli formalarda: qlobal dil düyməsi + qlobal AI (hamısını tərcümə/səliqə) */}
+          {localized && (
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 bg-gray-50/70 px-6 py-2">
+              <LocaleSwitcher />
+              <GlobalAiBar />
+            </div>
+          )}
           <div className="flex-1 space-y-6 overflow-auto p-6" onInput={() => setDirty(true)} onChange={() => setDirty(true)}>{children}</div>
           <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
             <div className="flex items-center gap-3">

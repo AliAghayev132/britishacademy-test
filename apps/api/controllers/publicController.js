@@ -61,9 +61,18 @@ const getHome = asyncHandler(async (_req, res) => {
     testimonials = await Testimonial.findPublic({ type: "text" }).limit(6);
   }
 
+  // Tələbə videoları — seçilmişlər üstünlüklə, yoxdursa istənilən video.
+  let videoTestimonials = await Testimonial.findPublic({
+    type: "video",
+    isFeatured: true,
+  }).limit(8);
+  if (!videoTestimonials.length) {
+    videoTestimonials = await Testimonial.findPublic({ type: "video" }).limit(8);
+  }
+
   res.json({
     success: true,
-    data: { settings, courses, testimonials, partners, advantages, destinations, faqs },
+    data: { settings, courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs },
   });
 });
 

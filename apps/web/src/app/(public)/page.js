@@ -15,6 +15,7 @@ import Marquee from "@/components/site/Marquee";
 import RevealOnScroll from "@/components/site/RevealOnScroll";
 import PartnersCarousel from "@/components/site/PartnersCarousel";
 import ServicesShowcase from "@/components/site/ServicesShowcase";
+import VideoSwiper from "@/components/site/VideoSwiper";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -83,6 +84,7 @@ export default async function HomePage() {
   const advantages = home?.advantages || [];
   const destinations = home?.destinations || [];
   const testimonials = (home?.testimonials || []).filter((t) => t.type === "text");
+  const videoTestimonials = home?.videoTestimonials || [];
   const partners = home?.partners || [];
 
   // ── render ──
@@ -120,6 +122,14 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
+        </section>
+      )}
+
+      {/* Student videos — Swiper (loopsuz) */}
+      {videoTestimonials.length > 0 && (
+        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+          <SectionHead title={t("page.students.speak")} sub={t("page.students.speakSub")} />
+          <VideoSwiper videos={videoTestimonials} />
         </section>
       )}
 

@@ -10,7 +10,7 @@
 //
 // confirmLocalized: submit-dən öncə AZ mütləqdir, EN/RU boşdursa təsdiq alır.
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import { confirmDialog, notify } from "@/components/ui/feedback";
 import { useAiProcessMutation } from "@/store/api/adminApi";
 import TiptapEditor from "@/components/editor/TiptapEditor";
@@ -42,14 +42,20 @@ export function trimLoc(v) {
 /** AZ variantı (preview üçün). */
 export const locAz = (v) => toLoc(v).az;
 
-// ── Modal səviyyəsində aktiv dil (paylaşılan kontekst) ──
+// ── Modal səviyyəsində aktiv dil + sahə reyestri (paylaşılan kontekst) ──
+// Reyestr qlobal AI düymələrinin (hamısını tərcümə et / səliqələ) bütün
+// LocalizedInput/Editor sahələrini gəzməsi üçündür. Hər sahə öz cari
+// { value, onChange, isHtml } ref-ini qeydiyyatdan keçirir.
 const FormLocaleContext = createContext(null);
 
 /** Overlay bunu bütün modal məzmununu əhatə edəcək şəkildə render edir. */
 export function LocalizedFormProvider({ children }) {
   const [locale, setLocale] = useState("az");
+  const fieldsRef = useRef(new Map());
+  const register = useCallback((id, ref) => { fieldsRef.current.set(id, ref); }, []);
+  const unregister = useCallback((id) => { fieldsRef.current.delete(id); }, []);
   return (
-    <FormLocaleContext.Provider value={{ locale, setLocale }}>
+    <FormLocaleContext.Provider value={{ locale, setLocale, register, unregister, fieldsRef }}>
       {children}
     </FormLocaleContext.Provider>
   );
@@ -58,6 +64,19 @@ export function LocalizedFormProvider({ children }) {
 /** Provider yoxdursa AZ-a düşür (switcher olmadan da sahələr işləyir). */
 export function useFormLocale() {
   return useContext(FormLocaleContext) || { locale: "az", setLocale: () => {} };
+}
+
+/** Sahəni reyestrə yaz — qlobal AI düymələri bunları gəzir. */
+function useRegisterField(v, onChange, isHtml) {
+  const ctx = useContext(FormLocaleContext);
+  const id = useId();
+  const ref = useRef({});
+  ref.current = { value: v, onChange, isHtml };
+  useEffect(() => {
+    if (!ctx?.register) return undefined;
+    ctx.register(id, ref);
+    return () => ctx.unregister(id);
+  }, [ctx, id]);
 }
 
 /** Qlobal dil düyməsi — Overlay başlığında bir dəfə göstərilir. */
@@ -110,8 +129,19 @@ function AiBtn({ onClick, busy, disabled, icon: Icon, children }) {
   );
 }
 
+/** OpenRouter çağırışı — yeni mətni qaytarır (boşdursa ""). */
+async function aiTransform(run, { action, v, locale, isHtml }) {
+  const body =
+    action === "translate"
+      ? { action: "translate", content: v.az, sourceLang: "az", targetLang: locale, isHtml }
+      : { action: "polish", content: v[locale], sourceLang: locale, isHtml };
+  const res = await run(body).unwrap();
+  const text = res?.data?.result;
+  return typeof text === "string" ? text.trim() : "";
+}
+
 /**
- * AI köməkçi zolağı — aktiv dilə görə tərcümə/səliqə düymələri.
+ * AI köməkçi zolağı — aktiv dilə görə tərcümə/səliqə düymələri (hər sahədə).
  *  - Aktiv dil ≠ AZ və AZ doludursa → "AZ-dən tərcümə et"
  *  - Aktiv dilin mətni doludursa → "Səliqəyə sal"
  */
@@ -129,13 +159,8 @@ function AiBar({ v, onChange, isHtml }) {
   const call = async (action) => {
     setBusy(action);
     try {
-      const body =
-        action === "translate"
-          ? { action: "translate", content: v.az, sourceLang: "az", targetLang: locale, isHtml }
-          : { action: "polish", content: v[locale], sourceLang: locale, isHtml };
-      const res = await run(body).unwrap();
-      const text = res?.data?.result;
-      if (typeof text === "string" && text.trim()) {
+      const text = await aiTransform(run, { action, v, locale, isHtml });
+      if (text) {
         onChange({ ...v, [locale]: text });
         notify.success(action === "translate" ? "Tərcümə edildi" : "Səliqəyə salındı");
       } else {
@@ -164,9 +189,72 @@ function AiBar({ v, onChange, isHtml }) {
   );
 }
 
+/**
+ * Qlobal AI zolağı — modalın başında bir dəfə (Overlay-də). Bütün çoxdilli
+ * sahələri birdən emal edir:
+ *  - "Hamısını tərcümə et" (aktiv dil ≠ AZ): hər sahədə AZ → aktiv dil
+ *  - "Hamısını səliqələ": hər sahədə aktiv dilin mətni düzəldilir
+ */
+export function GlobalAiBar() {
+  const ctx = useContext(FormLocaleContext);
+  const [run] = useAiProcessMutation();
+  const [busy, setBusy] = useState(null);
+  if (!ctx) return null;
+  const { locale, fieldsRef } = ctx;
+
+  const runAll = async (action) => {
+    const entries = [...fieldsRef.current.values()].map((r) => r.current).filter(Boolean);
+    const targets = entries.filter((e) => {
+      const v = toLoc(e.value);
+      return action === "translate" ? locale !== "az" && v.az.trim() : (v[locale] || "").trim();
+    });
+    if (!targets.length) {
+      notify.info(action === "translate" ? "Tərcümə üçün AZ mətn yoxdur" : "Səliqələmək üçün mətn yoxdur");
+      return;
+    }
+    setBusy(action);
+    let done = 0;
+    let failed = 0;
+    for (const e of targets) {
+      const v = toLoc(e.value);
+      try {
+        const text = await aiTransform(run, { action, v, locale, isHtml: e.isHtml });
+        if (text) {
+          e.onChange({ ...v, [locale]: text });
+          done += 1;
+        } else {
+          failed += 1;
+        }
+      } catch {
+        failed += 1;
+      }
+    }
+    setBusy(null);
+    if (done) {
+      notify.success(`${done} sahə ${action === "translate" ? "tərcümə edildi" : "səliqələndi"}${failed ? `, ${failed} alınmadı` : ""}`);
+    } else {
+      notify.error("AI xətası — Tənzimləmələr → AI-ı yoxlayın");
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {locale !== "az" && (
+        <AiBtn onClick={() => runAll("translate")} busy={busy === "translate"} disabled={Boolean(busy)} icon={Languages}>
+          Hamısını tərcümə et
+        </AiBtn>
+      )}
+      <AiBtn onClick={() => runAll("polish")} busy={busy === "polish"} disabled={Boolean(busy)} icon={Wand2}>
+        Hamısını səliqələ
+      </AiBtn>
+    </div>
+  );
+}
+
 export function LocalizedInput({ value, onChange, placeholder, multiline, rows = 3 }) {
   const v = toLoc(value);
   const { locale } = useFormLocale();
+  useRegisterField(v, onChange, false);
   const set = (text) => onChange({ ...v, [locale]: text });
   return (
     <div>
@@ -184,6 +272,7 @@ export function LocalizedInput({ value, onChange, placeholder, multiline, rows =
 export function LocalizedEditor({ value, onChange, ...rest }) {
   const v = toLoc(value);
   const { locale } = useFormLocale();
+  useRegisterField(v, onChange, true);
   const set = (html) => onChange({ ...v, [locale]: html });
   return (
     <div>
