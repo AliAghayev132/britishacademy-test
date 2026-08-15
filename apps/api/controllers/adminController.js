@@ -157,8 +157,9 @@ const reorder = asyncHandler(async (req, res) => {
 const getSettings = asyncHandler(async (_req, res) => {
   const settings = await SiteSetting.get();
   const out = settings.toObject();
-  // SMTP parolunu frontend-ə qaytarma (yalnız-yazma); yalnız var/yox işarəsi.
+  // Gizli açarları frontend-ə qaytarma (yalnız-yazma); yalnız var/yox işarəsi.
   if (out.smtp) out.smtp = { ...out.smtp, hasPass: Boolean(out.smtp.pass), pass: "" };
+  if (out.ai) out.ai = { ...out.ai, hasKey: Boolean(out.ai.apiKey), apiKey: "" };
   res.json({ success: true, data: { settings: out } });
 });
 
@@ -170,9 +171,12 @@ const updateSettings = asyncHandler(async (req, res) => {
   delete body.key;
   delete body.createdAt;
   delete body.updatedAt;
-  // SMTP parolu boş gəlibsə köhnəsini saxla (frontend parolu geri almır).
+  // Gizli açar boş gəlibsə köhnəsini saxla (frontend geri almır).
   if (body.smtp && !body.smtp.pass) {
     body.smtp = { ...body.smtp, pass: settings.smtp?.pass || "" };
+  }
+  if (body.ai && !body.ai.apiKey) {
+    body.ai = { ...body.ai, apiKey: settings.ai?.apiKey || "" };
   }
   Object.assign(settings, body);
   await settings.save();

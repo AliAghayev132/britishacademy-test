@@ -138,6 +138,7 @@ export function PageForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Səhifəni redaktə et" : "Yeni səhifə"}
       subtitle={
         isSystem ? "Sistem səhifəsi — slug dəyişdirilə bilməz" : undefined

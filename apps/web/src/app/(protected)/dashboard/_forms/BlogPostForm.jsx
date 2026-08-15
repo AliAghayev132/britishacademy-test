@@ -140,6 +140,7 @@ export function BlogPostForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Məqaləni redaktə et" : "Yeni məqalə"}
       onClose={onClose}
       onSave={handleSave}

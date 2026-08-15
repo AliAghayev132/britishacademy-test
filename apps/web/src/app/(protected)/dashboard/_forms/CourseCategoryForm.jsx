@@ -94,6 +94,7 @@ export function CourseCategoryForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Kateqoriyanı redaktə et" : "Yeni kateqoriya"}
       onClose={onClose}
       onSave={onSave}

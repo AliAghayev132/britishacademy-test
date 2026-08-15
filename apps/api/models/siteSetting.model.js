@@ -96,6 +96,14 @@ const siteSettingSchema = new Schema(
       fromName: { type: String, default: "", trim: true },
       fromEmail: { type: String, default: "", trim: true },
     },
+
+    // AI (OpenRouter) — admin panelindəki tərcümə/səliqə köməkçisi üçün.
+    // `apiKey` frontend-ə qaytarılmır (yalnız-yazma).
+    ai: {
+      enabled: { type: Boolean, default: false },
+      apiKey: { type: String, default: "" },
+      model: { type: String, default: "openai/gpt-4o-mini", trim: true },
+    },
   },
   {
     timestamps: true,

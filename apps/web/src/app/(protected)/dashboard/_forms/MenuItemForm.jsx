@@ -106,6 +106,7 @@ export function MenuItemForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Menyu bəndini redaktə et" : "Yeni menyu bəndi"}
       onClose={onClose}
       onSave={onSave}

@@ -100,6 +100,7 @@ export function PartnerForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Partnyoru redaktə et" : "Yeni partnyor"}
       onClose={onClose}
       onSave={onSave}

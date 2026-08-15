@@ -94,6 +94,7 @@ export function FaqForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Sualı redaktə et" : "Yeni sual"}
       onClose={onClose}
       onSave={onSave}

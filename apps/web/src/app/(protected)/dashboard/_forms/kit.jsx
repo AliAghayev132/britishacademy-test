@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 // UI / kit
 import { InfoTip } from "@/components/ui/InfoTip";
 import { confirmDialog } from "@/components/ui/feedback";
+import { LocalizedFormProvider, LocaleSwitcher } from "./Localized";
 // Icons
 import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
 
@@ -197,7 +198,9 @@ export function SectionTitle({ children, right }) {
 // ── Modal shell ──
 // `preview` (optional node) enables a "Test kimi göstər" toggle that flips the
 // body to a live preview before saving.
-export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, children }) {
+// `localized` — çoxdilli sahələr olan formalarda başlıqda qlobal AZ/EN/RU dil
+// düyməsini göstərir; bütün LocalizedInput/Editor həmin aktiv dili paylaşır.
+export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, localized, children }) {
   const [showPreview, setShowPreview] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -218,15 +221,18 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
   };
 
   return (
-    <>
+    <LocalizedFormProvider>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && requestClose()}>
         <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
-          <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-            <div>
-              <h2 className="text-base font-bold text-gray-900">{title}</h2>
+          <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4">
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-bold text-gray-900">{title}</h2>
               {subtitle && <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>}
             </div>
-            <button onClick={requestClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
+            <div className="flex flex-none items-center gap-3">
+              {localized && <LocaleSwitcher />}
+              <button onClick={requestClose} className="text-gray-400 hover:text-gray-700" aria-label="Bağla"><X className="h-5 w-5" /></button>
+            </div>
           </div>
           <div className="flex-1 space-y-6 overflow-auto p-6" onInput={() => setDirty(true)} onChange={() => setDirty(true)}>{children}</div>
           <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
@@ -263,7 +269,7 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
           <div className="mx-auto max-w-5xl px-6 py-10">{preview}</div>
         </div>
       )}
-    </>
+    </LocalizedFormProvider>
   );
 }
 

@@ -194,6 +194,7 @@ export function BranchForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Filialı redaktə et" : "Yeni filial"}
       onClose={onClose}
       onSave={onSave}

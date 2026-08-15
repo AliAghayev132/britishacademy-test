@@ -184,6 +184,7 @@ export function TestimonialForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Rəyi redaktə et" : "Yeni rəy"}
       onClose={onClose}
       onSave={handleSave}

@@ -96,6 +96,7 @@ export function AdvantageForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Üstünlüyü redaktə et" : "Yeni üstünlük"}
       onClose={onClose}
       onSave={onSave}

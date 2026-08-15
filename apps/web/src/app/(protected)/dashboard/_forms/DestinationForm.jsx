@@ -179,6 +179,7 @@ export function DestinationForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "İstiqaməti redaktə et" : "Yeni istiqamət"}
       onClose={onClose}
       onSave={handleSave}

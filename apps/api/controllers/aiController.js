@@ -1,13 +1,35 @@
 // Config
 import { config } from "#config";
 
+// Models
+import { SiteSetting } from "#models";
+
 // Utils
 import { asyncHandler } from "#utils";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MAX_CONTENT_LENGTH = 50000;
 
-const LANG_NAMES = { az: "Azerbaijani", en: "English" };
+const LANG_NAMES = { az: "Azerbaijani", en: "English", ru: "Russian" };
+
+/**
+ * Effektiv AI konfiqurasiyası: əvvəlcə admin panelindəki DB tənzimləməsi
+ * (SiteSetting.ai), yoxdursa ENV fallback. Beləcə açar saytın özündən
+ * (Tənzimləmələr) idarə olunur — SMTP ilə eyni məntiq.
+ */
+const resolveAiConfig = async () => {
+  let ai = {};
+  try {
+    const s = await SiteSetting.get();
+    ai = s?.ai || {};
+  } catch {
+    ai = {};
+  }
+  const dbKey = ai.enabled ? ai.apiKey : "";
+  const apiKey = dbKey || config.ai.apiKey || "";
+  const model = ai.model || config.ai.model;
+  return { apiKey, model };
+};
 
 /**
  * Strip a leading/trailing markdown code fence (```json ... ```), if present,
@@ -34,11 +56,12 @@ const tryParseJson = (raw) => {
  * Response: { success, data: { result } } — `result` may be a string, object or array.
  */
 const processAI = asyncHandler(async (req, res) => {
-  // AI is optional: without an API key the feature is disabled.
-  if (!config.ai.apiKey) {
+  // Konfiqurasiya saytdan (Tənzimləmələr → AI) və ya ENV-dən gəlir.
+  const aiCfg = await resolveAiConfig();
+  if (!aiCfg.apiKey) {
     return res.status(503).json({
       success: false,
-      message: "AI xidməti konfiqurasiya olunmayıb",
+      message: "AI xidməti konfiqurasiya olunmayıb (Tənzimləmələr → AI)",
     });
   }
 
@@ -185,12 +208,12 @@ const processAI = asyncHandler(async (req, res) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${config.ai.apiKey}`,
+      Authorization: `Bearer ${aiCfg.apiKey}`,
       "HTTP-Referer": config.appUrl,
       "X-Title": `${config.siteName} Admin`,
     },
     body: JSON.stringify({
-      model: config.ai.model,
+      model: aiCfg.model,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },

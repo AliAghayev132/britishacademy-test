@@ -291,6 +291,7 @@ export function CourseWizard({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       wide
       title={editingId ? "Kursu redaktə et" : "Yeni kurs"}
       subtitle="Kurs məlumatı → filiallar → qiymət — sonra dərs qrafiki"

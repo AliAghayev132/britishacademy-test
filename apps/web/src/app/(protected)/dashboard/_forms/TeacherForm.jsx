@@ -213,6 +213,7 @@ export function TeacherForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       title={isEdit ? "Müəllimi redaktə et" : "Yeni müəllim"}
       onClose={onClose}
       onSave={handleSave}

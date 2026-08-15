@@ -93,6 +93,13 @@ export const adminApi = baseApi.injectEndpoints({
       query: (to) => ({ url: "/admin/dev/test-mail", method: "POST", body: { to } }),
     }),
 
+    // ── AI köməkçi (OpenRouter): tərcümə / səliqə / slug / SEO ──
+    // Body: { action, content?|fields?, sourceLang?, targetLang?, isHtml? }
+    // Cavab: { data: { result } } (string | object | array).
+    aiProcess: builder.mutation({
+      query: (body) => ({ url: "/ai/process", method: "POST", body }),
+    }),
+
     // ── Admin users (multiple admins/editors) ──
     adminUsers: builder.query({
       query: (params) => ({ url: "/admin/users", params }),
@@ -144,6 +151,7 @@ export const {
   useAdminSeedMutation,
   useAdminMigrateI18nMutation,
   useAdminTestMailMutation,
+  useAiProcessMutation,
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,
