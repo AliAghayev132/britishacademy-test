@@ -4,33 +4,41 @@ import { nodemailer } from "#lib";
 // Config
 import { config } from "#config";
 
+// Models
+import { SiteSetting } from "#models";
+
 // Templates
 import { otpTemplate, welcomeTemplate } from "#templates";
 
 /**
  * MailService (static)
- * Thin wrapper over nodemailer with a couple of ready-made emails
- * (OTP verification + welcome). Extend with your own senders.
+ * Thin wrapper over nodemailer. SMTP config admin paneldən (SiteSetting.smtp)
+ * gəlir; boş sahələr ENV-dən (config.smtp) doldurulur. Hər göndərişdə cari
+ * konfiqurasiya oxunur — admin dəyişəndə yenidən başlatmağa ehtiyac yoxdur.
  */
 class MailService {
-  static transporter = null;
+  /** Startup no-op (geriyə uyğunluq üçün saxlanılır). */
+  static init() {}
 
-  /**
-   * Initialize the SMTP transporter (call once at startup).
-   * If SMTP is not configured, sends become no-ops with a warning.
-   */
-  static init() {
-    if (config.smtp.user && config.smtp.pass) {
-      this.transporter = nodemailer.createTransport({
-        host: config.smtp.host,
-        port: config.smtp.port,
-        secure: config.smtp.secure,
-        auth: {
-          user: config.smtp.user,
-          pass: config.smtp.pass,
-        },
-      });
+  /** Cari SMTP konfiqurasiyası: DB (admin) üstünlükdə, ENV fallback. */
+  static async resolveConfig() {
+    let smtp = {};
+    try {
+      const s = await SiteSetting.get();
+      smtp = s?.smtp || {};
+    } catch {
+      smtp = {};
     }
+    const host = smtp.host || config.smtp.host;
+    const port = smtp.port || config.smtp.port;
+    const secure = smtp.secure ?? config.smtp.secure;
+    const user = smtp.user || config.smtp.user;
+    const pass = smtp.pass || config.smtp.pass;
+    const fromName = smtp.fromName || config.siteName;
+    const fromEmail = smtp.fromEmail || user;
+    // DB-də açıqdırsa VƏ ya ENV tam qurulubsa aktiv say.
+    const enabled = (smtp.enabled && host && user && pass) || (!!config.smtp.user && !!config.smtp.pass);
+    return { host, port, secure, user, pass, fromName, fromEmail, enabled: Boolean(enabled) };
   }
 
   /**
@@ -38,14 +46,21 @@ class MailService {
    * @param {Object} options - { to, subject, html }
    */
   static async send({ to, subject, html }) {
-    if (!this.transporter) {
-      console.warn("Mail service not configured (SMTP_USER/SMTP_PASS missing)");
+    const c = await this.resolveConfig();
+    if (!c.enabled || !c.host || !c.user || !c.pass) {
+      console.warn("Mail service not configured (SMTP host/user/pass missing)");
       return { success: false, error: "Mail service not configured" };
     }
 
     try {
-      await this.transporter.sendMail({
-        from: `"${config.siteName}" <${config.smtp.user}>`,
+      const transporter = nodemailer.createTransport({
+        host: c.host,
+        port: c.port,
+        secure: c.secure,
+        auth: { user: c.user, pass: c.pass },
+      });
+      await transporter.sendMail({
+        from: `"${c.fromName}" <${c.fromEmail}>`,
         to,
         subject,
         html,
@@ -55,6 +70,15 @@ class MailService {
       console.error("Mail send error:", error);
       return { success: false, error: error.message };
     }
+  }
+
+  /** Admin "Test göndər" — SMTP konfiqurasiyasını yoxlamaq üçün test məktubu. */
+  static async sendTest(to) {
+    return this.send({
+      to,
+      subject: `SMTP test — ${config.siteName}`,
+      html: `<div style="font-family:sans-serif;padding:24px"><h2>SMTP işləyir ✅</h2><p>Bu, ${config.siteName} admin panelindən göndərilən test məktubudur. SMTP konfiqurasiyanız düzgündür.</p></div>`,
+    });
   }
 
   /**

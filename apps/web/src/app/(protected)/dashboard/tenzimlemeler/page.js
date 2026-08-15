@@ -8,6 +8,7 @@ import { notify } from "@/components/ui/feedback";
 import {
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
+  useAdminTestMailMutation,
 } from "@/store/api/adminApi";
 
 const input = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500";
@@ -30,7 +31,9 @@ const Section = ({ title, children }) => (
 export default function SettingsPage() {
   const { data, isLoading } = useAdminGetSettingsQuery();
   const [update, { isLoading: saving }] = useAdminUpdateSettingsMutation();
+  const [testMail, { isLoading: testing }] = useAdminTestMailMutation();
   const [form, setForm] = useState(null);
+  const [testTo, setTestTo] = useState("");
 
   useEffect(() => {
     const s = data?.data?.settings;
@@ -46,6 +49,17 @@ export default function SettingsPage() {
         },
         stats: JSON.stringify(s.stats || [], null, 2),
         marquee: (s.marquee || []).join(", "),
+        smtp: {
+          enabled: Boolean(s.smtp?.enabled),
+          host: s.smtp?.host || "",
+          port: s.smtp?.port ?? 587,
+          secure: Boolean(s.smtp?.secure),
+          user: s.smtp?.user || "",
+          fromName: s.smtp?.fromName || "",
+          fromEmail: s.smtp?.fromEmail || "",
+          pass: "", // yalnız-yazma; boş = köhnəni saxla
+          hasPass: Boolean(s.smtp?.hasPass),
+        },
         codeInjection: { head: s.codeInjection?.head || "", bodyEnd: s.codeInjection?.bodyEnd || "" },
         robotsTxt: s.robotsTxt || "",
         maxImageSizeKb: s.maxImageSizeKb || 500,
@@ -108,10 +122,31 @@ export default function SettingsPage() {
           keywords: csv(form.seo.keywords),
           verification: { ...form.seo.verification },
         },
+        smtp: {
+          enabled: Boolean(form.smtp.enabled),
+          host: form.smtp.host.trim(),
+          port: Number(form.smtp.port) || 587,
+          secure: Boolean(form.smtp.secure),
+          user: form.smtp.user.trim(),
+          fromName: form.smtp.fromName.trim(),
+          fromEmail: form.smtp.fromEmail.trim(),
+          pass: form.smtp.pass, // boşdursa backend köhnəni saxlayır
+        },
       }).unwrap();
       notify.success("Yadda saxlanıldı");
     } catch (err) {
       notify.error(err?.data?.message || "Yadda saxlanmadı");
+    }
+  };
+
+  const sendTest = async () => {
+    const to = testTo.trim();
+    if (!to) return notify.error("Test üçün email ünvanı yazın");
+    try {
+      const res = await testMail(to).unwrap();
+      notify.success(res?.message || "Test məktubu göndərildi");
+    } catch (err) {
+      notify.error(err?.data?.message || "Göndərilmədi — əvvəlcə SMTP-ni yadda saxlayın");
     }
   };
 
@@ -224,6 +259,51 @@ export default function SettingsPage() {
         <div>
           <label className={label}>Bing doğrulama</label>
           <input className={input} value={form.seo.verification.bing} onChange={(e) => set("seo.verification.bing", e.target.value)} />
+        </div>
+      </Section>
+
+      <Section title="SMTP (email göndərişi)">
+        <div className="sm:col-span-2 flex items-center gap-2">
+          <input id="smtp-enabled" type="checkbox" checked={form.smtp.enabled} onChange={(e) => set("smtp.enabled", e.target.checked)} className="h-4 w-4" />
+          <label htmlFor="smtp-enabled" className="text-sm font-medium text-gray-700">SMTP aktiv (email göndərişi üçün)</label>
+        </div>
+        <div>
+          <label className={label}>Host</label>
+          <input className={input} placeholder="smtp.gmail.com" value={form.smtp.host} onChange={(e) => set("smtp.host", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Port</label>
+          <input type="number" className={input} placeholder="587" value={form.smtp.port} onChange={(e) => set("smtp.port", e.target.value)} />
+        </div>
+        <div className="flex items-center gap-2 pt-6">
+          <input id="smtp-secure" type="checkbox" checked={form.smtp.secure} onChange={(e) => set("smtp.secure", e.target.checked)} className="h-4 w-4" />
+          <label htmlFor="smtp-secure" className="text-sm font-medium text-gray-700">Secure (SSL — port 465)</label>
+        </div>
+        <div>
+          <label className={label}>İstifadəçi (user)</label>
+          <input className={input} placeholder="mail@domain.com" value={form.smtp.user} onChange={(e) => set("smtp.user", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Parol {form.smtp.hasPass && <span className="text-emerald-600">(təyin olunub)</span>}</label>
+          <input type="password" autoComplete="new-password" className={input} placeholder={form.smtp.hasPass ? "•••••••• (dəyişmək üçün yaz)" : "SMTP parolu"} value={form.smtp.pass} onChange={(e) => set("smtp.pass", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Göndərən adı (from name)</label>
+          <input className={input} placeholder="British Academy" value={form.smtp.fromName} onChange={(e) => set("smtp.fromName", e.target.value)} />
+        </div>
+        <div>
+          <label className={label}>Göndərən email (from)</label>
+          <input className={input} placeholder="info@britishacademy.az" value={form.smtp.fromEmail} onChange={(e) => set("smtp.fromEmail", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2 rounded-lg bg-gray-50 p-3">
+          <label className={label}>Test məktubu göndər</label>
+          <div className="flex flex-wrap items-center gap-2">
+            <input className={`${input} max-w-xs`} placeholder="test@ünvan.com" value={testTo} onChange={(e) => setTestTo(e.target.value)} />
+            <button onClick={sendTest} disabled={testing} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
+              {testing ? "Göndərilir…" : "Test göndər"}
+            </button>
+          </div>
+          <p className="mt-1.5 text-xs text-gray-400">Əvvəlcə SMTP-ni yadda saxlayın, sonra test göndərin.</p>
         </div>
       </Section>
     </div>

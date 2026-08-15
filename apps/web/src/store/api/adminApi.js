@@ -88,6 +88,11 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["Resource", "Site"],
     }),
 
+    // ── SMTP test məktubu göndər ──
+    adminTestMail: builder.mutation({
+      query: (to) => ({ url: "/admin/dev/test-mail", method: "POST", body: { to } }),
+    }),
+
     // ── Admin users (multiple admins/editors) ──
     adminUsers: builder.query({
       query: (params) => ({ url: "/admin/users", params }),
@@ -138,6 +143,7 @@ export const {
   useAdminUpdateCourseFullMutation,
   useAdminSeedMutation,
   useAdminMigrateI18nMutation,
+  useAdminTestMailMutation,
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,

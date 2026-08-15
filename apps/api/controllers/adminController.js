@@ -156,7 +156,10 @@ const reorder = asyncHandler(async (req, res) => {
 /** GET /api/admin/settings — the singleton SiteSetting document. */
 const getSettings = asyncHandler(async (_req, res) => {
   const settings = await SiteSetting.get();
-  res.json({ success: true, data: { settings } });
+  const out = settings.toObject();
+  // SMTP parolunu frontend-ə qaytarma (yalnız-yazma); yalnız var/yox işarəsi.
+  if (out.smtp) out.smtp = { ...out.smtp, hasPass: Boolean(out.smtp.pass), pass: "" };
+  res.json({ success: true, data: { settings: out } });
 });
 
 /** PUT /api/admin/settings — partial update of the singleton. */
@@ -167,6 +170,10 @@ const updateSettings = asyncHandler(async (req, res) => {
   delete body.key;
   delete body.createdAt;
   delete body.updatedAt;
+  // SMTP parolu boş gəlibsə köhnəsini saxla (frontend parolu geri almır).
+  if (body.smtp && !body.smtp.pass) {
+    body.smtp = { ...body.smtp, pass: settings.smtp?.pass || "" };
+  }
   Object.assign(settings, body);
   await settings.save();
   await logAction(req, { action: "settings", resource: "settings", summary: "Sayt tənzimləmələri yeniləndi" });

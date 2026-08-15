@@ -83,6 +83,19 @@ const siteSettingSchema = new Schema(
 
     // Max upload size enforced by the media endpoint (client brief: 500 KB)
     maxImageSizeKb: { type: Number, default: 500 },
+
+    // SMTP — admin-editable email göndərişi (ENV fallback). `pass` frontend-ə
+    // qaytarılmır (yalnız-yazma); boş göndərilsə köhnə parol saxlanılır.
+    smtp: {
+      enabled: { type: Boolean, default: false },
+      host: { type: String, default: "", trim: true },
+      port: { type: Number, default: 587 },
+      secure: { type: Boolean, default: false }, // 465 üçün true
+      user: { type: String, default: "", trim: true },
+      pass: { type: String, default: "" },
+      fromName: { type: String, default: "", trim: true },
+      fromEmail: { type: String, default: "", trim: true },
+    },
   },
   {
     timestamps: true,
