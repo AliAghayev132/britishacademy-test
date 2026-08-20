@@ -121,6 +121,9 @@ export async function autoTranslate({
       }
 
       if (Object.keys(set).length) {
+        // QƏSDƏN sənəd-sənəd yazılır (bulkWrite YOX): AI çağırışları pullu və
+        // yavaşdır — proses ortada dayansa artıq ödənilmiş tərcümələr itməsin.
+        // DB yazısı burada onsuz da darboğaz deyil.
         await Model.updateOne({ _id: doc._id }, { $set: set });
         changedDocs += 1;
       }

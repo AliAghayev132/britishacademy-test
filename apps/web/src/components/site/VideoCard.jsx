@@ -11,6 +11,22 @@ function fmt(sec) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+// İkonlar FAYL səviyyəsindədir — komponent daxilində təyin olunsaydı hər
+// renderdə yeni komponent tipi yaranar, SVG-lər remount olunardı (React
+// `react-hooks/static-components` qaydası bunu error kimi işarələyirdi).
+const PlayIcon = ({ size = 24, fill = "#fff", ml = 2 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{ fill, marginLeft: ml }} aria-hidden="true">
+    <path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" />
+  </svg>
+);
+
+const PauseIcon = ({ size = 22, fill = "#fff" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{ fill }} aria-hidden="true">
+    <rect x="6" y="4.5" width="4.5" height="15" rx="1.6" />
+    <rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6" />
+  </svg>
+);
+
 /**
  * Custom video testimonial player matching the static .ba-vcard.
  * @param {{ t: { name?: string, achievement?: string, color?: string,
@@ -87,18 +103,6 @@ export default function VideoCard({ t }) {
         <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)", marginTop: 3 }}>{v.achievement}</div>
       )}
     </div>
-  );
-
-  const PlayIcon = ({ size = 24, fill = "#fff", ml = 2 }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" style={{ fill, marginLeft: ml }} aria-hidden="true">
-      <path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z" />
-    </svg>
-  );
-  const PauseIcon = ({ size = 22, fill = "#fff" }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" style={{ fill }} aria-hidden="true">
-      <rect x="6" y="4.5" width="4.5" height="15" rx="1.6" />
-      <rect x="13.5" y="4.5" width="4.5" height="15" rx="1.6" />
-    </svg>
   );
 
   // ── graceful: no video url → poster / placeholder ──

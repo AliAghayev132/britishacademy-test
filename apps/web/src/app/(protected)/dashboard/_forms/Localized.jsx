@@ -70,8 +70,12 @@ export function useFormLocale() {
 function useRegisterField(v, onChange, isHtml) {
   const ctx = useContext(FormLocaleContext);
   const id = useId();
-  const ref = useRef({});
-  ref.current = { value: v, onChange, isHtml };
+  const ref = useRef({ value: v, onChange, isHtml });
+  // Render zamanı ref-ə yazmaq React qaydasını pozur (concurrent render-də
+  // etibarsızdır) — ona görə hər render-dən SONRA effektdə yenilənir.
+  useEffect(() => {
+    ref.current = { value: v, onChange, isHtml };
+  });
   useEffect(() => {
     if (!ctx?.register) return undefined;
     ctx.register(id, ref);

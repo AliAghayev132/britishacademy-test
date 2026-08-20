@@ -75,23 +75,25 @@ export async function migrateI18n() {
     let changedDocs = 0;
     let changedFields = 0;
 
+    // Yazıları yığıb BİR bulkWrite ilə göndəririk — əvvəl sənəd başına ayrıca
+    // updateOne gedirdi (200+ sənəddə yüzlərlə şəbəkə gedişi).
+    const ops = [];
     for (const doc of docs) {
       const set = {};
       for (const path of fields) {
-        // Siyahı sahəsi? (sonuncu seqment LIST reyestrində, və ya tam yol)
-        const isList =
-          LIST_LOCALIZED_FIELDS.has(path) ||
-          LIST_LOCALIZED_FIELDS.has(path.split(".$.").join(".$."));
+        const isList = LIST_LOCALIZED_FIELDS.has(path);
         try {
           walk(doc, path.split("."), "", isList, set);
         } catch { /* sahə yoxdursa ötür */ }
       }
-      if (Object.keys(set).length) {
-        await Model.updateOne({ _id: doc._id }, { $set: set });
+      const count = Object.keys(set).length;
+      if (count) {
+        ops.push({ updateOne: { filter: { _id: doc._id }, update: { $set: set } } });
         changedDocs += 1;
-        changedFields += Object.keys(set).length;
+        changedFields += count;
       }
     }
+    if (ops.length) await Model.bulkWrite(ops, { ordered: false });
 
     report[modelName] = { docs: docs.length, changedDocs, changedFields };
     totalDocs += changedDocs;

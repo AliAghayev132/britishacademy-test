@@ -684,3 +684,23 @@ body.ba-home #qeydiyyat > div {
 
 /* ---- brand override (navy accent) ---- */
 :root { --accent: #00157A; --accent-soft: #00157A14; --accent-wm: #00157A2e; }
+
+/* ============================================================
+   Admin panel mikro-animasiyaları
+   Hamısı `prefers-reduced-motion: reduce` altında söndürülür —
+   layihədəki mövcud vərdiş pozulmasın.
+   ============================================================ */
+@keyframes ba-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes ba-pop-in  { from { opacity: 0; transform: scale(.96) } to { opacity: 1; transform: scale(1) } }
+@keyframes ba-row-in  { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+
+/* Tab keçidi, modal fonu */
+.ba-fade { animation: ba-fade-in .18s ease-out both; }
+/* Modal gövdəsi, QR, qoşulma kodu */
+.ba-pop  { animation: ba-pop-in .2s cubic-bezier(.2,.8,.3,1) both; }
+/* Cədvəl sətirləri — stagger `animation-delay` ilə inline verilir */
+.ba-row  { animation: ba-row-in .28s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ba-fade, .ba-pop, .ba-row { animation: none !important; }
+}
