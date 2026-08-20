@@ -5,3 +5,14 @@ uploads/*
 !uploads/.gitkeep
 *.log
 .DS_Store
+
+# ── WhatsApp (whatsapp-web.js) runtime ──
+# ⚠️ .wwebjs_auth/ saxlanmış WhatsApp sessiyasıdır — onu əldə edən şəxs hesaba
+# TAM giriş qazanır. Heç vaxt commit olunmamalıdır.
+.wwebjs_auth/
+.wwebjs_cache/
+session-*/
+
+# Puppeteer / Chromium keşi (lokal yüklənən brauzer)
+.cache/puppeteer/
+.local-chromium/

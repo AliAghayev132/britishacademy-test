@@ -6,11 +6,17 @@ dist/
 build/
 coverage/
 
-# WhatsApp sessiyası (whatsapp-web.js LocalAuth) — məxfidir, commit olunmamalıdır
+# ── WhatsApp (whatsapp-web.js) runtime ──
+# ⚠️ .wwebjs_auth/ saxlanmış WhatsApp sessiyasıdır — onu əldə edən şəxs hesaba
+# TAM giriş qazanır. Heç vaxt commit olunmamalıdır.
+# (Naxış qovluğun harada olmasından asılı olmayaraq işləyir.)
 .wwebjs_auth/
 .wwebjs_cache/
-apps/api/.wwebjs_auth/
-apps/api/.wwebjs_cache/
+session-*/
+
+# Puppeteer / Chromium keşi (lokal yüklənən brauzer)
+.cache/puppeteer/
+.local-chromium/
 
 # Runtime uploads
 apps/api/uploads/
