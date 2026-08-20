@@ -23,6 +23,9 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+      // Sorğularda DEFAULT olaraq gəlmir — diqqətsiz `res.json({ user })`
+      // bcrypt hash-ini sızdıra bilməsin. Lazım olan yerdə .select("+password").
+      select: false,
     },
     phone: {
       type: String,

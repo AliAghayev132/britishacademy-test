@@ -22,6 +22,7 @@ import {
   WEEKDAYS, LEVELS, FORMATS, toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { CourseGroupForm } from "./CourseGroupForm";
@@ -259,7 +260,7 @@ export function CourseWizard({ item, onClose }) {
       {locAz(contentHtml) && (
         <div
           className="bz-body mt-4"
-          dangerouslySetInnerHTML={{ __html: locAz(contentHtml) }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(locAz(contentHtml)) }}
         />
       )}
     </div>

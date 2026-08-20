@@ -213,10 +213,11 @@ const login = asyncHandler(async (req, res) => {
     });
   }
 
+  // Parol `select: false`-dur — müqayisə üçün açıq şəkildə istənilir.
   const user = await User.findOne({
     email: email.toLowerCase(),
     isDeleted: false,
-  });
+  }).select("+password");
 
   if (!user) {
     return res.status(401).json({
@@ -319,7 +320,7 @@ const changePassword = asyncHandler(async (req, res) => {
     });
   }
 
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user._id).select("+password");
 
   const isMatch = await HashService.comparePassword(
     currentPassword,

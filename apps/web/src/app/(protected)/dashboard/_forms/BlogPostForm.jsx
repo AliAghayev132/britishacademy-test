@@ -24,6 +24,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 // Utils
@@ -131,7 +132,7 @@ export function BlogPostForm({ item, onClose }) {
         {locAz(content) && (
           <div
             className="bz-body mt-4"
-            dangerouslySetInnerHTML={{ __html: locAz(content) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(locAz(content)) }}
           />
         )}
       </div>

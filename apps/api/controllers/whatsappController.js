@@ -101,11 +101,32 @@ const send = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Mesaj göndərildi" });
 });
 
-/** POST /api/admin/whatsapp/send-media  { phone, base64, mimetype?, filename?, caption? } */
+/**
+ * POST /api/admin/whatsapp/send-media  { phone, base64, mimetype?, filename?, caption? }
+ *
+ * ⚠️ Fayl JSON body-də base64 kimi gəlir. Express body limiti 10 MB-dır
+ * (securityConfig.maxPayloadSize) və base64 ~33% şişirdir → REAL limit ~7 MB.
+ * Ondan böyük fayl body parser-də anlaşılmaz 413 verirdi; burada aydın mesaj
+ * qaytarırıq. Daha böyük fayllar üçün multipart /api/media/upload-video
+ * işlədilməli və nəticə URL kimi göndərilməlidir.
+ */
+const MAX_MEDIA_BYTES = 7 * 1024 * 1024;
+
 const sendMedia = asyncHandler(async (req, res) => {
   const { phone, base64, mimetype, filename, caption } = req.body || {};
   if (!phone || !base64) {
     return res.status(400).json({ success: false, message: "Telefon nömrəsi və fayl məcburidir" });
+  }
+  // base64 uzunluğundan təxmini bayt ölçüsü
+  const approxBytes = Math.floor((String(base64).length * 3) / 4);
+  if (approxBytes > MAX_MEDIA_BYTES) {
+    const mb = Math.round(approxBytes / 1024 / 1024);
+    const maxMb = MAX_MEDIA_BYTES / 1024 / 1024;
+    return res.status(413).json({
+      success: false,
+      message:
+        "Fayl çox böyükdür (" + mb + " MB). WhatsApp ilə birbaşa göndəriş üçün maksimum " + maxMb + " MB.",
+    });
   }
   const normalized = WhatsAppService.normalizePhone(phone);
   try {

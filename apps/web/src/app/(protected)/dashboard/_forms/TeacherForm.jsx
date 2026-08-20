@@ -26,6 +26,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 // Utils
@@ -205,7 +206,7 @@ export function TeacherForm({ item, onClose }) {
       {azBio && (
         <div
           className="bz-body mt-4 basis-full"
-          dangerouslySetInnerHTML={{ __html: azBio }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(azBio) }}
         />
       )}
     </div>
