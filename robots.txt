@@ -1,5 +1,0 @@
-# British Academy — robots.txt
-User-agent: *
-Allow: /
-
-Sitemap: https://britishacademy.az/sitemap.xml

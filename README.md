@@ -1,23 +1,22 @@
 # British Academy
 
 Dil mərkəzi üçün tam-stack vebsayt: **Next.js 16 + Express 5 + MongoDB**.
-Statik saytdan dinamik sistemə miqrasiya tamamlanıb — bütün məzmun bazadan gəlir
-və admin paneldən idarə olunur.
+Bütün məzmun bazadan gəlir və admin paneldən idarə olunur (3 dildə: AZ/EN/RU).
 
 ```
 britishacademy/
-├── index.html, *.html, css/, js/, assets/, tools/   ← statik sayt (GitHub Pages kökdən verir)
 ├── apps/
 │   ├── api/          ← Express 5 + Mongoose 9 + Socket.IO backend
 │   └── web/          ← Next.js 16 (App Router) + RTK Query frontend
-└── docs/
-    ├── API.md                   ← marşrut arayışı (PUBLIC vs ADMIN)
-    ├── DATA-MODEL.md            ← domen modelinin dizaynı
-    └── template-reference/      ← starter şablonun sənədləri
+├── docs/
+│   ├── API.md                   ← marşrut arayışı (PUBLIC vs ADMIN)
+│   ├── DATA-MODEL.md            ← domen modelinin dizaynı
+│   └── template-reference/      ← starter şablonun sənədləri
+└── dev.sh            ← API + Web dev serverlərini birlikdə qaldırır
 ```
 
-> **Kökdəki statik sayt** GitHub Pages üçündür (60 səhifə, `tools/build.mjs` ilə generasiya olunur).
-> Dinamik sistem `apps/` altındadır və ayrıca deploy olunur — bir-birinə qarışmır.
+> Köhnə statik sayt (HTML/CSS/JS + `tools/` generatoru) repodan silinib — bütün
+> məzmun artıq dinamik sistemdədir. Lazım olsa git tarixindən bərpa edilə bilər.
 
 ## Sürətli başlanğıc
 
@@ -27,7 +26,7 @@ MongoDB lokal işləməlidir (`mongodb://localhost:27017/britishacademy`).
 # 1) Backend
 cd apps/api
 npm install --legacy-peer-deps
-node scripts/seed.js          # statik məzmunu bazaya köçürür
+node scripts/seed.js          # başlanğıc məzmunu bazaya yükləyir
 npm run dev                   # http://localhost:5000
 
 # 2) Frontend (ayrı terminalda)
@@ -46,12 +45,13 @@ Admin panel: `http://localhost:3000/dashboard`
 
 | Mərhələ | Vəziyyət | İş |
 |---------|----------|-----|
-| 0 | ✅ | Skafold + statikin `legacy-static/`-ə köçürülməsi |
+| 0 | ✅ | Skafold + statik məzmunun bazaya köçürülməsi |
 | 1 | ✅ | 17 Mongoose modeli + enum-lar + seed skripti |
 | 2 | ✅ | API — 22 public endpoint + 16 resurs üzrə admin CRUD |
 | 3 | ✅ | Next.js public sayt — bütün səhifələr dinamik |
 | 4 | ✅ | Admin dashboard (resurslar, müraciətlər, tənzimləmələr) |
 | 5 | ✅ | SEO — metadata, canonical, JSON-LD, dinamik sitemap/robots |
+| 6 | ✅ | 3 dil (AZ/EN/RU) — bütün məzmun sahələri + AI tərcümə köməkçisi |
 
 ## Səhifələr
 
@@ -82,7 +82,7 @@ cd apps/api
 npm install --legacy-peer-deps
 cp .env.example .env.development     # və ya mövcud .env.development-i redaktə et
 npm run dev                          # nodemon, http://localhost:5000
-node scripts/seed.js                 # statik məzmunu bazaya köçür
+node scripts/seed.js                 # başlanğıc məzmunu bazaya yüklə
 node scripts/seed.js --dry           # DB olmadan bütün sənədləri validasiya et
 ```
 
@@ -106,7 +106,7 @@ Next.js 16 App Router + RTK Query + Tailwind v4.
   API-dən çəkir; klient interaktivliyi RTK Query (`store/api/{publicApi,leadApi,adminApi}.js`).
 - **Chrome**: `components/site/*` — `SiteProvider` (müraciət modalı konteksti), `Header`
   (dinamik mega-menyu, mobil çekmecə), `Footer`, `ApplyModal`, `WhatsAppWidget` (filial seçici).
-- **Stillər**: `globals.css` = Tailwind v4 + `legacy-static`-dən köçürülmüş təsdiqlənmiş
+- **Stillər**: `globals.css` = Tailwind v4 + təsdiqlənmiş
   dizayn sistemi (mega-menyu, kartlar, qiymət cədvəli, rəy divarı). Fontlar: Poppins + Nunito Sans.
 - **Route qrupları**: `(public)` marketinq qabığı ilə, `(auth)` login/register (qabıqsız),
   `(protected)/dashboard` admin. Qorunma: `src/proxy.js` (Edge, `token` cookie).
@@ -121,18 +121,6 @@ Next.js 16 App Router + RTK Query + Tailwind v4.
 `/dashboard/resurslar/[resource]` — 16 resurs üçün generic CRUD (cədvəl, axtarış, JSON redaktoru) ·
 `/dashboard/tenzimlemeler` — əlaqə, sosial, hero, statistika, head/body kod inyeksiyası,
 robots.txt, şəkil limiti.
-
-## Statik sayt (GitHub Pages)
-
-Repo kökündəki HTML/CSS/JS **tam işlək statik saytdır** — GitHub Pages onu birbaşa kökdən verir
-(`Settings → Pages → Branch: main / root`). 60 səhifə `tools/build.mjs` generatoru ilə yaradılır:
-
-```bash
-node tools/build.mjs      # menyu/SEO/sitemap-i yenidən qurur
-```
-
-Dinamik sistem (`apps/`) bundan **asılı deyil** — yeganə əlaqə odur ki, `apps/api/scripts/seed.js`
-kurs mətnlərini `tools/content.mjs`-dən oxuyur.
 
 ## API marşrutları
 
