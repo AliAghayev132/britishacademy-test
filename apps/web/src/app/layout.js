@@ -6,6 +6,8 @@ import {
   getSiteSettings,
 } from "@/lib/seo";
 import { toList } from "@/utils/toList";
+import { getLocale } from "@/lib/i18n/serverT";
+import { CodeInjection } from "@/components/site/CodeInjection";
 
 const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
@@ -71,9 +73,16 @@ async function siteJsonLd() {
 }
 
 export default async function RootLayout({ children }) {
-  const ld = await siteJsonLd();
+  const [ld, s, locale] = await Promise.all([
+    siteJsonLd(),
+    getSiteSettings(),
+    getLocale(),
+  ]);
+  const inject = s?.codeInjection || {};
   return (
-    <html lang="az">
+    // `lang` seçilmiş dilə görə — əvvəl sabit "az" idi, EN/RU səhifələrdə
+    // ekran oxuyucular və axtarış sistemləri səhv dil görürdü.
+    <html lang={locale || "az"}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -85,6 +94,8 @@ export default async function RootLayout({ children }) {
       </head>
       <body>
         <Providers>{children}</Providers>
+        {/* Admin panelindən əlavə edilən analytics/pixel kodu */}
+        <CodeInjection head={inject.head} bodyEnd={inject.bodyEnd} />
       </body>
     </html>
   );

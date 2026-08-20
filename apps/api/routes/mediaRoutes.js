@@ -5,8 +5,26 @@ import { config } from "#config";
 // Controllers
 import { mediaController } from "#controllers";
 
+// Models
+import { SiteSetting } from "#models";
+
 // Middlewares
 import { authenticate, uploadLimit } from "#middlewares";
+
+/**
+ * Şəkil limiti admin panelindən idarə olunur (Tənzimləmələr → SEO/Texniki →
+ * "Maks. şəkil ölçüsü"). Dəyər yoxdursa və ya oxunmasa config-dəki limitə
+ * düşürük. `config.upload.maxImageSize` sərt tavandır — FileService onu
+ * ayrıca yoxlayır, ona görə admin ondan böyük dəyər versə də keçməyəcək.
+ */
+const resolveImageLimit = async () => {
+  try {
+    const s = await SiteSetting.get();
+    const kb = Number(s?.maxImageSizeKb);
+    if (kb > 0) return Math.min(kb * 1024, config.upload.maxImageSize);
+  } catch { /* DB əlçatmazdırsa config-ə düş */ }
+  return config.upload.maxImageSize;
+};
 
 const MediaRouter = Router();
 
@@ -15,7 +33,7 @@ const MediaRouter = Router();
 MediaRouter.post(
   "/upload-image",
   authenticate,
-  uploadLimit(config.upload.maxImageSize),
+  uploadLimit(resolveImageLimit),
   mediaController.uploadImage,
 );
 MediaRouter.post(
