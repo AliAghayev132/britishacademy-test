@@ -11,3 +11,4 @@ export * as devController from "./devController.js";
 export * as userAdminController from "./userAdminController.js";
 export * as leadController from "./leadController.js";
 export * as seoController from "./seoController.js";
+export * as whatsappController from "./whatsappController.js";

@@ -2,7 +2,7 @@
 import { Router, adminRoles } from "#constants";
 
 // Controllers
-import { adminController, leadController, courseComposer, devController, userAdminController } from "#controllers";
+import { adminController, leadController, courseComposer, devController, userAdminController, whatsappController } from "#controllers";
 
 // Middlewares
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
@@ -40,6 +40,19 @@ AdminRouter.post("/dev/test-mail", writeRateLimiter, devController.runTestMail);
 // AI toplu tərcümə — boş EN/RU sahələrini AZ-dan doldurur (uzun sürə bilər,
 // ona görə writeRateLimiter tətbiq olunmur).
 AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
+
+// WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
+// Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
+AdminRouter.get("/whatsapp/status", whatsappController.getStatus);
+AdminRouter.get("/whatsapp/check", whatsappController.checkNumber);
+AdminRouter.get("/whatsapp/messages", whatsappController.listMessages);
+AdminRouter.post("/whatsapp/init", whatsappController.init);
+AdminRouter.post("/whatsapp/send", writeRateLimiter, whatsappController.send);
+AdminRouter.post("/whatsapp/send-media", writeRateLimiter, whatsappController.sendMedia);
+AdminRouter.post("/whatsapp/bulk", whatsappController.bulk);
+AdminRouter.post("/whatsapp/bulk/cancel", whatsappController.cancelBulk);
+AdminRouter.post("/whatsapp/disconnect", whatsappController.disconnect);
+AdminRouter.post("/whatsapp/logout", whatsappController.logout);
 
 // Admin users (create multiple admins/editors) + audit log.
 // Fixed paths — must precede the generic /:resource matcher.

@@ -6,6 +6,12 @@ dist/
 build/
 coverage/
 
+# WhatsApp sessiyası (whatsapp-web.js LocalAuth) — məxfidir, commit olunmamalıdır
+.wwebjs_auth/
+.wwebjs_cache/
+apps/api/.wwebjs_auth/
+apps/api/.wwebjs_cache/
+
 # Runtime uploads
 apps/api/uploads/
 

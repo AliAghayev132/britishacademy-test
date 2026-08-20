@@ -93,6 +93,50 @@ export const adminApi = baseApi.injectEndpoints({
       query: (to) => ({ url: "/admin/dev/test-mail", method: "POST", body: { to } }),
     }),
 
+    // ── WhatsApp (whatsapp-web.js): QR ilə qoşulma + mesaj göndərmə ──
+    whatsappStatus: builder.query({
+      query: () => "/admin/whatsapp/status",
+      providesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+    whatsappInit: builder.mutation({
+      // { pairPhone? } — verilsə QR əvəzinə 8 rəqəmli qoşulma kodu istənilir
+      query: (body) => ({ url: "/admin/whatsapp/init", method: "POST", body: body || {} }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+    whatsappCheck: builder.query({
+      query: (phone) => ({ url: "/admin/whatsapp/check", params: { phone } }),
+    }),
+    whatsappMessages: builder.query({
+      query: (params) => ({ url: "/admin/whatsapp/messages", params }),
+      providesTags: [{ type: "Site", id: "whatsapp-messages" }],
+    }),
+    whatsappSendMedia: builder.mutation({
+      query: (body) => ({ url: "/admin/whatsapp/send-media", method: "POST", body }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp-messages" }],
+    }),
+    whatsappBulk: builder.mutation({
+      // { template, phones? | leadStatus?, skipDuplicates? }
+      query: (body) => ({ url: "/admin/whatsapp/bulk", method: "POST", body }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+    whatsappBulkCancel: builder.mutation({
+      query: () => ({ url: "/admin/whatsapp/bulk/cancel", method: "POST" }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+    whatsappSend: builder.mutation({
+      // { phone, message, lead?, vars? }
+      query: (body) => ({ url: "/admin/whatsapp/send", method: "POST", body }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp-messages" }],
+    }),
+    whatsappDisconnect: builder.mutation({
+      query: () => ({ url: "/admin/whatsapp/disconnect", method: "POST" }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+    whatsappLogout: builder.mutation({
+      query: () => ({ url: "/admin/whatsapp/logout", method: "POST" }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
+
     // ── AI toplu tərcümə: bazadakı boş EN/RU sahələrini AZ-dan doldurur ──
     // Uzun sürə bilər (hər sənəd üçün 1-2 AI sorğusu).
     adminAutoTranslate: builder.mutation({
@@ -160,6 +204,16 @@ export const {
   useAdminTestMailMutation,
   useAiProcessMutation,
   useAdminAutoTranslateMutation,
+  useWhatsappStatusQuery,
+  useWhatsappInitMutation,
+  useWhatsappSendMutation,
+  useWhatsappSendMediaMutation,
+  useWhatsappCheckQuery,
+  useWhatsappMessagesQuery,
+  useWhatsappBulkMutation,
+  useWhatsappBulkCancelMutation,
+  useWhatsappDisconnectMutation,
+  useWhatsappLogoutMutation,
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,

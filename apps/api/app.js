@@ -6,7 +6,7 @@ import { config, corsConfig, securityConfig } from "#config";
 
 // Services
 import {
-  MailService,
+  MailService, WhatsAppService,
   socketService,
   mongoDBService,
   bootstrapAdmin,
@@ -238,6 +238,10 @@ const initializeServices = async () => {
 
   // Initialize the mail service
   MailService.init();
+
+  // WhatsApp: saxlanmış sessiya varsa QR-siz avtomatik bərpa et.
+  // (Sessiya yoxdursa heç nə etmir — Chromium boş yerə açılmır.)
+  WhatsAppService.resumeIfSession().catch(() => {});
 };
 
 /**
