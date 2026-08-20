@@ -4,6 +4,7 @@
 import Link from "next/link";
 // Data (RTK Query)
 import { useAdminStatsQuery } from "@/store/api/adminApi";
+import { QueryState } from "@/components/ui/QueryState";
 // Icons
 import { Inbox, GraduationCap, Users, Building2, CalendarClock, MessageSquareQuote, Globe2, FileText } from "lucide-react";
 
@@ -20,7 +21,7 @@ const CARDS = [
 const fmt = (d) => new Date(d).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
 export default function DashboardHome() {
-  const { data, isLoading } = useAdminStatsQuery();
+  const { data, isLoading, isError, error, refetch } = useAdminStatsQuery();
   const counts = data?.data?.counts || {};
   const newLeads = data?.data?.newLeads ?? 0;
   const latest = data?.data?.latestLeads || [];
@@ -50,8 +51,15 @@ export default function DashboardHome() {
 
       <div className="rounded-xl border border-gray-200 bg-white">
         <div className="border-b border-gray-100 px-5 py-4 text-sm font-bold text-gray-900">Son müraciətlər</div>
-        {latest.length === 0 ? (
-          <div className="p-6 text-sm text-gray-500">{isLoading ? "Yüklənir…" : "Hələ müraciət yoxdur."}</div>
+        {isLoading || isError || latest.length === 0 ? (
+          <QueryState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={latest.length === 0}
+            emptyText="Hələ müraciət yoxdur."
+          />
         ) : (
           <table className="w-full text-sm">
             <tbody>

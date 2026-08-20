@@ -8,11 +8,20 @@ import { Button, Input, Card, PageLoader } from '@/components/ui'
 // Data (RTK Query)
 import { useGetMeQuery, useUpdateProfileMutation } from '@/store/api'
 import { updateUser } from '@/store/slices/authSlice'
+import { ErrorState } from '@/components/ui/QueryState'
 
 export default function ProfilePage() {
-  const { data, isLoading } = useGetMeQuery()
+  const { data, isLoading, isError, error, refetch } = useGetMeQuery()
 
-  if (isLoading) return <PageLoader message="Loading profile..." />
+  if (isLoading) return <PageLoader message="Profil yüklənir…" />
+  // Sorğu uğursuz olsa boş forma yerinə səbəb + yenidən cəhd göstər.
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white">
+        <ErrorState error={error} onRetry={refetch} />
+      </div>
+    )
+  }
 
   // `key` remounts the form when the loaded user changes, so the form's
   // initial state is derived from props without a syncing effect.

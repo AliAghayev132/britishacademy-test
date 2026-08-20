@@ -2,6 +2,7 @@
 
 import { LocaleLink as Link } from "./LocaleLink";
 import { useT } from "@/lib/i18n/useT";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 const CAT_COLORS = ["#2E6BE6", "#F5A524", "#7C4DFF", "#E0533D", "#12B5A5", "#FF3D8B", "#0EA5E9", "#22B07D"];
 
@@ -46,7 +47,13 @@ export function DestinationCard({ dest }) {
   return (
     <Link href={`/xaricde-tehsil/${dest.slug}`} className="ba-fdest" style={{ "--cc": dest.color || "#2E6BE6" }}>
       {dest.flag ? (
-        <span className="ba-flag" aria-hidden="true" dangerouslySetInnerHTML={{ __html: dest.flag }} />
+        <span
+          className="ba-flag"
+          aria-hidden="true"
+          /* Admin sərbəst mətn sahəsidir (inline SVG) — sanitizasiyasız render
+             saxlanmış XSS vektoru idi. */
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(dest.flag) }}
+        />
       ) : (
         <span aria-hidden="true" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 92, lineHeight: 1, opacity: 0.9, pointerEvents: "none", userSelect: "none", WebkitMaskImage: "linear-gradient(to left, #000 55%, transparent)", maskImage: "linear-gradient(to left, #000 55%, transparent)" }}>{flag}</span>
       )}

@@ -11,6 +11,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
+import { QueryState } from "@/components/ui/QueryState";
 import {
   MessageSquare, Send, X, RefreshCw, CheckCircle, XCircle, Loader2,
   AlertCircle, Smartphone, LogOut, PowerOff, Users, History, KeyRound, StopCircle,
@@ -63,7 +64,7 @@ export default function WhatsAppPage() {
 
   // Aktiv iş varsa 3 saniyədən bir, sakit vəziyyətdə seyrək yoxlanılır.
   const [poll, setPoll] = useState(3000);
-  const { data, isLoading, refetch } = useWhatsappStatusQuery(undefined, {
+  const { data, isLoading, isError, error, refetch } = useWhatsappStatusQuery(undefined, {
     pollingInterval: poll,
     skipPollingIfUnfocused: true,
   });
@@ -81,7 +82,10 @@ export default function WhatsAppPage() {
   const wantedPoll = isReady && !queue.running ? 15000 : 3000;
   if (wantedPoll !== poll) setPoll(wantedPoll);
 
-  const { data: msgData, isFetching: msgLoading } = useWhatsappMessagesQuery(
+  const {
+    data: msgData, isFetching: msgLoading,
+    isError: msgError, error: msgErrorObj, refetch: refetchMsgs,
+  } = useWhatsappMessagesQuery(
     { page, limit: 20 },
     { skip: tab !== "history" },
   );
@@ -459,10 +463,15 @@ npm i whatsapp-web.js@^1.34.7 qrcode@^1.5.4
           {/* ── Tarixçə ── */}
           {tab === "history" && (
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-              {msgLoading && messages.length === 0 ? (
-                <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
-              ) : messages.length === 0 ? (
-                <div className="p-8 text-center text-sm text-gray-500">Hələ mesaj göndərilməyib.</div>
+              {(msgLoading && messages.length === 0) || msgError || messages.length === 0 ? (
+                <QueryState
+                  isLoading={msgLoading && !msgError}
+                  isError={msgError}
+                  error={msgErrorObj}
+                  onRetry={refetchMsgs}
+                  isEmpty={messages.length === 0}
+                  emptyText="Hələ mesaj göndərilməyib."
+                />
               ) : (
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">

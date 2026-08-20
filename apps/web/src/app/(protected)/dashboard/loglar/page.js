@@ -6,6 +6,7 @@ import { useState } from "react";
 import { NativeSelect } from "../_forms/kit";
 // Data (RTK Query)
 import { useAdminLogsQuery } from "@/store/api/adminApi";
+import { QueryState } from "@/components/ui/QueryState";
 
 // action → AZ label + badge colors (navy-leaning palette)
 const ACTIONS = {
@@ -36,7 +37,7 @@ export default function LogsPage() {
   const [action, setAction] = useState("");
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, isFetching } = useAdminLogsQuery({ page, action, search });
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminLogsQuery({ page, action, search });
 
   const items = data?.data?.items || [];
   const pagination = data?.data?.pagination;
@@ -65,10 +66,15 @@ export default function LogsPage() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {isLoading ? (
-          <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
-        ) : items.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">Hələ log yoxdur.</div>
+        {isLoading || isError || items.length === 0 ? (
+          <QueryState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={items.length === 0}
+            emptyText={"Hələ log yoxdur."}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

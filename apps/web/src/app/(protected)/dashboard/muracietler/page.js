@@ -7,6 +7,7 @@ import { notify } from "@/components/ui/feedback";
 import { NativeSelect } from "../_forms/kit";
 // Data (RTK Query)
 import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/adminApi";
+import { QueryState } from "@/components/ui/QueryState";
 // Icons
 import { Search } from "lucide-react";
 
@@ -43,7 +44,7 @@ export default function LeadsPage() {
   const hasFilter = Boolean(search || status || source);
 
   // Backend leads-i həmişə createdAt: -1 (ən yenilər ən yuxarıda) qaytarır.
-  const { data, isLoading, isFetching } = useAdminListQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({
     resource: "leads",
     page,
     limit: 20,
@@ -90,10 +91,15 @@ export default function LeadsPage() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {isLoading ? (
-          <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
-        ) : items.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">{hasFilter ? "Axtarışa uyğun müraciət tapılmadı." : "Hələ müraciət yoxdur."}</div>
+        {isLoading || isError || items.length === 0 ? (
+          <QueryState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={items.length === 0}
+            emptyText={hasFilter ? "Axtarışa uyğun müraciət tapılmadı." : "Hələ müraciət yoxdur."}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">

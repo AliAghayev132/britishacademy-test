@@ -21,6 +21,23 @@ import {
 
 /* ---------------- Site chrome ---------------- */
 
+/**
+ * Public cavabdan çıxarılan sahələr.
+ *
+ * ⚠️ TƏHLÜKƏSİZLİK: /api/site autentifikasiyasızdır. SiteSetting sənədini olduğu
+ * kimi qaytarmaq SMTP parolunu və OpenRouter API açarını hər kəsə açırdı.
+ * Bura yalnız saytın işləməsi üçün lazım olanlar qalır; yeni gizli sahə əlavə
+ * ediləndə onu da bu siyahıya yazın.
+ */
+const PRIVATE_SETTING_FIELDS = ["smtp", "ai"];
+
+/** SiteSetting-i public üçün təhlükəsiz hala gətir. */
+function publicSettings(doc) {
+  const out = typeof doc?.toObject === "function" ? doc.toObject() : { ...doc };
+  for (const f of PRIVATE_SETTING_FIELDS) delete out[f];
+  return out;
+}
+
 /** GET /api/site — settings + header/footer menus (one call for the layout). */
 const getSite = asyncHandler(async (_req, res) => {
   const [settings, header, footer] = await Promise.all([
@@ -28,7 +45,10 @@ const getSite = asyncHandler(async (_req, res) => {
     MenuItem.tree("header"),
     MenuItem.tree("footer"),
   ]);
-  res.json({ success: true, data: { settings, menu: { header, footer } } });
+  res.json({
+    success: true,
+    data: { settings: publicSettings(settings), menu: { header, footer } },
+  });
 });
 
 /** GET /api/menu?location=header */
@@ -72,7 +92,10 @@ const getHome = asyncHandler(async (_req, res) => {
 
   res.json({
     success: true,
-    data: { settings, courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs },
+    data: {
+      settings: publicSettings(settings),
+      courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs,
+    },
   });
 });
 

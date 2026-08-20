@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 // UI / kit
 import { notify } from "@/components/ui/feedback";
+import { QueryState } from "@/components/ui/QueryState";
 // Data (RTK Query)
 import {
   useAdminGetSettingsQuery,
@@ -49,7 +50,7 @@ const TABS = [
  * SMTP email göndərişi və AI (OpenRouter) — hamısı SiteSetting singleton-da.
  */
 export default function SettingsPage() {
-  const { data, isLoading } = useAdminGetSettingsQuery();
+  const { data, isLoading, isError, error, refetch } = useAdminGetSettingsQuery();
   const [update, { isLoading: saving }] = useAdminUpdateSettingsMutation();
   const [testMail, { isLoading: testing }] = useAdminTestMailMutation();
   const [form, setForm] = useState(null);
@@ -108,7 +109,14 @@ export default function SettingsPage() {
     }
   }, [data, form]);
 
-  if (isLoading || !form) return <div className="p-8 text-sm text-gray-500">Yüklənir…</div>;
+  // Xəta halında sonsuz «Yüklənir…» əvəzinə səbəb + yenidən cəhd düyməsi.
+  if (isLoading || isError || !form) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white">
+        <QueryState isLoading={isLoading && !isError} isError={isError} error={error} onRetry={refetch} />
+      </div>
+    );
+  }
 
   const set = (path, value) => {
     setForm((f) => {

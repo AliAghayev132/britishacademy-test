@@ -153,14 +153,33 @@ const reorder = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Sıralama yeniləndi" });
 });
 
+/**
+ * Yalnız `admin` rolunun dəyişə biləcəyi tənzimləmə blokları.
+ *
+ * ⚠️ Bunların hamısı infrastruktur/təhlükəsizlik təsirlidir:
+ *  - smtp / ai            → kimlik məlumatları və API açarları
+ *  - codeInjection        → saytın hər səhifəsində ixtiyari skript
+ *  - robotsTxt            → axtarış indeksləşməsini söndürə bilər
+ *  - organizationSchema   → JSON-LD inyeksiyası
+ *  - maxImageSizeKb       → yükləmə limiti
+ * `editor` rolu məzmun sahələrini (contact, hero, seo mətnləri, stats…) dəyişə bilər.
+ */
+const ADMIN_ONLY_SETTING_FIELDS = [
+  "smtp", "ai", "codeInjection", "robotsTxt", "organizationSchema", "maxImageSizeKb",
+];
+
+/** Gizli açarları cavabdan çıxar (yalnız-yazma; var/yox işarəsi qalır). */
+function maskSettings(settings) {
+  const out = typeof settings?.toObject === "function" ? settings.toObject() : { ...settings };
+  if (out.smtp) out.smtp = { ...out.smtp, hasPass: Boolean(out.smtp.pass), pass: "" };
+  if (out.ai) out.ai = { ...out.ai, hasKey: Boolean(out.ai.apiKey), apiKey: "" };
+  return out;
+}
+
 /** GET /api/admin/settings — the singleton SiteSetting document. */
 const getSettings = asyncHandler(async (_req, res) => {
   const settings = await SiteSetting.get();
-  const out = settings.toObject();
-  // Gizli açarları frontend-ə qaytarma (yalnız-yazma); yalnız var/yox işarəsi.
-  if (out.smtp) out.smtp = { ...out.smtp, hasPass: Boolean(out.smtp.pass), pass: "" };
-  if (out.ai) out.ai = { ...out.ai, hasKey: Boolean(out.ai.apiKey), apiKey: "" };
-  res.json({ success: true, data: { settings: out } });
+  res.json({ success: true, data: { settings: maskSettings(settings) } });
 });
 
 /** PUT /api/admin/settings — partial update of the singleton. */
@@ -171,6 +190,17 @@ const updateSettings = asyncHandler(async (req, res) => {
   delete body.key;
   delete body.createdAt;
   delete body.updatedAt;
+
+  // Editor privilegiyalı blokları göndərsə — sükutla at (səhv redaktə cəzalandırılmasın,
+  // amma dəyişiklik də tətbiq olunmasın).
+  if (req.user?.role !== "admin") {
+    const blocked = ADMIN_ONLY_SETTING_FIELDS.filter((f) => f in body);
+    for (const f of blocked) delete body[f];
+    if (blocked.length) {
+      console.warn(`⚠️ settings: ${req.user?.email || "editor"} admin-only sahələri dəyişməyə çalışdı: ${blocked.join(", ")}`);
+    }
+  }
+
   // Gizli açar boş gəlibsə köhnəsini saxla (frontend geri almır).
   if (body.smtp && !body.smtp.pass) {
     body.smtp = { ...body.smtp, pass: settings.smtp?.pass || "" };
@@ -181,7 +211,8 @@ const updateSettings = asyncHandler(async (req, res) => {
   Object.assign(settings, body);
   await settings.save();
   await logAction(req, { action: "settings", resource: "settings", summary: "Sayt tənzimləmələri yeniləndi" });
-  res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings } });
+  // Cavabda da maskala — əks halda parol/açar admin panelə geri qayıdırdı.
+  res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings: maskSettings(settings) } });
 });
 
 /** GET /api/admin/stats — dashboard overview: per-resource counts + new leads. */

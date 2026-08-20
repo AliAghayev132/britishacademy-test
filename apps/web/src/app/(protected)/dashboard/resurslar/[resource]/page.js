@@ -15,6 +15,7 @@ import {
 // UI / kit
 import { confirmDialog, notify } from "@/components/ui/feedback";
 import { ActionsMenu } from "@/components/ui/ActionsMenu";
+import { QueryState } from "@/components/ui/QueryState";
 import { NativeSelect } from "../../_forms/kit";
 // Local
 import { BESPOKE_FORMS } from "../../_forms";
@@ -58,7 +59,7 @@ export default function ResourceBrowserPage({ params }) {
   }, [lookups]);
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
-  const { data, isLoading, isFetching } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
   const [createItem] = useAdminCreateMutation();
@@ -181,10 +182,15 @@ export default function ResourceBrowserPage({ params }) {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {isLoading ? (
-          <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
-        ) : items.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">Heç nə tapılmadı.</div>
+        {isLoading || isError || items.length === 0 ? (
+          <QueryState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={items.length === 0}
+            emptyText={"Heç nə tapılmadı."}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">

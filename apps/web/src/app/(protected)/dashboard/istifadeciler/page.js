@@ -20,6 +20,7 @@ import {
   useAdminUpdateUserMutation,
   useAdminDeleteUserMutation,
 } from "@/store/api/adminApi";
+import { QueryState } from "@/components/ui/QueryState";
 
 // ── Constants ──
 const ROLES = [
@@ -148,7 +149,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(null); // null | "create" | user object
 
-  const { data, isLoading, isFetching } = useAdminUsersQuery({ page, search });
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsersQuery({ page, search });
   const [del] = useAdminDeleteUserMutation();
 
   const items = data?.data?.items || [];
@@ -196,10 +197,15 @@ export default function UsersPage() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {isLoading ? (
-          <div className="p-8 text-center text-sm text-gray-500">Yüklənir…</div>
-        ) : items.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">İstifadəçi tapılmadı.</div>
+        {isLoading || isError || items.length === 0 ? (
+          <QueryState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={items.length === 0}
+            emptyText={"İstifadəçi tapılmadı."}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

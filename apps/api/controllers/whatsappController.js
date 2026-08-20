@@ -39,6 +39,9 @@ const getStatus = asyncHandler(async (_req, res) => {
  * `pairPhone` verilsə QR əvəzinə 8 rəqəmli qoşulma kodu istənilir.
  */
 const init = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "WhatsApp qoşulmasını yalnız admin idarə edə bilər" });
+  }
   if (WhatsAppService.isReady) {
     return res.json({ success: true, message: "WhatsApp artıq qoşulub", data: WhatsAppService.getStatus() });
   }
@@ -126,6 +129,10 @@ const sendMedia = asyncHandler(async (req, res) => {
  * mesajda {{ad}} / {{telefon}} dəyişənləri müraciət məlumatı ilə doldurulur.
  */
 const bulk = asyncHandler(async (req, res) => {
+  // Kütləvi göndəriş şirkət nömrəsinin bloklanmasına səbəb ola bilər — yalnız admin.
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
+  }
   const { template, phones, leadStatus, skipDuplicates = true } = req.body || {};
   if (!template?.trim()) {
     return res.status(400).json({ success: false, message: "Mesaj mətni məcburidir" });
@@ -198,6 +205,9 @@ const listMessages = asyncHandler(async (req, res) => {
 
 /** POST /api/admin/whatsapp/disconnect — bağla, sessiyanı SAXLA. */
 const disconnect = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Yalnız admin bağlaya bilər" });
+  }
   await WhatsAppService.disconnect();
   await logAction(req, { action: "settings", resource: "whatsapp", summary: "WhatsApp bağlandı" });
   res.json({ success: true, message: "WhatsApp bağlandı (sessiya saxlanıldı)" });
