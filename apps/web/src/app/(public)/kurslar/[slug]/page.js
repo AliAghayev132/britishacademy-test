@@ -197,7 +197,7 @@ export default async function CoursePage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Ana səhifə", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
         { "@type": "ListItem", position: 2, name: course.category?.name || "Kurslar", item: `${SITE_URL}/kurslar/${course.category?.slug || ""}` },
         { "@type": "ListItem", position: 3, name: course.title, item: `${SITE_URL}/kurslar/${slug}` },
       ],

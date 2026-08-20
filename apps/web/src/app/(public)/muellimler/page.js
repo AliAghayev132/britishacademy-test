@@ -10,10 +10,12 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Müəllimlər",
-    description:
-      "British Academy müəllimləri — IELTS 8.0–8.5 sertifikatlı, xaricdə təhsil almış, beynəlxalq təcrübəli müəllim heyəti. Ad və ya kursa görə axtar.",
+    title: t("meta.teachers.title"),
+    description: t("meta.teachers.desc"),
     path: "/muellimler",
   });
 }

@@ -61,18 +61,20 @@ export default function DashboardHome() {
             emptyText="Hələ müraciət yoxdur."
           />
         ) : (
-          <table className="w-full text-sm">
-            <tbody>
-              {latest.map((l) => (
-                <tr key={l._id} className="border-t border-gray-50">
-                  <td className="px-5 py-3 font-semibold text-gray-900">{l.name}</td>
-                  <td className="px-5 py-3 text-gray-500">{l.phone}</td>
-                  <td className="hidden px-5 py-3 text-gray-500 md:table-cell">{l.course?.title || l.interest || "—"}</td>
-                  <td className="px-5 py-3 text-right text-xs text-gray-400">{fmt(l.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <tbody>
+                {latest.map((l) => (
+                  <tr key={l._id} className="border-t border-gray-50">
+                    <td className="px-5 py-3 font-semibold text-gray-900">{l.name}</td>
+                    <td className="px-5 py-3 text-gray-500">{l.phone}</td>
+                    <td className="hidden px-5 py-3 text-gray-500 md:table-cell">{l.course?.title || l.interest || "—"}</td>
+                    <td className="px-5 py-3 text-right text-xs text-gray-400">{fmt(l.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              </table>
+          </div>
         )}
       </div>
     </div>

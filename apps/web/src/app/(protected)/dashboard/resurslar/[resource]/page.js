@@ -192,49 +192,51 @@ export default function ResourceBrowserPage({ params }) {
             emptyText={"Heç nə tapılmadı."}
           />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Ad</th>
-                <th className="hidden px-4 py-3 md:table-cell">Detal</th>
-                {hasActive && <th className="px-4 py-3">Status</th>}
-                <th className="px-4 py-3 text-right">Əməliyyat</th>
-              </tr>
-            </thead>
-            <tbody className={isFetching ? "opacity-60" : ""}>
-              {items.map((item) => (
-                <tr key={item._id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{field(item, cfg.title) || "—"}</td>
-                  <td className="hidden px-4 py-3 text-gray-500 md:table-cell">{String(field(item, cfg.sub) || "").slice(0, 80)}</td>
-                  {hasActive && (
-                    <td className="px-4 py-3">
-                      {"isActive" in item ? (
-                        <button
-                          onClick={() => toggleActive(item)}
-                          className={`rounded-full px-2.5 py-1 text-xs font-bold ${item.isActive ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-500"}`}
-                        >
-                          {item.isActive ? "Aktiv" : "Deaktiv"}
-                        </button>
-                      ) : null}
-                    </td>
-                  )}
-                  <td className="px-4 py-3">
-                    <ActionsMenu
-                      actions={[
-                        { label: "Redaktə", icon: Pencil, onClick: () => openEditor(item) },
-                        resource === "courses" && {
-                          label: "Dərs qrafiki",
-                          icon: CalendarClock,
-                          onClick: () => router.push(`/dashboard/resurslar/course-groups?course=${item._id}`),
-                        },
-                        { label: "Sil", icon: Trash2, tone: "danger", onClick: () => removeItem(item) },
-                      ]}
-                    />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-4 py-3">Ad</th>
+                  <th className="hidden px-4 py-3 md:table-cell">Detal</th>
+                  {hasActive && <th className="px-4 py-3">Status</th>}
+                  <th className="px-4 py-3 text-right">Əməliyyat</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className={isFetching ? "opacity-60" : ""}>
+                {items.map((item) => (
+                  <tr key={item._id} className="border-t border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900">{field(item, cfg.title) || "—"}</td>
+                    <td className="hidden px-4 py-3 text-gray-500 md:table-cell">{String(field(item, cfg.sub) || "").slice(0, 80)}</td>
+                    {hasActive && (
+                      <td className="px-4 py-3">
+                        {"isActive" in item ? (
+                          <button
+                            onClick={() => toggleActive(item)}
+                            className={`rounded-full px-2.5 py-1 text-xs font-bold ${item.isActive ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-500"}`}
+                          >
+                            {item.isActive ? "Aktiv" : "Deaktiv"}
+                          </button>
+                        ) : null}
+                      </td>
+                    )}
+                    <td className="px-4 py-3">
+                      <ActionsMenu
+                        actions={[
+                          { label: "Redaktə", icon: Pencil, onClick: () => openEditor(item) },
+                          resource === "courses" && {
+                            label: "Dərs qrafiki",
+                            icon: CalendarClock,
+                            onClick: () => router.push(`/dashboard/resurslar/course-groups?course=${item._id}`),
+                          },
+                          { label: "Sil", icon: Trash2, tone: "danger", onClick: () => removeItem(item) },
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              </table>
+          </div>
         )}
       </div>
 

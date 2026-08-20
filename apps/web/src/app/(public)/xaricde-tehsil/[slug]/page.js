@@ -77,8 +77,8 @@ export default async function DestinationPage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Ana səhifə", item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: "Xaricdə təhsil", item: `${SITE_URL}/xaricde-tehsil` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: tr("bc.abroad"), item: `${SITE_URL}/xaricde-tehsil` },
         { "@type": "ListItem", position: 3, name: d.country, item: `${SITE_URL}/xaricde-tehsil/${d.slug || slug}` },
       ],
     },

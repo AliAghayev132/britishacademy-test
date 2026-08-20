@@ -126,8 +126,8 @@ export default async function TeacherPage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Ana səhifə", item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: "Müəllimlər", item: `${SITE_URL}/muellimler` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: tr("bc.teachers"), item: `${SITE_URL}/muellimler` },
         { "@type": "ListItem", position: 3, name: t.fullName, item: `${SITE_URL}/muellimler/${t.slug || slug}` },
       ],
     },

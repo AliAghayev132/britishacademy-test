@@ -10,10 +10,12 @@ import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Filiallar",
-    description:
-      "British Academy filialları — Caspian Plaza, Nərimanov, Əhmədli və Elmlər Akademiyası. Ünvan, telefon, iş saatları və WhatsApp.",
+    title: t("meta.branches.title"),
+    description: t("meta.branches.desc"),
     path: "/filiallar",
   });
 }

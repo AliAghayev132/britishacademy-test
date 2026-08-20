@@ -101,42 +101,44 @@ export default function LeadsPage() {
             emptyText={hasFilter ? "Axtarışa uyğun müraciət tapılmadı." : "Hələ müraciət yoxdur."}
           />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Ad · Telefon</th>
-                <th className="hidden px-4 py-3 lg:table-cell">Maraq</th>
-                <th className="hidden px-4 py-3 md:table-cell">Tarix</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className={isFetching ? "opacity-60" : ""}>
-              {items.map((l) => (
-                <tr key={l._id} className="border-t border-gray-100 align-top hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="font-semibold text-gray-900">{l.name}</div>
-                    <div className="text-gray-500">{l.phone}{l.email ? ` · ${l.email}` : ""}</div>
-                    {l.message && <div className="mt-1 max-w-md text-xs text-gray-400">{l.message.slice(0, 140)}</div>}
-                  </td>
-                  <td className="hidden px-4 py-3 text-gray-600 lg:table-cell">
-                    {l.course?.title || l.interest || "—"}
-                    {l.branch?.name && <div className="text-xs text-gray-400">{l.branch.name}</div>}
-                    <div className="text-xs text-gray-400">{SOURCE_LABEL[l.source] || l.source}</div>
-                  </td>
-                  <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(l.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="w-44">
-                      <NativeSelect
-                        options={STATUS_OPTIONS}
-                        value={l.status}
-                        onChange={(e) => change(l, e.target.value)}
-                      />
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-4 py-3">Ad · Telefon</th>
+                  <th className="hidden px-4 py-3 lg:table-cell">Maraq</th>
+                  <th className="hidden px-4 py-3 md:table-cell">Tarix</th>
+                  <th className="px-4 py-3">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className={isFetching ? "opacity-60" : ""}>
+                {items.map((l) => (
+                  <tr key={l._id} className="border-t border-gray-100 align-top hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-gray-900">{l.name}</div>
+                      <div className="text-gray-500">{l.phone}{l.email ? ` · ${l.email}` : ""}</div>
+                      {l.message && <div className="mt-1 max-w-md text-xs text-gray-400">{l.message.slice(0, 140)}</div>}
+                    </td>
+                    <td className="hidden px-4 py-3 text-gray-600 lg:table-cell">
+                      {l.course?.title || l.interest || "—"}
+                      {l.branch?.name && <div className="text-xs text-gray-400">{l.branch.name}</div>}
+                      <div className="text-xs text-gray-400">{SOURCE_LABEL[l.source] || l.source}</div>
+                    </td>
+                    <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(l.createdAt)}</td>
+                    <td className="px-4 py-3">
+                      <div className="w-44">
+                        <NativeSelect
+                          options={STATUS_OPTIONS}
+                          value={l.status}
+                          onChange={(e) => change(l, e.target.value)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              </table>
+          </div>
         )}
       </div>
 

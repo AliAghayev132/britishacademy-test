@@ -14,10 +14,12 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Kurslar",
-    description:
-      "British Academy kursları — dil kursları, beynəlxalq imtahanlara hazırlıq, kompüter və karyera proqramları. İstiqamətini seç.",
+    title: t("meta.courses.title"),
+    description: t("meta.courses.desc"),
     path: "/kurslar",
   });
 }

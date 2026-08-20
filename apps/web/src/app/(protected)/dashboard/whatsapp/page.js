@@ -473,34 +473,36 @@ npm i whatsapp-web.js@^1.34.7 qrcode@^1.5.4
                   emptyText="Hələ mesaj göndərilməyib."
                 />
               ) : (
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-                    <tr>
-                      <th className="px-4 py-3">Nömrə</th>
-                      <th className="hidden px-4 py-3 md:table-cell">Mesaj</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="hidden px-4 py-3 sm:table-cell">Tarix</th>
-                    </tr>
-                  </thead>
-                  <tbody className={msgLoading ? "opacity-60" : ""}>
-                    {messages.map((m) => {
-                      const b = STATUS_BADGE[m.status] || STATUS_BADGE.sent;
-                      return (
-                        <tr key={m._id} className="border-t border-gray-100">
-                          <td className="px-4 py-3 font-mono text-gray-900">+{m.phone}</td>
-                          <td className="hidden max-w-md truncate px-4 py-3 text-gray-500 md:table-cell">
-                            {m.body || (m.media?.filename ? `📎 ${m.media.filename}` : "—")}
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${b.cls}`}>{b.label}</span>
-                            {m.error && <div className="mt-1 text-xs text-red-500">{m.error}</div>}
-                          </td>
-                          <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">{fmt(m.createdAt)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                      <tr>
+                        <th className="px-4 py-3">Nömrə</th>
+                        <th className="hidden px-4 py-3 md:table-cell">Mesaj</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="hidden px-4 py-3 sm:table-cell">Tarix</th>
+                      </tr>
+                    </thead>
+                    <tbody className={msgLoading ? "opacity-60" : ""}>
+                      {messages.map((m) => {
+                        const b = STATUS_BADGE[m.status] || STATUS_BADGE.sent;
+                        return (
+                          <tr key={m._id} className="border-t border-gray-100">
+                            <td className="px-4 py-3 font-mono text-gray-900">+{m.phone}</td>
+                            <td className="hidden max-w-md truncate px-4 py-3 text-gray-500 md:table-cell">
+                              {m.body || (m.media?.filename ? `📎 ${m.media.filename}` : "—")}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${b.cls}`}>{b.label}</span>
+                              {m.error && <div className="mt-1 text-xs text-red-500">{m.error}</div>}
+                            </td>
+                            <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">{fmt(m.createdAt)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    </table>
+                </div>
               )}
               {pagination && pagination.pages > 1 && (
                 <div className="flex justify-center gap-2 border-t border-gray-100 p-3">

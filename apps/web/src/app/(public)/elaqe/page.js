@@ -10,10 +10,12 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Əlaqə",
-    description:
-      "British Academy ilə əlaqə — ünvan, telefon, e-poçt və iş saatları. Sualların üçün bizə yaz.",
+    title: t("meta.contact.title"),
+    description: t("meta.contact.desc"),
     path: "/elaqe",
   });
 }

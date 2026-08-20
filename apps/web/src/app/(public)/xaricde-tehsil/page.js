@@ -11,10 +11,12 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Xaricdə təhsil",
-    description:
-      "British Academy ilə xaricdə təhsil — Almaniya, Türkiyə, İngiltərə, Kanada və daha 7 ölkə. Universitet seçimi, sənədlər, viza dəstəyi.",
+    title: t("meta.abroad.title"),
+    description: t("meta.abroad.desc"),
     path: "/xaricde-tehsil",
   });
 }

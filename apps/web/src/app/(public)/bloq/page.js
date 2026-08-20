@@ -12,10 +12,12 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Bloq",
-    description:
-      "Təhsil, dil və karyera haqqında məsləhətlər, uğur hekayələri və xaricdə təhsil bələdçiləri — British Academy bloqu.",
+    title: t("meta.blog.title"),
+    description: t("meta.blog.desc"),
     path: "/bloq",
   });
 }

@@ -12,35 +12,35 @@ import { buildMetadata } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
+  // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
+  // /en və /ru səhifələri AZ meta ilə indekslənirdi.
+  const t = await getT();
   return buildMetadata({
-    title: "Tələbələrimiz",
-    description:
-      "British Academy məzunlarının rəyləri — video təcrübələr, qiymətləndirmələr və real geri bildirimlər.",
+    title: t("meta.students.title"),
+    description: t("meta.students.desc"),
     path: "/telebelerimiz",
   });
 }
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
-// ── Static stats (matches legacy static site) ──
-const STATS = [
-  { value: "20 000+", label: "məzun tələbə" },
-  { value: "4.9", label: "orta qiymətləndirmə" },
-  { value: "96%", label: "dostuna tövsiyə edir" },
-  { value: "11 il", label: "təhsil təcrübəsi" },
-];
-
 // ── Subcomponents ──
 
-function StatsBar() {
+/**
+ * Statistika zolağı — dəyərlər admin panelindən gəlir (Tənzimləmələr →
+ * Ana səhifə → Statistika, 3 dilli). Əvvəl bu siyahı burada sabit kodlanmışdı:
+ * nə tərcümə olunurdu, nə də admin dəyişə bilirdi.
+ */
+function StatsBar({ stats = [] }) {
+  if (!stats.length) return null;
   return (
     <section style={{ maxWidth: 1200, margin: "52px auto 0", padding: "0 28px" }}>
       <div
         className="grid-4"
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, border: "1px solid #ECEDF2", borderRadius: 22, padding: "30px 24px", background: "linear-gradient(150deg,#FAFBFF,#FFF6F2)" }}
       >
-        {STATS.map((s) => (
-          <div key={s.label} style={{ textAlign: "center" }}>
+        {stats.map((s, i) => (
+          <div key={s.label || i} style={{ textAlign: "center" }}>
             <div style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: "clamp(30px,4vw,44px)", color: "var(--accent)", letterSpacing: "-.02em" }}>{s.value}</div>
             <div style={{ fontSize: 14.5, color: "#63636F", marginTop: 4 }}>{s.label}</div>
           </div>
@@ -53,8 +53,12 @@ function StatsBar() {
 export default async function StudentsPage() {
   const tr = await getT();
   // ── data fetching ──
-  const data = await apiGet("/testimonials");
+  const [data, site] = await Promise.all([
+    apiGet("/testimonials"),
+    apiGet("/site"),
+  ]);
   const all = data?.testimonials || [];
+  const stats = site?.settings?.stats || [];
 
   // ── derived values ──
   const videos = all.filter((t) => t.type === "video");
@@ -69,7 +73,7 @@ export default async function StudentsPage() {
         mascot="students"
       />
 
-      <StatsBar />
+      <StatsBar stats={stats} />
 
       {videos.length > 0 && (
         <section style={{ ...wrap, padding: "64px 28px 0" }}>
