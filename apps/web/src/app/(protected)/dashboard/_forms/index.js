@@ -16,6 +16,7 @@ import { PageForm } from "./PageForm";
 import { PartnerForm } from "./PartnerForm";
 import { AdvantageForm } from "./AdvantageForm";
 import { FaqForm } from "./FaqForm";
+import { MediaForm } from "./MediaForm";
 
 export const BESPOKE_FORMS = {
   teachers: TeacherForm,
@@ -32,4 +33,5 @@ export const BESPOKE_FORMS = {
   partners: PartnerForm,
   advantages: AdvantageForm,
   faqs: FaqForm,
+  media: MediaForm,
 };

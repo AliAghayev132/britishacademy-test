@@ -95,7 +95,7 @@ export default async function HomePage() {
       <Hero hero={s.hero} stats={s.stats} />
 
       {/* Marquee */}
-      <Marquee />
+      <Marquee words={s.marquee} />
 
       {/* Courses / services — interaktiv Swiper (kliklə yuxarıda inline açılır) */}
       <div id="kurslar">

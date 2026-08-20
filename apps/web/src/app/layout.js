@@ -5,6 +5,7 @@ import {
   SITE_NAME, SITE_URL, DEFAULT_TITLE, DEFAULT_DESCRIPTION, DEFAULT_IMAGE,
   getSiteSettings,
 } from "@/lib/seo";
+import { toList } from "@/utils/toList";
 
 const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
@@ -22,7 +23,7 @@ export async function generateMetadata() {
     title: { default: defTitle, template: seo.titleTemplate || `%s — ${name}` },
     description: defDesc,
     applicationName: name,
-    keywords: seo.keywords?.length ? seo.keywords : undefined,
+    keywords: toList(seo.keywords).length ? toList(seo.keywords) : undefined,
     icons: { icon: s?.brand?.favicon || "/assets/favicon.png", apple: "/assets/favicon-180.png" },
     openGraph: {
       type: "website", siteName: name, locale: "az_AZ", url: SITE_URL,

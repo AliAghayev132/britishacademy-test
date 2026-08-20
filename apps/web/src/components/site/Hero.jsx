@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toList } from "@/utils/toList";
 import { ApplyButton } from "./ApplyButton";
 import { useT } from "@/lib/i18n/useT";
 
@@ -93,7 +94,8 @@ function StatValue({ raw }) {
 export function Hero({ hero, stats = [] }) {
   // ── Derived / state ──
   const t = useT();
-  const words = hero?.words?.length ? hero.words : ["ingiliscə danış"];
+  const wordList = toList(hero?.words);
+  const words = wordList.length ? wordList : ["ingiliscə danış"];
   const colors = hero?.colors?.length ? hero.colors : ["#001478"];
   const [i, setI] = useState(0);
   const [reduced, setReduced] = useState(false);

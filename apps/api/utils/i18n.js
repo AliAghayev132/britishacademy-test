@@ -14,20 +14,75 @@ export const DEFAULT_LOCALE = "az";
  * istifadə edir. Yalnız mətn məzmunu (slug/rəng/url/email/şəkil/enum yox).
  */
 export const LOCALIZED_FIELDS = {
-  Course: ["title", "h1", "lead", "excerpt", "contentHtml", "pricingNote"],
-  CourseCategory: ["name", "description", "lead"],
-  Teacher: ["fullName", "title", "bio"],
-  Branch: ["name", "address", "district"],
-  Destination: ["country", "region", "lead", "tagline", "contentHtml"],
-  Page: ["title", "h1", "lead", "contentHtml"],
-  Testimonial: ["achievement", "quote"],
-  Advantage: ["title", "text"],
-  Faq: ["question", "answer"],
-  BlogPost: ["title", "excerpt", "content"],
-  BlogCategory: ["name"],
-  MenuItem: ["label"],
-  Partner: ["name"],
+  Course: [
+    "title", "h1", "lead", "excerpt", "contentHtml", "pricingNote", "seo.metaTitle", "seo.metaDescription",
+    "seo.keywords", "faq.$.question", "faq.$.answer", "info.$.label", "info.$.value", "customPricing.$.label",
+    "customPricing.$.value", "features.$.title", "features.$.text", "content.$.heading", "content.$.body",
+    "content.$.items", "content.$.definitions.$.term", "content.$.definitions.$.description",
+    "pricing.$.note",
+  ],
+  CourseCategory: [
+    "name", "description", "lead", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+  ],
+  Teacher: [
+    "fullName", "title", "bio", "seo.metaTitle", "seo.metaDescription", "seo.keywords", "certificates.$.title",
+    "stats.$.label", "stats.$.value",
+  ],
+  Branch: [
+    "name", "address", "district", "metro", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+    "workingHours.$.days",
+  ],
+  Destination: [
+    "country", "region", "lead", "tagline", "contentHtml", "seo.metaTitle", "seo.metaDescription",
+    "seo.keywords", "facts.$.label", "facts.$.value", "faq.$.question", "faq.$.answer", "content.$.heading",
+    "content.$.body", "content.$.items", "content.$.definitions.$.term", "content.$.definitions.$.description",
+    "universities.$.name", "universities.$.city",
+  ],
+  Page: [
+    "title", "h1", "lead", "contentHtml", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+    "facts.$.label", "facts.$.value", "faq.$.question", "faq.$.answer", "content.$.heading",
+    "content.$.body", "content.$.items", "content.$.definitions.$.term", "content.$.definitions.$.description",
+  ],
+  Testimonial: [
+    "achievement", "quote",
+  ],
+  Advantage: [
+    "title", "text",
+  ],
+  Faq: [
+    "question", "answer",
+  ],
+  BlogPost: [
+    "title", "excerpt", "content", "tags", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+  ],
+  BlogCategory: [
+    "name",
+  ],
+  MenuItem: [
+    "label",
+  ],
+  Partner: [
+    "name",
+  ],
+  CourseGroup: [
+    "note",
+  ],
+  Media: [
+    "alt",
+  ],
+  SiteSetting: [
+    "hero.titlePrefix", "hero.subtitle", "hero.words", "marquee", "stats.$.label", "stats.$.value",
+    "seo.defaultTitle", "seo.defaultDescription", "seo.keywords",
+  ],
 };
+
+/**
+ * Massiv kimi saxlanılan, indi isə dil üzrə MƏTN (vergüllə/sətirlə ayrılmış)
+ * olan sahələr — miqrasiya bunları join edir, forma isə split/join ilə redaktə edir.
+ */
+export const LIST_LOCALIZED_FIELDS = new Set([
+  "seo.keywords", "tags", "hero.words", "marquee", "content.$.items",
+]);
 
 /** Query/header dəyərini etibarlı dilə çevir (default: az). */
 export const parseLocale = (v) => (LOCALES.includes(v) ? v : DEFAULT_LOCALE);

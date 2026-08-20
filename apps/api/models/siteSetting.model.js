@@ -1,5 +1,7 @@
 // Constants
 import { Schema, Model } from "#constants";
+// Utils
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 // Local schemas
 import { factSchema } from "./shared.schemas.js";
 
@@ -45,23 +47,23 @@ const siteSettingSchema = new Schema(
 
     // Homepage hero: rotating words + the brand colour cycle behind them
     hero: {
-      titlePrefix: { type: String, default: "British Academy ilə" },
-      words: { type: [String], default: [] },
+      titlePrefix: localizedField(),
+      words: localizedField(), // vergüllə ayrılmış fırlanan sözlər (dil üzrə)
       colors: { type: [String], default: [] },
-      subtitle: { type: String },
+      subtitle: localizedField(),
     },
 
     // "20 000+ məzun" style counters
     stats: { type: [factSchema], default: [] },
     // Scrolling marquee strip
-    marquee: { type: [String], default: [] },
+    marquee: localizedField(), // vergüllə ayrılmış (dil üzrə)
 
     seo: {
       titleTemplate: { type: String, default: "%s — British Academy" },
-      defaultTitle: { type: String },
-      defaultDescription: { type: String },
+      defaultTitle: localizedField(),
+      defaultDescription: localizedField(),
       defaultOgImage: { type: String },
-      keywords: { type: [String], default: [] }, // default meta keywords
+      keywords: localizedField(), // vergüllə ayrılmış (dil üzrə)
       twitterHandle: { type: String, trim: true }, // @handle for twitter:site
       verification: {
         google: { type: String, trim: true }, // google-site-verification
@@ -119,5 +121,7 @@ siteSettingSchema.statics.get = async function () {
   if (existing) return existing;
   return this.create({ key: "site" });
 };
+
+siteSettingSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.SiteSetting });
 
 export const SiteSetting = Model("SiteSetting", siteSettingSchema);

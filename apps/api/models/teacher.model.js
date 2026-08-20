@@ -17,7 +17,7 @@ import { seoSchema, videoSchema, factSchema } from "./shared.schemas.js";
  */
 const certificateSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: localizedField(),
     image: { type: String, trim: true },
     year: { type: Number },
   },

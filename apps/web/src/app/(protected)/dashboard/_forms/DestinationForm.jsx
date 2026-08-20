@@ -261,16 +261,16 @@ export function DestinationForm({ item, onClose }) {
           {facts.map((f, i) => (
             <div key={i} className="flex items-end gap-3">
               <Field label="Etiket" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={f.label}
-                  onChange={(e) => updateFact(i, { label: e.target.value })}
+                  onChange={(v) => updateFact(i, { label: v })}
                   placeholder="Təhsil dili"
                 />
               </Field>
               <Field label="Dəyər" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={f.value}
-                  onChange={(e) => updateFact(i, { value: e.target.value })}
+                  onChange={(v) => updateFact(i, { value: v })}
                   placeholder="İngilis dili"
                 />
               </Field>
@@ -296,16 +296,16 @@ export function DestinationForm({ item, onClose }) {
           {universities.map((u, i) => (
             <div key={i} className="flex items-end gap-3">
               <Field label="Ad" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={u.name}
-                  onChange={(e) => updateUniversity(i, { name: e.target.value })}
+                  onChange={(v) => updateUniversity(i, { name: v })}
                   placeholder="University of Oxford"
                 />
               </Field>
               <Field label="Şəhər" className="w-40">
-                <TextInput
+                <LocalizedInput
                   value={u.city}
-                  onChange={(e) => updateUniversity(i, { city: e.target.value })}
+                  onChange={(v) => updateUniversity(i, { city: v })}
                   placeholder="Oxford"
                 />
               </Field>

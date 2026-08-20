@@ -32,6 +32,7 @@ import {
   LEVELS,
   FORMATS,
 } from "./kit";
+import { LocalizedInput, toLoc, trimLoc } from "./Localized";
 
 // CourseGroup.status enum (apps/api/constants/shared/enums.js → groupStatus).
 const STATUS = [
@@ -98,7 +99,7 @@ export function CourseGroupForm({ item, onClose }) {
   const [priceOverride, setPriceOverride] = useState(
     item?.priceOverride != null ? String(item.priceOverride) : "",
   );
-  const [note, setNote] = useState(item?.note || "");
+  const [note, setNote] = useState(toLoc(item?.note));
   const [isActive, setIsActive] = useState(
     isEdit ? Boolean(item?.isActive) : true,
   );
@@ -156,8 +157,8 @@ export function CourseGroupForm({ item, onClose }) {
     if (endDate) data.endDate = endDate;
     if (priceOverride.trim() !== "")
       data.priceOverride = Number(priceOverride);
-    const noteVal = note.trim();
-    if (noteVal) data.note = noteVal;
+    const noteVal = trimLoc(note);
+    if (noteVal.az || noteVal.en || noteVal.ru) data.note = noteVal;
 
     try {
       if (isEdit) {
@@ -179,6 +180,7 @@ export function CourseGroupForm({ item, onClose }) {
 
   return (
     <Overlay
+      localized
       wide
       title={isEdit ? "Qrafiki redaktə et" : "Yeni qrup / qrafik"}
       subtitle="Kim, harada, hansı kurs üçün — və hansı gün/saatlarda"
@@ -342,11 +344,7 @@ export function CourseGroupForm({ item, onClose }) {
       <section className="space-y-4">
         <SectionTitle>Qeyd</SectionTitle>
         <Field label="Qeyd">
-          <TextArea
-            rows={3}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+          <LocalizedInput multiline rows={3} value={note} onChange={setNote} />
         </Field>
         <div className="flex items-center">
           <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />

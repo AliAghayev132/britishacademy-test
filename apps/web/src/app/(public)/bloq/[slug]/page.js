@@ -9,6 +9,7 @@ import { apiGetStatus, isMissing } from "@/lib/api";
 // Utils / SEO
 import DOMPurify from "isomorphic-dompurify";
 import { metaFromApi, SITE_URL } from "@/lib/seo";
+import { toList } from "@/utils/toList";
 import { getLocale } from "@/lib/i18n/serverT";
 
 // Mütləq URL (şəkil relativdirsə SITE_URL əlavə et).
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }) {
       modifiedTime: p.updatedAt || undefined,
       authors: authorName ? [authorName] : undefined,
       section: p.category?.name || undefined,
-      tags: p.tags?.length ? p.tags : undefined,
+      tags: toList(p.tags).length ? toList(p.tags) : undefined,
     },
   };
 }
@@ -106,7 +107,7 @@ export default async function BlogPostPage({ params }) {
       dateModified: p.updatedAt || p.publishedAt || undefined,
       image: abs(p.cover) ? [abs(p.cover)] : undefined,
       articleSection: p.category?.name || undefined,
-      keywords: p.tags?.length ? p.tags.join(", ") : undefined,
+      keywords: toList(p.tags).length ? toList(p.tags).join(", ") : undefined,
       inLanguage: locale,
       author: authorName
         ? { "@type": "Person", name: authorName }

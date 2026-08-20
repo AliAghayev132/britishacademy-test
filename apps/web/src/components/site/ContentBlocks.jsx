@@ -1,8 +1,9 @@
 // ── Block renderers ──
+import { toList } from "@/utils/toList";
 function ListBlock({ block }) {
   return (
     <ul role="list" style={{ margin: "0 0 18px", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
-      {(block.items || []).map((it, j) => (
+      {toList(block.items).map((it, j) => (
         <li key={j} style={{ display: "flex", gap: 11, fontSize: 16, lineHeight: 1.65, color: "#3c3c47" }}>
           <span style={{ color: "var(--accent)", fontWeight: 800, flex: "none" }}>✓</span>
           <span>{it}</span>

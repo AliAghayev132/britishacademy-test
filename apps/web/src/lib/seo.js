@@ -5,6 +5,7 @@
 // the API is unreachable.
 
 import { apiGet } from "@/lib/api";
+import { toList } from "@/utils/toList";
 
 export const SITE_NAME = "British Academy";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -41,7 +42,9 @@ export async function resolveMetadata({
   const canon = canonical || url;
   const fullImg = abs(image || seo.defaultOgImage || s?.brand?.ogImage);
   const composed = title ? titleTemplate.replace("%s", title) : defTitle;
-  const kw = (keywords && keywords.length ? keywords : seo.keywords) || [];
+  // Açar sözlər dil üzrə vergüllə ayrılmış mətn ola bilər (köhnə data massiv).
+  const ownKw = toList(keywords);
+  const kw = ownKw.length ? ownKw : toList(seo.keywords);
 
   return {
     title: { absolute: composed },

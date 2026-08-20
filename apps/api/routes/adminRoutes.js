@@ -37,6 +37,9 @@ AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCour
 AdminRouter.post("/dev/seed", writeRateLimiter, devController.runSeed);
 AdminRouter.post("/dev/migrate-i18n", writeRateLimiter, devController.runMigrateI18n);
 AdminRouter.post("/dev/test-mail", writeRateLimiter, devController.runTestMail);
+// AI toplu tərcümə — boş EN/RU sahələrini AZ-dan doldurur (uzun sürə bilər,
+// ona görə writeRateLimiter tətbiq olunmur).
+AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
 
 // Admin users (create multiple admins/editors) + audit log.
 // Fixed paths — must precede the generic /:resource matcher.

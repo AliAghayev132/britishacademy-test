@@ -201,16 +201,17 @@ export function PageForm({ item, onClose }) {
             <div key={i} className="flex items-start gap-3">
               <div className="flex-1 space-y-3">
                 <Field label={`Başlıq ${i + 1}`}>
-                  <TextInput
+                  <LocalizedInput
                     value={b.heading}
-                    onChange={(e) => setBlock(i, "heading", e.target.value)}
+                    onChange={(v) => setBlock(i, "heading", v)}
                   />
                 </Field>
                 <Field label="Mətn">
-                  <TextArea
+                  <LocalizedInput
+                    multiline
                     rows={4}
                     value={b.body}
-                    onChange={(e) => setBlock(i, "body", e.target.value)}
+                    onChange={(v) => setBlock(i, "body", v)}
                   />
                 </Field>
               </div>

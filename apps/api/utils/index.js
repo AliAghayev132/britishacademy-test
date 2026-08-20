@@ -5,6 +5,7 @@ export {
   LOCALES,
   DEFAULT_LOCALE,
   LOCALIZED_FIELDS,
+  LIST_LOCALIZED_FIELDS,
   parseLocale,
   localizedField,
   looksLocalized,

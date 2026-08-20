@@ -15,7 +15,7 @@ import { seoSchema } from "./shared.schemas.js";
  */
 const workingHourSchema = new Schema(
   {
-    days: { type: String, required: true, trim: true }, // "B.e–Cümə"
+    days: localizedField(), // "B.e–Cümə"
     from: { type: String, required: true, trim: true }, // "09:00"
     to: { type: String, required: true, trim: true }, // "21:00"
   },
@@ -29,7 +29,7 @@ const branchSchema = new Schema(
 
     address: localizedField(),
     district: localizedField(),
-    metro: { type: String, trim: true },
+    metro: localizedField(),
 
     phone: { type: String, trim: true },
     // Digits only, e.g. "994552124151" — used to build wa.me links.

@@ -1,4 +1,6 @@
 import { Schema, Model, mediaTypes } from "#constants";
+// Utils
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /**
  * Media — the upload library. The desktop filename becomes the default `alt`
@@ -10,7 +12,7 @@ const mediaSchema = new Schema(
     url: { type: String, required: true, trim: true },
     filename: { type: String, required: true, trim: true },
     // Default alt derived from the original filename; editable per use.
-    alt: { type: String, trim: true, default: "" },
+    alt: localizedField(),
     type: { type: String, enum: mediaTypes, default: "image" },
     mimeType: { type: String, trim: true },
     sizeBytes: { type: Number, default: 0 },
@@ -23,5 +25,7 @@ const mediaSchema = new Schema(
 );
 
 mediaSchema.index({ createdAt: -1 });
+
+mediaSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Media });
 
 export const Media = Model("Media", mediaSchema);

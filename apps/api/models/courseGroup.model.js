@@ -6,6 +6,8 @@ import {
   timeSlots,
   groupStatus,
 } from "#constants";
+// Utils
+import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /**
  * CourseGroup — the timetable ("dərs qrafiki").
@@ -66,7 +68,7 @@ const courseGroupSchema = new Schema(
     // Overrides the course price matrix for this specific group
     priceOverride: { type: Number, min: 0 },
 
-    note: { type: String, trim: true },
+    note: localizedField(),
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
@@ -117,5 +119,7 @@ courseGroupSchema.statics.teachersFor = function (courseId, branchId) {
     isDeleted: false,
   }).distinct("teacher");
 };
+
+courseGroupSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.CourseGroup });
 
 export const CourseGroup = Model("CourseGroup", courseGroupSchema);

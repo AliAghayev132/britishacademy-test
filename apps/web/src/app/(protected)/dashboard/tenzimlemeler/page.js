@@ -10,6 +10,15 @@ import {
   useAdminUpdateSettingsMutation,
   useAdminTestMailMutation,
 } from "@/store/api/adminApi";
+// Çoxdilli redaktə (modallardakı ilə eyni sistem)
+import {
+  LocalizedFormProvider,
+  LocaleSwitcher,
+  GlobalAiBar,
+  LocalizedInput,
+  toLoc,
+  trimLoc,
+} from "../_forms/Localized";
 
 const input = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500";
 const label = "mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500";
@@ -54,13 +63,14 @@ export default function SettingsPage() {
         contact: { ...s.contact },
         socials: { ...s.socials },
         hero: {
-          titlePrefix: s.hero?.titlePrefix || "",
-          subtitle: s.hero?.subtitle || "",
-          words: (s.hero?.words || []).join(", "),
+          titlePrefix: toLoc(s.hero?.titlePrefix),
+          subtitle: toLoc(s.hero?.subtitle),
+          // Siyahılar hər dil üçün vergüllə ayrılmış mətndir.
+          words: toLoc(Array.isArray(s.hero?.words) ? s.hero.words.join(", ") : s.hero?.words),
           colors: (s.hero?.colors || []).join(", "),
         },
-        stats: JSON.stringify(s.stats || [], null, 2),
-        marquee: (s.marquee || []).join(", "),
+        stats: (s.stats || []).map((x) => ({ label: toLoc(x.label), value: toLoc(x.value) })),
+        marquee: toLoc(Array.isArray(s.marquee) ? s.marquee.join(", ") : s.marquee),
         smtp: {
           enabled: Boolean(s.smtp?.enabled),
           host: s.smtp?.host || "",
@@ -83,11 +93,11 @@ export default function SettingsPage() {
         maxImageSizeKb: s.maxImageSizeKb || 500,
         seo: {
           titleTemplate: s.seo?.titleTemplate || "",
-          defaultTitle: s.seo?.defaultTitle || "",
-          defaultDescription: s.seo?.defaultDescription || "",
+          defaultTitle: toLoc(s.seo?.defaultTitle),
+          defaultDescription: toLoc(s.seo?.defaultDescription),
           defaultOgImage: s.seo?.defaultOgImage || "",
           twitterHandle: s.seo?.twitterHandle || "",
-          keywords: (s.seo?.keywords || []).join(", "),
+          keywords: toLoc(s.seo?.keywords),
           verification: {
             google: s.seo?.verification?.google || "",
             yandex: s.seo?.verification?.yandex || "",
@@ -112,33 +122,31 @@ export default function SettingsPage() {
   };
 
   const save = async () => {
-    let stats;
-    try {
-      stats = JSON.parse(form.stats);
-    } catch {
-      notify.error("Statistika JSON düzgün deyil");
-      setTab("home");
-      return;
-    }
+    // Statistika sətirləri — boş olanlar atılır.
+    const stats = form.stats
+      .map((x) => ({ label: trimLoc(x.label), value: trimLoc(x.value) }))
+      .filter((x) => x.label.az || x.value.az);
     const csv = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
     try {
       await update({
         contact: form.contact,
         socials: form.socials,
         hero: {
-          titlePrefix: form.hero.titlePrefix,
-          subtitle: form.hero.subtitle,
-          words: csv(form.hero.words),
+          titlePrefix: trimLoc(form.hero.titlePrefix),
+          subtitle: trimLoc(form.hero.subtitle),
+          words: trimLoc(form.hero.words),
           colors: csv(form.hero.colors),
         },
         stats,
-        marquee: csv(form.marquee),
+        marquee: trimLoc(form.marquee),
         codeInjection: form.codeInjection,
         robotsTxt: form.robotsTxt,
         maxImageSizeKb: Number(form.maxImageSizeKb) || 500,
         seo: {
           ...form.seo,
-          keywords: csv(form.seo.keywords),
+          defaultTitle: trimLoc(form.seo.defaultTitle),
+          defaultDescription: trimLoc(form.seo.defaultDescription),
+          keywords: trimLoc(form.seo.keywords),
           verification: { ...form.seo.verification },
         },
         smtp: {
@@ -174,7 +182,11 @@ export default function SettingsPage() {
     }
   };
 
+  // Bu tab-larda çoxdilli sahələr var — dil düyməsi yalnız orada göstərilir.
+  const hasLocalized = tab === "home" || tab === "seo";
+
   return (
+    <LocalizedFormProvider>
     <div className="flex flex-col gap-5">
       {/* Tab bar + yadda saxla */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -193,6 +205,14 @@ export default function SettingsPage() {
           {saving ? "Saxlanılır…" : "Yadda saxla"}
         </button>
       </div>
+
+      {/* Çoxdilli sahələr üçün qlobal dil düyməsi + AI (hamısını tərcümə/səliqələ) */}
+      {hasLocalized && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2">
+          <LocaleSwitcher />
+          <GlobalAiBar />
+        </div>
+      )}
 
       {/* ── Əlaqə ── */}
       {tab === "contact" && (
@@ -221,28 +241,59 @@ export default function SettingsPage() {
       {tab === "home" && (
         <Section title="Ana səhifə hero">
           <div>
-            <label className={label}>Başlıq prefiksi</label>
-            <input className={input} value={form.hero.titlePrefix} onChange={(e) => set("hero.titlePrefix", e.target.value)} />
+            <label className={label}>Başlıq prefiksi (3 dildə)</label>
+            <LocalizedInput value={form.hero.titlePrefix} onChange={(v) => set("hero.titlePrefix", v)} />
           </div>
           <div>
-            <label className={label}>Alt yazı</label>
-            <input className={input} value={form.hero.subtitle} onChange={(e) => set("hero.subtitle", e.target.value)} />
+            <label className={label}>Alt yazı (3 dildə)</label>
+            <LocalizedInput value={form.hero.subtitle} onChange={(v) => set("hero.subtitle", v)} />
           </div>
           <div>
-            <label className={label}>Fırlanan sözlər (vergüllə)</label>
-            <input className={input} value={form.hero.words} onChange={(e) => set("hero.words", e.target.value)} />
+            <label className={label}>Fırlanan sözlər — vergüllə (3 dildə)</label>
+            <LocalizedInput value={form.hero.words} onChange={(v) => set("hero.words", v)} />
           </div>
           <div>
             <label className={label}>Rənglər (vergüllə, hex)</label>
             <input className={input} value={form.hero.colors} onChange={(e) => set("hero.colors", e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className={label}>Marquee sözləri (vergüllə)</label>
-            <input className={input} value={form.marquee} onChange={(e) => set("marquee", e.target.value)} />
+            <label className={label}>Marquee sözləri — vergüllə (3 dildə)</label>
+            <LocalizedInput value={form.marquee} onChange={(v) => set("marquee", v)} />
           </div>
+
+          {/* Statistika — sətir-sətir, hər sahə 3 dilli */}
           <div className="sm:col-span-2">
-            <label className={label}>Statistika (JSON: [{"{"}"label","value"{"}"}])</label>
-            <textarea rows={5} spellCheck={false} className={`${input} font-mono text-xs`} value={form.stats} onChange={(e) => set("stats", e.target.value)} />
+            <div className="mb-2 flex items-center justify-between">
+              <label className={label}>Statistika (məs. 20 000+ · məzun)</label>
+              <button
+                onClick={() => set("stats", [...form.stats, { label: toLoc(""), value: toLoc("") }])}
+                className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
+              >
+                + Göstərici
+              </button>
+            </div>
+            {form.stats.length === 0 && <p className="text-sm text-gray-400">Göstərici əlavə edilməyib</p>}
+            <div className="space-y-3">
+              {form.stats.map((row, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <label className={label}>Dəyər</label>
+                    <LocalizedInput value={row.value} onChange={(v) => set(`stats.${i}.value`, v)} placeholder="20 000+" />
+                  </div>
+                  <div className="flex-1">
+                    <label className={label}>Etiket</label>
+                    <LocalizedInput value={row.label} onChange={(v) => set(`stats.${i}.label`, v)} placeholder="məzun tələbə" />
+                  </div>
+                  <button
+                    onClick={() => set("stats", form.stats.filter((_, j) => j !== i))}
+                    className="mt-6 rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50"
+                    aria-label="Sil"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </Section>
       )}
@@ -257,16 +308,16 @@ export default function SettingsPage() {
               <p className="mt-1 text-xs text-gray-400">%s başlıq yerinə keçir, məs. &quot;%s — British Academy&quot;</p>
             </div>
             <div>
-              <label className={label}>Default başlıq</label>
-              <input className={input} value={form.seo.defaultTitle} onChange={(e) => set("seo.defaultTitle", e.target.value)} />
+              <label className={label}>Default başlıq (3 dildə)</label>
+              <LocalizedInput value={form.seo.defaultTitle} onChange={(v) => set("seo.defaultTitle", v)} />
             </div>
             <div className="sm:col-span-2">
-              <label className={label}>Default təsvir</label>
-              <textarea rows={3} className={input} value={form.seo.defaultDescription} onChange={(e) => set("seo.defaultDescription", e.target.value)} />
+              <label className={label}>Default təsvir (3 dildə)</label>
+              <LocalizedInput value={form.seo.defaultDescription} onChange={(v) => set("seo.defaultDescription", v)} multiline rows={3} />
             </div>
             <div className="sm:col-span-2">
-              <label className={label}>Açar sözlər (vergüllə)</label>
-              <input className={input} value={form.seo.keywords} onChange={(e) => set("seo.keywords", e.target.value)} />
+              <label className={label}>Açar sözlər — vergüllə (3 dildə)</label>
+              <LocalizedInput value={form.seo.keywords} onChange={(v) => set("seo.keywords", v)} />
             </div>
             <div className="sm:col-span-2">
               <label className={label}>Default OG şəkil (URL)</label>
@@ -390,5 +441,6 @@ export default function SettingsPage() {
         </Section>
       )}
     </div>
+    </LocalizedFormProvider>
   );
 }

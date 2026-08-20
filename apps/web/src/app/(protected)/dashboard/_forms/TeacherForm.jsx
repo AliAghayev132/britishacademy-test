@@ -293,9 +293,9 @@ export function TeacherForm({ item, onClose }) {
           {certificates.map((c, i) => (
             <div key={i} className="flex items-end gap-3">
               <Field label="Başlıq" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={c.title}
-                  onChange={(e) => updateCertificate(i, { title: e.target.value })}
+                  onChange={(v) => updateCertificate(i, { title: v })}
                   placeholder="IELTS Academic"
                 />
               </Field>
@@ -333,16 +333,16 @@ export function TeacherForm({ item, onClose }) {
           {stats.map((s, i) => (
             <div key={i} className="flex items-end gap-3">
               <Field label="Etiket" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={s.label}
-                  onChange={(e) => updateStat(i, { label: e.target.value })}
+                  onChange={(v) => updateStat(i, { label: v })}
                   placeholder="Təcrübə"
                 />
               </Field>
               <Field label="Dəyər" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={s.value}
-                  onChange={(e) => updateStat(i, { value: e.target.value })}
+                  onChange={(v) => updateStat(i, { value: v })}
                   placeholder="10 il"
                 />
               </Field>

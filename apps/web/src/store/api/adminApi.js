@@ -93,6 +93,13 @@ export const adminApi = baseApi.injectEndpoints({
       query: (to) => ({ url: "/admin/dev/test-mail", method: "POST", body: { to } }),
     }),
 
+    // ── AI toplu tərcümə: bazadakı boş EN/RU sahələrini AZ-dan doldurur ──
+    // Uzun sürə bilər (hər sənəd üçün 1-2 AI sorğusu).
+    adminAutoTranslate: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/translate-all", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+
     // ── AI köməkçi (OpenRouter): tərcümə / səliqə / slug / SEO ──
     // Body: { action, content?|fields?, sourceLang?, targetLang?, isHtml? }
     // Cavab: { data: { result } } (string | object | array).
@@ -152,6 +159,7 @@ export const {
   useAdminMigrateI18nMutation,
   useAdminTestMailMutation,
   useAiProcessMutation,
+  useAdminAutoTranslateMutation,
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,

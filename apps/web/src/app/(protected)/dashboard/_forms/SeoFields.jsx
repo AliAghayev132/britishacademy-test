@@ -3,46 +3,40 @@
 // ── SEO fields ──
 // Reusable SEO editor shared by the bespoke admin forms. Not a modal — render it
 // inside a form's <Overlay> body. Reads/writes a single `seo` object:
-//   { metaTitle, metaDescription, keywords (array), ogImage, canonical, noindex }
-// Keywords are stored as an array but edited as a comma-separated string.
+//   { metaTitle, metaDescription, keywords, ogImage, canonical, noindex }
+// metaTitle / metaDescription / keywords 3 dillidir ({ az, en, ru }) — aktiv dil
+// modalın yuxarısındakı qlobal düymə ilə seçilir, AI düymələri də oradan işləyir.
+// keywords hər dil üçün vergüllə ayrılmış mətndir.
 
 // Local
-import { SectionTitle, Field, TextInput, TextArea, Toggle } from "./kit";
+import { SectionTitle, Field, TextInput, Toggle } from "./kit";
+import { LocalizedInput } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
 
 export function SeoFields({ value = {}, onChange }) {
   const set = (key, val) => onChange({ ...value, [key]: val });
 
-  const keywords = Array.isArray(value.keywords) ? value.keywords : [];
-  const setKeywords = (csv) =>
-    set(
-      "keywords",
-      csv
-        .split(",")
-        .map((k) => k.trim())
-        .filter(Boolean),
-    );
-
   return (
     <section className="space-y-4">
       <SectionTitle>SEO</SectionTitle>
-      <Field label="Meta başlıq" info="Boş qalsa avtomatik başlıq işlənir">
-        <TextInput
-          value={value.metaTitle || ""}
-          onChange={(e) => set("metaTitle", e.target.value)}
+      <Field label="Meta başlıq" info="3 dildə — boş qalsa avtomatik başlıq işlənir">
+        <LocalizedInput
+          value={value.metaTitle}
+          onChange={(v) => set("metaTitle", v)}
         />
       </Field>
-      <Field label="Meta təsvir">
-        <TextArea
+      <Field label="Meta təsvir" info="3 dildə — axtarış nəticəsində görünən mətn">
+        <LocalizedInput
+          value={value.metaDescription}
+          onChange={(v) => set("metaDescription", v)}
+          multiline
           rows={3}
-          value={value.metaDescription || ""}
-          onChange={(e) => set("metaDescription", e.target.value)}
         />
       </Field>
-      <Field label="Açar sözlər" info="Vergüllə ayır, məs: IELTS, təhsil, viza">
-        <TextInput
-          value={keywords.join(", ")}
-          onChange={(e) => setKeywords(e.target.value)}
+      <Field label="Açar sözlər" info="3 dildə — vergüllə ayır, məs: IELTS, təhsil, viza">
+        <LocalizedInput
+          value={value.keywords}
+          onChange={(v) => set("keywords", v)}
           placeholder="IELTS, təhsil, viza"
         />
       </Field>

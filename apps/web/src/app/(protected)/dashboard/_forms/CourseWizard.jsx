@@ -376,7 +376,7 @@ export function CourseWizard({ item, onClose }) {
                     <Field label="Fərdi · gündüz"><NumberInput value={r.pricing.individual.day} onChange={(e) => patchPricing(ri, "individual", "day", e.target.value)} /></Field>
                     <Field label="Fərdi · axşam"><NumberInput value={r.pricing.individual.evening} onChange={(e) => patchPricing(ri, "individual", "evening", e.target.value)} /></Field>
                   </div>
-                  <Field label="Qeyd" info="Qiymətə dair əlavə qeyd (məs. endirim)" className="mt-3"><TextInput value={r.pricing.note} onChange={(e) => patchRow(ri, { pricing: { ...r.pricing, note: e.target.value } })} /></Field>
+                  <Field label="Qeyd" info="3 dildə — qiymətə dair əlavə qeyd (məs. endirim)" className="mt-3"><LocalizedInput value={r.pricing.note} onChange={(v) => patchRow(ri, { pricing: { ...r.pricing, note: v } })} /></Field>
                 </div>
 
               </div>

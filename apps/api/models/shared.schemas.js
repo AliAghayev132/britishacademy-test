@@ -1,16 +1,23 @@
 import { Schema, contentBlockTypes } from "#constants";
+// Utils
+import { localizedField } from "#utils";
 
 /**
  * Reusable sub-schemas shared by several models.
  * `_id: false` everywhere — these are value objects, not documents.
+ *
+ * Görünən bütün mətn sahələri `localizedField()`-dir ({ az, en, ru }). Siyahı
+ * tipli sahələr (keywords, items, tags) hər dil üçün vergül/sətir ilə ayrılmış
+ * MƏTN kimi saxlanılır — boş dil "" olduğuna görə AZ fallback-i işləyir
+ * (boş massiv `[]` truthy olduğu üçün fallback-i sındırardı).
  */
 
 /** Per-page SEO overrides. Empty fields fall back to SiteSetting defaults. */
 export const seoSchema = new Schema(
   {
-    metaTitle: { type: String, trim: true },
-    metaDescription: { type: String, trim: true },
-    keywords: { type: [String], default: undefined }, // per-page meta keywords
+    metaTitle: localizedField(),
+    metaDescription: localizedField(),
+    keywords: localizedField(), // vergüllə ayrılmış açar sözlər (dil üzrə)
     ogImage: { type: String },
     canonical: { type: String, trim: true }, // override canonical URL (optional)
     noindex: { type: Boolean, default: false },
@@ -25,16 +32,16 @@ export const seoSchema = new Schema(
 export const contentBlockSchema = new Schema(
   {
     type: { type: String, enum: contentBlockTypes, default: "paragraph" },
-    heading: { type: String, trim: true },
+    heading: localizedField(),
     headingLevel: { type: Number, enum: [2, 3], default: 2 },
-    body: { type: String },
-    // for type: 'list'
-    items: { type: [String], default: undefined },
+    body: localizedField(),
+    // for type: 'list' — hər sətir bir bənd (dil üzrə)
+    items: localizedField(),
     // for type: 'definitions' — [{ term, description }]
     definitions: {
       type: [
         new Schema(
-          { term: { type: String, trim: true }, description: { type: String } },
+          { term: localizedField(), description: localizedField() },
           { _id: false },
         ),
       ],
@@ -47,8 +54,8 @@ export const contentBlockSchema = new Schema(
 /** Question/answer pair — drives both the accordion UI and FAQPage JSON-LD. */
 export const faqItemSchema = new Schema(
   {
-    question: { type: String, required: true, trim: true },
-    answer: { type: String, required: true },
+    question: localizedField(),
+    answer: localizedField(),
   },
   { _id: false },
 );
@@ -56,8 +63,8 @@ export const faqItemSchema = new Schema(
 /** Small label/value row (the "Qısa məlumat" card, country facts). */
 export const factSchema = new Schema(
   {
-    label: { type: String, required: true, trim: true },
-    value: { type: String, required: true, trim: true },
+    label: localizedField(),
+    value: localizedField(),
   },
   { _id: false },
 );
@@ -66,8 +73,8 @@ export const factSchema = new Schema(
 export const featureSchema = new Schema(
   {
     icon: { type: String, trim: true },
-    title: { type: String, required: true, trim: true },
-    text: { type: String },
+    title: localizedField(),
+    text: localizedField(),
   },
   { _id: false },
 );

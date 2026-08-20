@@ -13,8 +13,8 @@ import { seoSchema, contentBlockSchema, factSchema, faqItemSchema } from "./shar
  */
 const universitySchema = new Schema(
   {
-    name: { type: String, required: true, trim: true },
-    city: { type: String, trim: true },
+    name: localizedField(),
+    city: localizedField(),
     url: { type: String, trim: true },
   },
   { _id: false },

@@ -8,5 +8,7 @@ export { buildGraph, validateGraph, seedDatabase } from "./SeedService.js";
 export { logAction } from "./LogService.js";
 export { bootstrapAdmin } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
+export { autoTranslate } from "./I18nAutoTranslateService.js";
+export { aiChat, translateFields, resolveAiConfig, tryParseJson, LANG_NAMES } from "./AiService.js";
 export { default as socketService } from "./SocketService.js";
 export { MongoDBService, mongoDBService } from "./MongoDBService.js";

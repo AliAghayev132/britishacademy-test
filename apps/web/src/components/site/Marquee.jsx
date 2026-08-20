@@ -1,5 +1,7 @@
 "use client";
 
+import { toList } from "@/utils/toList";
+
 // Static "running text" band. The gradient background + per-word star colors
 // live in globals.css under `body.ba-home .ba-mqband` — the homepage already
 // sets `ba-home`, so this only needs the matching markup (id="ba-mq" with
@@ -25,10 +27,16 @@ const wordStyle = {
   letterSpacing: ".08em",
 };
 
-/** Horizontal infinite-scroll strip of course keywords (CSS-animated loop). */
-export default function Marquee() {
+/**
+ * Horizontal infinite-scroll strip of course keywords (CSS-animated loop).
+ * `words` admin panelindən gəlir (Tənzimləmələr → Ana səhifə, 3 dildə);
+ * boş olarsa yuxarıdakı defolt siyahı işlənir.
+ */
+export default function Marquee({ words }) {
+  const list = toList(words);
+  const source = list.length ? list : WORDS;
   // Duplicate the list so translateX(-50%) loops seamlessly.
-  const items = [...WORDS, ...WORDS];
+  const items = [...source, ...source];
   return (
     <div
       className="ba-mqband"

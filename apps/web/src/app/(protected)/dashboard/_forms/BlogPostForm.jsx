@@ -57,7 +57,10 @@ export function BlogPostForm({ item, onClose }) {
   const [cover, setCover] = useState(item?.cover || "");
   const [category, setCategory] = useState(toId(item?.category));
   const [status, setStatus] = useState(item?.status || "draft");
-  const [tags, setTags] = useState((item?.tags || []).join(", "));
+  // Teqlər hər dil üçün vergüllə ayrılmış mətndir ({ az, en, ru }).
+  const [tags, setTags] = useState(
+    toLoc(Array.isArray(item?.tags) ? item.tags.join(", ") : item?.tags),
+  );
   const [readMinutes, setReadMinutes] = useState(item?.readMinutes ?? 3);
   const [content, setContent] = useState(toLoc(item?.content));
 
@@ -85,10 +88,7 @@ export function BlogPostForm({ item, onClose }) {
       status,
       readMinutes: Number(readMinutes) || 0,
       content: trimLoc(content),
-      tags: tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
+      tags: trimLoc(tags),
       seo,
     };
 
@@ -191,10 +191,10 @@ export function BlogPostForm({ item, onClose }) {
             />
           </Field>
         </div>
-        <Field label="Teqlər" info="Vergüllə ayır, məs: IELTS, təhsil, viza">
-          <TextInput
+        <Field label="Teqlər" info="3 dildə — vergüllə ayır, məs: IELTS, təhsil, viza">
+          <LocalizedInput
             value={tags}
-            onChange={(e) => setTags(e.target.value)}
+            onChange={setTags}
             placeholder="IELTS, təhsil, viza"
           />
         </Field>

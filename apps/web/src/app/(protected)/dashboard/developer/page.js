@@ -8,15 +8,42 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Database, TriangleAlert, Languages } from "lucide-react";
+import { Database, TriangleAlert, Languages, Sparkles } from "lucide-react";
 // Data
-import { useAdminSeedMutation, useAdminMigrateI18nMutation } from "@/store/api/adminApi";
+import {
+  useAdminSeedMutation,
+  useAdminMigrateI18nMutation,
+  useAdminAutoTranslateMutation,
+} from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
   const [seed, { isLoading }] = useAdminSeedMutation();
   const [migrate, { isLoading: migrating }] = useAdminMigrateI18nMutation();
   const [counts, setCounts] = useState(null);
   const [migrateReport, setMigrateReport] = useState(null);
+  const [autoTranslate, { isLoading: translating }] = useAdminAutoTranslateMutation();
+  const [translateReport, setTranslateReport] = useState(null);
+  const [langs, setLangs] = useState(["en", "ru"]);
+
+  // Boş EN/RU sahələrini AI ilə doldur (mövcud tərcüməyə toxunmur).
+  const runAutoTranslate = async () => {
+    const shown = langs.map((l) => l.toUpperCase()).join(" və ");
+    const ok = await confirmDialog({
+      tone: "warning",
+      title: "AI toplu tərcümə başlasın?",
+      text: `Bazadakı <b>boş ${shown}</b> sahələri AZ mətnindən tərcümə ediləcək.<br><br>Mövcud tərcümələr <b>dəyişmir</b>. Əməliyyat bir neçə dəqiqə çəkə bilər.`,
+      confirmText: "Bəli, başla",
+      cancelText: "İmtina",
+    });
+    if (!ok) return;
+    try {
+      const res = await autoTranslate({ langs }).unwrap();
+      setTranslateReport(res?.data?.report || null);
+      notify.success(res?.message || "Tərcümə tamamlandı");
+    } catch (err) {
+      notify.error(err?.data?.message || "Tərcümə alınmadı");
+    }
+  };
 
   const runMigrateI18n = async () => {
     const ok = await confirmDialog({
@@ -133,6 +160,74 @@ export default function DeveloperPage() {
                   {Object.entries(migrateReport).map(([k, v]) => (
                     <div key={k} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
                       <span className="font-bold text-gray-900">{v.changedDocs ?? 0}</span>{" "}
+                      <span className="text-gray-500">{k}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {/* AI toplu tərcümə */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-violet-50 text-violet-700">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">AI ilə toplu tərcümə</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Bazadakı <b>boş EN/RU</b> sahələrini AZ mətnindən avtomatik doldurur — kurslar,
+              müəllimlər, filiallar, ölkələr, rəylər, FAQ, SEO və s. Artıq tərcümə olunmuş
+              sahələrə <b>toxunmur</b>, ona görə təkrar işlədilə bilər.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-violet-50 p-3 text-sm text-violet-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Əvvəlcə <b>Tənzimləmələr → AI</b> bölməsində OpenRouter açarını təyin edin.
+                Əməliyyat məzmun həcmindən asılı olaraq bir neçə dəqiqə çəkə bilər — səhifəni bağlamayın.
+              </span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-gray-500">Dillər:</span>
+              {["en", "ru"].map((l) => (
+                <button
+                  key={l}
+                  onClick={() =>
+                    setLangs((prev) =>
+                      prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l],
+                    )
+                  }
+                  className={`rounded-md px-3 py-1 text-xs font-bold transition ${
+                    langs.includes(l)
+                      ? "bg-violet-600 text-white"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={runAutoTranslate}
+              disabled={translating || !langs.length}
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+            >
+              <Sparkles className="h-4 w-4" />
+              {translating ? "Tərcümə olunur… (gözləyin)" : "Boş dilləri AI ilə doldur"}
+            </button>
+
+            {translateReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">Nəticə</div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {Object.entries(translateReport).map(([k, v]) => (
+                    <div key={k} className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm">
+                      <span className="font-bold text-gray-900">{v.changedFields ?? 0}</span>{" "}
                       <span className="text-gray-500">{k}</span>
                     </div>
                   ))}

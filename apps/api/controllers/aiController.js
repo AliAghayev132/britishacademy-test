@@ -1,51 +1,11 @@
-// Config
-import { config } from "#config";
-
-// Models
-import { SiteSetting } from "#models";
-
 // Utils
 import { asyncHandler } from "#utils";
 
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+// Services
+import { aiChat, tryParseJson, LANG_NAMES } from "#services";
+
 const MAX_CONTENT_LENGTH = 50000;
 
-const LANG_NAMES = { az: "Azerbaijani", en: "English", ru: "Russian" };
-
-/**
- * Effektiv AI konfiqurasiyası: əvvəlcə admin panelindəki DB tənzimləməsi
- * (SiteSetting.ai), yoxdursa ENV fallback. Beləcə açar saytın özündən
- * (Tənzimləmələr) idarə olunur — SMTP ilə eyni məntiq.
- */
-const resolveAiConfig = async () => {
-  let ai = {};
-  try {
-    const s = await SiteSetting.get();
-    ai = s?.ai || {};
-  } catch {
-    ai = {};
-  }
-  const dbKey = ai.enabled ? ai.apiKey : "";
-  const apiKey = dbKey || config.ai.apiKey || "";
-  const model = ai.model || config.ai.model;
-  return { apiKey, model };
-};
-
-/**
- * Strip a leading/trailing markdown code fence (```json ... ```), if present,
- * then parse. Returns the parsed value or the original string on failure.
- */
-const tryParseJson = (raw) => {
-  let cleaned = raw;
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-  }
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    return raw;
-  }
-};
 
 /**
  * AI content assistant (OpenRouter proxy).
@@ -204,36 +164,16 @@ const processAI = asyncHandler(async (req, res) => {
         .json({ success: false, message: "Invalid action" });
   }
 
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${aiCfg.apiKey}`,
-      "HTTP-Referer": config.appUrl,
-      "X-Title": `${config.siteName} Admin`,
-    },
-    body: JSON.stringify({
-      model: aiCfg.model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: action === "generate-slug" ? 0.1 : 0.3,
-      max_tokens: 1500,
-    }),
+  const ai = await aiChat({
+    system: systemPrompt,
+    user: userPrompt,
+    temperature: action === "generate-slug" ? 0.1 : 0.3,
   });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error("OpenRouter error:", errorData);
-    return res.status(response.status).json({
-      success: false,
-      message: errorData?.error?.message || "AI service error",
-    });
+  if (!ai.ok) {
+    return res.status(ai.status).json({ success: false, message: ai.message });
   }
+  const raw = ai.text;
 
-  const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content?.trim() || "";
 
   // Parse JSON for actions that return structured data.
   let result = raw;

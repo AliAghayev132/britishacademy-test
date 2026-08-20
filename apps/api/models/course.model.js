@@ -33,7 +33,7 @@ const branchPriceSchema = new Schema(
       day: { type: Number, min: 0 },
       evening: { type: Number, min: 0 },
     },
-    note: { type: String, trim: true },
+    note: localizedField(),
   },
   { _id: false },
 );

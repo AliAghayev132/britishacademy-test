@@ -20,7 +20,7 @@ const blogPostSchema = new Schema(
 
     cover: { type: String, trim: true },
     category: { type: Schema.Types.ObjectId, ref: "BlogCategory" },
-    tags: { type: [String], default: [] },
+    tags: localizedField(), // vergüllə ayrılmış (dil üzrə)
     author: { type: Schema.Types.ObjectId, ref: "User" },
 
     readMinutes: { type: Number, default: 3 },

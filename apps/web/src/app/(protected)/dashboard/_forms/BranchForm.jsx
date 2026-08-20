@@ -39,7 +39,7 @@ export function BranchForm({ item, onClose }) {
   const [slug, setSlug] = useState(item?.slug || "");
   const [address, setAddress] = useState(toLoc(item?.address));
   const [district, setDistrict] = useState(toLoc(item?.district));
-  const [metro, setMetro] = useState(item?.metro || "");
+  const [metro, setMetro] = useState(toLoc(item?.metro));
 
   const [phone, setPhone] = useState(item?.phone || "");
   const [whatsapp, setWhatsapp] = useState(item?.whatsapp || "");
@@ -48,7 +48,7 @@ export function BranchForm({ item, onClose }) {
   const [workingHours, setWorkingHours] = useState(
     Array.isArray(item?.workingHours) && item.workingHours.length
       ? item.workingHours.map((h) => ({
-          days: h.days || "",
+          days: toLoc(h.days),
           from: h.from || "",
           to: h.to || "",
         }))
@@ -114,7 +114,7 @@ export function BranchForm({ item, onClose }) {
       name: trimLoc(name),
       address: trimLoc(address),
       district: trimLoc(district),
-      metro: metro.trim(),
+      metro: trimLoc(metro),
       phone: phone.trim(),
       whatsapp: whatsapp.trim(),
       email: email.trim(),
@@ -126,7 +126,7 @@ export function BranchForm({ item, onClose }) {
       // Prune blank rows.
       workingHours: workingHours
         .map((h) => ({
-          days: h.days.trim(),
+          days: trimLoc(h.days),
           from: h.from.trim(),
           to: h.to.trim(),
         }))
@@ -174,7 +174,7 @@ export function BranchForm({ item, onClose }) {
         <div className="text-sm text-gray-500">
           {locAz(address).trim()}
           {locAz(district).trim() ? ` · ${locAz(district).trim()}` : ""}
-          {metro.trim() ? ` · ${metro.trim()} m.` : ""}
+          {locAz(metro).trim() ? ` · ${locAz(metro).trim()} m.` : ""}
         </div>
       )}
       <div className="flex flex-wrap gap-2">
@@ -224,10 +224,7 @@ export function BranchForm({ item, onClose }) {
             <LocalizedInput value={district} onChange={setDistrict} />
           </Field>
           <Field label="Metro" info="Ən yaxın metro stansiyası">
-            <TextInput
-              value={metro}
-              onChange={(e) => setMetro(e.target.value)}
-            />
+            <LocalizedInput value={metro} onChange={setMetro} />
           </Field>
         </div>
       </section>
@@ -274,10 +271,10 @@ export function BranchForm({ item, onClose }) {
           {workingHours.map((h, i) => (
             <div key={i} className="flex items-end gap-3">
               <Field label="Günlər" className="flex-1">
-                <TextInput
+                <LocalizedInput
                   value={h.days}
                   placeholder="B.e–Cümə"
-                  onChange={(e) => setHour(i, "days", e.target.value)}
+                  onChange={(v) => setHour(i, "days", v)}
                 />
               </Field>
               <Field label="Başlanğıc" className="w-28">
