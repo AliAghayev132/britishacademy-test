@@ -22,13 +22,21 @@ const apiRateLimiter = rateLimit({
 
 /**
  * Stricter limiter for login attempts (brute-force protection).
+ *
+ * `skipSuccessfulRequests` VACİBDİR: onsuz uğurlu girişlər də kvotanı yeyirdi,
+ * yəni ofisdən (bir NAT IP-dən) bir neçə admin növbə ilə girəndə hamı 15 dəqiqə
+ * bloklanırdı. İndi yalnız UĞURSUZ cəhdlər sayılır — brute-force qorunması eyni
+ * qalır, normal istifadə əziyyət çəkmir.
  */
 const loginRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 attempts per window
+  windowMs: 15 * 60 * 1000, // 15 dəqiqə
+  max: 10, // IP başına 10 UĞURSUZ cəhd
+  skipSuccessfulRequests: true,
   message: {
     success: false,
-    message: "Too many failed attempts. Please wait 15 minutes.",
+    message:
+      "Çox sayda uğursuz giriş cəhdi. 15 dəqiqə gözləyin və ya parolu " +
+      "serverdə sıfırlayın (node scripts/adminDoctor.js --reset).",
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -42,7 +50,7 @@ const writeRateLimiter = rateLimit({
   max: 50, // 50 writes per window
   message: {
     success: false,
-    message: "Too many requests. Please slow down.",
+    message: "Çox sayda sorğu. Bir az yavaşlayın.",
   },
   standardHeaders: true,
   legacyHeaders: false,
