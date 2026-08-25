@@ -2,7 +2,10 @@
 import { Router, adminRoles } from "#constants";
 
 // Controllers
-import { adminController, leadController, courseComposer, devController, userAdminController, whatsappController } from "#controllers";
+import {
+  adminController, leadController, courseComposer, devController,
+  userAdminController, whatsappController, bulkController,
+} from "#controllers";
 
 // Middlewares
 import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
@@ -55,6 +58,13 @@ AdminRouter.post("/whatsapp/bulk", whatsappController.bulk);
 AdminRouter.post("/whatsapp/bulk/cancel", whatsappController.cancelBulk);
 AdminRouter.post("/whatsapp/disconnect", whatsappController.disconnect);
 AdminRouter.post("/whatsapp/logout", whatsappController.logout);
+
+// Toplu göndəriş (WhatsApp + e-poçt) — müraciətlər / Excel / əl ilə siyahı.
+// Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
+AdminRouter.get("/bulk/status", bulkController.status);
+AdminRouter.post("/bulk/preview", bulkController.preview);
+AdminRouter.post("/bulk/send", bulkController.send);
+AdminRouter.post("/bulk/cancel", bulkController.cancel);
 
 // Admin users (create multiple admins/editors) + audit log.
 // Fixed paths — must precede the generic /:resource matcher.

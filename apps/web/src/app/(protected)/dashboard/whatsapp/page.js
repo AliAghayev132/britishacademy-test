@@ -24,10 +24,10 @@ import {
   useWhatsappStatusQuery,
   useWhatsappInitMutation,
   useWhatsappSendMutation,
-  useWhatsappBulkMutation,
-  useWhatsappBulkCancelMutation,
   useWhatsappDisconnectMutation,
   useWhatsappLogoutMutation,
+  useBulkStatusQuery,
+  useBulkCancelMutation,
 } from "@/store/api/adminApi";
 // Local
 import { ConnectTab } from "./_components/ConnectTab";
@@ -76,13 +76,16 @@ export default function WhatsAppPage() {
 
   const [init, { isLoading: initing }] = useWhatsappInitMutation();
   const [send, { isLoading: sending }] = useWhatsappSendMutation();
-  const [startBulk, { isLoading: bulking }] = useWhatsappBulkMutation();
-  const [cancelBulk] = useWhatsappBulkCancelMutation();
+  const [cancelBulk] = useBulkCancelMutation();
   const [disconnect, { isLoading: disconnecting }] = useWhatsappDisconnectMutation();
   const [logout, { isLoading: loggingOut }] = useWhatsappLogoutMutation();
 
   const s = data?.data || {};
-  const { installed = true, isReady, isInitializing, qrDataUrl, pairingCode, lastError, queue = {} } = s;
+  const { installed = true, isReady, isInitializing, qrDataUrl, pairingCode, lastError } = s;
+
+  // Toplu göndəriş növbəsi artıq ayrıca endpointdədir (WhatsApp + e-poçt).
+  const { data: bulkData } = useBulkStatusQuery(undefined, { pollingInterval: 3000 });
+  const queue = bulkData?.data || {};
 
   const wantedPoll = isReady && !queue.running ? 15000 : 3000;
   if (wantedPoll !== poll) setPoll(wantedPoll);
@@ -103,23 +106,6 @@ export default function WhatsAppPage() {
     const ok = await run(send, form, "Mesaj göndərildi");
     if (ok) setModal(false);
     return ok;
-  };
-
-  // BulkTab `null` göndərəndə cari göndərişi dayandırır.
-  const onBulk = async (form) => {
-    if (form === null) return run(cancelBulk, undefined, "Dayandırılır…");
-    const ok = await confirmDialog({
-      tone: "warning",
-      title: "Toplu göndəriş başlasın?",
-      text:
-        "Seçilmiş müraciətlərə mesaj göndəriləcək. Mesajlar <b>ardıcıl və gecikmə ilə</b> " +
-        "göndərilir (4–9 san) — WhatsApp bloklamasın deyə.<br><br>" +
-        "Kütləvi göndəriş nömrənizin bloklanma riskini artırır.",
-      confirmText: "Bəli, başla",
-      cancelText: "İmtina",
-    });
-    if (!ok) return false;
-    return run(startBulk, form, "Toplu göndəriş başladı");
   };
 
   const onLogout = async () => {
@@ -264,7 +250,11 @@ npm i whatsapp-web.js@^1.34.7 qrcode@^1.5.4
               />
             )}
             {tab === "bulk" && (
-              <BulkTab queue={queue} isReady={isReady} onStart={onBulk} starting={bulking} />
+              <BulkTab
+                queue={queue}
+                isReady={isReady}
+                onCancel={() => run(cancelBulk, undefined, "Dayandırılır…")}
+              />
             )}
             {tab === "history" && <HistoryTab page={page} onPage={setPage} />}
           </div>

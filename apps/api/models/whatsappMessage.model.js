@@ -2,17 +2,36 @@
 import { Schema, Model } from "#constants";
 
 /**
- * WhatsAppMessage — admin paneldən göndərilən hər mesajın qeydi.
+ * Göndərilən mesajların qeydi — HƏM WhatsApp, HƏM e-poçt.
+ *
+ * ⚠️ Fayl/model adı tarixi səbəbdəndir: kolleksiya əvvəlcə yalnız WhatsApp
+ * üçün idi, sonra e-poçt toplu göndərişi əlavə olundu. Mövcud datanı
+ * miqrasiya etməmək üçün ad saxlanıldı; kanallar `channel` sahəsi ilə ayrılır.
  *
  * Nə üçün lazımdır:
  *  - kimə nə göndərildiyini izləmək (audit),
  *  - uğursuz göndərişləri görmək və təkrar cəhd etmək,
- *  - toplu göndərişdə eyni nömrəyə təkrar mesajın qarşısını almaq.
+ *  - toplu göndərişdə eyni alıcıya təkrar mesajın qarşısını almaq.
  */
 const whatsappMessageSchema = new Schema(
   {
-    // Normallaşdırılmış nömrə: "994501234567"
-    phone: { type: String, required: true, trim: true, index: true },
+    // Hansı kanal üzərindən göndərilib
+    channel: {
+      type: String,
+      enum: ["whatsapp", "email"],
+      default: "whatsapp",
+      index: true,
+    },
+
+    // WhatsApp üçün: normallaşdırılmış nömrə "994501234567"
+    phone: { type: String, trim: true, index: true },
+    // E-poçt üçün: alıcı ünvanı
+    email: { type: String, trim: true, lowercase: true, index: true },
+    // Alıcının adı (şablon dəyişəni və hesabat üçün)
+    name: { type: String, trim: true },
+    // E-poçt mövzusu
+    subject: { type: String, trim: true },
+
     body: { type: String, default: "" },
 
     // Media göndərilibsə
@@ -22,6 +41,7 @@ const whatsappMessageSchema = new Schema(
     },
 
     // sent → serverə verildi · delivered/read → message_ack ilə yenilənir
+    // (delivered/read yalnız WhatsApp-da mümkündür)
     status: {
       type: String,
       enum: ["sent", "delivered", "read", "failed"],
@@ -30,10 +50,10 @@ const whatsappMessageSchema = new Schema(
     },
     error: { type: String, default: "" },
 
-    // Mənbə: tək mesaj, toplu göndəriş, yoxsa müraciət kartından
+    // Mənbə: tək mesaj · müraciətlər · Excel faylı · əl ilə yazılan siyahı
     source: {
       type: String,
-      enum: ["manual", "bulk", "lead"],
+      enum: ["manual", "bulk", "lead", "excel", "list"],
       default: "manual",
       index: true,
     },

@@ -137,6 +137,25 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Site", id: "whatsapp" }],
     }),
 
+    // ── Toplu göndəriş (WhatsApp + e-poçt) ──
+    // Mənbə: müraciətlər / Excel / əl ilə siyahı. Göndərişdən əvvəl
+    // preview çağırılır — istifadəçi nəyin gedəcəyini görüb təsdiqləyir.
+    bulkStatus: builder.query({
+      query: () => "/admin/bulk/status",
+      providesTags: [{ type: "Site", id: "bulk" }],
+    }),
+    bulkPreview: builder.mutation({
+      query: (body) => ({ url: "/admin/bulk/preview", method: "POST", body }),
+    }),
+    bulkSend: builder.mutation({
+      query: (body) => ({ url: "/admin/bulk/send", method: "POST", body }),
+      invalidatesTags: [{ type: "Site", id: "bulk" }, { type: "Site", id: "whatsapp-messages" }],
+    }),
+    bulkCancel: builder.mutation({
+      query: () => ({ url: "/admin/bulk/cancel", method: "POST" }),
+      invalidatesTags: [{ type: "Site", id: "bulk" }],
+    }),
+
     // ── Müştəri kurs məlumatlarını tətbiq et (3 dil + SEO + qiymətlər) ──
     adminImportCourses: builder.mutation({
       query: (body) => ({ url: "/admin/dev/import-courses", method: "POST", body: body || {} }),
@@ -211,6 +230,10 @@ export const {
   useAiProcessMutation,
   useAdminAutoTranslateMutation,
   useAdminImportCoursesMutation,
+  useBulkStatusQuery,
+  useBulkPreviewMutation,
+  useBulkSendMutation,
+  useBulkCancelMutation,
   useWhatsappStatusQuery,
   useWhatsappInitMutation,
   useWhatsappSendMutation,
