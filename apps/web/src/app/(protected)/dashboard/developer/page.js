@@ -8,12 +8,13 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Database, TriangleAlert, Languages, Sparkles } from "lucide-react";
+import { Database, TriangleAlert, Languages, Sparkles, BookOpen } from "lucide-react";
 // Data
 import {
   useAdminSeedMutation,
   useAdminMigrateI18nMutation,
   useAdminAutoTranslateMutation,
+  useAdminImportCoursesMutation,
 } from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
@@ -24,6 +25,29 @@ export default function DeveloperPage() {
   const [autoTranslate, { isLoading: translating }] = useAdminAutoTranslateMutation();
   const [translateReport, setTranslateReport] = useState(null);
   const [langs, setLangs] = useState(["en", "ru"]);
+  const [importCourses, { isLoading: importing }] = useAdminImportCoursesMutation();
+  const [importReport, setImportReport] = useState(null);
+
+  // Müştəri kurs məlumatlarını tətbiq et (dryRun=true → yalnız yoxlama).
+  const runImport = async (dryRun) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        tone: "warning",
+        title: "Kurs məlumatları tətbiq olunsun?",
+        text: "MS Office, İngilis dili, Rus dili və IELTS kurslarının <b>təsviri, məzmunu, SEO mətnləri və qiymət matrisi</b> müştəri məlumatları ilə əvəzlənəcək.<br><br>Şəkil, sıra və dərs qrafikinə toxunulmur.",
+        confirmText: "Bəli, tətbiq et",
+        cancelText: "İmtina",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await importCourses({ dryRun }).unwrap();
+      setImportReport(res?.data || null);
+      notify.success(res?.message || "Tamamlandı");
+    } catch (err) {
+      notify.error(err?.data?.message || "Alınmadı");
+    }
+  };
 
   // Boş EN/RU sahələrini AI ilə doldur (mövcud tərcüməyə toxunmur).
   const runAutoTranslate = async () => {
@@ -232,6 +256,81 @@ export default function DeveloperPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {/* Müştəri kurs məlumatları */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-sky-50 text-sky-700">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Kurs məlumatlarını tətbiq et</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Müştəridən gələn məlumatları (<b>MS Office, İngilis dili, Rus dili, IELTS</b>)
+              mövcud kurslara yazır: <b>3 dildə</b> təsvir və məzmun, «Qısa məlumat» kartı,
+              <b> SEO</b> mətnləri və <b>filial üzrə qiymət matrisi</b> (qrup/fərdi ×
+              gündüz/axşam + qeyd).
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-sky-50 p-3 text-sm text-sky-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Yalnız sadalanan sahələr yazılır — şəkil, sıra, aktivlik və dərs qrafikinə
+                toxunulmur. Təkrar işlədilə bilər (idempotent). Əvvəlcə <b>«Yoxla»</b> ilə
+                nəyin dəyişəcəyini görün.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImport(true)}
+                disabled={importing}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                <BookOpen className="h-4 w-4" /> Yoxla (quru rejim)
+              </button>
+              <button
+                onClick={() => runImport(false)}
+                disabled={importing}
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:opacity-60"
+              >
+                <BookOpen className="h-4 w-4" />
+                {importing ? "Tətbiq olunur…" : "Tətbiq et"}
+              </button>
+            </div>
+
+            {importReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">Nəticə</div>
+                <div className="overflow-x-auto rounded-lg border border-gray-100">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-3 py-2">Kurs</th>
+                        <th className="px-3 py-2">Vəziyyət</th>
+                        <th className="px-3 py-2">Qiymət sətri</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importReport.report?.map((r) => (
+                        <tr key={r.slug} className="border-t border-gray-100">
+                          <td className="px-3 py-2 font-mono text-gray-900">{r.slug}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.status}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.priceRows ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {importReport.warnings?.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs text-amber-700">
+                    {importReport.warnings.map((w, i) => <li key={i}>⚠️ {w}</li>)}
+                  </ul>
+                )}
               </div>
             )}
           </div>

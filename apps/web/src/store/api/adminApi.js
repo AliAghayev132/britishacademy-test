@@ -137,6 +137,12 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Site", id: "whatsapp" }],
     }),
 
+    // ── Müştəri kurs məlumatlarını tətbiq et (3 dil + SEO + qiymətlər) ──
+    adminImportCourses: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-courses", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+
     // ── AI toplu tərcümə: bazadakı boş EN/RU sahələrini AZ-dan doldurur ──
     // Uzun sürə bilər (hər sənəd üçün 1-2 AI sorğusu).
     adminAutoTranslate: builder.mutation({
@@ -204,6 +210,7 @@ export const {
   useAdminTestMailMutation,
   useAiProcessMutation,
   useAdminAutoTranslateMutation,
+  useAdminImportCoursesMutation,
   useWhatsappStatusQuery,
   useWhatsappInitMutation,
   useWhatsappSendMutation,

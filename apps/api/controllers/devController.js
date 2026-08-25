@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, MailService } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -104,4 +104,32 @@ const runAutoTranslate = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate };
+/**
+ * POST /api/admin/dev/import-courses  { dryRun? }
+ * Müştəridən gələn kurs məlumatlarını (3 dilli mətn, SEO, filial qiymətləri)
+ * mövcud kurslara tətbiq edir. İdempotentdir.
+ */
+const runImportCourses = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await importCourseData({ dryRun });
+
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Kurs məlumatları import edildi: ${result.updated}/${result.total}`,
+    });
+  }
+  res.json({
+    success: true,
+    message: dryRun
+      ? `Yoxlama: ${result.updated}/${result.total} kurs hazırdır`
+      : `${result.updated}/${result.total} kurs yeniləndi`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses };

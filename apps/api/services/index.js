@@ -9,6 +9,7 @@ export { logAction } from "./LogService.js";
 export { bootstrapAdmin } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";
+export { importCourseData } from "./CourseImportService.js";
 export { WhatsAppService } from "./WhatsAppService.js";
 export { WhatsAppQueue, renderTemplate } from "./WhatsAppQueueService.js";
 export { aiChat, translateFields, resolveAiConfig, tryParseJson, LANG_NAMES } from "./AiService.js";

@@ -40,6 +40,8 @@ AdminRouter.post("/dev/test-mail", writeRateLimiter, devController.runTestMail);
 // AI toplu tərcümə — boş EN/RU sahələrini AZ-dan doldurur (uzun sürə bilər,
 // ona görə writeRateLimiter tətbiq olunmur).
 AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
+// Müştəri kurs məlumatlarını (3 dil + SEO + qiymətlər) tətbiq et.
+AdminRouter.post("/dev/import-courses", writeRateLimiter, devController.runImportCourses);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
