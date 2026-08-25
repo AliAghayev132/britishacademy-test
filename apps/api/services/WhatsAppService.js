@@ -62,6 +62,24 @@ function findSystemChrome() {
   return null;
 }
 
+/**
+ * Puppeteer-in xam «Could not find Chrome (ver. …)» mesajı səbəbi izah etmir —
+ * istifadəçi admin paneldə yalnız bu sətri görür və nə edəcəyini bilmir.
+ * Brauzer ümumiyyətlə tapılmadıqda mesajı həlli göstərən mətnlə əvəz edirik.
+ */
+function explainChromeError(message) {
+  if (!/Could not find Chrome|Could not find (Chromium|browser)|Failed to launch the browser/i.test(message)) {
+    return message;
+  }
+  return (
+    "Serverdə Chrome tapılmadı — WhatsApp Web brauzer olmadan işləmir. " +
+    "Həlli: sistemə Google Chrome quraşdırın (Debian/Ubuntu: " +
+    "apt-get install -y google-chrome-stable), sonra serveri yenidən başladın. " +
+    "Fərqli yerdədirsə WHATSAPP_CHROME_PATH dəyişənində tam yolu göstərin. " +
+    "Orijinal xəta: " + message
+  );
+}
+
 export class WhatsAppService {
   static client = null;
   static isReady = false;
@@ -318,10 +336,10 @@ export class WhatsAppService {
         clearTimeout(timeoutId);
       }
     } catch (error) {
-      this.lastError = error.message;
+      this.lastError = explainChromeError(error.message);
       this.isInitializing = false;
       this._authOk = false;
-      console.error("❌ WhatsApp init xətası:", error.message);
+      console.error("❌ WhatsApp init xətası:", this.lastError);
       await this._destroyClient();
     }
   }
