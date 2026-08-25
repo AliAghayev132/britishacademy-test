@@ -51,6 +51,14 @@ const siteSettingSchema = new Schema(
       words: localizedField(), // vergüllə ayrılmış fırlanan sözlər (dil üzrə)
       colors: { type: [String], default: [] },
       subtitle: localizedField(),
+      // Hero-nun SOLUNDA və SAĞINDA üzən şüşə sözlər. Hər səhifə açılışında
+      // siyahıdan təsadüfi seçilir — sol və sağ MÜSTƏQİL şəkildə.
+      // Vergüllə ayrılmış mətn (dil üzrə). Boşdursa komponentdəki defolt.
+      chipsLeft: localizedField(),
+      chipsRight: localizedField(),
+      // «Ödənişsiz sınaq dərsi» həbindən əvvəlki kateqoriya həbləri.
+      // AYRI siyahıdır — təsadüfi qarışdırılmır, sıra qorunur.
+      pills: localizedField(),
     },
 
     // "20 000+ məzun" style counters

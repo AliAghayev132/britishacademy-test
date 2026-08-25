@@ -8,17 +8,37 @@ import { useT } from "@/lib/i18n/useT";
 /** Floating glass chips — direct children divs of the hero so the per-position
  *  colour tints in globals.css (body.ba-home .ba-hero > div:nth-of-type(4..9)
  *  [data-chip]) apply. Positions/animation copied from the static hero. */
-const CHIPS = [
-  { label: "Speaking", pos: { top: 66, left: "6%" }, rot: -8, anim: "ba-float 6s ease-in-out infinite", weight: 600 },
-  { label: "Привет", pos: { top: 118, right: "7%" }, rot: 7, anim: "ba-float 7s ease-in-out infinite .6s", weight: 600 },
-  { label: "IELTS 8.5", pos: { top: 300, left: "4%" }, rot: 6, anim: "ba-float 8s ease-in-out infinite 1.1s", weight: 700 },
-  { label: "A1 → C1", pos: { top: 360, right: "5%" }, rot: -6, anim: "ba-float 6.5s ease-in-out infinite .3s", weight: 700 },
-  { label: "Hallo", pos: { bottom: 172, left: "9%" }, rot: -5, anim: "ba-float 7.5s ease-in-out infinite .9s", weight: 600 },
-  { label: "Konfrans", pos: { bottom: 150, right: "10%" }, rot: 8, anim: "ba-float 6.8s ease-in-out infinite 1.4s", weight: 600 },
+/**
+ * Üzən şüşə sözlərin MÖVQELƏRİ — sabitdir, sözlər isə admin siyahısından
+ * TƏSADÜFİ seçilir (sol və sağ müstəqil). Sözlər boşdursa DEFAULT_* işlənir.
+ */
+const SLOTS_LEFT = [
+  { pos: { top: 66, left: "6%" }, rot: -8, anim: "ba-float 6s ease-in-out infinite", weight: 600 },
+  { pos: { top: 300, left: "4%" }, rot: 6, anim: "ba-float 8s ease-in-out infinite 1.1s", weight: 700 },
+  { pos: { bottom: 172, left: "9%" }, rot: -5, anim: "ba-float 7.5s ease-in-out infinite .9s", weight: 600 },
+];
+const SLOTS_RIGHT = [
+  { pos: { top: 118, right: "7%" }, rot: 7, anim: "ba-float 7s ease-in-out infinite .6s", weight: 600 },
+  { pos: { top: 360, right: "5%" }, rot: -6, anim: "ba-float 6.5s ease-in-out infinite .3s", weight: 700 },
+  { pos: { bottom: 150, right: "10%" }, rot: 8, anim: "ba-float 6.8s ease-in-out infinite 1.4s", weight: 600 },
 ];
 
-/** Category pills — course names + one dark CTA pill, copied from the static hero. */
-const PILLS = [
+// Admin siyahısı boşdursa istifadə olunan hazır dəyərlər.
+const DEFAULT_LEFT = ["Speaking", "IELTS 8.5", "Hallo"];
+const DEFAULT_RIGHT = ["Привет", "A1 → C1", "Konfrans"];
+
+/** Fisher–Yates — siyahını qarışdırıb ilk n elementi qaytarır. */
+function sample(list, n) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+/** Kateqoriya həbləri — admin siyahısı boşdursa bunlar işlənir. */
+const DEFAULT_PILLS = [
   "İngilis dili", "IELTS", "Rus dili", "Alman dili", "Danışıq klubu",
   "Kompüter", "Uşaqlar üçün", "Biznes İngilis", "TOEFL", "SAT", "Xaricdə təhsil",
 ];
@@ -101,6 +121,33 @@ export function Hero({ hero, stats = [] }) {
   const [reduced, setReduced] = useState(false);
   const bgRef = useRef(null);
 
+  // Admin siyahıları (boşdursa defolt)
+  const leftPool = toList(hero?.chipsLeft);
+  const rightPool = toList(hero?.chipsRight);
+  const pills = toList(hero?.pills);
+  const poolL = leftPool.length ? leftPool : DEFAULT_LEFT;
+  const poolR = rightPool.length ? rightPool : DEFAULT_RIGHT;
+  const pillList = pills.length ? pills : DEFAULT_PILLS;
+
+  /**
+   * SSR-də deterministik ilk N söz göstərilir, mount-dan SONRA təsadüfi
+   * seçim tətbiq olunur. Render zamanı Math.random() çağırsaydıq server və
+   * klient fərqli HTML verərdi → hidratasiya xətası (React #418).
+   */
+  const [chips, setChips] = useState(() => ({
+    left: poolL.slice(0, SLOTS_LEFT.length),
+    right: poolR.slice(0, SLOTS_RIGHT.length),
+  }));
+
+  useEffect(() => {
+    setChips({
+      left: sample(poolL, SLOTS_LEFT.length),
+      right: sample(poolR, SLOTS_RIGHT.length),
+    });
+    // Yalnız mount-da — hər səhifə açılışında bir dəfə qarışdırılır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Effects ──
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -133,13 +180,18 @@ export function Hero({ hero, stats = [] }) {
       <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,.18) 1.4px, transparent 1.4px)", backgroundSize: "26px 26px", WebkitMaskImage: "radial-gradient(circle at 50% 42%, transparent 24%, #000 80%)", maskImage: "radial-gradient(circle at 50% 42%, transparent 24%, #000 80%)", pointerEvents: "none" }} />
 
       {/* nth-of-type(4..9) — floating glass chips (direct children so tints apply) */}
-      {CHIPS.map((c) => (
-        <div key={c.label} style={{ position: "absolute", ...c.pos, transform: `rotate(${c.rot}deg)`, pointerEvents: "none" }}>
-          <span data-chip style={{ ...CHIP_STYLE, fontWeight: c.weight, animation: reduced ? "none" : c.anim }}>
-            {c.label}
-          </span>
-        </div>
-      ))}
+      {[
+        ...SLOTS_LEFT.map((sl, idx) => ({ ...sl, label: chips.left[idx], side: "l", idx })),
+        ...SLOTS_RIGHT.map((sl, idx) => ({ ...sl, label: chips.right[idx], side: "r", idx })),
+      ]
+        .filter((c) => c.label)
+        .map((c) => (
+          <div key={`${c.side}${c.idx}`} style={{ position: "absolute", ...c.pos, transform: `rotate(${c.rot}deg)`, pointerEvents: "none" }}>
+            <span data-chip style={{ ...CHIP_STYLE, fontWeight: c.weight, animation: reduced ? "none" : c.anim }}>
+              {c.label}
+            </span>
+          </div>
+        ))}
 
       {/* mascot — /public/assets/mascot/hero.png (shows nothing if absent) */}
       <span
@@ -185,7 +237,7 @@ export function Hero({ hero, stats = [] }) {
 
         {/* category pills */}
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 52 }}>
-          {PILLS.map((p) => (
+          {pillList.map((p) => (
             <a key={p} href="#kurslar" className="ba-pill-cat" style={PILL_BASE}>
               {p}
             </a>

@@ -71,7 +71,8 @@ export const LOCALIZED_FIELDS = {
     "alt",
   ],
   SiteSetting: [
-    "hero.titlePrefix", "hero.subtitle", "hero.words", "marquee", "stats.$.label", "stats.$.value",
+    "hero.titlePrefix", "hero.subtitle", "hero.words", "hero.chipsLeft",
+    "hero.chipsRight", "hero.pills", "marquee", "stats.$.label", "stats.$.value",
     "seo.defaultTitle", "seo.defaultDescription", "seo.keywords",
   ],
 };
@@ -81,7 +82,8 @@ export const LOCALIZED_FIELDS = {
  * olan sahələr — miqrasiya bunları join edir, forma isə split/join ilə redaktə edir.
  */
 export const LIST_LOCALIZED_FIELDS = new Set([
-  "seo.keywords", "tags", "hero.words", "marquee", "content.$.items",
+  "seo.keywords", "tags", "hero.words", "hero.chipsLeft", "hero.chipsRight",
+  "hero.pills", "marquee", "content.$.items",
 ]);
 
 /** Query/header dəyərini etibarlı dilə çevir (default: az). */

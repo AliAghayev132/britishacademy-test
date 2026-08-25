@@ -81,6 +81,9 @@ export default function SettingsPage() {
           subtitle: toLoc(s.hero?.subtitle),
           // Siyahılar hər dil üçün vergüllə ayrılmış mətndir.
           words: toLoc(Array.isArray(s.hero?.words) ? s.hero.words.join(", ") : s.hero?.words),
+          chipsLeft: toLoc(s.hero?.chipsLeft),
+          chipsRight: toLoc(s.hero?.chipsRight),
+          pills: toLoc(s.hero?.pills),
           colors: (s.hero?.colors || []).join(", "),
         },
         stats: (s.stats || []).map((x) => ({ label: toLoc(x.label), value: toLoc(x.value) })),
@@ -157,6 +160,9 @@ export default function SettingsPage() {
           titlePrefix: trimLoc(form.hero.titlePrefix),
           subtitle: trimLoc(form.hero.subtitle),
           words: trimLoc(form.hero.words),
+          chipsLeft: trimLoc(form.hero.chipsLeft),
+          chipsRight: trimLoc(form.hero.chipsRight),
+          pills: trimLoc(form.hero.pills),
           colors: csv(form.hero.colors),
         },
         stats,
@@ -322,6 +328,45 @@ export default function SettingsPage() {
             <label className={label}>Rənglər (vergüllə, hex)</label>
             <input className={input} value={form.hero.colors} onChange={(e) => set("hero.colors", e.target.value)} />
           </div>
+          <div className="sm:col-span-2 rounded-lg border border-gray-100 bg-gray-50 p-3">
+            <p className="mb-3 text-xs text-gray-500">
+              Hero-nun <b>solunda və sağında</b> üzən sözlər. Hər səhifə açılışında
+              siyahıdan <b>təsadüfi 3-ü</b> seçilir — sol və sağ müstəqil şəkildə.
+              Boş buraxsanız hazır dəyərlər işlənir.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label}>Sol tərəf — vergüllə (3 dildə)</label>
+                <LocalizedInput
+                  value={form.hero.chipsLeft}
+                  onChange={(v) => set("hero.chipsLeft", v)}
+                  placeholder="Speaking, IELTS 8.5, Hallo"
+                />
+              </div>
+              <div>
+                <label className={label}>Sağ tərəf — vergüllə (3 dildə)</label>
+                <LocalizedInput
+                  value={form.hero.chipsRight}
+                  onChange={(v) => set("hero.chipsRight", v)}
+                  placeholder="Привет, A1 → C1, Konfrans"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={label}>Kateqoriya həbləri — vergüllə (3 dildə)</label>
+            <LocalizedInput
+              value={form.hero.pills}
+              onChange={(v) => set("hero.pills", v)}
+              placeholder="İngilis dili, IELTS, Rus dili, Danışıq klubu"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              «Ödənişsiz sınaq dərsi» həbindən əvvəl görünən sıra. Təsadüfi
+              qarışdırılmır — yazdığınız ardıcıllıqla göstərilir.
+            </p>
+          </div>
+
           <div className="sm:col-span-2">
             <label className={label}>Marquee sözləri — vergüllə (3 dildə)</label>
             <LocalizedInput value={form.marquee} onChange={(v) => set("marquee", v)} />
