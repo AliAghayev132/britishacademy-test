@@ -28,6 +28,9 @@ const resolveImageLimit = async () => {
 
 const MediaRouter = Router();
 
+// Qalereya qovluqları (UI filtri üçün) — yükləmə marşrutlarından əvvəl.
+MediaRouter.get("/folders", authenticate, mediaController.folders);
+
 // Editor media uploads (auth required). Each route enforces its own size limit
 // via uploadLimit before the file is persisted by FileService.
 MediaRouter.post(

@@ -10,6 +10,8 @@ export { bootstrapAdmin } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";
 export { importCourseData } from "./CourseImportService.js";
+export { registerMedia, listFolders } from "./MediaLibraryService.js";
+export { importFlags } from "./FlagImportService.js";
 export { WhatsAppService } from "./WhatsAppService.js";
 export { WhatsAppQueue } from "./WhatsAppQueueService.js";
 export { BulkQueue, normalizeRecipients, renderTemplate } from "./BulkQueueService.js";

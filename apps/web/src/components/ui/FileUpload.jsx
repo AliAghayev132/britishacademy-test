@@ -15,19 +15,25 @@
 import { useRef, useState } from "react";
 // UI
 import { ImageCropper } from "./ImageCropper";
+import { MediaPicker } from "./MediaPicker";
 // Utils
 import { uploadWithProgress } from "@/utils/uploadWithProgress";
 import { getImageUrl } from "@/utils/getImageUrl";
 import { API_URL } from "@/lib/variables";
 import { specSummary } from "@/lib/imageSpecs";
 // Icons
-import { UploadCloud, X, Crop, Info } from "lucide-react";
+import { UploadCloud, X, Crop, Info, FolderOpen } from "lucide-react";
 
-export function FileUpload({ value, onChange, kind = "image", spec }) {
+/**
+ * @param {object} p
+ * @param {string} [p.folder] Qalereyada hansı qovluğa düşsün (məs. "bayraqlar")
+ */
+export function FileUpload({ value, onChange, kind = "image", spec, folder }) {
   const inputRef = useRef(null);
   const [pct, setPct] = useState(null); // null = boşdayanma
   const [err, setErr] = useState("");
   const [cropFile, setCropFile] = useState(null); // kəsmə gözləyən fayl
+  const [picking, setPicking] = useState(false);  // qalereya modalı
 
   const isVideo = kind === "video";
   const endpoint = isVideo ? "/api/media/upload-video" : "/api/media/upload-image";
@@ -44,6 +50,8 @@ export function FileUpload({ value, onChange, kind = "image", spec }) {
     try {
       const fd = new FormData();
       fd.append(fieldName, file);
+      // Qalereyada hansı bölməyə düşəcəyi (registerMedia bunu oxuyur).
+      if (folder) fd.append("folder", folder);
       const res = await uploadWithProgress(`${API_URL}${endpoint}`, fd, (p) => setPct(p));
       const url = res?.data?.url;
       if (!url) throw new Error("Server URL qaytarmadı");
@@ -92,6 +100,15 @@ export function FileUpload({ value, onChange, kind = "image", spec }) {
             />
           )}
           <div className="min-w-0 flex-1 truncate text-xs text-gray-500">{value}</div>
+          {!isVideo && (
+            <button
+              type="button"
+              onClick={() => setPicking(true)}
+              className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              Qalereya
+            </button>
+          )}
           <button
             type="button"
             onClick={pick}
@@ -109,15 +126,28 @@ export function FileUpload({ value, onChange, kind = "image", spec }) {
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={pick}
-          disabled={uploading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-medium text-gray-500 transition-colors hover:border-[#00157A] hover:text-[#00157A] disabled:opacity-60"
-        >
-          {canCrop ? <Crop className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
-          {uploading ? `Yüklənir… ${pct}%` : isVideo ? "Video yüklə" : canCrop ? "Şəkil seç və kəs" : "Şəkil yüklə"}
-        </button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {/* Şəkillərdə iki yol: hazır qalereyadan seç, ya da yeni yüklə. */}
+          {!isVideo && (
+            <button
+              type="button"
+              onClick={() => setPicking(true)}
+              disabled={uploading}
+              className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-medium text-gray-500 transition-colors hover:border-[#00157A] hover:text-[#00157A] disabled:opacity-60"
+            >
+              <FolderOpen className="h-5 w-5" /> Qalereyadan seç
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={pick}
+            disabled={uploading}
+            className={`flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-medium text-gray-500 transition-colors hover:border-[#00157A] hover:text-[#00157A] disabled:opacity-60 ${isVideo ? "sm:col-span-2" : ""}`}
+          >
+            {canCrop ? <Crop className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
+            {uploading ? `Yüklənir… ${pct}%` : isVideo ? "Video yüklə" : canCrop ? "Yeni yüklə və kəs" : "Yeni yüklə"}
+          </button>
+        </div>
       )}
 
       {/* Video üçün ölçü xəbərdarlığı (spesifikasiya yalnız şəkillərdədir) */}
@@ -149,6 +179,15 @@ export function FileUpload({ value, onChange, kind = "image", spec }) {
         </div>
       )}
       {err && <div className="mt-1 text-xs font-semibold text-red-600">{err}</div>}
+
+      {picking && (
+        <MediaPicker
+          defaultFolder={folder || ""}
+          fit={spec?.fit || "cover"}
+          onClose={() => setPicking(false)}
+          onSelect={(url) => { onChange(url); setPicking(false); }}
+        />
+      )}
 
       {cropFile && (
         <ImageCropper

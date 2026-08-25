@@ -225,6 +225,8 @@ export const STRINGS = {
     "bc.blog": "Bloq",
     "bc.courses": "Kurslar",
     "bc.teachers": "Müəllimlər",
+    "page.contact.branches": "Filiallarımız",
+    "page.contact.branchesSub": "Filialı seçin — ünvan, telefon və xəritə dəyişəcək.",
   },
 
   en: {
@@ -429,6 +431,8 @@ export const STRINGS = {
     "bc.blog": "Blog",
     "bc.courses": "Courses",
     "bc.teachers": "Teachers",
+    "page.contact.branches": "Our branches",
+    "page.contact.branchesSub": "Pick a branch — the address, phone and map will update.",
   },
 
   ru: {
@@ -633,6 +637,8 @@ export const STRINGS = {
     "bc.blog": "Блог",
     "bc.courses": "Курсы",
     "bc.teachers": "Преподаватели",
+    "page.contact.branches": "Наши филиалы",
+    "page.contact.branchesSub": "Выберите филиал — адрес, телефон и карта обновятся.",
   },
 };
 

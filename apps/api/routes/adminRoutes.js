@@ -45,6 +45,8 @@ AdminRouter.post("/dev/test-mail", writeRateLimiter, devController.runTestMail);
 AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
 // Müştəri kurs məlumatlarını (3 dil + SEO + qiymətlər) tətbiq et.
 AdminRouter.post("/dev/import-courses", writeRateLimiter, devController.runImportCourses);
+// Ölkə bayraqlarını qalereyaya endir (şəbəkə əməliyyatı — limiter yoxdur).
+AdminRouter.post("/dev/import-flags", devController.runImportFlags);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.

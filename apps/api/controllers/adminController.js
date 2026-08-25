@@ -61,6 +61,7 @@ const list = asyncHandler(async (req, res) => {
     "isActive", "isFeatured", "isScholarship", "status", "type", "format",
     "pricingMode", "location", "group", "region", "source",
     "category", "branch", "teacher", "course", "parent", "author",
+    "folder", // qalereya bölməsi
   ];
   for (const key of FILTERABLE) {
     const raw = req.query[key];

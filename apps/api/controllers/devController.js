@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, MailService } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -132,4 +132,26 @@ const runImportCourses = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses };
+/**
+ * POST /api/admin/dev/import-flags  { overwrite? }
+ * Ölkə bayraqlarını flagcdn.com-dan qalereyaya endirir və ölkə kartlarına
+ * bağlayır. Fayllar lokala yazılır — sayt kənar CDN-dən asılı qalmır.
+ */
+const runImportFlags = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  }
+  const result = await importFlags({ overwrite: Boolean(req.body?.overwrite) });
+  await logAction(req, {
+    action: "settings",
+    resource: "dev",
+    summary: `Bayraqlar endirildi: ${result.imported}/${result.total}`,
+  });
+  res.json({
+    success: true,
+    message: `${result.imported} bayraq endirildi, ${result.skipped} ötürüldü`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags };

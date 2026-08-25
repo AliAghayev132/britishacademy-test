@@ -3,9 +3,14 @@ import { Schema, Model, mediaTypes } from "#constants";
 import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 
 /**
- * Media — the upload library. The desktop filename becomes the default `alt`
- * text, and the media endpoint enforces the ≤500 KB image limit — both are
- * requirements from the client's technical brief.
+ * Media — qalereya (yükləmə kitabxanası).
+ *
+ * Hər yüklənən şəkil buraya avtomatik yazılır (mediaController.uploadImage),
+ * beləcə admin növbəti dəfə eyni şəkli yenidən yükləmək əvəzinə qalereyadan
+ * seçə bilir. Əvvəl yükləmə yalnız URL qaytarırdı və kitabxana boş qalırdı.
+ *
+ * `folder` qalereyanı bölmələrə ayırır — «Bayraqlar» qovluğu ölkə kartları
+ * üçün hazır saxlanılır.
  */
 const mediaSchema = new Schema(
   {
@@ -13,6 +18,15 @@ const mediaSchema = new Schema(
     filename: { type: String, required: true, trim: true },
     // Default alt derived from the original filename; editable per use.
     alt: localizedField(),
+
+    /**
+     * Qalereya bölməsi. Sərbəst mətndir (enum deyil) — yeni bölmə əlavə etmək
+     * üçün miqrasiya lazım olmasın. UI mövcud dəyərlərdən siyahı qurur.
+     */
+    folder: { type: String, trim: true, default: "ümumi", index: true },
+    /** Axtarış üçün açar sözlər (məs. "almaniya, bayraq, avropa"). */
+    tags: { type: [String], default: [] },
+
     type: { type: String, enum: mediaTypes, default: "image" },
     mimeType: { type: String, trim: true },
     sizeBytes: { type: Number, default: 0 },
@@ -25,6 +39,8 @@ const mediaSchema = new Schema(
 );
 
 mediaSchema.index({ createdAt: -1 });
+// Eyni fayl iki dəfə qeyd olunmasın (yenidən yükləmə mövcud qeydi yeniləyir).
+mediaSchema.index({ url: 1 }, { unique: true });
 
 mediaSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Media });
 

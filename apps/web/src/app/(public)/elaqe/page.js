@@ -2,7 +2,9 @@
 import { apiGet } from "@/lib/api";
 
 // Components
+import { SectionHead } from "@/components/site/cards";
 import { ContactForm } from "@/components/site/ContactForm";
+import { BranchContact } from "@/components/site/BranchContact";
 import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
@@ -65,10 +67,13 @@ export default async function ContactPage() {
           {cards.map(([ic, t, v]) => <ContactInfoCard key={t} icon={ic} title={t} value={v} />)}
         </div>
 
-        <div className="split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 32, alignItems: "stretch" }}>
-          <div className="img-slot" style={{ minHeight: 340, borderRadius: 22 }}>
-            <span>{tr("common.mapSoon")}<br />(Google Maps embed)</span>
-          </div>
+        {/* Filial üzrə əlaqə — seçim dəyişəndə xəritə və məlumatlar dəyişir */}
+        <div style={{ marginTop: 40 }}>
+          <SectionHead title={tr("page.contact.branches")} sub={tr("page.contact.branchesSub")} />
+          <BranchContact branches={branches} fallback={c} />
+        </div>
+
+        <div style={{ marginTop: 40 }}>
           <ContactForm branches={branches} />
         </div>
       </section>

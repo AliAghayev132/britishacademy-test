@@ -1,5 +1,5 @@
 // Services
-import { FileService } from "#services";
+import { FileService, registerMedia, listFolders } from "#services";
 
 // Utils
 import { asyncHandler } from "#utils";
@@ -23,7 +23,17 @@ const uploadImage = asyncHandler(async (req, res) => {
 
   try {
     const url = await FileService.uploadImage(req.files.image, "content");
-    res.status(200).json({ success: true, data: { url } });
+    // Qalereyaya qeyd et — növbəti dəfə yenidən yükləmək əvəzinə seçilə bilsin.
+    // Qeydiyyat uğursuz olsa da yükləmə uğurlu sayılır (fayl artıq diskdədir).
+    const media = await registerMedia({
+      url,
+      file: req.files.image,
+      folder: req.body?.folder || "ümumi",
+      tags: String(req.body?.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
+      type: "image",
+      uploadedBy: req.user?._id,
+    });
+    res.status(200).json({ success: true, data: { url, media } });
   } catch (error) {
     res
       .status(400)
@@ -44,7 +54,14 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
   try {
     const url = await FileService.uploadVideo(req.files.video, "videos");
-    res.status(200).json({ success: true, data: { url } });
+    const media = await registerMedia({
+      url,
+      file: req.files.video,
+      folder: req.body?.folder || "video",
+      type: "video",
+      uploadedBy: req.user?._id,
+    });
+    res.status(200).json({ success: true, data: { url, media } });
   } catch (error) {
     res
       .status(400)
@@ -80,4 +97,11 @@ const uploadDocument = asyncHandler(async (req, res) => {
   }
 });
 
-export { uploadImage, uploadVideo, uploadDocument };
+/**
+ * GET /api/media/folders — qalereyadakı qovluqlar və say (UI filtri üçün).
+ */
+const folders = asyncHandler(async (_req, res) => {
+  res.json({ success: true, data: { folders: await listFolders() } });
+});
+
+export { uploadImage, uploadVideo, uploadDocument, folders };

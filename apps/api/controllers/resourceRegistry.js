@@ -113,7 +113,7 @@ export const RESOURCES = {
   },
   media: {
     model: Media,
-    search: ["filename", "alt"],
+    search: ["filename", "alt", "tags", "folder"],
     sort: { createdAt: -1 },
     softDelete: true,
   },

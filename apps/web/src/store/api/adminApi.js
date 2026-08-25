@@ -137,6 +137,21 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Site", id: "whatsapp" }],
     }),
 
+    // ── Qalereya (media kitabxanası) ──
+    // Hər yüklənən şəkil avtomatik ora düşür; picker buradan oxuyur.
+    mediaFolders: builder.query({
+      query: () => "/media/folders",
+      providesTags: [{ type: "Resource", id: "media-folders" }],
+    }),
+    mediaUpdate: builder.mutation({
+      query: ({ id, data }) => ({ url: `/admin/media/${id}`, method: "PUT", body: data }),
+      invalidatesTags: [{ type: "Resource", id: "media" }, { type: "Resource", id: "media-folders" }],
+    }),
+    importFlags: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-flags", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+
     // ── Toplu göndəriş (WhatsApp + e-poçt) ──
     // Mənbə: müraciətlər / Excel / əl ilə siyahı. Göndərişdən əvvəl
     // preview çağırılır — istifadəçi nəyin gedəcəyini görüb təsdiqləyir.
@@ -230,6 +245,9 @@ export const {
   useAiProcessMutation,
   useAdminAutoTranslateMutation,
   useAdminImportCoursesMutation,
+  useMediaFoldersQuery,
+  useMediaUpdateMutation,
+  useImportFlagsMutation,
   useBulkStatusQuery,
   useBulkPreviewMutation,
   useBulkSendMutation,
