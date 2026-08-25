@@ -122,14 +122,9 @@ export const IMAGE_SPECS = {
     where: "Header — tünd fon üzərində",
     w: 400, h: 120, fit: "contain", transparent: true,
   },
-  brandLogoStack: {
-    label: "Loqo (şaquli)",
-    where: "Footer və yüklənmə ekranı",
-    w: 400, h: 400, fit: "contain", transparent: true,
-  },
   brandShield: {
     label: "Qalxan nişanı",
-    where: "Müraciət modalı və favicon mənbəyi",
+    where: "Footer loqosu, müraciət modalı və favicon mənbəyi",
     w: 512, h: 512, fit: "contain", transparent: true,
   },
   brandBadge: {

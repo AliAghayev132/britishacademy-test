@@ -67,7 +67,6 @@ export default function SettingsPage() {
         brand: {
           name: s.brand?.name || "",
           logo: s.brand?.logo || "",
-          logoStack: s.brand?.logoStack || "",
           shield: s.brand?.shield || "",
           badge: s.brand?.badge || "",
           favicon: s.brand?.favicon || "",
@@ -252,10 +251,6 @@ export default function SettingsPage() {
           <div>
             <label className={label}>Loqo (üfüqi)</label>
             <FileUpload value={form.brand.logo} onChange={(u) => set("brand.logo", u)} kind="image" spec={IMAGE_SPECS.brandLogo} />
-          </div>
-          <div>
-            <label className={label}>Loqo (şaquli)</label>
-            <FileUpload value={form.brand.logoStack} onChange={(u) => set("brand.logoStack", u)} kind="image" spec={IMAGE_SPECS.brandLogoStack} />
           </div>
           <div>
             <label className={label}>Qalxan nişanı</label>

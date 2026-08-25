@@ -29,9 +29,9 @@ export async function Footer({ site }) {
         <div>
           <div style={{ display: "inline-block", background: "#fff", borderRadius: 14, padding: "14px 18px" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.brand?.logoStack || "/assets/logo-stack.png"} alt="British Academy" style={{ height: 74, width: "auto" }} />
+            <img src={s.brand?.shield || "/assets/shield.png"} alt="British Academy" style={{ height: 74, width: "auto" }} />
           </div>
-          <p style={{ fontSize: 14.5, lineHeight: 1.65, margin: "20px 0 0", maxWidth: 330, color: "#9A9BB0" }}>
+          <p style={{ fontSize: 14.5, lineHeight: 1.65, margin: "20px 0 0", maxWidth: 380, color: "#9A9BB0" }}>
             {t("footer.intro")}
           </p>
           <div style={{ fontSize: 14, color: "#8788A0", marginTop: 20, lineHeight: 1.75 }}>
