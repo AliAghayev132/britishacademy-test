@@ -20,7 +20,7 @@ import { NativeSelect } from "../../_forms/kit";
 // Local
 import { BESPOKE_FORMS } from "../../_forms";
 // Utils
-import { ADMIN_RESOURCES, field, RESOURCE_FILTERS } from "@/lib/adminResources";
+import { ADMIN_RESOURCES, field, RESOURCE_FILTERS, pickAz } from "@/lib/adminResources";
 // Icons
 import { Plus, Pencil, Trash2, Search, CalendarClock, X } from "lucide-react";
 
@@ -52,9 +52,11 @@ export default function ResourceBrowserPage({ params }) {
   const dynOptions = useMemo(() => {
     const lk = lookups?.data || {};
     return {
-      branches: (lk.branches || []).map((b) => ({ value: b._id, label: b.name })),
-      teachers: (lk.teachers || []).map((t) => ({ value: t._id, label: t.fullName })),
-      categories: (lk.categories || []).map((c) => ({ value: c._id, label: c.name })),
+      // /admin/lookups ADMIN endpointidir — xam { az, en, ru } qaytarır.
+      // pickAz olmadan obyekt birbaşa render olunurdu (React #31 çökməsi).
+      branches: (lk.branches || []).map((b) => ({ value: b._id, label: pickAz(b.name) })),
+      teachers: (lk.teachers || []).map((t) => ({ value: t._id, label: pickAz(t.fullName) })),
+      categories: (lk.categories || []).map((c) => ({ value: c._id, label: pickAz(c.name) })),
     };
   }, [lookups]);
   // Only send non-empty filter values.

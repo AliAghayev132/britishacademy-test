@@ -39,7 +39,7 @@ export function TeacherForm({ item, onClose }) {
   const { data: lookups } = useAdminLookupsQuery();
   const branchOptions = (lookups?.data?.branches || []).map((b) => ({
     value: b._id,
-    label: b.name,
+    label: locAz(b.name),
   }));
 
   const [create, { isLoading: creating }] = useAdminCreateMutation();

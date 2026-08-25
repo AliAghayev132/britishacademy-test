@@ -32,7 +32,7 @@ import {
   LEVELS,
   FORMATS,
 } from "./kit";
-import { LocalizedInput, toLoc, trimLoc } from "./Localized";
+import { LocalizedInput, toLoc, trimLoc, locAz } from "./Localized";
 
 // CourseGroup.status enum (apps/api/constants/shared/enums.js → groupStatus).
 const STATUS = [
@@ -61,20 +61,22 @@ export function CourseGroupForm({ item, onClose }) {
     () =>
       (coursesData?.data?.items || []).map((c) => ({
         value: c._id,
-        label: c.title,
+        label: locAz(c.title),
       })),
     [coursesData],
   );
   const branchOpts = useMemo(
     () =>
-      (lk?.data?.branches || []).map((b) => ({ value: b._id, label: b.name })),
+      (lk?.data?.branches || []).map((b) => ({ value: b._id, label: locAz(b.name) })),
     [lk],
   );
   const teacherOpts = useMemo(
     () =>
       (lk?.data?.teachers || []).map((t) => ({
         value: t._id,
-        label: t.title ? `${t.fullName} · ${t.title}` : t.fullName,
+        label: locAz(t.title)
+          ? `${locAz(t.fullName)} · ${locAz(t.title)}`
+          : locAz(t.fullName),
       })),
     [lk],
   );
@@ -126,6 +128,15 @@ export function CourseGroupForm({ item, onClose }) {
     setSchedule((rows) =>
       rows.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)),
     );
+
+  // Qrafikin insan oxunaqlı xülasəsi — admin nəticəni dərhal görsün.
+  const scheduleSummary = schedule
+    .filter((s) => s.weekday && s.from && s.to)
+    .map((s) => {
+      const day = WEEKDAYS.find((w) => String(w.v) === String(s.weekday));
+      return (day ? day.l : "?") + " " + s.from + "–" + s.to;
+    })
+    .join(" · ");
 
   const onSave = async () => {
     setError("");
@@ -232,11 +243,11 @@ export function CourseGroupForm({ item, onClose }) {
         </div>
       </section>
 
-      {/* ── Parametrlər ── */}
+      {/* ── Səviyyə və format ── */}
       <section className="space-y-4">
-        <SectionTitle>Parametrlər</SectionTitle>
+        <SectionTitle>Səviyyə və format</SectionTitle>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Field label="Səviyyə">
+          <Field label="Səviyyə" info="CEFR səviyyəsi (A1–C2). Bilinmirsə boş buraxın.">
             <NativeSelect
               placeholder="—"
               options={LEVELS.map((l) => ({ value: l, label: l }))}
@@ -244,53 +255,44 @@ export function CourseGroupForm({ item, onClose }) {
               onChange={(e) => setLevel(e.target.value)}
             />
           </Field>
-          <Field label="Format">
+          <Field label="Format" info="Qrup — bir neçə tələbə birlikdə. Fərdi — tək tələbə ilə.">
             <NativeSelect
               options={FORMATS}
               value={format}
               onChange={(e) => setFormat(e.target.value)}
             />
           </Field>
-          <Field label="Status">
+          <Field label="Tutum" info="Qrupa maksimum neçə tələbə qəbul olunur (adətən 3–7).">
+            <NumberInput
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+            />
+          </Field>
+        </div>
+      </section>
+
+      {/* ── Vəziyyət və tarixlər ── */}
+      <section className="space-y-4">
+        <SectionTitle>Vəziyyət və tarixlər</SectionTitle>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Field
+            label="Status"
+            info="Açıq — qeydiyyat davam edir · Dolu — yer yoxdur · Davam edir — dərslər başlayıb · Bitib / Ləğv edilib"
+          >
             <NativeSelect
               options={STATUS}
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             />
           </Field>
-          <Field label="Tutum">
-            <NumberInput
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-            />
-          </Field>
-          <Field
-            label="Kod"
-            info="İnsana oxunaqlı qrup kodu, məs. ENG-B1-AXŞAM-01 (istəyə bağlı)"
-          >
-            <TextInput
-              value={code}
-              placeholder="ENG-B1-AXŞAM-01"
-              onChange={(e) => setCode(e.target.value)}
-            />
-          </Field>
-          <Field
-            label="Xüsusi qiymət"
-            info="Kurs qiymət matrisini bu qrup üçün əvəz edir (istəyə bağlı)"
-          >
-            <NumberInput
-              value={priceOverride}
-              onChange={(e) => setPriceOverride(e.target.value)}
-            />
-          </Field>
-          <Field label="Başlama tarixi">
+          <Field label="Başlama tarixi" info="Qrupun ilk dərs günü (istəyə bağlı)">
             <TextInput
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </Field>
-          <Field label="Bitmə tarixi">
+          <Field label="Bitmə tarixi" info="Proqramın planlaşdırılan sonu (istəyə bağlı)">
             <TextInput
               type="date"
               value={endDate}
@@ -300,54 +302,101 @@ export function CourseGroupForm({ item, onClose }) {
         </div>
       </section>
 
-      {/* ── Qrafik ── */}
-      <section className="space-y-4">
-        <SectionTitle right={<AddButton onClick={addSlot}>Vaxt</AddButton>}>
-          Qrafik
+      {/* ── Həftəlik qrafik ── */}
+      <section className="space-y-3">
+        <SectionTitle right={<AddButton onClick={addSlot}>Vaxt əlavə et</AddButton>}>
+          Həftəlik qrafik
         </SectionTitle>
-        <p className="text-xs text-gray-400">
-          Həftənin günləri və saatları.
+        <p className="text-sm text-gray-500">
+          Dərslərin hansı günlər və saatlarda keçiriləcəyi. Həftədə 2 dərs varsa
+          iki sətir əlavə edin.
         </p>
-        {schedule.length === 0 && (
-          <p className="text-sm text-gray-400">Hələ vaxt əlavə edilməyib.</p>
-        )}
-        <div className="space-y-3">
-          {schedule.map((s, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <NativeSelect
-                className="w-32"
-                placeholder="Gün"
-                options={WEEKDAYS.map((w) => ({ value: w.v, label: w.l }))}
-                value={s.weekday}
-                onChange={(e) => setSlot(i, "weekday", e.target.value)}
-              />
-              <TextInput
-                className="w-24"
-                placeholder="19:00"
-                value={s.from}
-                onChange={(e) => setSlot(i, "from", e.target.value)}
-              />
-              <span className="text-gray-400">–</span>
-              <TextInput
-                className="w-24"
-                placeholder="20:30"
-                value={s.to}
-                onChange={(e) => setSlot(i, "to", e.target.value)}
-              />
-              <RemoveButton onClick={() => removeSlot(i)} />
+
+        {schedule.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center text-sm text-gray-400">
+            Hələ vaxt əlavə edilməyib — «Vaxt əlavə et» düyməsinə basın.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {/* Sütun başlıqları — əvvəl hansı sahənin nə olduğu bilinmirdi */}
+            <div className="flex items-center gap-2 px-1 text-xs font-bold uppercase tracking-wide text-gray-500">
+              <span className="w-32">Gün</span>
+              <span className="w-28">Başlanğıc</span>
+              <span className="w-4" />
+              <span className="w-28">Bitiş</span>
             </div>
-          ))}
-        </div>
+            {schedule.map((s, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <NativeSelect
+                  className="w-32"
+                  placeholder="Gün"
+                  options={WEEKDAYS.map((w) => ({ value: w.v, label: w.l }))}
+                  value={s.weekday}
+                  onChange={(e) => setSlot(i, "weekday", e.target.value)}
+                />
+                {/* type="time" — native saat seçici, əl ilə "19:00" yazmaqdan rahatdır */}
+                <TextInput
+                  type="time"
+                  className="w-28"
+                  value={s.from}
+                  onChange={(e) => setSlot(i, "from", e.target.value)}
+                />
+                <span className="w-4 text-center text-gray-400">–</span>
+                <TextInput
+                  type="time"
+                  className="w-28"
+                  value={s.to}
+                  onChange={(e) => setSlot(i, "to", e.target.value)}
+                />
+                <RemoveButton onClick={() => removeSlot(i)} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {scheduleSummary && (
+          <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-900">
+            <span className="font-semibold">Saytda belə görünəcək:</span> {scheduleSummary}
+          </div>
+        )}
       </section>
 
-      {/* ── Qeyd ── */}
+      {/* ── Əlavə (istəyə bağlı) ── */}
       <section className="space-y-4">
-        <SectionTitle>Qeyd</SectionTitle>
-        <Field label="Qeyd">
+        <SectionTitle>Əlavə məlumat</SectionTitle>
+        <p className="text-sm text-gray-500">
+          Bu sahələr istəyə bağlıdır — boş buraxıla bilər.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="Qrup kodu"
+            info="Daxili istifadə üçün oxunaqlı ad, məs. ENG-B1-AXŞAM-01. Saytda görünmür."
+          >
+            <TextInput
+              value={code}
+              placeholder="ENG-B1-AXŞAM-01"
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </Field>
+          <Field
+            label="Xüsusi qiymət (AZN)"
+            info="Yalnız bu qrup üçün kursun qiymət matrisini əvəz edir. Boş qalsa kursun öz qiyməti işlənir."
+          >
+            <NumberInput
+              value={priceOverride}
+              onChange={(e) => setPriceOverride(e.target.value)}
+            />
+          </Field>
+        </div>
+        <Field label="Qeyd" info="3 dildə — qrup haqqında əlavə izah (məs. «yalnız həftə sonu»)">
           <LocalizedInput multiline rows={3} value={note} onChange={setNote} />
         </Field>
         <div className="flex items-center">
-          <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
+          <Toggle
+            checked={isActive}
+            onChange={setIsActive}
+            label="Aktiv (saytda göstərilsin)"
+          />
         </div>
       </section>
     </Overlay>
