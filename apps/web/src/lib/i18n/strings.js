@@ -33,8 +33,8 @@ export const STRINGS = {
     "home.faq.sub": "ən çox soruşulanlar",
     "home.partners.title": "Tərəfdaşlarımız",
     "home.partners.sub": "bizə güvənənlər",
-    "home.cta.title": "Pulsuz sınaq dərsinə bu gün yazıl",
-    "home.cta.text": "Səviyyəni pulsuz təyin edək və sənə uyğun kurs planını təklif edək.",
+    "home.cta.title": "Ödənişsiz sınaq dərsinə bu gün yazıl",
+    "home.cta.text": "Səviyyəni ödənişsiz təyin edək və sənə uyğun kurs planını təklif edək.",
     // Services showcase
     "svc.all": "Bütün xidmətlər",
     "svc.service": "Xidmət",
@@ -58,12 +58,12 @@ export const STRINGS = {
     // WhatsApp
     "wa.pick": "Filial seç · WhatsApp",
     // Hero
-    "hero.trial": "Pulsuz sınaq dərsi →",
-    "hero.trialCta": "Pulsuz sınaq dərsinə yazıl →",
+    "hero.trial": "Ödənişsiz sınaq dərsi →",
+    "hero.trialCta": "Ödənişsiz sınaq dərsinə yazıl →",
     // CTA band / apply button
     "cta.apply": "Müraciət et",
     "cta.title": "Hazırsan? Elə bu gün başla.",
-    "cta.text": "Pulsuz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.",
+    "cta.text": "Ödənişsiz səviyyə təyini və məsləhət üçün müraciət et — komandamız səninlə əlaqə saxlayacaq.",
     // Footer
     "footer.rights": "Bütün hüquqlar qorunur.",
     "footer.intro": "English UK akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti. 2014-cü ildən keyfiyyətli dil təhsili və xaricdə təhsil.",
@@ -191,7 +191,7 @@ export const STRINGS = {
     "about.valuesTitle2": "sizə nə vəd edirik",
     "about.accreditations": "Akkreditasiyalar",
     "about.ctaTitle": "Bizimlə tanış ol",
-    "about.ctaText": "Pulsuz sınaq dərsinə yazıl və mühitimizi yaxından gör.",
+    "about.ctaText": "Ödənişsiz sınaq dərsinə yazıl və mühitimizi yaxından gör.",
     "about.v1t": "Təcrübəli müəllimlər",
     "about.v1x": "IELTS 8.0–8.5 sertifikatlı, beynəlxalq təcrübəli müəllim heyəti.",
     "about.v2t": "Xüsusi metodika",
