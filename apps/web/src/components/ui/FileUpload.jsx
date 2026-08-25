@@ -1,34 +1,44 @@
 "use client";
 
 // ── File upload ──
-// Replaces raw URL inputs. Uploads an image/video to the media API with a real
-// progress bar (long uploads show %), stores the returned URL. Shows a preview
-// + "change" / "remove" once uploaded.
+// Xam URL sahələrini əvəz edir. Şəkil/video media API-yə real gedişat çubuğu
+// ilə yüklənir, qayıdan URL saxlanılır.
+//
+// `spec` verilsə (lib/imageSpecs.js) iki şey əlavə olunur:
+//   1) sahənin altında "harada görünür + tövsiyə olunan ölçü" yazısı
+//   2) fayl seçiləndən sonra KƏSMƏ dialoqu — nisbət kilidli, object-fit
+//      (cover/contain) seçimi, zoom, döndərmə, fon rəngi
+// Beləcə admin şəklin saytda necə görünəcəyini əvvəlcədən görür və düzgün
+// ölçüdə yükləyir (əvvəl istənilən ölçü gedirdi, kart-kart fərqli görünürdü).
 
 // React
 import { useRef, useState } from "react";
+// UI
+import { ImageCropper } from "./ImageCropper";
 // Utils
 import { uploadWithProgress } from "@/utils/uploadWithProgress";
 import { getImageUrl } from "@/utils/getImageUrl";
 import { API_URL } from "@/lib/variables";
+import { specSummary } from "@/lib/imageSpecs";
 // Icons
-import { UploadCloud, X } from "lucide-react";
+import { UploadCloud, X, Crop, Info } from "lucide-react";
 
-export function FileUpload({ value, onChange, kind = "image" }) {
+export function FileUpload({ value, onChange, kind = "image", spec }) {
   const inputRef = useRef(null);
-  const [pct, setPct] = useState(null); // null = idle
+  const [pct, setPct] = useState(null); // null = boşdayanma
   const [err, setErr] = useState("");
+  const [cropFile, setCropFile] = useState(null); // kəsmə gözləyən fayl
 
   const isVideo = kind === "video";
   const endpoint = isVideo ? "/api/media/upload-video" : "/api/media/upload-image";
   const fieldName = isVideo ? "video" : "image";
   const uploading = pct !== null;
+  const canCrop = !isVideo && Boolean(spec);
 
   const pick = () => inputRef.current?.click();
 
-  const onFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  /** Faylı serverə göndər. */
+  const upload = async (file) => {
     setErr("");
     setPct(0);
     try {
@@ -38,30 +48,65 @@ export function FileUpload({ value, onChange, kind = "image" }) {
       const url = res?.data?.url;
       if (!url) throw new Error("Server URL qaytarmadı");
       onChange(url);
-    } catch (e2) {
-      setErr(e2?.message || "Yüklənmə alınmadı");
+      setCropFile(null);
+    } catch (e) {
+      setErr(e?.message || "Yüklənmə alınmadı");
     } finally {
       setPct(null);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
 
+  const onFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Spesifikasiya varsa əvvəlcə kəsmə dialoqu açılır.
+    if (canCrop) {
+      setCropFile(file);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    await upload(file);
+  };
+
   return (
     <div>
-      <input ref={inputRef} type="file" accept={isVideo ? "video/*" : "image/*"} onChange={onFile} className="hidden" />
+      <input
+        ref={inputRef}
+        type="file"
+        accept={isVideo ? "video/*" : "image/*"}
+        onChange={onFile}
+        className="hidden"
+      />
 
       {value && !uploading ? (
         <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-2">
           {isVideo ? (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
             <video src={getImageUrl(value)} className="h-14 w-24 rounded bg-black object-cover" />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={getImageUrl(value)} alt="" className="h-14 w-14 rounded object-cover" />
+            <img
+              src={getImageUrl(value)}
+              alt=""
+              className={`h-14 w-14 rounded bg-gray-50 ${spec?.fit === "contain" ? "object-contain p-1" : "object-cover"}`}
+            />
           )}
           <div className="min-w-0 flex-1 truncate text-xs text-gray-500">{value}</div>
-          <button type="button" onClick={pick} className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50">Dəyiş</button>
-          <button type="button" onClick={() => onChange("")} className="rounded-lg p-1.5 text-red-500 hover:bg-red-50" aria-label="Sil"><X className="h-4 w-4" /></button>
+          <button
+            type="button"
+            onClick={pick}
+            className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+          >
+            Dəyiş
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="rounded-lg p-1.5 text-red-500 transition hover:bg-red-50"
+            aria-label="Sil"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       ) : (
         <button
@@ -70,9 +115,21 @@ export function FileUpload({ value, onChange, kind = "image" }) {
           disabled={uploading}
           className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-medium text-gray-500 transition-colors hover:border-[#00157A] hover:text-[#00157A] disabled:opacity-60"
         >
-          <UploadCloud className="h-5 w-5" />
-          {uploading ? `Yüklənir… ${pct}%` : isVideo ? "Video yüklə" : "Şəkil yüklə"}
+          {canCrop ? <Crop className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
+          {uploading ? `Yüklənir… ${pct}%` : isVideo ? "Video yüklə" : canCrop ? "Şəkil seç və kəs" : "Şəkil yüklə"}
         </button>
+      )}
+
+      {/* Spesifikasiya — admin harada nə görünəcəyini bilsin */}
+      {spec && (
+        <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-500">
+          <Info className="mt-0.5 h-3 w-3 flex-none text-gray-400" />
+          <span>
+            <span className="font-semibold text-gray-700">{specSummary(spec)}</span>
+            {" — "}{spec.where}
+            {spec.note && <span className="block text-gray-400">{spec.note}</span>}
+          </span>
+        </div>
       )}
 
       {uploading && (
@@ -81,6 +138,16 @@ export function FileUpload({ value, onChange, kind = "image" }) {
         </div>
       )}
       {err && <div className="mt-1 text-xs font-semibold text-red-600">{err}</div>}
+
+      {cropFile && (
+        <ImageCropper
+          file={cropFile}
+          spec={spec}
+          busy={uploading}
+          onCancel={() => setCropFile(null)}
+          onDone={upload}
+        />
+      )}
     </div>
   );
 }

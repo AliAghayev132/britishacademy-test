@@ -13,6 +13,7 @@ import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store/api/admi
 import { Overlay, Field, TextInput, NativeSelect } from "./kit";
 import { LocalizedInput, toLoc, trimLoc } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 
 const TYPE_OPTIONS = [
   { value: "image", label: "Şəkil" },
@@ -69,7 +70,12 @@ export function MediaForm({ item, onClose }) {
           />
         </Field>
         <Field label={type === "video" ? "Video" : "Şəkil"} required info="Şəkil ≤30MB, video ≤100MB">
-          <FileUpload value={url} onChange={setUrl} kind={type} />
+          <FileUpload
+            value={url}
+            onChange={setUrl}
+            kind={type}
+            spec={type === "image" ? IMAGE_SPECS.mediaLibrary : undefined}
+          />
         </Field>
         <Field label="Alt mətn (təsvir)" info="3 dildə — SEO və əlçatanlıq üçün qısa təsvir">
           <LocalizedInput value={alt} onChange={setAlt} placeholder="Şəkli təsvir edən mətn" />

@@ -22,6 +22,7 @@ import {
 } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -122,7 +123,7 @@ export function PartnerForm({ item, onClose }) {
             />
           </Field>
           <Field label="Loqo" className="sm:col-span-2">
-            <FileUpload value={logo} onChange={setLogo} kind="image" />
+            <FileUpload value={logo} onChange={setLogo} kind="image" spec={IMAGE_SPECS.partnerLogo} />
           </Field>
         </div>
       </section>

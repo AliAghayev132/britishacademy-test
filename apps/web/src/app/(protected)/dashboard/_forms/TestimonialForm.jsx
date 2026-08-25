@@ -26,6 +26,7 @@ import {
 } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 // Utils
 import { getImageUrl } from "@/utils/getImageUrl";
 
@@ -240,7 +241,7 @@ export function TestimonialForm({ item, onClose }) {
           </Field>
         </div>
         <Field label="Şəkil (avatar)" info="Boş qalsa ad hərfi göstərilir">
-          <FileUpload value={photo} onChange={setPhoto} kind="image" />
+          <FileUpload value={photo} onChange={setPhoto} kind="image" spec={IMAGE_SPECS.testimonialAvatar} />
         </Field>
       </section>
 
@@ -252,7 +253,7 @@ export function TestimonialForm({ item, onClose }) {
             <FileUpload value={videoUrl} onChange={setVideoUrl} kind="video" />
           </Field>
           <Field label="Poster (ön şəkil)">
-            <FileUpload value={videoPoster} onChange={setVideoPoster} kind="image" />
+            <FileUpload value={videoPoster} onChange={setVideoPoster} kind="image" spec={IMAGE_SPECS.videoPoster} />
           </Field>
         </section>
       ) : (

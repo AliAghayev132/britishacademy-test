@@ -24,6 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -238,7 +239,7 @@ export function DestinationForm({ item, onClose }) {
           <LocalizedInput value={lead} onChange={setLead} multiline rows={3} />
         </Field>
         <Field label="Şəkil">
-          <FileUpload value={image} onChange={setImage} kind="image" />
+          <FileUpload value={image} onChange={setImage} kind="image" spec={IMAGE_SPECS.destinationImage} />
         </Field>
       </section>
 

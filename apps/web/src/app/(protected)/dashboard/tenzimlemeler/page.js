@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 // UI / kit
 import { notify } from "@/components/ui/feedback";
 import { QueryState } from "@/components/ui/QueryState";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 // Data (RTK Query)
 import {
   useAdminGetSettingsQuery,
@@ -37,6 +39,7 @@ const Section = ({ title, children }) => (
 // tək `form` state-də saxlanılır, ona görə "Yadda saxla" hansı tabda olsan da
 // hamısını göndərir.
 const TABS = [
+  { id: "brand", label: "Brend" },
   { id: "contact", label: "Əlaqə" },
   { id: "home", label: "Ana səhifə" },
   { id: "seo", label: "SEO / Texniki" },
@@ -61,6 +64,16 @@ export default function SettingsPage() {
     const s = data?.data?.settings;
     if (s && !form) {
       setForm({
+        brand: {
+          name: s.brand?.name || "",
+          logo: s.brand?.logo || "",
+          logoStack: s.brand?.logoStack || "",
+          shield: s.brand?.shield || "",
+          badge: s.brand?.badge || "",
+          favicon: s.brand?.favicon || "",
+          ogImage: s.brand?.ogImage || "",
+          themeColor: s.brand?.themeColor || "#00157A",
+        },
         contact: { ...s.contact },
         socials: { ...s.socials },
         hero: {
@@ -137,6 +150,7 @@ export default function SettingsPage() {
     const csv = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
     try {
       await update({
+        brand: form.brand,
         contact: form.contact,
         socials: form.socials,
         hero: {
@@ -220,6 +234,50 @@ export default function SettingsPage() {
           <LocaleSwitcher />
           <GlobalAiBar />
         </div>
+      )}
+
+      {/* ── Brend ── */}
+      {tab === "brand" && (
+        <Section title="Loqolar və nişanlar">
+          <div className="sm:col-span-2">
+            <label className={label}>Brend adı</label>
+            <input className={input} value={form.brand.name} onChange={(e) => set("brand.name", e.target.value)} />
+          </div>
+          <div>
+            <label className={label}>Loqo (üfüqi)</label>
+            <FileUpload value={form.brand.logo} onChange={(u) => set("brand.logo", u)} kind="image" spec={IMAGE_SPECS.brandLogo} />
+          </div>
+          <div>
+            <label className={label}>Loqo (şaquli)</label>
+            <FileUpload value={form.brand.logoStack} onChange={(u) => set("brand.logoStack", u)} kind="image" spec={IMAGE_SPECS.brandLogoStack} />
+          </div>
+          <div>
+            <label className={label}>Qalxan nişanı</label>
+            <FileUpload value={form.brand.shield} onChange={(u) => set("brand.shield", u)} kind="image" spec={IMAGE_SPECS.brandShield} />
+          </div>
+          <div>
+            <label className={label}>Yubiley nişanı</label>
+            <FileUpload value={form.brand.badge} onChange={(u) => set("brand.badge", u)} kind="image" spec={IMAGE_SPECS.brandBadge} />
+          </div>
+          <div>
+            <label className={label}>Favicon</label>
+            <FileUpload value={form.brand.favicon} onChange={(u) => set("brand.favicon", u)} kind="image" spec={IMAGE_SPECS.favicon} />
+          </div>
+          <div>
+            <label className={label}>Paylaşım şəkli (OG)</label>
+            <FileUpload value={form.brand.ogImage} onChange={(u) => set("brand.ogImage", u)} kind="image" spec={IMAGE_SPECS.ogImage} />
+          </div>
+          <div>
+            <label className={label}>Tema rəngi</label>
+            <input
+              type="color"
+              value={form.brand.themeColor}
+              onChange={(e) => set("brand.themeColor", e.target.value)}
+              className="h-10 w-full cursor-pointer rounded-lg border border-gray-200 bg-white p-1"
+            />
+            <p className="mt-1 text-xs text-gray-400">Mobil brauzerin ünvan zolağının rəngi.</p>
+          </div>
+        </Section>
       )}
 
       {/* ── Əlaqə ── */}
@@ -329,7 +387,12 @@ export default function SettingsPage() {
             </div>
             <div className="sm:col-span-2">
               <label className={label}>Default OG şəkil (URL)</label>
-              <input className={input} value={form.seo.defaultOgImage} onChange={(e) => set("seo.defaultOgImage", e.target.value)} />
+              <FileUpload
+                value={form.seo.defaultOgImage}
+                onChange={(url) => set("seo.defaultOgImage", url)}
+                kind="image"
+                spec={IMAGE_SPECS.ogImage}
+              />
             </div>
             <div>
               <label className={label}>Twitter handle</label>

@@ -26,6 +26,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -262,6 +263,7 @@ export function TeacherForm({ item, onClose }) {
             value={photo}
             onChange={(url) => setPhoto(url)}
             kind="image"
+            spec={IMAGE_SPECS.teacherPhoto}
           />
         </Field>
         <Field label="Bio" info="3 dildə">
@@ -305,6 +307,7 @@ export function TeacherForm({ item, onClose }) {
                   value={c.image}
                   onChange={(url) => updateCertificate(i, { image: url })}
                   kind="image"
+                  spec={IMAGE_SPECS.certificate}
                 />
               </Field>
               <Field label="İl" className="w-24">
@@ -371,6 +374,7 @@ export function TeacherForm({ item, onClose }) {
               value={introPoster}
               onChange={(url) => setIntroPoster(url)}
               kind="image"
+              spec={IMAGE_SPECS.videoPoster}
             />
           </Field>
         </div>

@@ -22,6 +22,7 @@ import {
   WEEKDAYS, LEVELS, FORMATS, toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -325,7 +326,7 @@ export function CourseWizard({ item, onClose }) {
               <Field label="Qrup max" info="Qrupdakı maksimum tələbə"><NumberInput value={course.groupSize.max} onChange={(e) => patchCourse({ groupSize: { ...course.groupSize, max: e.target.value } })} /></Field>
             </div>
             <div className={g2}>
-              <Field label="Şəkil" info="Kursun kart/başlıq şəkli"><FileUpload value={course.image} onChange={(url) => patchCourse({ image: url })} kind="image" /></Field>
+              <Field label="Şəkil" info="Kursun kart/başlıq şəkli"><FileUpload value={course.image} onChange={(url) => patchCourse({ image: url })} kind="image" spec={IMAGE_SPECS.courseImage} /></Field>
               <Field label="İkon (emoji/ad)" info="Kart üçün emoji, məs. 🎯"><TextInput value={course.icon} onChange={(e) => patchCourse({ icon: e.target.value })} /></Field>
             </div>
             <Field label="Sıra (order)"><NumberInput value={course.order} onChange={(e) => patchCourse({ order: e.target.value })} /></Field>

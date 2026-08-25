@@ -24,6 +24,7 @@ import {
   toId,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -167,7 +168,7 @@ export function BlogPostForm({ item, onClose }) {
           <LocalizedInput value={excerpt} onChange={setExcerpt} multiline rows={2} />
         </Field>
         <Field label="Örtük şəkli (cover)">
-          <FileUpload value={cover} onChange={setCover} kind="image" />
+          <FileUpload value={cover} onChange={setCover} kind="image" spec={IMAGE_SPECS.blogCover} />
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Kateqoriya">

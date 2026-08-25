@@ -24,6 +24,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
@@ -347,6 +348,7 @@ export function BranchForm({ item, onClose }) {
                   value={url}
                   onChange={(u) => setImage(i, u)}
                   kind="image"
+                  spec={IMAGE_SPECS.branchImage}
                 />
               </Field>
               <div className="pb-1">

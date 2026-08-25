@@ -12,6 +12,7 @@
 import { SectionTitle, Field, TextInput, Toggle } from "./kit";
 import { LocalizedInput } from "./Localized";
 import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 
 export function SeoFields({ value = {}, onChange }) {
   const set = (key, val) => onChange({ ...value, [key]: val });
@@ -45,6 +46,7 @@ export function SeoFields({ value = {}, onChange }) {
           value={value.ogImage}
           onChange={(url) => set("ogImage", url)}
           kind="image"
+          spec={IMAGE_SPECS.ogImage}
         />
       </Field>
       <Field label="Canonical URL" info="Yalnız xüsusi hal üçün; boş qoy">
