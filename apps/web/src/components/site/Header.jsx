@@ -6,7 +6,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 // Local
 import { LocaleLink as Link } from "./LocaleLink";
-import { useLocale, stripLocale } from "./LocaleProvider";
+import { useLocale, stripLocale, withLocale } from "./LocaleProvider";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
@@ -20,7 +20,9 @@ const LanguageSwitcher = memo(function LanguageSwitcher() {
   const go = (l) => {
     if (l === locale) return;
     document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    const target = l === "az" ? base : `/${l}${base === "/" ? "" : base}`;
+    // withLocale həm prefiksi qoyur, həm slug-u hədəf dilə çevirir
+    // (/en/contact → /ru/kontakty).
+    const target = withLocale(l, base);
     // Hard reload — serverdən tam yenidən render (nav/menyu daxil) yeni dildə.
     window.location.assign(target || "/");
   };

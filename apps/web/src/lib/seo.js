@@ -5,6 +5,8 @@
 // the API is unreachable.
 
 import { apiGet } from "@/lib/api";
+import { buildPath } from "./i18n/routes";
+import { getLocale } from "./i18n/serverT";
 import { toList } from "@/utils/toList";
 
 export const SITE_NAME = "British Academy";
@@ -33,12 +35,14 @@ export async function resolveMetadata({
   title, description, path = "", image, keywords, noindex, canonical, type = "website",
 } = {}) {
   const s = await getSiteSettings();
+  const locale = await getLocale();
   const seo = s?.seo || {};
   const name = s?.brand?.name || SITE_NAME;
   const titleTemplate = seo.titleTemplate || `%s — ${name}`;
   const defTitle = seo.defaultTitle || DEFAULT_TITLE;
   const desc = description || seo.defaultDescription || DEFAULT_DESCRIPTION;
-  const url = `${SITE_URL}${path}`;
+  // `path` KANONİK AZ formadadır; public URL cari dilin slug-ı ilə qurulur.
+  const url = `${SITE_URL}${buildPath(path || "/", locale)}`;
   const canon = canonical || url;
   const fullImg = abs(image || seo.defaultOgImage || s?.brand?.ogImage);
   const composed = title ? titleTemplate.replace("%s", title) : defTitle;
@@ -55,14 +59,14 @@ export async function resolveMetadata({
       canonical: canon,
       // hreflang — hər dil üçün ayrı URL (az prefikssiz, en/ru prefiksli).
       languages: {
-        az: `${SITE_URL}${path}`,
-        en: `${SITE_URL}/en${path}`,
-        ru: `${SITE_URL}/ru${path}`,
-        "x-default": `${SITE_URL}${path}`,
+        az: `${SITE_URL}${buildPath(path || "/", "az")}`,
+        en: `${SITE_URL}${buildPath(path || "/", "en")}`,
+        ru: `${SITE_URL}${buildPath(path || "/", "ru")}`,
+        "x-default": `${SITE_URL}${buildPath(path || "/", "az")}`,
       },
     },
     openGraph: {
-      title: composed, description: desc, url, siteName: name, locale: "az_AZ", type,
+      title: composed, description: desc, url, siteName: name, locale: { az: "az_AZ", en: "en_US", ru: "ru_RU" }[locale] || "az_AZ", type,
       images: [{ url: fullImg, width: 1200, height: 630, alt: composed }],
     },
     twitter: {

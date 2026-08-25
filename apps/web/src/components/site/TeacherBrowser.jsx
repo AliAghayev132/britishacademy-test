@@ -3,7 +3,7 @@
 // React
 import { memo, useCallback, useState } from "react";
 // Next
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
 // Data (RTK Query)
 import { useGetTeachersQuery } from "@/store/api/publicApi";
 // Local

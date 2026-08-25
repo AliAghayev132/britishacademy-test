@@ -1,14 +1,17 @@
 import { SITE_URL } from "@/lib/seo";
 import { apiGet } from "@/lib/api";
+import { buildPath } from "@/lib/i18n/routes";
 
 // /sitemap.xml — built from the API's URL list so new courses/posts/branches
 // appear automatically. Falls back to the static core routes if the API is down.
 // Hər path üçün az/en/ru hreflang alternates.
+// `path` kanonik AZ formadadır — hər dil öz slug-ı ilə verilir
+// (/elaqe · /en/contact · /ru/kontakty).
 const langs = (path) => ({
   languages: {
-    az: `${SITE_URL}${path}`,
-    en: `${SITE_URL}/en${path}`,
-    ru: `${SITE_URL}/ru${path}`,
+    az: `${SITE_URL}${buildPath(path, "az")}`,
+    en: `${SITE_URL}${buildPath(path, "en")}`,
+    ru: `${SITE_URL}${buildPath(path, "ru")}`,
   },
 });
 

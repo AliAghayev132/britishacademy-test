@@ -1,5 +1,5 @@
 // Next
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
 
 // Data
 import { apiGet } from "@/lib/api";

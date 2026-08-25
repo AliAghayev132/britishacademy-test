@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/site/LocaleLink";
 
 /**
  * Per-page mascot slot. Filenames map to /public/assets/mascot/<name>.png.
