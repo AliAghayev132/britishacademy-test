@@ -96,7 +96,7 @@ const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCou
         <input
           value={name}
           onChange={(e) => onName(e.target.value)}
-          placeholder="Müəllim adı ilə axtar…"
+          placeholder="Ad, ixtisas və ya filial üzrə axtar…"
           className="ba-field"
           style={{ ...inputStyle, paddingLeft: 42 }}
         />
@@ -121,7 +121,36 @@ const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCou
 });
 
 // Azerbaijani-tolerant lowercase for the client-side name match.
-const norm = (s) => (s || "").toLocaleLowerCase("az");
+// Azərbaycan hərflərinə həssas olmayan normallaşdırma.
+//
+// Diakritikləri açıb ataraq normallaşdırırıq (NFD): İ→i, ş→s, ö→o, ü→u …
+// ə və ı Unicode-da parçalanmır, ona görə açıq şəkildə əvəzlənir.
+//
+// Niyə toLocaleLowerCase("az") YOX: o, "IELTS" sözünü "ıelts"-ə çevirir
+// (nöqtəsiz ı) və istifadəçi "ielts" yazanda nəticə gəlmirdi.
+const norm = (s) =>
+  (s || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/ı/g, "i")
+    .replace(/ə/g, "e");
+
+/**
+ * Müəllimin axtarıla bilən bütün mətnini bir sətirdə topla.
+ * Əvvəl yalnız ad axtarılırdı — "IELTS", "Nərimanov" kimi sorğular nəticə
+ * vermirdi. İndi ixtisas başlığı və filial adları da daxildir.
+ */
+const haystack = (t) =>
+  norm(
+    [
+      t.fullName,
+      t.title,
+      ...(Array.isArray(t.branches) ? t.branches.map((b) => b && b.name) : []),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
 
 /**
  * Teacher grid with a course filter. Server passes the initial (unfiltered)
@@ -142,7 +171,7 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
   // filter is applied client-side on top of whichever list is showing.
   const base = course ? data?.data?.teachers || [] : initialTeachers;
   const q = norm(name.trim());
-  const teachers = q ? base.filter((t) => norm(t.fullName).includes(q)) : base;
+  const teachers = q ? base.filter((t) => haystack(t).includes(q)) : base;
   const hasFilter = Boolean(course || name.trim());
 
   // ── Handlers ──

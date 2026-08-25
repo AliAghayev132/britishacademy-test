@@ -281,7 +281,11 @@ export function TestimonialForm({ item, onClose }) {
             <NumberInput value={order} onChange={(e) => setOrder(e.target.value)} />
           </Field>
           <div className="flex items-end gap-6 pb-2">
-            <Toggle checked={isFeatured} onChange={setIsFeatured} label="Seçilmiş" />
+            <Toggle
+              checked={isFeatured}
+              onChange={setIsFeatured}
+              label={isVideo ? "Ana səhifədə göstər" : "Seçilmiş"}
+            />
             <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
           </div>
         </div>

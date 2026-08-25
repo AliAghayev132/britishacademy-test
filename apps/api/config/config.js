@@ -83,7 +83,11 @@ const config = {
   // File upload limits/types (used by FileService media helpers + uploadLimit)
   upload: {
     maxImageSize: 30 * 1024 * 1024, // images — 30MB
-    maxVideoSize: 100 * 1024 * 1024, // videos — 100MB
+    // Tələbə video rəyləri 200 MB-a qədər ola bilər — 250 MB ehtiyatla.
+    // Bu dəyər HƏM qlobal express-fileupload limitini, HƏM marşrut
+    // limitini, HƏM də FileService yoxlamasını idarə edir (app.js:95).
+    // ⚠️ Reverse proxy (nginx: client_max_body_size) də uyğun olmalıdır.
+    maxVideoSize: Number(process.env.MAX_VIDEO_SIZE_MB || 250) * 1024 * 1024,
     maxDocSize: 100 * 1024 * 1024, // documents — 100MB
     allowedImageTypes: ["image/jpeg", "image/png", "image/webp", "image/jpg"],
     allowedVideoTypes: ["video/mp4", "video/webm", "video/ogg"],

@@ -120,6 +120,17 @@ export function FileUpload({ value, onChange, kind = "image", spec }) {
         </button>
       )}
 
+      {/* Video üçün ölçü xəbərdarlığı (spesifikasiya yalnız şəkillərdədir) */}
+      {isVideo && (
+        <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-500">
+          <Info className="mt-0.5 h-3 w-3 flex-none text-gray-400" />
+          <span>
+            <span className="font-semibold text-gray-700">MP4 / WebM · maksimum 250 MB</span>
+            {" — "}yüklənmə böyük fayllarda bir neçə dəqiqə çəkə bilər, səhifəni bağlamayın.
+          </span>
+        </div>
+      )}
+
       {/* Spesifikasiya — admin harada nə görünəcəyini bilsin */}
       {spec && (
         <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-500">
