@@ -8,13 +8,14 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Database, TriangleAlert, Languages, Sparkles, BookOpen } from "lucide-react";
+import { Database, TriangleAlert, Languages, Sparkles, BookOpen, Flag } from "lucide-react";
 // Data
 import {
   useAdminSeedMutation,
   useAdminMigrateI18nMutation,
   useAdminAutoTranslateMutation,
   useAdminImportCoursesMutation,
+  useImportFlagsMutation,
 } from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
@@ -27,8 +28,30 @@ export default function DeveloperPage() {
   const [langs, setLangs] = useState(["en", "ru"]);
   const [importCourses, { isLoading: importing }] = useAdminImportCoursesMutation();
   const [importReport, setImportReport] = useState(null);
+  const [importFlags, { isLoading: flagging }] = useImportFlagsMutation();
+  const [flagReport, setFlagReport] = useState(null);
 
   // Müştəri kurs məlumatlarını tətbiq et (dryRun=true → yalnız yoxlama).
+  // Bayraqları flagcdn.com-dan endirib qalereyaya yazır və ölkə kartlarına
+  // bağlayır. `overwrite` — şəkli olan ölkələri də yenilə.
+  const runImportFlags = async (overwrite) => {
+    const ok = await confirmDialog({
+      title: overwrite ? "Bütün bayraqlar yenilənsin?" : "Bayraqlar endirilsin?",
+      message: overwrite
+        ? "Şəkli OLAN ölkələrin də bayrağı yenidən endirilib əvəz olunacaq."
+        : "Şəkli olmayan ölkələrə flagcdn.com-dan bayraq endirilib «bayraqlar» qovluğuna yazılacaq.",
+      confirmText: "Başlat",
+    });
+    if (!ok) return;
+    try {
+      const res = await importFlags({ overwrite }).unwrap();
+      setFlagReport(res.data);
+      notify.success(res.message || "Bayraqlar endirildi");
+    } catch (e) {
+      notify.error(e?.data?.message || "Bayraq importu alınmadı");
+    }
+  };
+
   const runImport = async (dryRun) => {
     if (!dryRun) {
       const ok = await confirmDialog({
@@ -331,6 +354,79 @@ export default function DeveloperPage() {
                     {importReport.warnings.map((w, i) => <li key={i}>⚠️ {w}</li>)}
                   </ul>
                 )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Ölkə bayraqları */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+            <Flag className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Ölkə bayraqlarını endir</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              «Xaricdə təhsil» ölkə kartlarının şəkli boş olduqda kart emoji bayrağa düşür —
+              Windows isə bayraq emojilərini göstərmir, ona görə kartlar boş görünür.
+              Bu əməliyyat bayraqları <b>flagcdn.com</b>-dan endirib serverə yazır,
+              qalereyada <b>«bayraqlar»</b> qovluğuna qeyd edir və hər ölkənin şəklinə bağlayır.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Fayllar <b>lokala</b> endirilir — sayt kənar CDN-dən asılı qalmır.
+                Adi rejim yalnız <b>şəkli olmayan</b> ölkələrə toxunur, təkrar işlədilə bilər.
+                Ölkənin adı tanınmasa (ISO kodu tapılmasa) o ölkə ötürülür — şəkli əl ilə yükləyin.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportFlags(false)}
+                disabled={flagging}
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              >
+                <Flag className="h-4 w-4" />
+                {flagging ? "Endirilir…" : "Bayraqları endir"}
+              </button>
+              <button
+                onClick={() => runImportFlags(true)}
+                disabled={flagging}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                <Flag className="h-4 w-4" /> Hamısını yenilə
+              </button>
+            </div>
+
+            {flagReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Nəticə — {flagReport.imported}/{flagReport.total} endirildi, {flagReport.skipped} ötürüldü
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-gray-100">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-3 py-2">Ölkə</th>
+                        <th className="px-3 py-2">Vəziyyət</th>
+                        <th className="px-3 py-2">Ölçü</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {flagReport.report?.map((r, i) => (
+                        <tr key={i} className="border-t border-gray-100">
+                          <td className="px-3 py-2 font-medium text-gray-900">{r.country}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.status}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.kb ? `${r.kb} KB` : "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
