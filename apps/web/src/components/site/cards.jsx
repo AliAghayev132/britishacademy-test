@@ -3,6 +3,7 @@
 import { LocaleLink as Link } from "./LocaleLink";
 import { useT } from "@/lib/i18n/useT";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 const CAT_COLORS = ["#2E6BE6", "#F5A524", "#7C4DFF", "#E0533D", "#12B5A5", "#FF3D8B", "#0EA5E9", "#22B07D"];
 
@@ -41,12 +42,25 @@ const COUNTRY_FLAGS = {
   "Fransa": "🇫🇷", "İspaniya": "🇪🇸", "İtaliya": "🇮🇹", "Niderland": "🇳🇱",
 };
 
-/** Study-abroad destination card with the flag as a full-height wash. */
+/**
+ * Study-abroad destination card — sağ tərəfdə solğun "wash" görüntüsü.
+ *
+ * Üstünlük sırası:
+ *   1) dest.image  — admin paneldən yüklənən şəkil (ƏN SADƏ YOL)
+ *   2) dest.flag   — inline SVG bayraq (JSON redaktorundan)
+ *   3) emoji       — heç nə yoxdursa (⚠️ Windows-da bayraq emojiləri
+ *                    dəstəklənmir, "DE" kimi hərf cütü görünür)
+ */
 export function DestinationCard({ dest }) {
   const flag = COUNTRY_FLAGS[dest.country] || (dest.isScholarship ? "🎓" : "🌍");
   return (
     <Link href={`/xaricde-tehsil/${dest.slug}`} className="ba-fdest" style={{ "--cc": dest.color || "#2E6BE6" }}>
-      {dest.flag ? (
+      {dest.image ? (
+        <span className="ba-flag" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={getImageUrl(dest.image)} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </span>
+      ) : dest.flag ? (
         <span
           className="ba-flag"
           aria-hidden="true"

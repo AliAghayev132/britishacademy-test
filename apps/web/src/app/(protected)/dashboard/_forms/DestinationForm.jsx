@@ -238,7 +238,7 @@ export function DestinationForm({ item, onClose }) {
         <Field label="Giriş mətni (lead)" info="3 dildə">
           <LocalizedInput value={lead} onChange={setLead} multiline rows={3} />
         </Field>
-        <Field label="Şəkil">
+        <Field label="Şəkil / bayraq" info="Ölkə kartının fonunda görünür — bayraq şəkli yükləmək kifayətdir">
           <FileUpload value={image} onChange={setImage} kind="image" spec={IMAGE_SPECS.destinationImage} />
         </Field>
       </section>

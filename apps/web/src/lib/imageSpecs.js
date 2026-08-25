@@ -79,9 +79,10 @@ export const IMAGE_SPECS = {
     w: 1200, h: 750, fit: "cover",
   },
   destinationImage: {
-    label: "Ölkə şəkli",
-    where: "Xaricdə təhsil kartı və ölkə səhifəsi",
-    w: 1200, h: 750, fit: "cover",
+    label: "Ölkə şəkli / bayraq",
+    where: "Ölkə kartının sağ tərəfində solğun fon (ana səhifə + Xaricdə təhsil)",
+    w: 800, h: 1000, fit: "cover",
+    note: "Bayraq və ya ölkə fotosu. Kartda 60% enlə, ~17% şəffaflıqla və yumşaq keçidlə göstərilir — detallı şəkil lazım deyil.",
   },
 
   // ── Bloq ──
