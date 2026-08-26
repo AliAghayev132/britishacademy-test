@@ -84,6 +84,11 @@ jobs:
             # 7. Dependencies quraşdır
             # ========================================
             echo "📦 Dependencies quraşdırılır..."
+            # pnpm 10 postinstall skriptlərini standart olaraq bloklayır və
+            # ERR_PNPM_IGNORED_BUILDS ilə 1 qaytarır. `set -e` səbəbindən bu
+            # bütün deploy-u dayandırır — PM2 restart işləmir, server köhnə
+            # kodda qalır (endpointlər "not found" verir).
+            # package.json-dakı pnpm.ignoredBuiltDependencies bunun qarşısını alır.
             pnpm install --no-frozen-lockfile --prod
 
             # ========================================
@@ -100,4 +105,25 @@ jobs:
 
             pm2 save --force
 
-            echo "✅ Node.js server deploy uğurla tamamlandı (port $PORT)."
+            # ========================================
+            # 9. Sağlamlıq yoxlaması
+            # ========================================
+            # Restart "uğurlu" görünə bilər, amma proses açılışda çökərsə
+            # (məsələn korlanmış modul) köhnə cavab verməyən vəziyyət qalır.
+            # Deploy yalnız server həqiqətən cavab verəndə uğurlu sayılır.
+            echo "🩺 Server yoxlanılır..."
+            code=000
+            healthy=0
+            for i in $(seq 1 15); do
+              code=$(curl -s -m 5 -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/api/site" || echo 000)
+              if [ "$code" = "200" ]; then healthy=1; break; fi
+              sleep 2
+            done
+
+            if [ "$healthy" -ne 1 ]; then
+              echo "❌ Server 30 saniyə ərzində cavab vermədi (son HTTP kodu: $code)"
+              pm2 logs "$APP_NAME" --lines 40 --nostream || true
+              exit 1
+            fi
+
+            echo "✅ Node.js server deploy uğurla tamamlandı (port $PORT, HTTP $code)."
