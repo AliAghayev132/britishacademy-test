@@ -3,6 +3,15 @@ const nextConfig = {
   // Do not advertise the framework in the response headers.
   poweredByHeader: false,
 
+  // jsdom (isomorphic-dompurify vasitəsilə gəlir — bloq/səhifə HTML-ini
+  // təmizləmək üçün) öz aktivlərini __dirname-ə nisbətən oxuyur, məsələn
+  // browser/default-stylesheet.css. Webpack onu paketləyəndə həmin nisbi yol
+  // sınır və build "ENOENT ... browser/default-stylesheet.css" ilə dayanır.
+  //
+  // Server paketi kimi xaricdə saxlayanda Next onu paketləmir — Node adi
+  // require ilə yükləyir və fayl yolları düzgün qalır.
+  serverExternalPackages: ['jsdom', 'isomorphic-dompurify'],
+
   // Fail-safe: keep React strict mode on for better warnings in development.
   reactStrictMode: true,
 

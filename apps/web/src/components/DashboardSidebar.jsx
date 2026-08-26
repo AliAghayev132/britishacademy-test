@@ -1,7 +1,7 @@
 'use client'
 
 // React
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Next
 import Link from 'next/link'
@@ -73,6 +73,18 @@ export const DashboardSidebar = ({ children }) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
+
+  // authSlice ilkin vəziyyəti modul yüklənəndə localStorage-dan oxunur:
+  // serverdə `user` null, brauzerdə isə dolu olur. Onu birinci render-də
+  // göstərmək server/klient HTML fərqi yaradırdı (React #418 — hidratasiya
+  // uğursuzluğu, bütün ağac yenidən qurulur).
+  //
+  // Store-a toxunmuruq — token dərhal əlçatan qalmalıdır, yoxsa ilk sorğular
+  // Authorization başlığı olmadan gedər. Yalnız GÖSTƏRİLMƏSİNİ mount-dan
+  // sonraya saxlayırıq: ilk render hər iki tərəfdə eyni (boş) olur.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const shownUser = mounted ? user : null
   const [logoutApi] = useLogoutMutation()
 
   // Yeni (baxılmamış) müraciət sayı — sidebar-da qırmızı badge. Status
@@ -236,14 +248,14 @@ export const DashboardSidebar = ({ children }) => {
             className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
           >
             <div className="w-9 h-9 rounded-xl bg-[#00157A] overflow-hidden flex items-center justify-center text-white text-sm font-semibold">
-              {user?.firstName?.[0]}
-              {user?.lastName?.[0]}
+              {shownUser?.firstName?.[0]}
+              {shownUser?.lastName?.[0]}
             </div>
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium text-gray-900">
-                {user?.firstName} {user?.lastName}
+                {shownUser?.firstName} {shownUser?.lastName}
               </p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
+              <p className="text-xs text-gray-500">{shownUser?.email}</p>
             </div>
           </Link>
         </header>

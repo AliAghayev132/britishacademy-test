@@ -8,6 +8,7 @@ import { NativeSelect } from "../_forms/kit";
 // Data (RTK Query)
 import { useAdminListQuery, useAdminLeadStatusMutation } from "@/store/api/adminApi";
 import { QueryState } from "@/components/ui/QueryState";
+import { pickAz } from "@/lib/adminResources";
 // Icons
 import { Search } from "lucide-react";
 
@@ -120,8 +121,8 @@ export default function LeadsPage() {
                       {l.message && <div className="mt-1 max-w-md text-xs text-gray-400">{l.message.slice(0, 140)}</div>}
                     </td>
                     <td className="hidden px-4 py-3 text-gray-600 lg:table-cell">
-                      {l.course?.title || l.interest || "—"}
-                      {l.branch?.name && <div className="text-xs text-gray-400">{l.branch.name}</div>}
+                      {pickAz(l.course?.title) || pickAz(l.interest) || "—"}
+                      {l.branch?.name && <div className="text-xs text-gray-400">{pickAz(l.branch.name)}</div>}
                       <div className="text-xs text-gray-400">{SOURCE_LABEL[l.source] || l.source}</div>
                     </td>
                     <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(l.createdAt)}</td>

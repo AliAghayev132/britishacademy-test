@@ -2,6 +2,7 @@
 
 // Next
 import Link from "next/link";
+import { pickAz } from "@/lib/adminResources";
 // Data (RTK Query)
 import { useAdminStatsQuery } from "@/store/api/adminApi";
 import { QueryState } from "@/components/ui/QueryState";
@@ -68,7 +69,7 @@ export default function DashboardHome() {
                   <tr key={l._id} className="border-t border-gray-50">
                     <td className="px-5 py-3 font-semibold text-gray-900">{l.name}</td>
                     <td className="px-5 py-3 text-gray-500">{l.phone}</td>
-                    <td className="hidden px-5 py-3 text-gray-500 md:table-cell">{l.course?.title || l.interest || "—"}</td>
+                    <td className="hidden px-5 py-3 text-gray-500 md:table-cell">{pickAz(l.course?.title) || pickAz(l.interest) || "—"}</td>
                     <td className="px-5 py-3 text-right text-xs text-gray-400">{fmt(l.createdAt)}</td>
                   </tr>
                 ))}
