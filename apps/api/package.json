@@ -46,10 +46,5 @@
     "#constants": "./constants/index.js",
     "#middlewares": "./middlewares/index.js",
     "#controllers": "./controllers/index.js"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "puppeteer"
-    ]
   }
 }

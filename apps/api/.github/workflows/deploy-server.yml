@@ -84,12 +84,13 @@ jobs:
             # 7. Dependencies quraşdır
             # ========================================
             echo "📦 Dependencies quraşdırılır..."
-            # pnpm 10 postinstall skriptlərini standart olaraq bloklayır və
-            # ERR_PNPM_IGNORED_BUILDS ilə 1 qaytarır. `set -e` səbəbindən bu
-            # bütün deploy-u dayandırır — PM2 restart işləmir, server köhnə
-            # kodda qalır (endpointlər "not found" verir).
-            # package.json-dakı pnpm.ignoredBuiltDependencies bunun qarşısını alır.
-            pnpm install --no-frozen-lockfile --prod
+            # --frozen-lockfile: pnpm-lock.yaml artıq repoda izlənilir, ona görə
+            # server MÜTLƏQ lokalda test edilmiş versiyaları quraşdırır. Əvvəl
+            # --no-frozen-lockfile idi və serverdə öz lock-u vardı — asılılıqlar
+            # sərbəst həll olunurdu (mongoose çökməsinin mənbəyi bu idi).
+            # package.json lock ilə uyğunsuzdursa deploy səssizcə davam etmək
+            # əvəzinə burada dayanır.
+            pnpm install --frozen-lockfile --prod
 
             # ========================================
             # 8. PM2 ilə restart et

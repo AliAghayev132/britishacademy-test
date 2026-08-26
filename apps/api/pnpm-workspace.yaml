@@ -1,0 +1,9 @@
+# pnpm build skriptlərini standart olaraq bloklayır və qərar verilməmiş
+# paket qalanda ERR_PNPM_IGNORED_BUILDS ilə 1 qaytarır. Deploy skriptində
+# `set -e` olduğu üçün bu, PM2 restart-a qədər çatmadan deploy-u dayandırır.
+#
+# puppeteer whatsapp-web.js-in tranzitiv asılılığıdır; build skripti Chrome
+# endirir (~150 MB). Biz sistem Chrome-unu işlədirik (WhatsAppService →
+# findSystemChrome / WHATSAPP_CHROME_PATH), ona görə endirmə lazım deyil.
+allowBuilds:
+  puppeteer: false

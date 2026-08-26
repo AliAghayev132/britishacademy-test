@@ -1,6 +1,5 @@
 # Dependencies / build output (monorepo-wide)
 node_modules/
-pnpm-lock.yaml   # layihə npm işlədir (package-lock.json)
 dist/
 .next/
 build/
