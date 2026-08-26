@@ -68,3 +68,23 @@ export const RESOURCE_FILTERS = {
   faqs: [ACTIVE],
   pages: [ACTIVE],
 };
+
+// ── Siyahıda kiçik önizləmə ──
+// Admin cədvəlində sətri açmadan şəkli görmək üçün. Resurs başına ayrıca
+// konfiq yazmaq əvəzinə geniş yayılmış sahə adlarını sıra ilə yoxlayırıq —
+// media (url), kurslar (image), müəllimlər (photo), bloq (cover) və s.
+const THUMB_FIELDS = ["url", "image", "photo", "cover", "logo", "thumbnail", "avatar", "flag"];
+
+/** Element üçün önizləmə şəkli yolu; yoxdursa null. */
+export const thumbOf = (item) => {
+  if (!item || typeof item !== "object") return null;
+  for (const f of THUMB_FIELDS) {
+    const v = item[f];
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return null;
+};
+
+/** Fayl yolundan şəkil olub-olmadığını təxmin et (video/sənəd üçün ikon). */
+export const isImagePath = (v) =>
+  typeof v === "string" && /\.(png|jpe?g|gif|webp|avif|svg|bmp|ico)(\?|$)/i.test(v);

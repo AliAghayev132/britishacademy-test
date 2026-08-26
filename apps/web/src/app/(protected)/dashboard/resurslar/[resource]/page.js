@@ -20,9 +20,10 @@ import { NativeSelect } from "../../_forms/kit";
 // Local
 import { BESPOKE_FORMS } from "../../_forms";
 // Utils
-import { ADMIN_RESOURCES, field, RESOURCE_FILTERS, pickAz } from "@/lib/adminResources";
+import { ADMIN_RESOURCES, field, RESOURCE_FILTERS, pickAz, thumbOf, isImagePath } from "@/lib/adminResources";
+import { getImageUrl } from "@/utils/getImageUrl";
 // Icons
-import { Plus, Pencil, Trash2, Search, CalendarClock, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, CalendarClock, X, FileVideo } from "lucide-react";
 
 /**
  * Generic admin resource browser.
@@ -74,6 +75,10 @@ export default function ResourceBrowserPage({ params }) {
   const [jsonDirty, setJsonDirty] = useState(false);
 
   const items = data?.data?.items || [];
+
+  // Önizləmə sütunu yalnız siyahıda şəkli olan element varsa göstərilir —
+  // filial/FAQ kimi şəkilsiz resurslarda boş sütun yer tutmasın.
+  const showThumb = items.some((i) => thumbOf(i));
   const pagination = data?.data?.pagination;
 
   const openEditor = (item) => {
@@ -147,8 +152,21 @@ export default function ResourceBrowserPage({ params }) {
     } catch { /* table refetch shows the truth */ }
   };
 
+  // «Ana səhifədə» açarı. Əvvəl yalnız redaktə formasının içində idi —
+  // hansı kursların ana səhifədə göründüyünü görmək üçün hər birini tək-tək
+  // açmaq lazım gəlirdi. İndi siyahıdan birbaşa dəyişilir.
+  const toggleFeatured = async (item) => {
+    try {
+      await updateItem({ resource, id: item._id, data: { isFeatured: !item.isFeatured } }).unwrap();
+    } catch { /* cədvəl yenidən yüklənəndə həqiqi vəziyyət görünür */ }
+  };
+
   const title = cfg?.name || resource;
   const hasActive = useMemo(() => items.some((i) => "isActive" in i), [items]);
+  const hasFeatured = useMemo(() => items.some((i) => "isFeatured" in i), [items]);
+  const featuredCount = useMemo(() => items.filter((i) => i.isFeatured).length, [items]);
+  // Ana səhifə bölmələrinin göstərdiyi maksimum say (publicController.getHome).
+  const HOME_LIMIT = { courses: 6, destinations: 8, testimonials: 6, teachers: 8 }[resource];
 
   if (!cfg) return <div className="text-gray-600">Naməlum resurs: {resource}</div>;
 
@@ -183,6 +201,25 @@ export default function ResourceBrowserPage({ params }) {
         </button>
       </div>
 
+      {/* Ana səhifə seçimi — limiti gizli saxlamamaq üçün açıq göstərilir.
+          Seçilmişlərin sayı limitdən çoxdursa artıqları görünməyəcək. */}
+      {hasFeatured && HOME_LIMIT ? (
+        <div
+          className={`mb-3 rounded-lg px-3 py-2 text-sm ${
+            featuredCount > HOME_LIMIT
+              ? "bg-amber-50 text-amber-800"
+              : "bg-blue-50 text-blue-800"
+          }`}
+        >
+          Ana səhifədə göstərilir: <b>{Math.min(featuredCount, HOME_LIMIT)}</b> / {HOME_LIMIT}
+          {featuredCount > HOME_LIMIT ? (
+            <> — <b>{featuredCount}</b> seçilib, artıq olan {featuredCount - HOME_LIMIT}-i görünməyəcək. Sıralama «Sıra» sahəsinə görədir.</>
+          ) : (
+            <> · Sıralama «Sıra» sahəsinə görədir.</>
+          )}
+        </div>
+      ) : null}
+
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading || isError || items.length === 0 ? (
           <QueryState
@@ -198,8 +235,10 @@ export default function ResourceBrowserPage({ params }) {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                 <tr>
+                  {showThumb && <th className="w-16 px-4 py-3">Önizləmə</th>}
                   <th className="px-4 py-3">Ad</th>
                   <th className="hidden px-4 py-3 md:table-cell">Detal</th>
+                  {hasFeatured && <th className="px-4 py-3">Ana səhifə</th>}
                   {hasActive && <th className="px-4 py-3">Status</th>}
                   <th className="px-4 py-3 text-right">Əməliyyat</th>
                 </tr>
@@ -207,8 +246,26 @@ export default function ResourceBrowserPage({ params }) {
               <tbody className={isFetching ? "opacity-60" : ""}>
                 {items.map((item) => (
                   <tr key={item._id} className="border-t border-gray-100 hover:bg-gray-50">
+                    {showThumb && (
+                      <td className="px-4 py-3">
+                        <Thumb src={thumbOf(item)} />
+                      </td>
+                    )}
                     <td className="px-4 py-3 font-medium text-gray-900">{field(item, cfg.title) || "—"}</td>
                     <td className="hidden px-4 py-3 text-gray-500 md:table-cell">{String(field(item, cfg.sub) || "").slice(0, 80)}</td>
+                    {hasFeatured && (
+                      <td className="px-4 py-3">
+                        {"isFeatured" in item ? (
+                          <button
+                            onClick={() => toggleFeatured(item)}
+                            title={item.isFeatured ? "Ana səhifədən çıxar" : "Ana səhifədə göstər"}
+                            className={`rounded-full px-2.5 py-1 text-xs font-bold ${item.isFeatured ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"}`}
+                          >
+                            {item.isFeatured ? "Göstərilir" : "Gizli"}
+                          </button>
+                        ) : null}
+                      </td>
+                    )}
                     {hasActive && (
                       <td className="px-4 py-3">
                         {"isActive" in item ? (
@@ -282,5 +339,31 @@ export default function ResourceBrowserPage({ params }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Cədvəldəki kiçik önizləmə. Şəkil deyilsə (video/sənəd) ikon göstərilir,
+ * yüklənmə uğursuz olarsa sınıq şəkil əvəzinə boş çərçivə qalır.
+ */
+function Thumb({ src }) {
+  if (!src) {
+    return <div className="h-10 w-10 rounded-lg border border-dashed border-gray-200" />;
+  }
+  if (!isImagePath(src)) {
+    return (
+      <div className="grid h-10 w-10 place-items-center rounded-lg border border-gray-200 bg-gray-50 text-gray-400">
+        <FileVideo className="h-4 w-4" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={getImageUrl(src)}
+      alt=""
+      loading="lazy"
+      className="h-10 w-10 rounded-lg border border-gray-200 bg-gray-50 object-cover"
+      onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+    />
   );
 }

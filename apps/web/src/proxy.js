@@ -37,12 +37,11 @@ export function proxy(request) {
   //   1) gələn URL kanonik forma çevrilib rewrite olunur (URL dəyişmir),
   //   2) səhv slug istifadə olunubsa 308 ilə düzgün URL-ə yönləndirilir —
   //      /en/elaqe → /en/contact. Beləcə eyni məzmun iki URL-də qalmır.
-  const cookieLang = request.cookies.get('lang')?.value
   const { locale: prefixLang, path: stripped, prefixed } = splitLocale(pathname)
 
   // Prefikssiz gələn əcnəbi slug (/contact) → aid olduğu dilin URL-inə yönəlt.
   if (!prefixed) {
-    const owner = localeOfPath(stripped, cookieLang)
+    const owner = localeOfPath(stripped)
     if (owner) {
       const url = request.nextUrl.clone()
       url.pathname = buildPath(canonicalPath(stripped), owner)
@@ -50,9 +49,14 @@ export function proxy(request) {
     }
   }
 
-  const lang = prefixed
-    ? prefixLang
-    : (['az', 'en', 'ru'].includes(cookieLang) ? cookieLang : 'az')
+  // Dil YALNIZ URL prefiksindən gəlir. Prefikssiz ünvan həmişə AZ-dır.
+  //
+  // Əvvəl `lang` cookie-si də nəzərə alınırdı: bir dəfə RU seçən ziyarətçi
+  // sonradan sadəcə domenə girəndə sayt yenə rus dilində açılırdı və AZ-a
+  // qayıtmağın yolu yox idi. Üstəlik eyni məzmun eyni URL-də müxtəlif dillərdə
+  // görünürdü — axtarış motorları üçün zərərli. İndi hər dilin öz ünvanı var
+  // (/elaqe · /en/contact · /ru/kontakty), ona görə cookie-yə ehtiyac qalmır.
+  const lang = prefixed ? prefixLang : 'az'
 
   const canon = canonicalPath(stripped)
 

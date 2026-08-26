@@ -32,7 +32,17 @@ export const API_URL = RAW_API_URL.endsWith('/api')
  * paths returned by the server are appended to this base.
  */
 export const IMAGE_URL = stripTrailingSlash(
-  process.env.NEXT_PUBLIC_IMAGE_URL || 'http://localhost:5000'
+  // NEXT_PUBLIC_IMAGE_URL təyin olunmayıbsa API host-una düşürük — yüklənən
+  // fayllar onsuz da orada saxlanılır (`app.use("/uploads", ...)`).
+  //
+  // Əvvəl defolt sabit 'http://localhost:5000' idi: deploy-da bu dəyişən
+  // qoyulmayanda BÜTÜN yüklənmiş şəkillər ziyarətçinin öz kompüterinə
+  // (localhost:5000) işarə edirdi və heç nə görünmürdü — nə ölkə bayraqları,
+  // nə admin panelindəki media. API URL-i isə həmişə düzgün konfiqurasiya
+  // olunur, ona görə ondan törətmək daha etibarlı defoltdur.
+  process.env.NEXT_PUBLIC_IMAGE_URL ||
+    (RAW_API_URL.endsWith('/api') ? RAW_API_URL.slice(0, -4) : RAW_API_URL) ||
+    'http://localhost:5000'
 )
 
 /** Canonical site root (SEO metadata, sitemap, robots). */

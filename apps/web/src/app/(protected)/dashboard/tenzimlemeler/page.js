@@ -357,7 +357,7 @@ export default function SettingsPage() {
               placeholder="İngilis dili, IELTS, Rus dili, Danışıq klubu"
             />
             <p className="mt-1 text-xs text-gray-400">
-              «Ödənişsiz sınaq dərsi» həbindən əvvəl görünən sıra. Təsadüfi
+              Hero-nun altında görünən kateqoriya sırası. Təsadüfi
               qarışdırılmır — yazdığınız ardıcıllıqla göstərilir.
             </p>
           </div>

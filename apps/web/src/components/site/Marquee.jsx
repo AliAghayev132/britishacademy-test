@@ -8,7 +8,7 @@ import { toList } from "@/utils/toList";
 // direct <span> children, each holding an inner <span> star).
 const WORDS = [
   "İNGİLİS DİLİ",
-  "IELTS 7+",
+  "IELTS 8.5",
   "DANIŞIQ KLUBU",
   "XARİCDƏ TƏHSİL",
   "RUS DİLİ",

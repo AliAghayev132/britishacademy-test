@@ -242,9 +242,6 @@ export function Hero({ hero, stats = [] }) {
               {p}
             </a>
           ))}
-          <a href="#qeydiyyat" style={{ ...PILL_BASE, background: "#001452", color: "#fff", fontWeight: 700, boxShadow: "none" }}>
-            {t("hero.trial")}
-          </a>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 44 }}>

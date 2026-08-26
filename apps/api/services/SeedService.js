@@ -177,7 +177,7 @@ export function buildGraph() {
     },
     hero: {
       titlePrefix: "British Academy ilə",
-      words: ["ingiliscə danış", "IELTS 7+ al", "rus dili öyrən", "almanca danış", "xaricdə oxu"],
+      words: ["ingiliscə danış", "IELTS 8.5 al", "rus dili öyrən", "almanca danış", "xaricdə oxu"],
       colors: ["#001478", "#0B2A9C", "#C8102E", "#00105E", "#1438B8"],
       subtitle: "British Academy ilə top universitetlərə qəbul ol.",
     },
@@ -186,7 +186,7 @@ export function buildGraph() {
       { label: "korporativ tərəfdaş", value: "30+" },
       { label: "filial · Bakı", value: "4" },
     ],
-    marquee: ["İNGİLİS DİLİ", "IELTS 7+", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"],
+    marquee: ["İNGİLİS DİLİ", "IELTS 8.5", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"],
     seo: {
       titleTemplate: "%s — British Academy",
       defaultDescription: "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.",
