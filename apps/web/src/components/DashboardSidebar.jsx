@@ -11,7 +11,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useSelector, useDispatch } from 'react-redux'
 
 // UI / components
-import { motion, AnimatePresence } from 'framer-motion'
 
 // Icons
 import {
@@ -120,11 +119,11 @@ export const DashboardSidebar = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <motion.aside
-        className="bg-white border-r border-gray-100 flex flex-col relative shadow-sm"
-        initial={false}
-        animate={{ width: sidebarOpen ? 260 : 76 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
+      {/* En dəyişikliyi CSS keçidi ilə — framer-motion əvəzinə.
+          overflow-hidden yığılanda mətnlərin kənara daşmasının qarşısını alır. */}
+      <aside
+        className="bg-white border-r border-gray-100 flex flex-col relative shadow-sm overflow-hidden transition-[width] duration-200 ease-in-out"
+        style={{ width: sidebarOpen ? 260 : 76 }}
       >
         {/* Toggle */}
         <button
@@ -149,19 +148,15 @@ export const DashboardSidebar = ({ children }) => {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/assets/shield.png" alt="British Academy" className="w-6 h-6 object-contain" />
             </div>
-            <AnimatePresence>
-              {sidebarOpen && (
-                <motion.span
-                  className="text-[15px] font-bold text-[#00157A] whitespace-nowrap leading-tight"
-                  style={{ fontFamily: "'Poppins', sans-serif" }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  British Academy
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <span
+              className={`text-[15px] font-bold text-[#00157A] whitespace-nowrap leading-tight transition-opacity duration-200 ${
+                sidebarOpen ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+              aria-hidden={!sidebarOpen}
+            >
+              British Academy
+            </span>
           </Link>
         </div>
 
@@ -183,20 +178,15 @@ export const DashboardSidebar = ({ children }) => {
                 }`}
               >
                 <item.icon className="w-5 h-5 shrink-0 group-hover:text-white" style={active ? { color: '#fff' } : undefined} />
-                <AnimatePresence>
-                  {sidebarOpen && (
-                    <motion.span
-                      className="text-[15px] font-bold whitespace-nowrap group-hover:text-white"
-                      style={active ? { color: '#fff' } : undefined}
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {item.name}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                <span
+                  className={`text-[15px] font-bold whitespace-nowrap overflow-hidden group-hover:text-white transition-all duration-200 ${
+                    sidebarOpen ? 'opacity-100 max-w-[170px]' : 'opacity-0 max-w-0'
+                  }`}
+                  style={active ? { color: '#fff' } : undefined}
+                  aria-hidden={!sidebarOpen}
+                >
+                  {item.name}
+                </span>
 
                 {/* Yeni müraciət badge-i (varsa) */}
                 {badge > 0 && (
@@ -221,21 +211,17 @@ export const DashboardSidebar = ({ children }) => {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-semibold"
           >
             <LogOut className="w-5 h-5 shrink-0" />
-            <AnimatePresence>
-              {sidebarOpen && (
-                <motion.span
-                  className="text-sm whitespace-nowrap"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  Çıxış
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <span
+              className={`text-sm whitespace-nowrap overflow-hidden transition-all duration-200 ${
+                sidebarOpen ? 'opacity-100 max-w-[120px]' : 'opacity-0 max-w-0'
+              }`}
+              aria-hidden={!sidebarOpen}
+            >
+              Çıxış
+            </span>
           </button>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">

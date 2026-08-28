@@ -704,3 +704,25 @@ body.ba-home #qeydiyyat > div {
 @media (prefers-reduced-motion: reduce) {
   .ba-fade, .ba-pop, .ba-row { animation: none !important; }
 }
+
+/* ── Yüklənmə animasiyaları ──
+   Əvvəl framer-motion tərəfindən JS-də hesablanırdı. Eyni nəticəni CSS verir
+   və brauzer onu kompozitor səviyyəsində icra edir — daha yüngül. */
+@keyframes ba-dot-pulse {
+  0%, 100% { transform: scale(1);   opacity: .3; }
+  50%      { transform: scale(1.4); opacity: 1; }
+}
+
+@keyframes ba-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Hərəkət azaldılması seçilibsə animasiyaları dayandır (əlçatanlıq). */
+@media (prefers-reduced-motion: reduce) {
+  [style*="ba-dot-pulse"],
+  [style*="ba-fade-in"] {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
