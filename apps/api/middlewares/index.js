@@ -3,3 +3,4 @@ export * from "./security.js";
 export * from "./sanitize.js";
 export * from "./upload.js";
 export * from "./localize.js";
+export * from "./cache.js";

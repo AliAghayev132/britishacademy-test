@@ -19,6 +19,7 @@ const LanguageSwitcher = memo(function LanguageSwitcher() {
   const base = stripLocale(pathname);
   const go = (l) => {
     if (l === locale) return;
+    // eslint-disable-next-line react-hooks/immutability -- document.cookie hadisə işləyicisinin içindədir — render zamanı deyil, yalan siqnal
     document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
     // withLocale həm prefiksi qoyur, həm slug-u hədəf dilə çevirir
     // (/en/contact → /ru/kontakty).
@@ -172,6 +173,7 @@ function IntroLoader() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem("ba-intro-shown")) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- giriş animasiyası yalnız brauzerdə, sessionStorage yoxlanışından sonra başlaya bilər
     setShow(true);
     const start = setTimeout(() => setBar(100), 60);
     const fade = setTimeout(() => setHide(true), 1200);
@@ -236,6 +238,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
   const closeSearch = useCallback(() => setSearch(false), []);
 
   // Close the mobile drawer whenever the route changes…
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- route dəyişəndə mobil menyu bağlanır (pathname asılılığına reaksiya)
   useEffect(() => { setMobile(false); }, [pathname]);
 
   // …and when the viewport grows back to the desktop nav breakpoint (1000px).

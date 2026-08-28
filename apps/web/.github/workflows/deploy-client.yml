@@ -84,7 +84,13 @@ jobs:
             # 7. Dependencies quraşdır
             # ========================================
             echo "📦 Dependencies quraşdırılır..."
-            pnpm install --no-frozen-lockfile
+            # --frozen-lockfile: pnpm-lock.yaml artıq repoda izlənilir, ona görə
+            # server MÜTLƏQ lokalda test edilmiş versiyaları quraşdırır.
+            # Əvvəl --no-frozen-lockfile idi və hər deploy-da asılılıqlar
+            # yenidən həll olunurdu: isomorphic-dompurify ^3.18 → 3.22 sürüşməsi
+            # jsdom 30 gətirib build-i sındırmışdı. package.json lock ilə
+            # uyğunsuzdursa deploy səssizcə davam etmək əvəzinə burada dayanır.
+            pnpm install --frozen-lockfile
 
             # ========================================
             # 8. Next.js Build
@@ -106,4 +112,25 @@ jobs:
 
             pm2 save --force
 
-            echo "✅ Next.js client deploy uğurla tamamlandı (port $PORT)."
+            # ========================================
+            # 10. Sağlamlıq yoxlaması
+            # ========================================
+            # Restart "uğurlu" görünə bilər, amma proses açılışda çökərsə köhnə
+            # cavab verməyən vəziyyət qalır. Deploy yalnız sayt həqiqətən
+            # cavab verəndə uğurlu sayılır.
+            echo "🩺 Sayt yoxlanılır..."
+            code=000
+            healthy=0
+            for i in $(seq 1 15); do
+              code=$(curl -s -m 5 -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/" || echo 000)
+              if [ "$code" = "200" ]; then healthy=1; break; fi
+              sleep 2
+            done
+
+            if [ "$healthy" -ne 1 ]; then
+              echo "❌ Sayt 30 saniyə ərzində cavab vermədi (son HTTP kodu: $code)"
+              pm2 logs "$APP_NAME" --lines 40 --nostream || true
+              exit 1
+            fi
+
+            echo "✅ Next.js client deploy uğurla tamamlandı (port $PORT, HTTP $code)."

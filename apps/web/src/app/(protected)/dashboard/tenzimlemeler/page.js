@@ -63,6 +63,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const s = data?.data?.settings;
     if (s && !form) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- tənzimləmələr yüklənəndə forma bir dəfə doldurulur (`!form` şərti təkrarın qarşısını alır)
       setForm({
         brand: {
           name: s.brand?.name || "",

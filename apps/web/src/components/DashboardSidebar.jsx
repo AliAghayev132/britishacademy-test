@@ -83,6 +83,7 @@ export const DashboardSidebar = ({ children }) => {
   // Authorization başlığı olmadan gedər. Yalnız GÖSTƏRİLMƏSİNİ mount-dan
   // sonraya saxlayırıq: ilk render hər iki tərəfdə eyni (boş) olur.
   const [mounted, setMounted] = useState(false)
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- mount qapısı: localStorage-dan gələn user SSR-də yoxdur, ilk render uyğun olmalıdır (React #418)
   useEffect(() => setMounted(true), [])
   const shownUser = mounted ? user : null
   const [logoutApi] = useLogoutMutation()

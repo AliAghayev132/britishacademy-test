@@ -81,6 +81,7 @@ function StatValue({ raw }) {
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- təsadüfi söz seçimi mount-dan sonra olmalıdır — render zamanı SSR/klient fərqi yaradar (React #418)
       setN(target);
       return;
     }
@@ -140,6 +141,7 @@ export function Hero({ hero, stats = [] }) {
   }));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- eyni səbəb: hidratasiya təhlükəsizliyi üçün qarışdırma mount-dan sonradır
     setChips({
       left: sample(poolL, SLOTS_LEFT.length),
       right: sample(poolR, SLOTS_RIGHT.length),
@@ -151,6 +153,7 @@ export function Hero({ hero, stats = [] }) {
   // ── Effects ──
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefers-reduced-motion yalnız brauzerdə oxuna bilər
     setReduced(reduce);
     if (reduce) return;
     const t = setInterval(() => setI((n) => (n + 1) % words.length), 3000);

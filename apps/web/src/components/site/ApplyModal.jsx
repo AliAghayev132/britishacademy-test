@@ -95,6 +95,7 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
   // ── Effects ──
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- modal açılanda forma vəziyyəti sıfırlanır (prop dəyişikliyinə reaksiya)
       setDone(false);
       setError("");
       setInterest(preset || "");

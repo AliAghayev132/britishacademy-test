@@ -18,6 +18,7 @@ import {
   apiRateLimiter,
   securityHeaders,
   sanitizeInput,
+  cacheHeaders,
 } from "#middlewares";
 
 // Routes
@@ -109,6 +110,10 @@ const setupMiddlewares = (app) => {
 
   // Rate limiting for the API
   app.use("/api", apiRateLimiter);
+
+  // Keşləmə başlıqları — public GET-lər üçün qısa keş, qalanı üçün no-store.
+  // Router-lərdən ƏVVƏL qoşulur ki, bütün /api cavablarını əhatə etsin.
+  app.use("/api", cacheHeaders);
 
   // Static files (uploads)
   app.use("/uploads", express.static("uploads"));

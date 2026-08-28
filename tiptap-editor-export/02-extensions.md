@@ -1,4 +1,4 @@
-# Genişlənmələr və sabitlər
+m# Genişlənmələr və sabitlər
 
 `buildExtensions()` bütün TipTap genişlənmələrini bir massivdə qaytarır.
 Kollaj və slayder layihəyə xas **öz node-larıdır** — HTML-ə `<figure>` kimi

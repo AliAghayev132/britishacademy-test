@@ -84,6 +84,7 @@ export function CourseWizard({ item, onClose }) {
     if (!editingId) return;
     const c = full?.data?.course;
     if (!c) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- server-dən gələn kurs datası forma state-inə köçürülür (mount deyil, data gəlişi)
     setCourse({
       ...emptyCourse(),
       ...c,

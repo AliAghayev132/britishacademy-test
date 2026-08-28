@@ -154,6 +154,7 @@ export function FeedbackHost() {
   const [, force] = useState(0);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal yalnız mount-dan sonra render oluna bilər
     setMounted(true);
     return subscribe(() => force((n) => n + 1));
   }, []);
