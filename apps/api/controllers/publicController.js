@@ -60,7 +60,10 @@ const getMenu = asyncHandler(async (req, res) => {
 
 /** GET /api/home — everything the homepage needs, in one payload. */
 const getHome = asyncHandler(async (_req, res) => {
-  const [settings, courses, partners, advantages, destinations, faqs] =
+  // Rəy sorğuları da bu dəstəyə daxildir. Əvvəl onlar ARDICIL icra olunurdu
+  // (əvvəl mətn rəyləri gözlənilir, sonra videolar) — ana səhifə üçün 3 gediş
+  // demək idi. İndi normal halda hamısı BİR gedişdə paralel gedir.
+  const [settings, courses, partners, advantages, destinations, faqs, featuredText, featuredVideo] =
     await Promise.all([
       SiteSetting.get(),
       Course.findFeatured(6).populate("category"),
@@ -68,26 +71,23 @@ const getHome = asyncHandler(async (_req, res) => {
       Advantage.findPublic(),
       Destination.findPublic({ isFeatured: true }).limit(8),
       Faq.findPublic().limit(8),
+      Testimonial.findPublic({ type: "text", isFeatured: true }).limit(6),
+      Testimonial.findPublic({ type: "video", isFeatured: true }).limit(8),
     ]);
 
-  // The homepage renders the written-review wall. Prefer featured reviews, but
-  // fall back to any published text review so the section is never empty just
-  // because nothing was flagged in the admin panel.
-  let testimonials = await Testimonial.findPublic({
-    type: "text",
-    isFeatured: true,
-  }).limit(6);
-  if (!testimonials.length) {
-    testimonials = await Testimonial.findPublic({ type: "text" }).limit(6);
-  }
+  // Seçilmiş rəy yoxdursa istənilən dərc olunmuşa düşürük ki, bölmə yalnız
+  // admin paneldə heç nə işarələnmədiyinə görə boş qalmasın. Bu ehtiyat
+  // sorğular yalnız lazım olanda və yenə PARALEL işləyir.
+  let testimonials = featuredText;
+  let videoTestimonials = featuredVideo;
 
-  // Tələbə videoları — seçilmişlər üstünlüklə, yoxdursa istənilən video.
-  let videoTestimonials = await Testimonial.findPublic({
-    type: "video",
-    isFeatured: true,
-  }).limit(8);
-  if (!videoTestimonials.length) {
-    videoTestimonials = await Testimonial.findPublic({ type: "video" }).limit(8);
+  if (!testimonials.length || !videoTestimonials.length) {
+    const [fallbackText, fallbackVideo] = await Promise.all([
+      testimonials.length ? null : Testimonial.findPublic({ type: "text" }).limit(6),
+      videoTestimonials.length ? null : Testimonial.findPublic({ type: "video" }).limit(8),
+    ]);
+    if (fallbackText) testimonials = fallbackText;
+    if (fallbackVideo) videoTestimonials = fallbackVideo;
   }
 
   res.json({

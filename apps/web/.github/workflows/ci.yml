@@ -42,3 +42,39 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:5000
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+  # Smoke testlər ayrıca job-dur: brauzer endirməsi ~1 dəqiqə əlavə edir,
+  # ona görə lint/unit nəticəsini gözlətmirik — ikisi paralel gedir.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Asılılıqlar
+        run: pnpm install --frozen-lockfile
+
+      # Yalnız Chromium — smoke testlər üçün üç brauzer lazım deyil.
+      - name: Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke testlər
+        run: pnpm run test:e2e
+        env:
+          NEXT_PUBLIC_API_URL: http://127.0.0.1:5000
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3599
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
