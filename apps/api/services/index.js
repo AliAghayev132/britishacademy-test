@@ -10,6 +10,7 @@ export { bootstrapAdmin } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";
 export { importCourseData } from "./CourseImportService.js";
+export { importTeacherAssignments } from "./TeacherImportService.js";
 export { registerMedia, listFolders } from "./MediaLibraryService.js";
 export { importFlags } from "./FlagImportService.js";
 export { WhatsAppService } from "./WhatsAppService.js";

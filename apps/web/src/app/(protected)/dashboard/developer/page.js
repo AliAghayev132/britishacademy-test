@@ -8,7 +8,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Database, TriangleAlert, Languages, Sparkles, BookOpen, Flag } from "lucide-react";
+import { Database, TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap } from "lucide-react";
 // Data
 import {
   useAdminSeedMutation,
@@ -16,6 +16,7 @@ import {
   useAdminAutoTranslateMutation,
   useAdminImportCoursesMutation,
   useImportFlagsMutation,
+  useImportTeachersMutation,
 } from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
@@ -30,10 +31,32 @@ export default function DeveloperPage() {
   const [importReport, setImportReport] = useState(null);
   const [importFlags, { isLoading: flagging }] = useImportFlagsMutation();
   const [flagReport, setFlagReport] = useState(null);
+  const [importTeachers, { isLoading: teaching }] = useImportTeachersMutation();
+  const [teacherReport, setTeacherReport] = useState(null);
 
   // Müştəri kurs məlumatlarını tətbiq et (dryRun=true → yalnız yoxlama).
   // Bayraqları flagcdn.com-dan endirib qalereyaya yazır və ölkə kartlarına
   // bağlayır. `overwrite` — şəkli olan ölkələri də yenilə.
+  // Müəllim → filial → dərs təyinatları. Dərs saatı yazılmır.
+  const runImportTeachers = async (dryRun) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        title: "Müəllim təyinatları tətbiq olunsun?",
+        message:
+          "Siyahıdakı müəllimlər bazaya yazılacaq: mövcud olanlar adına görə tapılıb yenilənəcək, olmayanlar yaradılacaq. Mövcud filial/dərs təyinatları əvəz olunur.",
+        confirmText: "Tətbiq et",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await importTeachers({ dryRun }).unwrap();
+      setTeacherReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "İmport alınmadı");
+    }
+  };
+
   const runImportFlags = async (overwrite) => {
     const ok = await confirmDialog({
       title: overwrite ? "Bütün bayraqlar yenilənsin?" : "Bayraqlar endirilsin?",
@@ -427,6 +450,84 @@ export default function DeveloperPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Müəllim təyinatları */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-violet-50 text-violet-700">
+            <GraduationCap className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Müəllim təyinatlarını tətbiq et</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Müştəridən gələn siyahını yazır: <b>hansı müəllim, hansı filialda, hansı dərsi</b> keçir.
+              Mövcud müəllim adına görə tapılır, olmayan yaradılır.
+              <b> Dərs saatı yazılmır</b> — müəllim səhifəsi vaxt cədvəli saxlamır.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-violet-50 p-3 text-sm text-violet-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Təkrar işlədilə bilər (idempotent). Bazada uyğunluğu olmayan kurslar
+                (məsələn <b>Cambridge English</b>, <b>Aptis</b>) ötürülür və nəticədə
+                xəbərdarlıq kimi göstərilir. Əvvəlcə <b>«Yoxla»</b> ilə baxın.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportTeachers(true)}
+                disabled={teaching}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                <GraduationCap className="h-4 w-4" /> Yoxla (quru rejim)
+              </button>
+              <button
+                onClick={() => runImportTeachers(false)}
+                disabled={teaching}
+                className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:opacity-60"
+              >
+                <GraduationCap className="h-4 w-4" />
+                {teaching ? "Tətbiq olunur…" : "Tətbiq et"}
+              </button>
+            </div>
+
+            {teacherReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Nəticə — {teacherReport.created} yaradıldı, {teacherReport.updated} yeniləndi
+                  {teacherReport.dryRun ? " (quru rejim)" : ""}
+                </div>
+                <div className="max-h-80 overflow-auto rounded-lg border border-gray-100">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-gray-50 text-left text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-3 py-2">Müəllim</th>
+                        <th className="px-3 py-2">Filial</th>
+                        <th className="px-3 py-2">Dərslər</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teacherReport.report?.map((r, i) => (
+                        <tr key={i} className="border-t border-gray-100">
+                          <td className="px-3 py-2 font-medium text-gray-900">{r.name}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.branches}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.courses}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {teacherReport.warnings?.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs text-amber-700">
+                    {teacherReport.warnings.map((w, i) => <li key={i}>⚠️ {w}</li>)}
+                  </ul>
+                )}
               </div>
             )}
           </div>

@@ -5,7 +5,7 @@ export { Post } from "./post.model.js";
 
 // British Academy domain models
 export { Branch } from "./branch.model.js";
-export { Teacher } from "./teacher.model.js";
+export { Teacher, syncDerived } from "./teacher.model.js";
 export { CourseCategory } from "./courseCategory.model.js";
 export { Course } from "./course.model.js";
 export { CourseGroup } from "./courseGroup.model.js";

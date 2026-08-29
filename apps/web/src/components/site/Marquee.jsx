@@ -9,6 +9,7 @@ import { toList } from "@/utils/toList";
 const WORDS = [
   "İNGİLİS DİLİ",
   "IELTS 8.5",
+  "DUOLINGO",
   "DANIŞIQ KLUBU",
   "XARİCDƏ TƏHSİL",
   "RUS DİLİ",

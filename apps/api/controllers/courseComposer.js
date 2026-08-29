@@ -74,14 +74,17 @@ async function syncTeacherLinks(courseId, branches) {
 // ── GET /api/admin/lookups ──
 // Lightweight option lists for the wizard selects (branches, teachers, categories).
 const getLookups = asyncHandler(async (_req, res) => {
-  const [branches, teachers, categories] = await Promise.all([
+  // `courses` müəllim formasına lazımdır: filial üzrə hansı dərsləri
+  // apardığını seçmək üçün siyahı göstərilir.
+  const [branches, teachers, categories, courses] = await Promise.all([
     Branch.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name address"),
     Teacher.find({ isDeleted: false })
       .sort({ order: 1, fullName: 1 })
       .select("fullName title branches color"),
     CourseCategory.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name parent"),
+    Course.find({ isDeleted: false }).sort({ order: 1, title: 1 }).select("title slug"),
   ]);
-  res.json({ success: true, data: { branches, teachers, categories } });
+  res.json({ success: true, data: { branches, teachers, categories, courses } });
 });
 
 // ── GET /api/admin/courses/full/:id ──

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/useT";
 import { LocaleLink as Link } from "./LocaleLink";
 import { useLocale } from "./LocaleProvider";
 
@@ -13,6 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
  * and links matches to /kurslar/<slug>. Escape or backdrop click closes it.
  */
 export function SearchOverlay({ open, onClose }) {
+  const t = useT();
   const locale = useLocale();
   const [courses, setCourses] = useState(null); // null = not yet loaded
   const [q, setQ] = useState("");
@@ -70,7 +72,7 @@ export function SearchOverlay({ open, onClose }) {
       className="ba-search-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Axtarış"
+      aria-label={t("search.title")}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -86,7 +88,7 @@ export function SearchOverlay({ open, onClose }) {
     >
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
-          <span style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 22, color: "#14141C" }}>Axtarış</span>
+          <span style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: 22, color: "#14141C" }}>{t("search.title")}</span>
           <button
             type="button"
             onClick={onClose}
@@ -105,7 +107,7 @@ export function SearchOverlay({ open, onClose }) {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Kurs, xəbər və ya proqram axtar..."
+            placeholder={t("search.placeholder")}
             autoComplete="off"
             style={{ border: "none", outline: "none", fontSize: 19, width: "100%", background: "transparent", color: "#14141C", fontFamily: "inherit" }}
           />
@@ -127,7 +129,7 @@ export function SearchOverlay({ open, onClose }) {
         </div>
 
         {showEmpty && (
-          <div style={{ textAlign: "center", color: "#63636E", padding: 28, fontSize: 16 }}>Nəticə tapılmadı</div>
+          <div style={{ textAlign: "center", color: "#63636E", padding: 28, fontSize: 16 }}>{t("search.empty")}</div>
         )}
       </div>
     </div>

@@ -24,6 +24,22 @@ const certificateSchema = new Schema(
   { _id: false },
 );
 
+/**
+ * Bir filialda müəllimin apardığı dərslər.
+ *
+ * Dərs SAATI qəsdən yoxdur — müəllim səhifəsində vaxt cədvəli saxlamaq
+ * lazımsız baxım yükü yaradırdı (qrafik dəyişəndə iki yerdə yenilənməli
+ * olurdu). Burada yalnız «hansı filialda hansı dərsi keçir» qeyd olunur.
+ * Vaxtlı qrafik lazım olarsa CourseGroup resursu yerindədir.
+ */
+const assignmentSchema = new Schema(
+  {
+    branch: { type: Schema.Types.ObjectId, ref: "Branch", required: true },
+    courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
+  },
+  { _id: false },
+);
+
 const teacherSchema = new Schema(
   {
     fullName: localizedField(),
@@ -37,6 +53,12 @@ const teacherSchema = new Schema(
 
     bio: localizedField(), // rich text (TipTap HTML)
 
+    // Filial üzrə dərs təyinatları — əsas mənbə budur.
+    assignments: { type: [assignmentSchema], default: [] },
+
+    // `branches` və `courses` assignments-dən TÖRƏYİR (pre-save hook).
+    // Onlar saxlanılır ki, mövcud indekslər və filtrlər (məsələn «bu filialın
+    // müəllimləri») join etmədən işləməyə davam etsin.
     branches: [{ type: Schema.Types.ObjectId, ref: "Branch" }],
     courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
 
@@ -78,7 +100,27 @@ teacherSchema.virtual("initial").get(function () {
 
 teacherSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.Teacher });
 
+/**
+ * assignments → branches/courses (təkrarsız).
+ *
+ * İxrac olunur ki, həm save, həm findOneAndUpdate yolu eyni funksiyanı
+ * işlətsin və test onu birbaşa yoxlaya bilsin.
+ */
+export function syncDerived(doc) {
+  if (!Array.isArray(doc.assignments) || doc.assignments.length === 0) return;
+  const b = new Set();
+  const c = new Set();
+  for (const a of doc.assignments) {
+    if (a?.branch) b.add(String(a.branch));
+    for (const id of a?.courses || []) if (id) c.add(String(id));
+  }
+  doc.branches = [...b];
+  doc.courses = [...c];
+}
+
 teacherSchema.pre("save", async function () {
+  syncDerived(this);
+
   if (!this.slug) {
     this.slug = await SlugService.unique(
       this.constructor,
@@ -87,6 +129,16 @@ teacherSchema.pre("save", async function () {
     );
   }
 
+});
+
+// Admin paneli findOneAndUpdate işlədir — orada da törəmə sahələr yenilənməlidir,
+// əks halda filial filtri köhnə dəyərlə qalar.
+teacherSchema.pre("findOneAndUpdate", function () {
+  const u = this.getUpdate() || {};
+  const set = u.$set || u;
+  if (!Array.isArray(set.assignments)) return;
+  syncDerived(set);
+  this.setUpdate(u.$set ? { ...u, $set: set } : set);
 });
 
 teacherSchema.statics.findPublic = function (filter = {}) {

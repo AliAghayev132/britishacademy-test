@@ -49,7 +49,56 @@ function TeacherHero({ t, tr }) {
   );
 }
 
-/** "Dərs qrafiki" — group schedule rows. */
+/**
+ * "Filiallar və dərslər" — müəllimin hansı filialda hansı dərsi apardığı.
+ *
+ * Saat göstərilmir: qrafik tez-tez dəyişir və onu iki yerdə (kurs qrafiki +
+ * müəllim səhifəsi) sinxron saxlamaq baxım yükü yaradırdı. Ziyarətçi üçün
+ * əsas sual «bu müəllim mənim filialımda hansı dərsi keçir» sualıdır.
+ */
+function BranchCourses({ assignments, tr }) {
+  const rows = (assignments || []).filter((a) => a.branch);
+  if (!rows.length) return null;
+
+  return (
+    <>
+      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "40px 0 18px" }}>
+        {tr("teacher.branchCourses")}
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {rows.map((a, i) => (
+          <div key={a.branch?._id || i} style={{ border: "1px solid #ECEDF2", borderRadius: 14, padding: "16px 18px", background: "#fff" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: (a.courses || []).length ? 12 : 0 }}>
+              <span style={{ display: "grid", placeItems: "center", width: 28, height: 28, borderRadius: 8, background: "var(--accent-soft)", color: "var(--accent)", flex: "none", fontSize: 14, fontWeight: 700 }}>
+                {i + 1}
+              </span>
+              <span style={{ fontWeight: 700, color: "#16161C", fontFamily: "'Poppins'", fontSize: 15.5 }}>
+                {a.branch?.name}
+              </span>
+            </div>
+            {(a.courses || []).length > 0 ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {a.courses.map((c) => (
+                  <Link
+                    key={c._id}
+                    href={`/kurslar/${c.slug}`}
+                    style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)", background: "var(--accent-soft)", borderRadius: 99, padding: "7px 14px" }}
+                  >
+                    {c.title}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 13.5, color: "#8A8A98" }}>{tr("teacher.noCourses")}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/** Köhnə məlumat üçün ehtiyat: təyinat yoxdursa CourseGroup qrafiki. */
 function ScheduleList({ groups, tr }) {
   return (
     <>
@@ -152,7 +201,11 @@ export default async function TeacherPage({ params }) {
               </p>
             )}
 
-            {groups.length > 0 && <ScheduleList groups={groups} tr={tr} />}
+            {(t.assignments || []).length > 0 ? (
+              <BranchCourses assignments={t.assignments} tr={tr} />
+            ) : (
+              groups.length > 0 && <ScheduleList groups={groups} tr={tr} />
+            )}
           </div>
 
           <TeacherSidebar t={t} tr={tr} />

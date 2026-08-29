@@ -42,6 +42,9 @@ const branchSchema = new Schema(
       lng: { type: Number },
     },
     mapEmbedUrl: { type: String, trim: true },
+    // «Xəritədə aç» düyməsinin linki. maps.app.goo.gl kimi qısa linklər
+    // iframe-də açılmır, ona görə embed-dən AYRI saxlanılır.
+    mapUrl: { type: String, trim: true },
 
     images: { type: [String], default: [] },
 

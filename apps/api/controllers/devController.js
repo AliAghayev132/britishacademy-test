@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, MailService } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -154,4 +154,35 @@ const runImportFlags = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags };
+/**
+ * Müəllim → filial → dərs təyinatlarının importu.
+ *
+ * Müştəri siyahısını (39 müəllim) bazaya yazır: mövcud müəllimi ada görə
+ * tapır, yoxdursa yaradır. Dərs saatı yazılmır. Təkrar işlədilə bilər.
+ */
+const runImportTeachers = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await importTeacherAssignments({
+    dryRun,
+    replace: req.body?.replace !== false,
+  });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Müəllim təyinatları: ${result.created} yeni, ${result.updated} yeniləndi`,
+    });
+  }
+  res.json({
+    success: true,
+    message: dryRun
+      ? `Quru rejim: ${result.created} yaradılacaq, ${result.updated} yenilənəcək`
+      : `${result.created} müəllim yaradıldı, ${result.updated} yeniləndi`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers };

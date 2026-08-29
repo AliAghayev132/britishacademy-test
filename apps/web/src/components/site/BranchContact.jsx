@@ -33,8 +33,16 @@ function mapSrc(b) {
   return q ? `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=16&output=embed` : null;
 }
 
-/** Xəritəni böyük pəncərədə açan link. */
+/**
+ * Xəritəni böyük pəncərədə açan link.
+ *
+ * Admin `mapUrl` veribsə o üstündür — qısa Google linki dəqiq yeri göstərir
+ * (ünvandan qurulan axtarış linki bəzən yaxınlıqdakı başqa obyekti tapır).
+ * Həmin linklər iframe-də AÇILMIR, ona görə embed ayrıca qurulur.
+ */
 function mapLink(b) {
+  if (b?.mapUrl) return b.mapUrl;
+
   const lat = Number(b?.coords?.lat);
   const lng = Number(b?.coords?.lng);
   if (Number.isFinite(lat) && Number.isFinite(lng)) {
@@ -175,7 +183,7 @@ function MapPane({ b, t }) {
             boxShadow: "0 6px 18px rgba(20,20,45,.12)",
           }}
         >
-          <ExternalLink size={14} /> Xəritədə aç
+          <ExternalLink size={14} /> {t("common.openMap")}
         </a>
       )}
     </div>

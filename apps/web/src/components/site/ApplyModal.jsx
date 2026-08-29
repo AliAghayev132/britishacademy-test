@@ -7,17 +7,24 @@ import { useCreateLeadMutation } from "@/store/api/leadApi";
 // Local
 import { SiteSelect } from "./SiteSelect";
 import { useT } from "@/lib/i18n/useT";
+import { t as translate } from "@/lib/i18n/strings";
 
 // ── Constants ──
-const INTERESTS = [
-  "İngilis dili",
-  "IELTS · TOEFL",
-  "Rus dili",
-  "Alman dili",
-  "Biznes İngilis",
-  "Uşaqlar üçün",
-  "Xaricdə təhsil",
-  "Kompüter kursları",
+// Maraq siyahısı tərcümə açarlarındandır — dəyər kimi AZ mətn göndərilir
+// (admin panelində müraciətlər AZ oxunur), göstərilən etiket isə dilə görə.
+/** Müraciətin `interest` dəyəri həmişə AZ yazılır ki, admin paneldə
+ *  müraciətlər tək dildə oxunsun; istifadəçi öz dilində etiket görür. */
+const tAz = (key) => translate("az", key);
+
+const INTEREST_KEYS = [
+  "apply.int.english",
+  "apply.int.exams",
+  "apply.int.russian",
+  "apply.int.german",
+  "apply.int.business",
+  "apply.int.kids",
+  "apply.int.abroad",
+  "apply.int.computer",
 ];
 
 const field = {
@@ -70,7 +77,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
         <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
         <input className="ba-field" name="email" type="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
-      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} style={field} options={INTERESTS.map((i) => ({ value: i, label: i }))} />
+      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} style={field} options={INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }))} />
       {branches.length > 0 && (
         <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
@@ -125,7 +132,7 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
       }).unwrap();
       setDone(true);
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi. Yenidən cəhd et.");
+      setError(err?.data?.message || t("apply.error"));
     }
   }, [createLead, form, interest, branch]);
 

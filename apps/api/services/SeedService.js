@@ -7,6 +7,7 @@
 // from the legacy generator) so this works inside the standalone server repo.
 //
 // ⚠️ seedDatabase() WIPES the BA content collections before inserting.
+import { TEACHERS as TEACHER_ROWS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
 
 // Models
 import {
@@ -19,23 +20,57 @@ import { SlugService } from "./SlugService.js";
 import { COURSE_CONTENT } from "../data/courseContent.mjs";
 
 // ── Source data (from the static build) ──
+// Müştəridən gələn real filial məlumatları (ünvan, telefon, WhatsApp, xəritə).
+// `mapUrl` qısa Google linkidir — «Xəritədə aç» düyməsi üçün; iframe embed-i
+// isə ünvandan qurulur (qısa linklər iframe-də açılmır).
 const BRANCHES = [
-  { name: "Mərkəz — Caspian Plaza", address: "C.Cabbarlı 44, Caspian Plaza", district: "Nəsimi", metro: "Nizami m.", phone: "(+994) 55 212 41 51", whatsapp: "994552124151", isMain: true, workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "21:00" }] },
-  { name: "Nərimanov filialı", address: "Nərimanov r., Atatürk pr. 25", district: "Nərimanov", metro: "Nərimanov m.", phone: "(+994) 55 212 41 52", whatsapp: "994552124152", workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "21:00" }] },
-  { name: "Əhmədli filialı", address: "Əhmədli, Babək pr. 88", district: "Xətai", metro: "Həzi Aslanov m.", phone: "(+994) 55 212 41 53", whatsapp: "994552124153", workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "20:00" }] },
-  { name: "Elmlər Akademiyası filialı", address: "Elmlər Akademiyası, H.Cavid pr. 31", district: "Yasamal", metro: "Elmlər Akademiyası m.", phone: "(+994) 55 212 41 54", whatsapp: "994552124154", workingHours: [{ days: "B.e–Şənbə", from: "10:00", to: "20:00" }] },
+  {
+    name: "Mərkəz — Caspian Plaza",
+    address: "C.Cabbarlı 44, Caspian Plaza, 9-cu mərtəbə",
+    district: "Nəsimi",
+    metro: "Nizami m.",
+    phone: "(+994) 55 226 24 85",
+    whatsapp: "994552262485",
+    mapUrl: "https://maps.app.goo.gl/fyo3Pt6xF1XyZUjB8",
+    isMain: true,
+    workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "21:00" }],
+  },
+  {
+    name: "Nəriman Nərimanov filialı",
+    address: "Azaro Plaza, 3-cü mərtəbə",
+    district: "Nərimanov",
+    metro: "Nərimanov m.",
+    phone: "(+994) 55 215 35 79",
+    whatsapp: "994552153579",
+    mapUrl: "https://maps.app.goo.gl/zpTahekdrgR6bQDf7",
+    workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "21:00" }],
+  },
+  {
+    name: "Əhmədli filialı",
+    address: "Əhmədli, Babək pr. 88",
+    district: "Xətai",
+    metro: "Həzi Aslanov m.",
+    phone: "(+994) 50 370 05 09",
+    whatsapp: "994503700509",
+    mapUrl: "https://maps.app.goo.gl/7ra4Nh45aaRxTEi98",
+    workingHours: [{ days: "B.e–Şənbə", from: "09:00", to: "20:00" }],
+  },
+  {
+    name: "Elmlər Akademiyası filialı",
+    address: "Əbdürrəhim Bəy Haqverdiyev 48, Bakı 1141",
+    district: "Yasamal",
+    metro: "Elmlər Akademiyası m.",
+    phone: "(+994) 55 215 35 77",
+    whatsapp: "994552153577",
+    mapUrl:
+      "https://www.google.com/maps?q=British+Academy+-+Elml%C9%99r+filial%C4%B1,+48+%C6%8Fbd%C3%BCrr%C9%99him+B%C9%99y+Haqverdiyev,+Baku+1141&ftid=0x40307de9861dc6bf:0xed0648981d6adff1",
+    workingHours: [{ days: "B.e–Şənbə", from: "10:00", to: "20:00" }],
+  },
 ];
 
-const TEACHERS = [
-  { fullName: "Aygün Əliyeva", title: "IELTS 8.5 · İngilis dili", color: "#2E6BE6", isFeatured: true, stats: [{ label: "Təcrübə", value: "9 il" }, { label: "IELTS", value: "8.5" }] },
-  { fullName: "Günel Sadıqova", title: "İngilis dili · Uşaq proqramları", color: "#12B5A5" },
-  { fullName: "Rəşad Məmmədov", title: "Biznes İngilis · Danışıq", color: "#7C4DFF" },
-  { fullName: "Kamran İsmayılov", title: "IELTS · TOEFL hazırlıq", color: "#E0533D" },
-  { fullName: "Nigar Hüseynova", title: "Rus dili · Danışıq klubu", color: "#F5A524" },
-  { fullName: "Elvin Quliyev", title: "Kompüter · Ofis proqramları", color: "#0EA5E9" },
-  { fullName: "Leyla Rəhimova", title: "Alman dili · Sertifikat", color: "#FF3D8B" },
-  { fullName: "Tural Əhmədov", title: "SAT · İmtahan hazırlığı", color: "#22B07D" },
-];
+// Müəllimlər müştəri siyahısından gəlir (data/teacherAssignments.mjs) —
+// əvvəlki mock adlar əvəz olundu. Təyinatlar (filial → dərs) kurslar
+// yaradıldıqdan SONRA qurulur, çünki kurs id-ləri lazımdır.
 
 const CATEGORIES = [
   { key: "xidmetler", name: "Xidmətlər", parent: null, icon: "⚙️", order: 1 },
@@ -158,6 +193,9 @@ function toContentBlocks(C) {
 const toInfo = (C) => (C.info || []).map(([label, value]) => ({ label, value }));
 const toFaq = (C) => (C.faq || []).map(([question, answer]) => ({ question, answer }));
 
+/** Fotosu olmayan müəllim üçün avatar rəngi. */
+const TEACHER_COLORS = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D", "#F5A524", "#0EA5E9", "#FF3D8B", "#22B07D"];
+
 // ── Build the full document graph (pure — no DB) ──
 export function buildGraph() {
   const site = new SiteSetting({
@@ -177,7 +215,9 @@ export function buildGraph() {
     },
     hero: {
       titlePrefix: "British Academy ilə",
-      words: ["ingiliscə danış", "IELTS 8.5 al", "rus dili öyrən", "almanca danış", "xaricdə oxu"],
+      // «xaricdə oxu» prefikslə birləşəndə «British Academy ilə xaricdə oxu»
+      // oxunurdu; müştəri vurğunu universitet qəbuluna keçirdi.
+      words: ["ingiliscə danış", "IELTS 8.5 al", "rus dili öyrən", "almanca danış", "top universitetlərə qəbul ol", "Duolingo-ya hazırlaş"],
       colors: ["#001478", "#0B2A9C", "#C8102E", "#00105E", "#1438B8"],
       subtitle: "British Academy ilə top universitetlərə qəbul ol.",
     },
@@ -186,7 +226,7 @@ export function buildGraph() {
       { label: "korporativ tərəfdaş", value: "30+" },
       { label: "filial · Bakı", value: "4" },
     ],
-    marquee: ["İNGİLİS DİLİ", "IELTS 8.5", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"],
+    marquee: ["İNGİLİS DİLİ", "IELTS 8.5", "DUOLINGO", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"],
     seo: {
       titleTemplate: "%s — British Academy",
       defaultDescription: "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.",
@@ -205,13 +245,22 @@ export function buildGraph() {
   });
   CATEGORIES.forEach((c, i) => { if (c.parent) categories[i].parent = catByKey[c.parent]._id; });
 
-  const teachers = TEACHERS.map((t, i) =>
-    new Teacher({
-      ...t,
-      slug: SlugService.slugify(t.fullName),
-      branches: [branches[i % branches.length]._id, branches[(i + 1) % branches.length]._id],
-      order: i,
-    }),
+  // Müəllimlər: eyni ad birdən çox filialda ola bilər, ona görə ada görə
+  // qruplaşdırılır. Təyinatlar aşağıda (kurslardan sonra) doldurulur.
+  const teacherRowsByName = new Map();
+  for (const row of TEACHER_ROWS) {
+    if (!teacherRowsByName.has(row.name)) teacherRowsByName.set(row.name, []);
+    teacherRowsByName.get(row.name).push(row);
+  }
+
+  const teachers = [...teacherRowsByName.keys()].map(
+    (name, i) =>
+      new Teacher({
+        fullName: name,
+        slug: SlugService.slugify(name),
+        color: TEACHER_COLORS[i % TEACHER_COLORS.length],
+        order: i,
+      }),
   );
 
   const courses = COURSES.map((c, i) => {
@@ -250,6 +299,51 @@ export function buildGraph() {
       );
     });
   });
+
+  // ── Müəllim təyinatları: filial → dərs ──
+  // Kurslar və filiallar hazır olduqdan sonra qurulur. Dərs SAATI yazılmır —
+  // müəllim səhifəsi vaxt cədvəli saxlamır; qrafik CourseGroup-dadır.
+  {
+    const normKey = (v) =>
+      String(v || "")
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .replace(/ı/g, "i")
+        .replace(/ə/g, "e")
+        .trim();
+
+    const courseBySlug = new Map(courses.map((c) => [c.slug, c]));
+    const findBranch = (key) => {
+      const kw = BRANCH_KEYWORDS[key];
+      return kw ? branches.find((b) => normKey(b.name).includes(kw)) : null;
+    };
+
+    for (const t of teachers) {
+      const rows = teacherRowsByName.get(t.fullName) || [];
+      const assignments = [];
+
+      for (const row of rows) {
+        const branch = findBranch(row.branch);
+        if (!branch) continue;
+
+        const courseIds = [];
+        for (const label of row.courses) {
+          const slug = COURSE_ALIASES[label.toLowerCase()];
+          // Bazada qarşılığı olmayan adlar (Cambridge English, Aptis) ötürülür.
+          if (!slug || slug.startsWith("__UNMAPPED")) continue;
+          const c = courseBySlug.get(slug);
+          // Pre-IELTS və IELTS eyni kursa düşür — təkrar əlavə etmirik.
+          if (c && !courseIds.some((id) => String(id) === String(c._id))) courseIds.push(c._id);
+        }
+        assignments.push({ branch: branch._id, courses: courseIds });
+      }
+
+      t.assignments = assignments;
+      t.branches = [...new Set(assignments.map((a) => String(a.branch)))];
+      t.courses = [...new Set(assignments.flatMap((a) => a.courses.map(String)))];
+    }
+  }
 
   const destinations = DESTINATIONS.map((d, i) => new Destination({ ...d, slug: SlugService.slugify(d.country), order: i, isFeatured: i < 8 }));
   const testimonials = TESTIMONIALS.map((t, i) => new Testimonial({ ...t, order: i }));

@@ -36,7 +36,8 @@ export const RESOURCES = {
     model: Teacher,
     search: ["fullName", "title"],
     sort: { order: 1, fullName: 1 },
-    populate: ["branches", "courses"],
+    // assignments.* — redaktə formasının filial üzrə dərsləri göstərməsi üçün.
+    populate: ["branches", "courses", "assignments.branch", "assignments.courses"],
   },
   "course-categories": {
     model: CourseCategory,

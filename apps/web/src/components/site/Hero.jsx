@@ -39,7 +39,7 @@ function sample(list, n) {
 
 /** Kateqoriya həbləri — admin siyahısı boşdursa bunlar işlənir. */
 const DEFAULT_PILLS = [
-  "İngilis dili", "IELTS", "Rus dili", "Alman dili", "Danışıq klubu",
+  "İngilis dili", "IELTS", "Duolingo", "Rus dili", "Alman dili", "Danışıq klubu",
   "Kompüter", "Uşaqlar üçün", "Biznes İngilis", "TOEFL", "SAT", "Xaricdə təhsil",
 ];
 

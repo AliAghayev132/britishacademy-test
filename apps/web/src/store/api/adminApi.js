@@ -151,6 +151,10 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/dev/import-flags", method: "POST", body: body || {} }),
       invalidatesTags: ["Resource", "Site"],
     }),
+    importTeachers: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-teachers", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
 
     // ── Toplu göndəriş (WhatsApp + e-poçt) ──
     // Mənbə: müraciətlər / Excel / əl ilə siyahı. Göndərişdən əvvəl
@@ -248,6 +252,7 @@ export const {
   useMediaFoldersQuery,
   useMediaUpdateMutation,
   useImportFlagsMutation,
+  useImportTeachersMutation,
   useBulkStatusQuery,
   useBulkPreviewMutation,
   useBulkSendMutation,

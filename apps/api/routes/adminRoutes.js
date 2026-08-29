@@ -47,6 +47,7 @@ AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
 AdminRouter.post("/dev/import-courses", writeRateLimiter, devController.runImportCourses);
 // Ölkə bayraqlarını qalereyaya endir (şəbəkə əməliyyatı — limiter yoxdur).
 AdminRouter.post("/dev/import-flags", devController.runImportFlags);
+AdminRouter.post("/dev/import-teachers", devController.runImportTeachers);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.

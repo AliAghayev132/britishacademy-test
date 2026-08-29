@@ -2,6 +2,7 @@
 
 // React
 import { memo, useCallback, useState } from "react";
+import { useT } from "@/lib/i18n/useT";
 // Next
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 // Data (RTK Query)
@@ -33,6 +34,12 @@ function badgeText(t) {
 
 // ── Subcomponents ──
 // Portrait card mirroring the static `.mt-card` design.
+/** Müəllimin filial adları — kartda bir sətirdə. */
+const branchNames = (t) =>
+  (t.assignments || []).length
+    ? t.assignments.map((a) => a.branch?.name).filter(Boolean).join(" · ")
+    : (t.branches || []).map((b) => b?.name).filter(Boolean).join(" · ");
+
 const TeacherCard = memo(function TeacherCard({ t }) {
   const badge = badgeText(t);
   return (
@@ -73,6 +80,12 @@ const TeacherCard = memo(function TeacherCard({ t }) {
         <div style={{ minWidth: 0 }}>
           <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 20, margin: 0, color: "#17171F" }}>{t.fullName}</h3>
           {t.title && <div style={{ fontSize: 14, color: "#63636F", marginTop: 4 }}>{t.title}</div>}
+          {/* Filiallar — ziyarətçinin ilk sualı «mənim filialımda dərs keçirmi». */}
+          {branchNames(t) && (
+            <div style={{ fontSize: 12.5, color: "#8A8A98", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {branchNames(t)}
+            </div>
+          )}
         </div>
         <span className="mt-arrow" style={{ width: 40, height: 40, flex: "none", borderRadius: "50%", background: "#F1F2F6", color: "#4C4C58", display: "grid", placeItems: "center", transition: ".25s", fontSize: 18 }}>→</span>
       </div>
@@ -147,6 +160,14 @@ const haystack = (t) =>
       t.fullName,
       t.title,
       ...(Array.isArray(t.branches) ? t.branches.map((b) => b && b.name) : []),
+      // Kurs adları da axtarılsın: «IELTS müəllimi» kimi sorğular işləsin.
+      ...(Array.isArray(t.courses) ? t.courses.map((c) => c && c.title) : []),
+      ...(Array.isArray(t.assignments)
+        ? t.assignments.flatMap((a) => [
+            a.branch?.name,
+            ...(a.courses || []).map((c) => c && c.title),
+          ])
+        : []),
     ]
       .filter(Boolean)
       .join(" "),
@@ -158,6 +179,9 @@ const haystack = (t) =>
  * (`/api/teachers?course=<slug>`), so the first paint is SSR and instant.
  */
 export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
+  // Bu faylda `t` MÜƏLLİM deməkdir (TeacherCard prop-u), ona görə tərcümə
+  // funksiyası `tr` adlanır — qarışmasın.
+  const tr = useT();
   // ── State / data ──
   const [course, setCourse] = useState("");
   const [name, setName] = useState("");
@@ -196,7 +220,7 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
 
       {teachers.length === 0 ? (
         <p style={{ color: "#63636F", padding: "30px 0" }}>
-          {hasFilter ? "Axtarışa uyğun müəllim tapılmadı." : "Hələ müəllim əlavə edilməyib."}
+          {hasFilter ? tr("teachers.noMatch") : tr("teachers.empty")}
         </p>
       ) : (
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24, opacity: isFetching ? 0.6 : 1, transition: "opacity .15s" }}>

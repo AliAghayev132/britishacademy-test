@@ -213,10 +213,13 @@ const listTeachers = asyncHandler(async (req, res) => {
     filter._id = { $in: ids };
   }
 
-  const teachers = await Teacher.findPublic(filter).populate(
-    "branches",
-    "name slug",
-  );
+  // assignments.branch — kartda filial adlarını göstərmək və axtarışda
+  // kurs/filial adlarına görə tapmaq üçün.
+  const teachers = await Teacher.findPublic(filter)
+    .populate("branches", "name slug")
+    .populate("courses", "title slug")
+    .populate("assignments.branch", "name slug")
+    .populate("assignments.courses", "title slug");
   res.json({ success: true, data: { teachers } });
 });
 
@@ -227,18 +230,28 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
     isDeleted: false,
   })
     .populate("branches", "name slug")
-    .populate("courses", "title slug");
+    .populate("courses", "title slug")
+    // Filial üzrə dərs təyinatları — müəllim səhifəsinin əsas bölməsi.
+    .populate("assignments.branch", "name slug")
+    .populate("assignments.courses", "title slug");
   if (!teacher) {
     return res.status(404).json({ success: false, message: "Müəllim tapılmadı" });
   }
-  // Which courses/branches/times this teacher runs.
-  const groups = await CourseGroup.find({
-    teacher: teacher._id,
-    isActive: true,
-    isDeleted: false,
-  })
-    .populate("course", "title slug")
-    .populate("branch", "name slug");
+
+  // Vaxtlı qrafik yalnız təyinat DOLDURULMAYIB isə göstərilir — köhnə
+  // məlumatlarda müəllimin dərsləri yalnız CourseGroup-da ola bilər, onda
+  // səhifə boş qalmasın. Təyinat varsa o üstündür (saatsız, sadə görünüş).
+  const hasAssignments = (teacher.assignments || []).length > 0;
+  const groups = hasAssignments
+    ? []
+    : await CourseGroup.find({
+        teacher: teacher._id,
+        isActive: true,
+        isDeleted: false,
+      })
+        .populate("course", "title slug")
+        .populate("branch", "name slug");
+
   res.json({ success: true, data: { teacher, groups } });
 });
 
