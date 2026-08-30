@@ -50,6 +50,15 @@ const config = {
     password: process.env.DEFAULT_ADMIN_PASSWORD || "Admin123!",
   },
 
+  // Developer hesabı — texniki alətlər (import, miqrasiya, seed) üçün.
+  // İlk açılışda yaradılır; sahibi öz adını, e-poçtunu və parolunu profil
+  // səhifəsindən dəyişə bilər. ENV-dəki dəyərlər yalnız İLK yaradılışda
+  // işlədilir, sonrakı açılışlarda mövcud hesaba toxunulmur.
+  defaultDeveloper: {
+    email: process.env.DEFAULT_DEVELOPER_EMAIL || "developer@britishacademy.az",
+    password: process.env.DEFAULT_DEVELOPER_PASSWORD || "Developer123!",
+  },
+
   // Cookie names (prefixed to avoid collisions)
   accessCookieName: "__starter_at",
   refreshCookieName: "__starter_rt",

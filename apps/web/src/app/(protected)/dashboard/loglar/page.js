@@ -2,6 +2,7 @@
 
 // React
 import { useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
 // UI / kit
 import { NativeSelect } from "../_forms/kit";
 // Data (RTK Query)
@@ -111,13 +112,12 @@ export default function LogsPage() {
         )}
       </div>
 
-      {pagination && pagination.pages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((n) => (
-            <button key={n} onClick={() => setPage(n)} className={`h-9 w-9 rounded-lg text-sm font-semibold ${n === pagination.page ? "bg-[#00157A] text-white" : "border border-gray-200 bg-white text-gray-600"}`}>{n}</button>
-          ))}
-        </div>
-      )}
+      <Pagination
+        page={pagination?.page || 1}
+        pages={pagination?.pages || 1}
+        total={pagination?.total}
+        onChange={setPage}
+      />
     </div>
   );
 }

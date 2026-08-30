@@ -1,4 +1,4 @@
-import { Schema, Model, userRoles, accountStatus } from "#constants";
+import { Schema, Model, userRoles, accountStatus, adminSections } from "#constants";
 
 const userSchema = new Schema(
   {
@@ -47,6 +47,19 @@ const userSchema = new Schema(
       type: String,
       enum: accountStatus,
       default: "active",
+    },
+
+    /**
+     * İcazə verilmiş admin panel bölmələri.
+     *
+     * BOŞ massiv = «məhdudiyyət yoxdur» DEYİL — heç bir bölmə deməkdir.
+     * superadmin və developer bu sahədən asılı deyil (hər şeyi görürlər),
+     * ona görə onlar üçün doldurulmasına ehtiyac yoxdur.
+     */
+    permissions: {
+      type: [String],
+      enum: adminSections,
+      default: [],
     },
 
     // Token version for "logout all devices"

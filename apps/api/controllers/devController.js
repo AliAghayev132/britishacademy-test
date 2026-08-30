@@ -10,8 +10,8 @@ import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, 
  * Restricted to the "admin" role (editors cannot wipe data).
  */
 const runSeed = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
 
   const { counts } = await seedDatabase();
@@ -29,8 +29,8 @@ const runSeed = asyncHandler(async (req, res) => {
  * Mövcud data itmir — mövcud dəyər AZ variantı olur.
  */
 const runMigrateI18n = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
 
   const result = await migrateI18n();
@@ -51,8 +51,8 @@ const runMigrateI18n = asyncHandler(async (req, res) => {
  * Cari SMTP konfiqurasiyası ilə test məktubu göndərir.
  */
 const runTestMail = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
   const to = String(req.body?.to || "").trim();
   if (!to) {
@@ -72,8 +72,8 @@ const runTestMail = asyncHandler(async (req, res) => {
  * Mövcud tərcüməyə toxunmur — təkrar işlədilə bilər.
  */
 const runAutoTranslate = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
 
   const { langs, model, limit, overwrite } = req.body || {};
@@ -110,8 +110,8 @@ const runAutoTranslate = asyncHandler(async (req, res) => {
  * mövcud kurslara tətbiq edir. İdempotentdir.
  */
 const runImportCourses = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importCourseData({ dryRun });
@@ -138,8 +138,8 @@ const runImportCourses = asyncHandler(async (req, res) => {
  * bağlayır. Fayllar lokala yazılır — sayt kənar CDN-dən asılı qalmır.
  */
 const runImportFlags = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
   const result = await importFlags({ overwrite: Boolean(req.body?.overwrite) });
   await logAction(req, {
@@ -161,8 +161,8 @@ const runImportFlags = asyncHandler(async (req, res) => {
  * tapır, yoxdursa yaradır. Dərs saatı yazılmır. Təkrar işlədilə bilər.
  */
 const runImportTeachers = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importTeacherAssignments({

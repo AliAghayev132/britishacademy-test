@@ -75,13 +75,6 @@ export const adminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // ── Developer: reseed demo content (WIPES + reloads) ──
-    adminSeed: builder.mutation({
-      query: () => ({ url: "/admin/dev/seed", method: "POST" }),
-      // Seed replaces everything — drop all cached admin/site data.
-      invalidatesTags: ["Resource", "Site"],
-    }),
-
     // ── Developer: köhnə məzmunu 3-dilli { az,en,ru } formasına miqrasiya et ──
     adminMigrateI18n: builder.mutation({
       query: () => ({ url: "/admin/dev/migrate-i18n", method: "POST" }),
@@ -243,7 +236,6 @@ export const {
   useAdminCourseFullQuery,
   useAdminCreateCourseFullMutation,
   useAdminUpdateCourseFullMutation,
-  useAdminSeedMutation,
   useAdminMigrateI18nMutation,
   useAdminTestMailMutation,
   useAiProcessMutation,

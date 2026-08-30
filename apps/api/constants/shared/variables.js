@@ -5,6 +5,8 @@ const Model = mongoose.model;
 const Router = () => ExpressRouter();
 
 // Roles allowed into the admin dashboard / write endpoints.
-const adminRoles = ["admin", "editor"];
+// Admin panelinə giriş hüququ olan rollar. Bölmə səviyyəsindəki icazə
+// ayrıca yoxlanılır (requireSection) — bu, yalnız «panelə girə bilər»dir.
+const adminRoles = ["editor", "admin", "superadmin", "developer"];
 
 export { Schema, Model, Router, adminRoles };

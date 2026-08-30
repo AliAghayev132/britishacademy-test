@@ -1,5 +1,40 @@
 // User roles
-const userRoles = ["user", "admin", "editor"];
+/**
+ * İstifadəçi rolları — səlahiyyət artan sırada.
+ *
+ *   user        saytın adi istifadəçisi (admin panelə girişi yoxdur)
+ *   editor      məhdud məzmun redaktoru
+ *   admin       icazə verilmiş bölmələri idarə edir
+ *   superadmin  admin YARADA və onlara icazə verə bilər
+ *   developer   texniki alətlər (import, miqrasiya, seed) — ən yüksək
+ */
+const userRoles = ["user", "editor", "admin", "superadmin", "developer"];
+
+/** Rol gücü — müqayisə üçün (böyük rəqəm = daha çox səlahiyyət). */
+const ROLE_RANK = { user: 0, editor: 1, admin: 2, superadmin: 3, developer: 4 };
+
+/**
+ * Admin panelindəki bölmələr. İstifadəçiyə `permissions` massivi ilə verilir;
+ * sidebar da, server də eyni siyahıdan istifadə edir ki, UI-da gizlədilən
+ * bölmə API-dən də bağlı olsun.
+ */
+const adminSections = [
+  "dashboard",     // İdarə paneli (hamıya açıq)
+  "leads",         // Müraciətlər
+  "courses",       // Kurslar
+  "teachers",      // Müəllimlər
+  "branches",      // Filiallar
+  "course-groups", // Dərs qrafiki
+  "testimonials",  // Rəylər
+  "destinations",  // Xaricdə təhsil
+  "blog",          // Bloq
+  "resources",     // Digər resurslar
+  "whatsapp",      // WhatsApp / toplu göndəriş
+  "users",         // İstifadəçilər
+  "logs",          // Loglar
+  "settings",      // Tənzimləmələr
+  "developer",     // Texniki alətlər
+];
 
 // Account status
 const accountStatus = ["active", "suspended", "pending"];
@@ -62,6 +97,8 @@ const contentBlockTypes = [
 
 export {
   userRoles,
+  ROLE_RANK,
+  adminSections,
   accountStatus,
   postStatus,
   otpTypes,

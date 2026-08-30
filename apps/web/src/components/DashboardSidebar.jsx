@@ -43,22 +43,24 @@ import { ADMIN_RESOURCES } from '@/lib/adminResources'
 
 // British Academy admin navigation. Resource pages use the generic browser
 // at /dashboard/resurslar/<resource> (see resourceRegistry on the server).
+// `section` icazə açarıdır — serverdəki adminSections ilə eyni.
+// Profil hər kəsə açıqdır, ona görə onun bölməsi yoxdur.
 const navItems = [
-  { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true },
-  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox },
-  { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap },
-  { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users },
-  { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2 },
-  { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock },
-  { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote },
-  { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2 },
-  { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText },
-  { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true },
-  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle },
-  { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck },
-  { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText },
-  { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings },
-  { name: 'Developer', href: '/dashboard/developer', icon: Database },
+  { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
+  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, section: 'leads' },
+  { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap, section: 'courses' },
+  { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
+  { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
+  { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock, section: 'course-groups' },
+  { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote, section: 'testimonials' },
+  { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2, section: 'destinations' },
+  { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText, section: 'blog' },
+  { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true, section: 'resources' },
+  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
+  { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
+  { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
+  { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
+  { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },
   { name: 'Profil', href: '/dashboard/profile', icon: User },
 ]
 
@@ -85,6 +87,16 @@ export const DashboardSidebar = ({ children }) => {
   // eslint-disable-next-line react-hooks/set-state-in-effect -- mount qapısı: localStorage-dan gələn user SSR-də yoxdur, ilk render uyğun olmalıdır (React #418)
   useEffect(() => setMounted(true), [])
   const shownUser = mounted ? user : null
+
+  // Sidebar yalnız icazə verilmiş bölmələri göstərir. Bu, YALNIZ görünüşdür —
+  // əsl qoruma serverdədir (requireSection), çünki client kodu dəyişdirilə bilər.
+  //
+  // Mount-dan əvvəl user null olduğu üçün siyahı boş qalardı və hidratasiyadan
+  // sonra sıçrayardı; ona görə mount olana qədər tam siyahı göstərilir və
+  // filtrləmə klient tərəfdə tətbiq olunur.
+  const visibleNav = mounted
+    ? navItems.filter((i) => !i.section || canSee(user, i.section))
+    : navItems
   const [logoutApi] = useLogoutMutation()
 
   // Yeni (baxılmamış) müraciət sayı — sidebar-da qırmızı badge. Status
@@ -100,7 +112,7 @@ export const DashboardSidebar = ({ children }) => {
   const resourceMatch = pathname.match(/^\/dashboard\/resurslar\/([^/]+)/)
   const currentTitle = resourceMatch
     ? ADMIN_RESOURCES[resourceMatch[1]]?.name || 'Resurs'
-    : [...navItems]
+    : [...visibleNav]
         .reverse()
         .find((item) =>
           item.exact ? pathname === item.href : pathname.startsWith(item.href)
@@ -162,7 +174,7 @@ export const DashboardSidebar = ({ children }) => {
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-          {navItems.map((item) => {
+          {visibleNav.map((item) => {
             const active = isActive(item)
             const badge = item.href === '/dashboard/muracietler' ? newLeads : 0
             return (

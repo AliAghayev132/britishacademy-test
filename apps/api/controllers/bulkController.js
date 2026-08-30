@@ -73,7 +73,7 @@ const preview = asyncHandler(async (req, res) => {
  * təsadüfi/təkrar POST sorğusu minlərlə mesaj göndərməsin.
  */
 const send = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
   }
 

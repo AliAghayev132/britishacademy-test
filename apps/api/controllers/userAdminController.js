@@ -5,14 +5,16 @@
 // users). Passwords are hashed with HashService; password is never returned.
 
 import { asyncHandler, fuzzyRegex } from "#utils";
+import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
 import { HashService, logAction } from "#services";
-import { adminRoles } from "#constants";
+import { adminRoles, adminSections } from "#constants";
 
 const isAdmin = (req) => req.user?.role === "admin";
 const publicUser = (u) => ({
   _id: u._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
   phone: u.phone, role: u.role, status: u.status, lastLogin: u.lastLogin,
+  permissions: u.permissions || [],
   createdAt: u.createdAt,
 });
 
@@ -36,18 +38,29 @@ const listUsers = asyncHandler(async (req, res) => {
 // ── POST /api/admin/users ──
 const createUser = asyncHandler(async (req, res) => {
   if (!isAdmin(req)) return res.status(403).json({ success: false, message: "Yalnız admin istifadəçi yarada bilər" });
-  const { firstName, lastName, email, password, phone, role = "editor", status = "active" } = req.body || {};
+  const {
+    firstName, lastName, email, password, phone,
+    role = "editor", status = "active", permissions = [],
+  } = req.body || {};
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ success: false, message: "Ad, soyad, e-poçt və parol tələb olunur" });
   }
   if (String(password).length < 8) return res.status(400).json({ success: false, message: "Parol ən azı 8 simvol olmalıdır" });
   if (!adminRoles.includes(role)) return res.status(400).json({ success: false, message: "Yanlış rol" });
+  // Kimsə ÖZÜNDƏN yüksək rol təyin edə bilməz — əks halda istənilən
+  // superadmin özünə developer hesabı yaradardı.
+  if (!canAssignRole(req.user?.role, role)) {
+    return res.status(403).json({ success: false, message: "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz" });
+  }
+  const cleanPerms = (Array.isArray(permissions) ? permissions : []).filter((x) =>
+    adminSections.includes(x),
+  );
 
   const exists = await User.findOne({ email: String(email).toLowerCase() });
   if (exists) return res.status(409).json({ success: false, message: "Bu e-poçt artıq istifadə olunur" });
 
   const user = await User.create({
-    firstName, lastName, email, phone, role, status,
+    firstName, lastName, email, phone, role, status, permissions: cleanPerms,
     password: await HashService.hashPassword(password),
   });
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi yaradıldı: ${email} (${role})` });
@@ -60,11 +73,25 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
 
-  const { firstName, lastName, phone, role, status, password } = req.body || {};
+  const { firstName, lastName, phone, role, status, password, permissions } = req.body || {};
+
+  // Özündən yüksək/bərabər istifadəçiyə toxunmaq olmaz — admin superadmin-i
+  // dəyişə bilməməlidir.
+  if (!canAssignRole(req.user?.role, user.role)) {
+    return res.status(403).json({ success: false, message: "Bu istifadəçini dəyişməyə icazəniz yoxdur" });
+  }
   if (firstName != null) user.firstName = firstName;
   if (lastName != null) user.lastName = lastName;
   if (phone != null) user.phone = phone;
-  if (role && adminRoles.includes(role)) user.role = role;
+  if (role && adminRoles.includes(role)) {
+    if (!canAssignRole(req.user?.role, role)) {
+      return res.status(403).json({ success: false, message: "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz" });
+    }
+    user.role = role;
+  }
+  if (Array.isArray(permissions)) {
+    user.permissions = permissions.filter((x) => adminSections.includes(x));
+  }
   if (status) user.status = status;
   if (password) {
     if (String(password).length < 8) return res.status(400).json({ success: false, message: "Parol ən azı 8 simvol olmalıdır" });

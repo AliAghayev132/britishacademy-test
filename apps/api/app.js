@@ -10,6 +10,7 @@ import {
   socketService,
   mongoDBService,
   bootstrapAdmin,
+  bootstrapDeveloper,
 } from "#services";
 
 // Middlewares
@@ -240,6 +241,7 @@ const initializeServices = async () => {
 
   // Create the default admin if none exists
   await bootstrapAdmin();
+  await bootstrapDeveloper();
 
   // Initialize the mail service
   MailService.init();

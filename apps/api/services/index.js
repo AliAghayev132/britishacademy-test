@@ -6,7 +6,7 @@ export { EncryptionService } from "./EncryptionService.js";
 export { SlugService } from "./SlugService.js";
 export { buildGraph, validateGraph, seedDatabase } from "./SeedService.js";
 export { logAction } from "./LogService.js";
-export { bootstrapAdmin } from "./BootstrapService.js";
+export { bootstrapAdmin, bootstrapDeveloper } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";
 export { importCourseData } from "./CourseImportService.js";

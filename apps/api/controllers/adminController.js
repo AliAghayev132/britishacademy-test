@@ -194,7 +194,7 @@ const updateSettings = asyncHandler(async (req, res) => {
 
   // Editor privilegiyalı blokları göndərsə — sükutla at (səhv redaktə cəzalandırılmasın,
   // amma dəyişiklik də tətbiq olunmasın).
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     const blocked = ADMIN_ONLY_SETTING_FIELDS.filter((f) => f in body);
     for (const f of blocked) delete body[f];
     if (blocked.length) {

@@ -39,7 +39,7 @@ const getStatus = asyncHandler(async (_req, res) => {
  * `pairPhone` verilsə QR əvəzinə 8 rəqəmli qoşulma kodu istənilir.
  */
 const init = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     return res.status(403).json({ success: false, message: "WhatsApp qoşulmasını yalnız admin idarə edə bilər" });
   }
   if (WhatsAppService.isReady) {
@@ -151,7 +151,7 @@ const sendMedia = asyncHandler(async (req, res) => {
  */
 const bulk = asyncHandler(async (req, res) => {
   // Kütləvi göndəriş şirkət nömrəsinin bloklanmasına səbəb ola bilər — yalnız admin.
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
   }
   const { template, phones, leadStatus, skipDuplicates = true } = req.body || {};
@@ -226,7 +226,7 @@ const listMessages = asyncHandler(async (req, res) => {
 
 /** POST /api/admin/whatsapp/disconnect — bağla, sessiyanı SAXLA. */
 const disconnect = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     return res.status(403).json({ success: false, message: "Yalnız admin bağlaya bilər" });
   }
   await WhatsAppService.disconnect();
@@ -236,7 +236,7 @@ const disconnect = asyncHandler(async (req, res) => {
 
 /** POST /api/admin/whatsapp/logout — cihazı ayır + sessiyanı sil (yeni QR tələb olunur). */
 const logout = asyncHandler(async (req, res) => {
-  if (req.user?.role !== "admin") {
+  if (!hasRole(req.user, "admin")) {
     return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
   }
   await WhatsAppService.clearSession();

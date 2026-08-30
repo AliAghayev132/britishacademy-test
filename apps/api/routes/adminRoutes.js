@@ -8,7 +8,7 @@ import {
 } from "#controllers";
 
 // Middlewares
-import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
+import { authenticate, requireRole, requireSection, writeRateLimiter } from "#middlewares";
 
 /**
  * ADMIN API — mounted at /api/admin. NOTHING here is public.
@@ -36,18 +36,22 @@ AdminRouter.get("/courses/full/:id", courseComposer.getCourseFull);
 AdminRouter.post("/courses/full", writeRateLimiter, courseComposer.createCourseFull);
 AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCourseFull);
 
-// Developer tools — reseed demo content (admin role enforced in the controller).
-AdminRouter.post("/dev/seed", writeRateLimiter, devController.runSeed);
-AdminRouter.post("/dev/migrate-i18n", writeRateLimiter, devController.runMigrateI18n);
-AdminRouter.post("/dev/test-mail", writeRateLimiter, devController.runTestMail);
+// ── Developer alətləri ──
+// YALNIZ `developer` rolu. Bu əməliyyatlar məzmunu kütləvi dəyişir
+// (seed, miqrasiya, toplu tərcümə, import) — səhv basılması bahalıdır.
+const devOnly = requireRole(["developer"]);
+
+AdminRouter.post("/dev/seed", devOnly, writeRateLimiter, devController.runSeed);
+AdminRouter.post("/dev/migrate-i18n", devOnly, writeRateLimiter, devController.runMigrateI18n);
+AdminRouter.post("/dev/test-mail", devOnly, writeRateLimiter, devController.runTestMail);
 // AI toplu tərcümə — boş EN/RU sahələrini AZ-dan doldurur (uzun sürə bilər,
 // ona görə writeRateLimiter tətbiq olunmur).
-AdminRouter.post("/dev/translate-all", devController.runAutoTranslate);
+AdminRouter.post("/dev/translate-all", devOnly, devController.runAutoTranslate);
 // Müştəri kurs məlumatlarını (3 dil + SEO + qiymətlər) tətbiq et.
-AdminRouter.post("/dev/import-courses", writeRateLimiter, devController.runImportCourses);
+AdminRouter.post("/dev/import-courses", devOnly, writeRateLimiter, devController.runImportCourses);
 // Ölkə bayraqlarını qalereyaya endir (şəbəkə əməliyyatı — limiter yoxdur).
-AdminRouter.post("/dev/import-flags", devController.runImportFlags);
-AdminRouter.post("/dev/import-teachers", devController.runImportTeachers);
+AdminRouter.post("/dev/import-flags", devOnly, devController.runImportFlags);
+AdminRouter.post("/dev/import-teachers", devOnly, devController.runImportTeachers);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
@@ -71,10 +75,14 @@ AdminRouter.post("/bulk/cancel", bulkController.cancel);
 
 // Admin users (create multiple admins/editors) + audit log.
 // Fixed paths — must precede the generic /:resource matcher.
-AdminRouter.get("/users", userAdminController.listUsers);
-AdminRouter.post("/users", writeRateLimiter, userAdminController.createUser);
-AdminRouter.put("/users/:id", writeRateLimiter, userAdminController.updateUser);
-AdminRouter.delete("/users/:id", writeRateLimiter, userAdminController.removeUser);
+// İstifadəçi idarəsi — yalnız superadmin və developer admin yarada,
+// silə və rol/icazə təyin edə bilər.
+const userAdmin = requireRole(["superadmin", "developer"]);
+
+AdminRouter.get("/users", userAdmin, userAdminController.listUsers);
+AdminRouter.post("/users", userAdmin, writeRateLimiter, userAdminController.createUser);
+AdminRouter.put("/users/:id", userAdmin, writeRateLimiter, userAdminController.updateUser);
+AdminRouter.delete("/users/:id", userAdmin, writeRateLimiter, userAdminController.removeUser);
 AdminRouter.get("/logs", userAdminController.listLogs);
 
 // Generic CRUD over the resource registry.

@@ -2,6 +2,7 @@
 
 // React
 import { use, useMemo, useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
 // Next
 import { useRouter, useSearchParams } from "next/navigation";
 // Data (RTK Query)
@@ -299,13 +300,12 @@ export default function ResourceBrowserPage({ params }) {
         )}
       </div>
 
-      {pagination && pagination.pages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((n) => (
-            <button key={n} onClick={() => setPage(n)} className={`h-9 w-9 rounded-lg text-sm font-semibold ${n === pagination.page ? "bg-blue-900 text-white" : "border border-gray-200 bg-white text-gray-600"}`}>{n}</button>
-          ))}
-        </div>
-      )}
+      <Pagination
+        page={pagination?.page || 1}
+        pages={pagination?.pages || 1}
+        total={pagination?.total}
+        onChange={setPage}
+      />
 
       {/* Bespoke form (teachers / branches / courses) — renders its own modal. */}
       {editing !== null && Bespoke && (

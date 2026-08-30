@@ -179,7 +179,46 @@ const requireRole = (allowedRoles) => {
   };
 };
 
+/**
+ * Bölmə icazəsi tələb et.
+ *
+ * superadmin və developer bütün bölmələri görür — onlar üçün `permissions`
+ * doldurulmur. Qalanlar üçün massivdə həmin bölmə olmalıdır.
+ *
+ * Bu, sidebar-dakı gizlətmənin SERVER qarşılığıdır: UI-da görünməyən bölmə
+ * API-dən də bağlı olmalıdır, əks halda link-i bilən istifadəçi girə bilər.
+ */
+const requireSection = (section) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+    const role = req.user.role;
+    if (role === "superadmin" || role === "developer") return next();
+
+    const allowed = Array.isArray(req.user.permissions) ? req.user.permissions : [];
+    if (!allowed.includes(section)) {
+      return res.status(403).json({
+        success: false,
+        message: "Bu bölməyə icazəniz yoxdur",
+      });
+    }
+    next();
+  };
+};
+
+/**
+ * Hədəf rolun cari istifadəçidən aşağı olduğunu yoxla.
+ *
+ * Bir admin özündən yüksək rol təyin edə bilməməlidir — əks halda istənilən
+ * admin özünü developer edərdi.
+ */
+const canAssignRole = (actorRole, targetRole) =>
+  (ROLE_RANK[actorRole] ?? -1) > (ROLE_RANK[targetRole] ?? 99);
+
 export {
+  requireSection,
+  canAssignRole,
   authenticate,
   authenticateRefreshToken,
   authenticateResetToken,

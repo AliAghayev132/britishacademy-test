@@ -2,7 +2,7 @@
 import { Post } from "#models";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { asyncHandler, hasRole } from "#utils";
 
 /**
  * List published posts (public) with pagination + optional filters.
@@ -126,7 +126,7 @@ const updatePost = asyncHandler(async (req, res) => {
   }
 
   // Ownership check (admins may edit any post).
-  if (post.author.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+  if (post.author.toString() !== req.user._id.toString() && !hasRole(req.user, "admin")) {
     return res.status(403).json({
       success: false,
       message: "You do not have permission to edit this post",
@@ -156,7 +156,7 @@ const deletePost = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: "Post not found" });
   }
 
-  if (post.author.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+  if (post.author.toString() !== req.user._id.toString() && !hasRole(req.user, "admin")) {
     return res.status(403).json({
       success: false,
       message: "You do not have permission to delete this post",

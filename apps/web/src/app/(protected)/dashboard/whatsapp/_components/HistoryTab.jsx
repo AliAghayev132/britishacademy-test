@@ -3,6 +3,7 @@
 // ── Göndəriş tarixçəsi ──
 
 import { QueryState } from "@/components/ui/QueryState";
+import { Pagination } from "@/components/ui/Pagination";
 import { useWhatsappMessagesQuery } from "@/store/api/adminApi";
 import { STATUS_BADGE, fmt } from "./shared";
 
@@ -64,23 +65,12 @@ export function HistoryTab({ page, onPage }) {
         </div>
       )}
 
-      {pagination && pagination.pages > 1 && (
-        <div className="flex flex-wrap justify-center gap-2 border-t border-gray-100 p-3">
-          {Array.from({ length: Math.min(pagination.pages, 12) }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              onClick={() => onPage(n)}
-              className={`h-8 w-8 rounded-lg text-sm font-semibold transition ${
-                n === pagination.page
-                  ? "bg-blue-900 text-white"
-                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
-      )}
+      <Pagination
+        page={pagination?.page || 1}
+        pages={pagination?.pages || 1}
+        total={pagination?.total}
+        onChange={onPage}
+      />
     </div>
   );
 }

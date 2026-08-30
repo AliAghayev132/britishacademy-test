@@ -7,6 +7,7 @@
 
 // React
 import { useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
 // UI / kit
 import { Overlay, Field, TextInput, NativeSelect } from "../_forms/kit";
 import { notify, confirmDialog } from "@/components/ui/feedback";
@@ -254,19 +255,12 @@ export default function UsersPage() {
         )}
       </div>
 
-      {pagination && pagination.pages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              onClick={() => setPage(n)}
-              className={`h-9 w-9 rounded-lg text-sm font-semibold ${n === pagination.page ? "bg-[#00157A] text-white" : "border border-gray-200 bg-white text-gray-600"}`}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
-      )}
+      <Pagination
+        page={pagination?.page || 1}
+        pages={pagination?.pages || 1}
+        total={pagination?.total}
+        onChange={setPage}
+      />
 
       {modal && <UserForm user={modal === "create" ? null : modal} onClose={() => setModal(null)} />}
     </div>

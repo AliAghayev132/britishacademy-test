@@ -30,6 +30,9 @@ const toUserResponse = (user) => ({
   avatar: user.avatar,
   role: user.role,
   status: user.status,
+  // Sidebar hansı bölmələri göstərəcəyini bundan bilir. superadmin/developer
+  // üçün boş gəlir — onlar hər şeyi görür (client tərəfdə rola baxılır).
+  permissions: user.permissions || [],
 });
 
 /**
