@@ -84,33 +84,33 @@ const CATEGORIES = [
 ];
 
 const COURSES = [
-  { slug: "ingilis-dili-kursu", title: "İngilis dili kursu", cat: "dil-kurslari", base: 100, featured: true },
-  { slug: "biznes-ingilis-dili-kursu", title: "Biznes İngilis dili kursu", cat: "dil-kurslari", base: 170, featured: true },
-  { slug: "huquqsunaslar-ingilis-dili-kursu", title: "Hüquqşünaslar üçün İngilis dili", cat: "dil-kurslari", base: 180 },
-  { slug: "otel-turizm-ingilis-dili-kursu", title: "Otel və Turizm üçün İngilis dili", cat: "dil-kurslari", base: 150 },
-  { slug: "alman-dili-kursu", title: "Alman dili kursu", cat: "dil-kurslari", base: 110, onlyMain: true },
-  { slug: "beynelxalq-sertifikatli-alman-dili-kursu", title: "Beynəlxalq Sertifikatlı Alman dili", cat: "dil-kurslari", base: 160 },
-  { slug: "rus-dili-kursu", title: "Rus dili kursu", cat: "dil-kurslari", base: 80, featured: true },
-  { slug: "ispan-dili-kursu", title: "İspan dili kursu", cat: "dil-kurslari", base: 110 },
-  { slug: "italyan-dili-kursu", title: "İtalyan dili kursu", cat: "dil-kurslari", base: 110 },
-  { slug: "fransiz-dili-kursu", title: "Fransız dili kursu", cat: "dil-kurslari", base: 110 },
-  { slug: "conversation-club", title: "Conversation Club", cat: "danisiq", custom: [["Bir dəfə iştirak", "10 AZN"], ["Aylıq iştirak", "80 AZN"], ["British Academy tələbələri", "Ödənişsiz"]] },
-  { slug: "workshop", title: "Workshop", cat: "danisiq", base: 70 },
-  { slug: "ielts", title: "IELTS & Pre-IELTS", cat: "imtahanlar", base: 180, featured: true },
-  { slug: "toefl", title: "TOEFL & Pre-TOEFL", cat: "imtahanlar", base: 180 },
-  { slug: "oet", title: "OET (Tibb işçiləri üçün)", cat: "imtahanlar", base: 200 },
-  { slug: "toeic", title: "TOEIC (Rəsmi imtahan)", cat: "imtahanlar", base: 170 },
-  { slug: "sat", title: "SAT & Pre-SAT", cat: "imtahanlar", base: 190 },
-  { slug: "duolingo", title: "Duolingo", cat: "imtahanlar", base: 150 },
-  { slug: "toles", title: "TOLES", cat: "imtahanlar", base: 200 },
-  { slug: "tefl-kurslari", title: "TEFL Kursları", cat: "sertifikat", base: 220 },
-  { slug: "ms-office", title: "MS Office proqramları", cat: "komputer", base: 80, featured: true },
-  { slug: "pesekar-excel-kursu", title: "Peşəkar Excel kursu", cat: "komputer", base: 90 },
-  { slug: "muhasibatliq-1c-kursu", title: "Mühasibatlıq və 1C kursu", cat: "karyera", base: 150 },
-  { slug: "hr-karguzarliq-kursu", title: "HR & Kargüzarlıq kursu", cat: "karyera", base: 140 },
-  { slug: "usaq-ingilis-dili", title: "Uşaqlar üçün İngilis dili", cat: "usaq", base: 90, featured: true },
-  { slug: "usaq-rus-dili", title: "Uşaqlar üçün Rus dili", cat: "usaq", base: 90 },
-  { slug: "usaq-mentiq", title: "Uşaqlar üçün Məntiq", cat: "usaq", base: 85 },
+  { slug: "ingilis-dili-kursu", title: "İngilis dili kursu", cat: "dil-kurslari", featured: true },
+  { slug: "biznes-ingilis-dili-kursu", title: "Biznes İngilis dili kursu", cat: "dil-kurslari", featured: true },
+  { slug: "huquqsunaslar-ingilis-dili-kursu", title: "Hüquqşünaslar üçün İngilis dili", cat: "dil-kurslari" },
+  { slug: "otel-turizm-ingilis-dili-kursu", title: "Otel və Turizm üçün İngilis dili", cat: "dil-kurslari" },
+  { slug: "alman-dili-kursu", title: "Alman dili kursu", cat: "dil-kurslari", onlyMain: true },
+  { slug: "beynelxalq-sertifikatli-alman-dili-kursu", title: "Beynəlxalq Sertifikatlı Alman dili", cat: "dil-kurslari" },
+  { slug: "rus-dili-kursu", title: "Rus dili kursu", cat: "dil-kurslari", featured: true },
+  { slug: "ispan-dili-kursu", title: "İspan dili kursu", cat: "dil-kurslari" },
+  { slug: "italyan-dili-kursu", title: "İtalyan dili kursu", cat: "dil-kurslari" },
+  { slug: "fransiz-dili-kursu", title: "Fransız dili kursu", cat: "dil-kurslari" },
+  { slug: "conversation-club", title: "Conversation Club", cat: "danisiq" },
+  { slug: "workshop", title: "Workshop", cat: "danisiq" },
+  { slug: "ielts", title: "IELTS & Pre-IELTS", cat: "imtahanlar", featured: true },
+  { slug: "toefl", title: "TOEFL & Pre-TOEFL", cat: "imtahanlar" },
+  { slug: "oet", title: "OET (Tibb işçiləri üçün)", cat: "imtahanlar" },
+  { slug: "toeic", title: "TOEIC (Rəsmi imtahan)", cat: "imtahanlar" },
+  { slug: "sat", title: "SAT & Pre-SAT", cat: "imtahanlar" },
+  { slug: "duolingo", title: "Duolingo", cat: "imtahanlar" },
+  { slug: "toles", title: "TOLES", cat: "imtahanlar" },
+  { slug: "tefl-kurslari", title: "TEFL Kursları", cat: "sertifikat" },
+  { slug: "ms-office", title: "MS Office proqramları", cat: "komputer", featured: true },
+  { slug: "pesekar-excel-kursu", title: "Peşəkar Excel kursu", cat: "komputer" },
+  { slug: "muhasibatliq-1c-kursu", title: "Mühasibatlıq və 1C kursu", cat: "karyera" },
+  { slug: "hr-karguzarliq-kursu", title: "HR & Kargüzarlıq kursu", cat: "karyera" },
+  { slug: "usaq-ingilis-dili", title: "Uşaqlar üçün İngilis dili", cat: "usaq", featured: true },
+  { slug: "usaq-rus-dili", title: "Uşaqlar üçün Rus dili", cat: "usaq" },
+  { slug: "usaq-mentiq", title: "Uşaqlar üçün Məntiq", cat: "usaq" },
 ];
 
 const DESTINATIONS = [
@@ -163,17 +163,12 @@ const HEADER_MENU = [
 ];
 
 // ── Converters ──
-const BRANCH_DELTA = [0, 10, -5, 5];
-
-function priceRow(base, branchIndex, branchId) {
-  const groupDay = base + (BRANCH_DELTA[branchIndex] || 0);
-  const soloDay = Math.round((groupDay * 2.2) / 5) * 5;
-  return {
-    branch: branchId,
-    group: { day: groupDay, evening: groupDay + 10 },
-    individual: { day: soloDay, evening: soloDay + 20 },
-  };
-}
+//
+// Qiymət generatoru SİLİNDİ. Əvvəl hər kurs üçün `base` dəyəri götürülüb
+// filiala görə ±10 AZN sürüşdürülür, fərdi dərs isə qrupun 2.2 mislinə
+// yuvarlaqlaşdırılırdı — yəni bütün qiymətlər DÜSTURLA uydurulmuşdu və
+// həqiqi qiymətlərlə əlaqəsi yox idi. Belə rəqəmlər saytda göstərilməkdənsə
+// heç olmaması yaxşıdır: admin paneldən doldurulur.
 
 function toContentBlocks(C) {
   const blocks = [];
@@ -271,9 +266,10 @@ export function buildGraph() {
       h1: C.h1, lead: C.lead, excerpt: C.lead,
       content: toContentBlocks(C), faq: toFaq(C), info: toInfo(C),
       levels: ["A1", "A2", "B1", "B2", "C1", "C2"],
-      pricingMode: c.custom ? "custom" : "branch",
-      pricing: c.custom ? [] : branchList.map((b, bi) => priceRow(c.base, c.onlyMain ? 0 : bi, b._id)),
-      customPricing: (c.custom || []).map(([label, value]) => ({ label, value })),
+      // Qiymətlər BOŞ gəlir — admin paneldən filial üzrə doldurulur.
+      pricingMode: "branch",
+      pricing: [],
+      customPricing: [],
       pricingNote: (C.pricing && C.pricing.note) || undefined,
       isFeatured: Boolean(c.featured),
       order: i,
