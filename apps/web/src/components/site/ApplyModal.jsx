@@ -91,6 +91,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
 });
 
 export function ApplyModal({ open, onClose, preset, branches = [] }) {
+  const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
@@ -134,7 +135,7 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
     } catch (err) {
       setError(err?.data?.message || t("apply.error"));
     }
-  }, [createLead, form, interest, branch]);
+  }, [createLead, form, interest, branch, t]);
 
   const onOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) onClose();

@@ -15,13 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Versiya DƏQİQ pinlənir: "11" ən son 11.x-i gətirir və o, xəbərsiz
+      # dəyişə bilər. Lokalda lockfile-ı yaradan versiya ilə eyni olmalıdır.
       - uses: pnpm/action-setup@v4
         with:
-          version: 11
+          version: 11.5.2
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # pnpm 11.x Node >=22.13 tələb edir. Node 20 ilə setup-node-un
+          # keş addımı (`pnpm store path`) ERR_UNKNOWN_BUILTIN_MODULE
+          # (node:sqlite) ilə çökürdü.
+          node-version: 22
           cache: pnpm
 
       # --frozen-lockfile: lockfile package.json ilə uyğun deyilsə burada

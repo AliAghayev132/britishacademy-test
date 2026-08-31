@@ -197,6 +197,10 @@ const requireSection = (section) => {
     if (role === "superadmin" || role === "developer") return next();
 
     const allowed = Array.isArray(req.user.permissions) ? req.user.permissions : [];
+    // Boş massiv = məhdudiyyət yoxdur (köhnə hesablar kilidlənməsin) —
+    // utils/roles.js-dəki canAccessSection ilə eyni qayda.
+    if (allowed.length === 0) return next();
+
     if (!allowed.includes(section)) {
       return res.status(403).json({
         success: false,

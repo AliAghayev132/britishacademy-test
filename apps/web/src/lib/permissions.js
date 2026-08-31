@@ -46,7 +46,14 @@ export const canSee = (user, section) => {
   // çünki oradakı əməliyyatlar məzmunu kütləvi dəyişir.
   if (section === "developer") return user.role === "developer";
   if (SEES_EVERYTHING.includes(user.role)) return true;
-  return Array.isArray(user.permissions) && user.permissions.includes(section);
+
+  // GERİYƏ UYĞUNLUQ: bu sistemdən əvvəl yaradılmış adminlərin permissions-u
+  // boşdur. «Boş = heç nə» olsaydı, onlar sidebar-da yalnız «Profil» görər
+  // və paneldən kilidlənərdi. Serverdəki canAccessSection ilə eyni qayda.
+  const perms = Array.isArray(user.permissions) ? user.permissions : [];
+  if (perms.length === 0) return true;
+
+  return perms.includes(section);
 };
 
 /** Aktor hədəf rolu təyin edə bilərmi? (özündən aşağı olmalıdır) */

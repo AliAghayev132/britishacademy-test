@@ -26,5 +26,15 @@ export const seesEverything = (user) =>
 export const canAccessSection = (user, section) => {
   if (!user) return false;
   if (seesEverything(user)) return true;
-  return Array.isArray(user.permissions) && user.permissions.includes(section);
+
+  // GERİYƏ UYĞUNLUQ: bu sistemdən ƏVVƏL yaradılmış adminlərin `permissions`
+  // massivi boşdur. «Boş = heç nə» qəbul etsəydik, deploy-dan sonra bütün
+  // mövcud adminlər paneldən kilidlənərdi.
+  //
+  // Ona görə BOŞ = «məhdudiyyət yoxdur». Superadmin kimisə məhdudlaşdırmaq
+  // istəyəndə ən azı bir bölmə seçir; tam bağlamaq üçün hesab deaktiv edilir.
+  const perms = Array.isArray(user.permissions) ? user.permissions : [];
+  if (perms.length === 0) return true;
+
+  return perms.includes(section);
 };

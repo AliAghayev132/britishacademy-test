@@ -5,5 +5,12 @@
 # puppeteer whatsapp-web.js-in tranzitiv asılılığıdır; build skripti Chrome
 # endirir (~150 MB). Biz sistem Chrome-unu işlədirik (WhatsAppService →
 # findSystemChrome / WHATSAPP_CHROME_PATH), ona görə endirmə lazım deyil.
+# DİQQƏT — parametr pnpm versiyasına görə İKİ YERDƏDİR:
+#   • pnpm 11 → bu fayldakı `allowBuilds`
+#   • pnpm 10 → package.json-dakı `pnpm.ignoredBuiltDependencies`
+# Deploy serveri Node 20 işlədir, pnpm 11 isə Node >=22.13 tələb edir —
+# yəni orada pnpm 10 ola bilər. Hər iki açar saxlanılır ki, hansı versiya
+# olursa olsun install uğursuz olmasın. Hər versiya digərinin açarını
+# sadəcə nəzərə almır.
 allowBuilds:
   puppeteer: false

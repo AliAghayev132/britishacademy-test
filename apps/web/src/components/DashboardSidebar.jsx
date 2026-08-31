@@ -10,6 +10,9 @@ import { usePathname, useRouter } from 'next/navigation'
 // Data
 import { useSelector, useDispatch } from 'react-redux'
 
+// Local
+import { canSee } from '@/lib/permissions'
+
 // UI / components
 
 // Icons
