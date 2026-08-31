@@ -59,14 +59,21 @@ const getMenu = asyncHandler(async (req, res) => {
 });
 
 /** GET /api/home — everything the homepage needs, in one payload. */
+// Ana səhifədəki «Kurslarımız» swiper-ində göstərilən kurs sayı.
+// Admin hansıların vacib olduğunu seçir (isFeatured); seçilən sayı bundan
+// AZDIRSA qalanı digər aktiv kurslarla tamamlanır ki, swiper yarımçıq
+// qalmasın. Əvvəl yalnız seçilmişlər göstərilirdi — 2 kurs işarələnəndə
+// bölmə 2 kartla qalırdı.
+const HOME_COURSE_COUNT = 6;
+
 const getHome = asyncHandler(async (_req, res) => {
   // Rəy sorğuları da bu dəstəyə daxildir. Əvvəl onlar ARDICIL icra olunurdu
   // (əvvəl mətn rəyləri gözlənilir, sonra videolar) — ana səhifə üçün 3 gediş
   // demək idi. İndi normal halda hamısı BİR gedişdə paralel gedir.
-  const [settings, courses, partners, advantages, destinations, faqs, featuredText, featuredVideo] =
+  const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo] =
     await Promise.all([
       SiteSetting.get(),
-      Course.findFeatured(6).populate("category"),
+      Course.findFeatured(HOME_COURSE_COUNT).populate("category"),
       Partner.findPublic(),
       Advantage.findPublic(),
       Destination.findPublic({ isFeatured: true }).limit(8),
@@ -74,6 +81,19 @@ const getHome = asyncHandler(async (_req, res) => {
       Testimonial.findPublic({ type: "text", isFeatured: true }).limit(6),
       Testimonial.findPublic({ type: "video", isFeatured: true }).limit(8),
     ]);
+
+  // Seçilmiş kurslar 6-dan azdırsa qalanını sıraya görə digər aktiv
+  // kurslarla tamamlayırıq. Onsuz da seçilmişlər ƏVVƏLDƏ qalır — admin-in
+  // sırası qorunur, tamamlayıcılar sona əlavə olunur.
+  let courses = featuredCourses;
+  if (courses.length < HOME_COURSE_COUNT) {
+    const fill = await Course.findPublic({
+      _id: { $nin: courses.map((c) => c._id) },
+    })
+      .limit(HOME_COURSE_COUNT - courses.length)
+      .populate("category");
+    courses = [...courses, ...fill];
+  }
 
   // Seçilmiş rəy yoxdursa istənilən dərc olunmuşa düşürük ki, bölmə yalnız
   // admin paneldə heç nə işarələnmədiyinə görə boş qalmasın. Bu ehtiyat

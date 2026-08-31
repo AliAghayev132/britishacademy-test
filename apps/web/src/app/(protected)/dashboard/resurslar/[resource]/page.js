@@ -212,9 +212,17 @@ export default function ResourceBrowserPage({ params }) {
               : "bg-blue-50 text-blue-800"
           }`}
         >
-          Ana səhifədə göstərilir: <b>{Math.min(featuredCount, HOME_LIMIT)}</b> / {HOME_LIMIT}
+          Ana səhifə <b>{HOME_LIMIT}</b> element göstərir · seçilib: <b>{featuredCount}</b>
           {featuredCount > HOME_LIMIT ? (
-            <> — <b>{featuredCount}</b> seçilib, artıq olan {featuredCount - HOME_LIMIT}-i görünməyəcək. Sıralama «Sıra» sahəsinə görədir.</>
+            <>
+              {" "}— artıq olan {featuredCount - HOME_LIMIT}-i görünməyəcək.
+              Sıralama «Sıra» sahəsinə görədir.
+            </>
+          ) : featuredCount < HOME_LIMIT ? (
+            <>
+              {" "}— qalan {HOME_LIMIT - featuredCount} yer digər kurslarla
+              avtomatik tamamlanır. Seçdikləriniz həmişə ƏVVƏLDƏ görünür.
+            </>
           ) : (
             <> · Sıralama «Sıra» sahəsinə görədir.</>
           )}
