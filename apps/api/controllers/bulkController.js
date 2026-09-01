@@ -11,7 +11,7 @@ import { Lead } from "#models";
 import { BulkQueue, normalizeRecipients, logAction } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { asyncHandler, hasRole } from "#utils";
 
 /** Müraciətlərdən alıcı siyahısı qur. */
 async function fromLeads({ leadStatus, channel }) {

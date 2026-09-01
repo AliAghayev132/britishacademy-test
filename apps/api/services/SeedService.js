@@ -217,7 +217,6 @@ export function buildGraph() {
 
   const courses = COURSES.map((c, i) => {
     const C = COURSE_CONTENT[`${c.slug}.html`] || {};
-    const branchList = c.onlyMain ? [branches[0]] : branches;
     return new Course({
       title: tri(c.title), slug: c.slug, category: catByKey[c.cat]._id,
       h1: C.h1, lead: C.lead, excerpt: C.lead,

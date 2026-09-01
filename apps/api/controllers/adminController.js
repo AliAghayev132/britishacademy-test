@@ -4,7 +4,7 @@
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole } from "#utils";
 
 // Services
 import { logAction } from "#services";

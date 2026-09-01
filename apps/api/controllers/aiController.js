@@ -2,7 +2,7 @@
 import { asyncHandler } from "#utils";
 
 // Services
-import { aiChat, tryParseJson, LANG_NAMES } from "#services";
+import { aiChat, tryParseJson, resolveAiConfig, LANG_NAMES } from "#services";
 
 const MAX_CONTENT_LENGTH = 50000;
 

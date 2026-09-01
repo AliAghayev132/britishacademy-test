@@ -8,7 +8,7 @@ import { WhatsAppMessage, Lead } from "#models";
 import { WhatsAppService, WhatsAppQueue, renderTemplate, logAction } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { asyncHandler, hasRole } from "#utils";
 
 /** Kitabxana yoxdursa 503 qaytar (hər yerdə eyni mesaj). */
 async function requireLib(res) {
