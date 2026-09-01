@@ -46,10 +46,15 @@ seansına yapışdıranda terminal sətirləri bir-birinin üstünə salır və 
 səssizcə yarımçıq yazılır (praktikada baş verdi: `nginx -t` tanınmayan
 direktiv göstərdi, çünki blokun ortası itmişdi).
 
+**Köçürmə iki mərhələlidir.** Yekun konfiqdə `listen 443 ssl` var, nginx isə
+`ssl_certificate` olmadan belə bloku qəbul etmir — sertifikat isə hələ
+yoxdur, çünki onu almaq üçün nginx-in işləməsi lazımdır. Ona görə əvvəlcə
+yalnız-HTTP konfiqi qoyulur.
+
 Lokal maşından (PowerShell):
 
 ```powershell
-scp "deploy\nginx\britishacademy.az.conf" `
+scp "deploy\nginx\britishacademy.az.http.conf" `
     root@169.58.130.173:/etc/nginx/sites-available/britishacademy.az
 ```
 
@@ -62,12 +67,14 @@ sudo ln -sfn /etc/nginx/sites-available/britishacademy.az \
 # Defolt sayt qalsa "Welcome to nginx" səhifəsi bizimkini üstələyə bilər.
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Faylın tam getdiyini yoxla — 153 sətir olmalıdır.
-wc -l /etc/nginx/sites-available/britishacademy.az
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 `ln -sfn` işlədilir (`ln -s` yox): simvolik keçid artıq varsa `ln -s`
 «File exists» ilə dayanır, `-f` isə onu əvəz edir.
+
+Bu mərhələdə sayt HTTP üzərindən **tam işləkdir** — DNS keçidindən sonra
+fasilə olmur, sadəcə hələ HTTPS yoxdur.
 
 **Hələ `nginx -t` işlətmə** — fayl SSL sertifikatına istinad edir, o isə
 sertifikat alınana qədər yoxdur. 4-cü addımdan sonra yoxlanacaq.
@@ -110,20 +117,58 @@ dig +short britishacademy.az
 # 169.58.130.173 çıxana qədər gözlə
 ```
 
-### 4. SSL sertifikatı
+### 4. SSL sertifikatı + yekun konfiq
 
-DNS yeni serverə yönələndən **sonra**:
+DNS yeni serverə yönələndən **sonra**. `--nginx` deyil, `certonly --webroot`
+işlədilir: `--nginx` konfiqi özü redaktə edir və bizim tənzimlədiyimiz proxy
+bloklarını dublikat edir. `certonly` yalnız sertifikat alır, konfiq bizdə qalır.
 
 ```bash
-sudo certbot --nginx -d britishacademy.az -d www.britishacademy.az
+sudo certbot certonly --webroot -w /var/www/html \
+     -d britishacademy.az -d www.britishacademy.az \
+     --agree-tos -m <sənin@epoçtun> --no-eff-email
+```
+
+Certbot-un SSL parametr faylları ilk dəfə yaranmaya bilər — yoxla:
+
+```bash
+ls /etc/letsencrypt/options-ssl-nginx.conf /etc/letsencrypt/ssl-dhparams.pem
+```
+
+Yoxdursa yarat (yekun konfiq onlara istinad edir):
+
+```bash
+sudo curl -s -o /etc/letsencrypt/options-ssl-nginx.conf \
+  https://raw.githubusercontent.com/certbot/certbot/main/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
+sudo openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
+```
+
+İndi yekun (HTTPS) konfiqi qoy — lokal maşından:
+
+```powershell
+scp "deploy\nginx\britishacademy.az.conf" `
+    root@169.58.130.173:/etc/nginx/sites-available/britishacademy.az
+```
+
+```bash
+# Faylın tam getdiyini yoxla — 165 sətir olmalıdır.
+wc -l /etc/nginx/sites-available/britishacademy.az
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Certbot `ssl_certificate` sətirlərini özü əlavə edir və 80-ci portu HTTPS-ə
-yönləndirir. Avtomatik yenilənməni yoxla:
+Avtomatik yenilənməni yoxla:
 
 ```bash
 sudo certbot renew --dry-run
+```
+
+Yenilənmədən sonra nginx-in yeni sertifikatı götürməsi üçün qarmaq əlavə et
+(`certonly` işlədildiyi üçün certbot bunu özü etmir):
+
+```bash
+echo -e '#!/bin/sh\nsystemctl reload nginx' \
+  | sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
 ```
 
 ### 5. Environment dəyişənləri
