@@ -38,15 +38,25 @@ açmaq olar; bu, ikiqat məzmun deməkdir və axtarış reytinqinə zərər veri
 
 ### 2. Konfiqurasiya faylı
 
+Serverdə **bu qovluq yoxdur** — orada yalnız `client` və `server` repoları
+klonlanıb, `deploy/` isə monorepodadır. Ona görə fayl birbaşa yaradılır:
+`britishacademy.az.conf`-un məzmununu köçürüb aşağıdakı kimi yapışdır.
+
 ```bash
-sudo cp deploy/nginx/britishacademy.az.conf \
-        /etc/nginx/sites-available/britishacademy.az
+sudo tee /etc/nginx/sites-available/britishacademy.az > /dev/null <<'NGINX'
+# ... britishacademy.az.conf faylının məzmunu ...
+NGINX
+
 sudo ln -s /etc/nginx/sites-available/britishacademy.az \
            /etc/nginx/sites-enabled/britishacademy.az
 
 # Defolt sayt qalsa "Welcome to nginx" səhifəsi bizimkini üstələyə bilər.
 sudo rm -f /etc/nginx/sites-enabled/default
 ```
+
+Heredoc `<<'NGINX'` **tək dırnaqla** yazılır — dırnaqsız olsa bash konfiqdəki
+`$host`, `$remote_addr` kimi dəyişənləri boş sətirlə əvəz edər və proxy
+başlıqları sınar.
 
 **Hələ `nginx -t` işlətmə** — fayl SSL sertifikatına istinad edir, o isə
 sertifikat alınana qədər yoxdur. 4-cü addımdan sonra yoxlanacaq.
@@ -93,7 +103,17 @@ sudo certbot renew --dry-run
 ```
 NEXT_PUBLIC_SITE_URL=https://britishacademy.az
 NEXT_PUBLIC_API_URL=https://britishacademy.az
+NEXT_PUBLIC_IMAGE_URL=https://britishacademy.az
 ```
+
+`NEXT_PUBLIC_IMAGE_URL` təyin olunmasa `NEXT_PUBLIC_API_URL`-dən törəyir, ona
+görə məcburi deyil — amma açıq yazmaq sonradan API-ni ayrı subdomenə keçirsən
+şəkillərin sınmasının qarşısını alır.
+
+`NEXT_PUBLIC_LEGACY_IMAGE_HOSTS` **lazım deyil, boş qalsın**. Bazada bütün
+şəkillər nisbi yol kimi saxlanılır (`/uploads/...`), mütləq IP ünvanı yoxdur —
+yoxlanılıb. (Qeyd: o dəyişəni oxuyan `normalizeContentHtml` funksiyası hazırda
+heç yerdən çağırılmır, yəni onsuz da təsirsizdir.)
 
 `NEXT_PUBLIC_*` dəyişənləri **build zamanı koda yazılır** — restart kifayət
 etmir, yenidən build lazımdır:
