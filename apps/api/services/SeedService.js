@@ -9,11 +9,12 @@
 // ⚠️ seedDatabase() WIPES the BA content collections before inserting.
 import { TEACHERS as TEACHER_ROWS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
 import { BRANCHES } from "../data/branchData.mjs";
+import { tri, FAQS } from "../data/translations.mjs";
 
 // Models
 import {
   SiteSetting, Branch, Teacher, CourseCategory, Course, CourseGroup,
-  Testimonial, Destination, MenuItem, Partner, Advantage, Page,
+  Testimonial, Destination, MenuItem, Partner, Advantage, Page, Faq,
 } from "#models";
 
 // Local
@@ -81,7 +82,7 @@ const DESTINATIONS = [
   { country: "Rusiya", region: "Region", color: "#0039A6", tagline: "Aparıcı universitetlər" },
   { country: "Gürcüstan", region: "Region", color: "#E8112D", tagline: "Tibb & universitet" },
   { country: "Estoniya", region: "Avropa", color: "#0072CE", tagline: "Rəqəmsal ölkə" },
-  { country: "Taqaüd Proqramları", region: "Proqram", color: "#7C4DFF", tagline: "Tam & qismən təqaüd", isScholarship: true },
+  { country: "Təqaüd Proqramları", region: "Proqram", color: "#7C4DFF", tagline: "Tam & qismən təqaüd", isScholarship: true },
 ];
 
 const TESTIMONIALS = [
@@ -190,7 +191,7 @@ export function buildGraph() {
 
   const catByKey = {};
   const categories = CATEGORIES.map((c) => {
-    const doc = new CourseCategory({ name: c.name, slug: c.key, icon: c.icon, order: c.order });
+    const doc = new CourseCategory({ name: tri(c.name), slug: c.key, icon: c.icon, order: c.order });
     catByKey[c.key] = doc;
     return doc;
   });
@@ -218,7 +219,7 @@ export function buildGraph() {
     const C = COURSE_CONTENT[`${c.slug}.html`] || {};
     const branchList = c.onlyMain ? [branches[0]] : branches;
     return new Course({
-      title: c.title, slug: c.slug, category: catByKey[c.cat]._id,
+      title: tri(c.title), slug: c.slug, category: catByKey[c.cat]._id,
       h1: C.h1, lead: C.lead, excerpt: C.lead,
       content: toContentBlocks(C), faq: toFaq(C), info: toInfo(C),
       levels: ["A1", "A2", "B1", "B2", "C1", "C2"],
@@ -297,18 +298,36 @@ export function buildGraph() {
     }
   }
 
-  const destinations = DESTINATIONS.map((d, i) => new Destination({ ...d, slug: SlugService.slugify(d.country), order: i, isFeatured: i < 8 }));
+  const destinations = DESTINATIONS.map((d, i) =>
+    new Destination({
+      ...d,
+      country: tri(d.country),
+      region: tri(d.region),
+      tagline: tri(d.tagline),
+      slug: SlugService.slugify(d.country),
+      order: i,
+      isFeatured: i < 8,
+    }),
+  );
   const testimonials = TESTIMONIALS.map((t, i) => new Testimonial({ ...t, order: i }));
-  const advantages = ADVANTAGES.map((a, i) => new Advantage({ ...a, order: i }));
+  const advantages = ADVANTAGES.map((a, i) =>
+    new Advantage({ ...a, title: tri(a.title), text: tri(a.text), order: i }),
+  );
   const partners = PARTNERS.map((p) => new Partner(p));
-  const menu = HEADER_MENU.map((m, i) => new MenuItem({ ...m, location: "header", order: i }));
+  const menu = HEADER_MENU.map((m, i) =>
+    new MenuItem({ ...m, label: tri(m.label), location: "header", order: i }),
+  );
+
+  // Sayt üzrə FAQ — ana səhifədəki bölmə. Əvvəl seed-də ümumiyyətlə yox idi,
+  // ona görə /api/faqs boş qayıdırdı və bölmə sabit mətnlərə düşürdü.
+  const faqs = FAQS.map((f, i) => new Faq({ ...f, order: i }));
 
   const pages = [
     new Page({ title: "Haqqımızda", slug: "haqqimizda", isSystem: true, h1: "2014-cü ildən dünya dillərini Azərbaycana öyrədirik", lead: "British Academy — “English UK” akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti və rəsmi TOEFL beynəlxalq imtahan mərkəzidir.", order: 0 }),
     new Page({ title: "Əlaqə", slug: "elaqe", isSystem: true, h1: "Əlaqə", lead: "Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.", order: 1 }),
   ];
 
-  return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages };
+  return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages, faqs };
 }
 
 // ── Validation ──
@@ -337,7 +356,7 @@ async function insert(graph) {
     Branch.deleteMany({}), Teacher.deleteMany({}), CourseCategory.deleteMany({}),
     Course.deleteMany({}), CourseGroup.deleteMany({}), Testimonial.deleteMany({}),
     Destination.deleteMany({}), MenuItem.deleteMany({}), Partner.deleteMany({}),
-    Advantage.deleteMany({}), Page.deleteMany({}),
+    Advantage.deleteMany({}), Page.deleteMany({}), Faq.deleteMany({}),
   ]);
   await graph.site.save();
   await Branch.insertMany(graph.branches);
@@ -351,12 +370,13 @@ async function insert(graph) {
   await Partner.insertMany(graph.partners);
   await MenuItem.insertMany(graph.menu);
   await Page.insertMany(graph.pages);
+  await Faq.insertMany(graph.faqs);
 
   return {
     Branch: graph.branches.length, Category: graph.categories.length, Teacher: graph.teachers.length,
     Course: graph.courses.length, CourseGroup: graph.groups.length, Destination: graph.destinations.length,
     Testimonial: graph.testimonials.length, Advantage: graph.advantages.length, Partner: graph.partners.length,
-    Menu: graph.menu.length, Page: graph.pages.length,
+    Menu: graph.menu.length, Page: graph.pages.length, Faq: graph.faqs.length,
   };
 }
 
