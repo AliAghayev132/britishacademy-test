@@ -38,6 +38,11 @@ export const LOCALIZED_FIELDS = {
     "content.$.body", "content.$.items", "content.$.definitions.$.term", "content.$.definitions.$.description",
     "universities.$.name", "universities.$.city",
   ],
+  Quiz: [
+    "title", "lead", "description", "ctaLabel", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+    "questions.$.text", "questions.$.explanation", "questions.$.options.$.text",
+    "levels.$.title", "levels.$.description",
+  ],
   Page: [
     "title", "h1", "lead", "contentHtml", "seo.metaTitle", "seo.metaDescription", "seo.keywords",
     "facts.$.label", "facts.$.value", "faq.$.question", "faq.$.answer", "content.$.heading",

@@ -4,7 +4,7 @@ import { Router, adminRoles } from "#constants";
 // Controllers
 import {
   adminController, leadController, courseComposer, devController,
-  userAdminController, whatsappController, bulkController, statsController,
+  userAdminController, whatsappController, bulkController, statsController, linkController,
 } from "#controllers";
 
 // Middlewares
@@ -26,6 +26,10 @@ AdminRouter.use(authenticate, requireRole(adminRoles));
 AdminRouter.get("/stats", adminController.stats);
 // Məzmun statistikası — «Statistika» səhifəsi üçün. Ayrıca bölmə icazəsi var.
 AdminRouter.get("/stats/content", requireSection("stats"), statsController.contentStats);
+// İzlənilən linklərin hesabatı. CRUD generic /:resource ilə gedir,
+// bu iki marşrut isə ondan ƏVVƏL qeydiyyatdan keçməlidir.
+AdminRouter.get("/links/:id/stats", requireSection("links"), linkController.stats);
+AdminRouter.delete("/links/:id/clicks", requireSection("links"), linkController.resetClicks);
 AdminRouter.get("/settings", adminController.getSettings);
 AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
@@ -55,6 +59,10 @@ AdminRouter.post("/dev/import-courses", devOnly, writeRateLimiter, devController
 AdminRouter.post("/dev/import-flags", devOnly, devController.runImportFlags);
 AdminRouter.post("/dev/import-teachers", devOnly, devController.runImportTeachers);
 AdminRouter.post("/dev/import-branches", devOnly, devController.runImportBranches);
+// Kurs sluglarını köhnə saytın ünvanlarına uyğunlaşdır (SEO trafikinin qorunması).
+AdminRouter.post("/dev/migrate-slugs", devOnly, writeRateLimiter, devController.runMigrateSlugs);
+// Səviyyə testlərini yüklə (köhnə saytın ən çox girilən iki səhifəsi).
+AdminRouter.post("/dev/import-quizzes", devOnly, writeRateLimiter, devController.runImportQuizzes);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.

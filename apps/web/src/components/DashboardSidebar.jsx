@@ -46,7 +46,7 @@ import {
   Menu as MenuIcon,
   Image as ImageIcon,
   FileStack,
-} from 'lucide-react'
+Link2, ClipboardList } from 'lucide-react'
 
 // Utils
 import { logout } from '@/store/slices/authSlice'
@@ -87,6 +87,7 @@ const NAV_GROUPS = [
       { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock, section: 'course-groups' },
       { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
       { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
+      { name: 'Testlər', href: '/dashboard/testler', icon: ClipboardList, section: 'quizzes' },
     ],
   },
   {
@@ -114,6 +115,7 @@ const NAV_GROUPS = [
       { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
       { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
       { name: 'Statistika', href: '/dashboard/statistika', icon: BarChart3, section: 'stats' },
+      { name: 'İzlənilən linklər', href: '/dashboard/linkler', icon: Link2, section: 'links' },
       { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
       { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
       { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },

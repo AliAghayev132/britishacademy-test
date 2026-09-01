@@ -24,6 +24,8 @@ import {
   Advantage,
   Faq,
   Media,
+  ShortLink,
+  Quiz,
 } from "#models";
 
 export const RESOURCES = {
@@ -111,6 +113,18 @@ export const RESOURCES = {
     model: Faq,
     search: ["question"],
     sort: { order: 1 },
+  },
+  quizzes: {
+    model: Quiz,
+    search: ["title", "slug"],
+    sort: { order: 1, createdAt: -1 },
+  },
+  "short-links": {
+    model: ShortLink,
+    search: ["code", "title", "target"],
+    // Ən çox kliklənən əvvəldə — kampaniya siyahısında ən vacib sıralama.
+    sort: { clicks: -1, createdAt: -1 },
+    populate: ["createdBy"],
   },
   media: {
     model: Media,

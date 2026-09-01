@@ -4,7 +4,7 @@ import { Router } from "#constants";
 // Controllers
 import {
   publicController,
-  leadController,
+  leadController, linkController, quizController,
   seoController,
 } from "#controllers";
 
@@ -66,5 +66,18 @@ PublicRouter.get("/seo/urls", seoController.getUrls);
 
 // Lead capture (public write — rate limited)
 PublicRouter.post("/leads", writeRateLimiter, leadController.createLead);
+
+// İzlənilən qısa link — klik qeydiyyatı.
+// Yönləndirmə Next tərəfindədir (/r/<kod>), burada yalnız klik yazılır.
+// writeRateLimiter TƏTBİQ OLUNMUR: mobil operator və ofis şəbəkələrində
+// yüzlərlə real ziyarətçi eyni IP-dən gəlir, limit onları bloklayardı.
+// Ümumi apiRateLimiter (dəqiqədə 100) onsuz da tətbiq olunur.
+PublicRouter.post("/track/:code", linkController.track);
+
+// Testlər. Düzgün cavablar getQuiz cavabında GETMİR — qiymətləndirmə
+// serverdədir (bax quizController).
+PublicRouter.get("/quizzes", quizController.listQuizzes);
+PublicRouter.get("/quizzes/:slug", quizController.getQuiz);
+PublicRouter.post("/quizzes/:slug/submit", quizController.submitQuiz);
 
 export { PublicRouter };

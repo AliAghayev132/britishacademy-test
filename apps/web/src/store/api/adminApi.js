@@ -152,6 +152,16 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/dev/import-branches", method: "POST", body: body || {} }),
       invalidatesTags: ["Resource", "Site"],
     }),
+    // Kurs sluglarını köhnə saytın ünvanlarına uyğunlaşdırır (SEO trafiki).
+    migrateSlugs: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/migrate-slugs", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+    // Səviyyə testlərini yüklə (mövcud test toxunulmur).
+    importQuizzes: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-quizzes", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
     // Bütün məzmunu silib yenidən qurur — YALNIZ developer.
     adminSeed: builder.mutation({
       query: () => ({ url: "/admin/dev/seed", method: "POST" }),
@@ -220,6 +230,19 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/admin/logs", params }),
       providesTags: [{ type: "Resource", id: "logs" }],
     }),
+    // İzlənilən linkin detallı hesabatı (klik dinamikası, cihaz, mənbə, saat).
+    linkStats: builder.query({
+      query: ({ id, days = 30 }) => ({ url: `/admin/links/${id}/stats`, params: { days } }),
+      providesTags: (r, e, { id }) => [{ type: "Resource", id: `link-stats-${id}` }],
+    }),
+    // Sınaq kliklərini təmizlə — kampaniya başlamazdan əvvəl sayğacı sıfırla.
+    resetLinkClicks: builder.mutation({
+      query: ({ id }) => ({ url: `/admin/links/${id}/clicks`, method: "DELETE" }),
+      invalidatesTags: (r, e, { id }) => [
+        { type: "Resource", id: "short-links" },
+        { type: "Resource", id: `link-stats-${id}` },
+      ],
+    }),
     adminContentStats: builder.query({
       query: ({ days } = {}) => ({ url: "/admin/stats/content", params: { days } }),
       providesTags: [{ type: "Site", id: "content-stats" }],
@@ -244,6 +267,8 @@ export const {
   useAdminLeadStatusMutation,
   useAdminStatsQuery,
   useAdminContentStatsQuery,
+  useLinkStatsQuery,
+  useResetLinkClicksMutation,
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
   useAdminLookupsQuery,
@@ -260,6 +285,8 @@ export const {
   useImportFlagsMutation,
   useImportTeachersMutation,
   useImportBranchesMutation,
+  useMigrateSlugsMutation,
+  useImportQuizzesMutation,
   useAdminSeedMutation,
   useBulkStatusQuery,
   useBulkPreviewMutation,

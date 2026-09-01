@@ -10,19 +10,19 @@
 
 /** Müştəri adı → bazadakı kurs slug-ı. */
 export const COURSE_ALIASES = {
-  "general english": "ingilis-dili-kursu",
+  "general english": "ingilis-dili-kurslari",
   "business english": "biznes-ingilis-dili-kursu",
   "english for kids": "usaq-ingilis-dili",
   "rus dili": "rus-dili-kursu",
-  "ielts": "ielts",
-  "pre-ielts": "ielts", // eyni kurs — «IELTS & Pre-IELTS»
+  "ielts": "ielts-kurslari",
+  "pre-ielts": "ielts-kurslari", // eyni kurs — «IELTS & Pre-IELTS»
   "toefl": "toefl",
   "toeic": "toeic",
   "oet": "oet",
   "toles": "toles",
   "duolingo": "duolingo",
-  "sat verbal": "sat", // hər ikisi «SAT & Pre-SAT»
-  "sat math": "sat",
+  "sat verbal": "sat-kurslari", // hər ikisi «SAT & Pre-SAT»
+  "sat math": "sat-kurslari",
   "conversation moderator": "conversation-club",
   "ofis proqramları": "ms-office",
   // Yazılış səhvi müştəri mesajında: "Camridge English"

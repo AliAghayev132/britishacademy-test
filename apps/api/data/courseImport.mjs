@@ -105,7 +105,7 @@ const msOffice = {
 // İngilis dili
 // ─────────────────────────────────────────────────────────────
 const english = {
-  slug: "ingilis-dili-kursu",
+  slug: "ingilis-dili-kurslari",
   lead: L(
     "11 illik təcrübə, 4 filial və rəsmi TOEIC/TOEFL imtahan mərkəzi. Dərslər həftədə 2 dəfə, 90 dəqiqə.",
     "11 years of experience, 4 branches and an official TOEIC/TOEFL test centre. Classes twice a week, 90 minutes.",
@@ -268,7 +268,7 @@ const IELTS_NOTE = L(
 );
 
 const ielts = {
-  slug: "ielts",
+  slug: "ielts-kurslari",
   lead: L(
     "10 illik təcrübəsi və 8.0 IELTS dərəcəsi olan müəllimlərlə 3 aylıq hazırlıq proqramı.",
     "A 3-month preparation programme with teachers who have 10 years of experience and an IELTS score of 8.0.",

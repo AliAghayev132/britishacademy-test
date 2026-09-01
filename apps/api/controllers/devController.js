@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -213,4 +213,61 @@ const runImportBranches = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches };
+/**
+ * POST /api/admin/dev/migrate-slugs
+ *
+ * Kurs slug-larını köhnə saytın (daha çox axtarılan) ünvanlarına uyğunlaşdırır.
+ * Seed faylı artıq yeni sluglarla gəlir, amma seed bütün məzmunu silir — canlı
+ * saytda yalnız bu miqrasiya işlədilə bilər. İdempotentdir.
+ */
+const runMigrateSlugs = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await migrateCourseSlugs({ dryRun });
+  if (!dryRun && result.renamed) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Kurs slugları: ${result.renamed} yeniləndi`,
+    });
+  }
+  res.json({
+    success: true,
+    message: dryRun
+      ? `${result.renamed} slug dəyişəcək (sınaq rejimi)`
+      : `${result.renamed} slug yeniləndi`,
+    data: result,
+  });
+});
+
+/**
+ * POST /api/admin/dev/import-quizzes
+ *
+ * İngilis və Rus dili səviyyə testlərini yükləyir. Mövcud test
+ * TOXUNULMUR (admin sualları redaktə etmiş ola bilər) — üzərinə yazmaq
+ * üçün `overwrite: true` göndərilir.
+ */
+const runImportQuizzes = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const overwrite = Boolean(req.body?.overwrite);
+  const result = await importQuizzes({ dryRun, overwrite });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Testlər: ${result.created} yaradıldı, ${result.replaced} əvəz olundu`,
+    });
+  }
+  res.json({
+    success: true,
+    message: `${result.created} yaradıldı, ${result.replaced} əvəz olundu, ${result.skipped} toxunulmadı`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes };

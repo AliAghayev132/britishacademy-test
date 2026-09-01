@@ -11,7 +11,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database } from "lucide-react";
+import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList } from "lucide-react";
 // Data
 import {
   useAdminMigrateI18nMutation,
@@ -20,6 +20,8 @@ import {
   useImportFlagsMutation,
   useImportTeachersMutation,
   useImportBranchesMutation,
+  useMigrateSlugsMutation,
+  useImportQuizzesMutation,
   useAdminSeedMutation,
 } from "@/store/api/adminApi";
 
@@ -37,6 +39,10 @@ export default function DeveloperPage() {
   const [teacherReport, setTeacherReport] = useState(null);
   const [importBranches, { isLoading: branching }] = useImportBranchesMutation();
   const [branchReport, setBranchReport] = useState(null);
+  const [migrateSlugs, { isLoading: slugging }] = useMigrateSlugsMutation();
+  const [slugReport, setSlugReport] = useState(null);
+  const [importQuizzes, { isLoading: quizzing }] = useImportQuizzesMutation();
+  const [quizReport, setQuizReport] = useState(null);
   const [seed, { isLoading: seeding }] = useAdminSeedMutation();
   const [seedConfirm, setSeedConfirm] = useState("");
   const [counts, setCounts] = useState(null);
@@ -58,6 +64,47 @@ export default function DeveloperPage() {
     try {
       const res = await importBranches({ dryRun }).unwrap();
       setBranchReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "İmport alınmadı");
+    }
+  };
+
+  // Kurs sluglarını köhnə saytın ünvanlarına uyğunlaşdırır. Yalnız `slug`
+  // sahəsi dəyişir — mətn, qiymət, şəkil və baxış sayğacı toxunulmur.
+  const runMigrateSlugs = async (dryRun) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        title: "Kurs slugları yenilənsin?",
+        text: "Üç kursun ünvanı köhnə saytın (daha çox axtarılan) formasına keçir:<br><br><b>ingilis-dili-kursu → ingilis-dili-kurslari</b><br><b>ielts → ielts-kurslari</b><br><b>sat → sat-kurslari</b><br><br>Köhnə ünvanlar 301 ilə yenisinə yönləndirilir, ona görə mövcud linklər sınmır.",
+        confirmText: "Yenilə",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await migrateSlugs({ dryRun }).unwrap();
+      setSlugReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "Miqrasiya alınmadı");
+    }
+  };
+
+  // Səviyyə testlərini yükləyir. Mövcud test TOXUNULMUR — admin sualları
+  // redaktə etmiş ola bilər; üzərinə yazmaq üçün ayrıca düymə var.
+  const runImportQuizzes = async (overwrite) => {
+    const ok = await confirmDialog({
+      tone: overwrite ? "error" : undefined,
+      title: overwrite ? "Testlər başlanğıc məzmunla əvəz olunsun?" : "Testlər yüklənsin?",
+      text: overwrite
+        ? "Mövcud testlərin <b>bütün sualları silinir</b> və başlanğıc dəsti ilə əvəz olunur. Admin paneldə etdiyin redaktələr itir."
+        : "İngilis və Rus dili səviyyə testləri yaradılır. <b>Mövcud test toxunulmur.</b>",
+      confirmText: overwrite ? "Bəli, əvəz et" : "Yüklə",
+    });
+    if (!ok) return;
+    try {
+      const res = await importQuizzes({ overwrite }).unwrap();
+      setQuizReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
       notify.error(e?.data?.message || "İmport alınmadı");
@@ -516,6 +563,136 @@ export default function DeveloperPage() {
           </div>
         </div>
       </div>
+
+      {/* Səviyyə testləri */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-sky-50 text-sky-700">
+            <ClipboardList className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Səviyyə testlərini yüklə</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              İngilis dili (28 sual) və Rus dili (22 sual) testləri — CEFR şkalası ilə
+              A1–C1 nəticəsi. Köhnə saytın ən çox girilən iki səhifəsi
+              (<b>/english-test</b>, <b>/rus-dili-test</b>) bunlara yönləndirilir.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-sky-50 p-3 text-sm text-sky-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Mövcud test <b>toxunulmur</b> — sualları paneldən redaktə etmisənsə itmir.
+                Başlanğıc məzmuna qayıtmaq üçün «Üzərinə yaz» işlədilir.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportQuizzes(false)}
+                disabled={quizzing}
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:opacity-60"
+              >
+                <ClipboardList className="h-4 w-4" />
+                {quizzing ? "Yüklənir…" : "Testləri yüklə"}
+              </button>
+              <button
+                onClick={() => runImportQuizzes(true)}
+                disabled={quizzing}
+                className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+              >
+                Üzərinə yaz
+              </button>
+            </div>
+
+            {quizReport && (
+              <ul className="mt-6 space-y-1 text-sm">
+                {quizReport.items.map((r) => (
+                  <li key={r.slug} className="font-mono text-xs text-gray-600">
+                    {r.slug} — {r.status} ({r.questions} sual)
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+
+
+      {/* Kurs slug miqrasiyası */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-indigo-50 text-indigo-700">
+            <Route className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Kurs sluglarını köhnə ünvanlara uyğunlaşdır</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Köhnə saytda bu üç səhifə ayda <b>1300+ giriş</b> alırdı və ünvanları cəm
+              formada idi. Slug həmin formaya keçirilir ki, axtarış reytinqi yeni
+              səhifəyə otursun.
+            </p>
+
+            <div className="mt-4 overflow-hidden rounded-lg border border-gray-100 text-sm">
+              <table className="w-full">
+                <tbody className="divide-y divide-gray-100">
+                  <tr><td className="px-3 py-2 font-mono text-xs text-gray-500">ingilis-dili-kursu</td><td className="px-3 py-2 font-mono text-xs font-bold text-gray-900">→ ingilis-dili-kurslari</td></tr>
+                  <tr><td className="px-3 py-2 font-mono text-xs text-gray-500">ielts</td><td className="px-3 py-2 font-mono text-xs font-bold text-gray-900">→ ielts-kurslari</td></tr>
+                  <tr><td className="px-3 py-2 font-mono text-xs text-gray-500">sat</td><td className="px-3 py-2 font-mono text-xs font-bold text-gray-900">→ sat-kurslari</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Yalnız <b>slug</b> dəyişir. Köhnə ünvan 301 ilə yenisinə yönləndirilir,
+                ona görə paylaşılmış linklər sınmır. Təkrar işlədilə bilər.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runMigrateSlugs(true)}
+                disabled={slugging}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                <Route className="h-4 w-4" /> Yoxla (quru rejim)
+              </button>
+              <button
+                onClick={() => runMigrateSlugs(false)}
+                disabled={slugging}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              >
+                <Route className="h-4 w-4" />
+                {slugging ? "Yenilənir…" : "Yenilə"}
+              </button>
+            </div>
+
+            {slugReport && (
+              <div className="mt-6 space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Nəticə — {slugReport.renamed} slug {slugReport.dryRun ? "dəyişəcək (quru rejim)" : "yeniləndi"}
+                </div>
+                {slugReport.changes?.length > 0 && (
+                  <ul className="space-y-1 text-sm">
+                    {slugReport.changes.map((c) => (
+                      <li key={c.from} className="font-mono text-xs text-emerald-700">✓ {c.from} → {c.to}</li>
+                    ))}
+                  </ul>
+                )}
+                {slugReport.skipped?.length > 0 && (
+                  <ul className="space-y-1 text-sm">
+                    {slugReport.skipped.map((c) => (
+                      <li key={c.from} className="font-mono text-xs text-gray-400">— {c.from}: {c.reason}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
 
       {/* Filial əlaqə məlumatları */}
       <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

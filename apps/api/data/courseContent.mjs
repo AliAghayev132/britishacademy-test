@@ -20,7 +20,7 @@ const FORMAT = ['Format', 'Qrup (3–6 nəfər) / Fərdi'];
 
 export const COURSE_CONTENT = {
   /* ---------------------------------------------------------- */
-  'ingilis-dili-kursu.html': {
+  'ingilis-dili-kurslari.html': {
     h1: 'Azərbaycanda Yeganə Beynəlxalq Statuslu İngilis Dili Kursu – British Academy',
     lead: 'Böyük Britaniya mütəxəssislərinin hazırladığı metodika, rəsmi TOEIC imtahan mərkəzi statusu və 2 aya danışıq zəmanəti.',
     info: [SCHEDULE, LESSON, LEVELS, ['Qrup', '3–5, maksimum 6 nəfər']],

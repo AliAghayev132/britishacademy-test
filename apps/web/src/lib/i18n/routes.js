@@ -30,6 +30,7 @@ export const ROUTE_SLUGS = {
   telebelerimiz: { az: "telebelerimiz", en: "students", ru: "studenty" },
   bloq: { az: "bloq", en: "blog", ru: "blog" },
   elaqe: { az: "elaqe", en: "contact", ru: "kontakty" },
+  testler: { az: "testler", en: "tests", ru: "testy" },
 };
 
 // Əks indeks: istənilən dildəki slug → kanonik AZ seqment.

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { buildPath, canonicalPath, localeOfPath, splitLocale } from '@/lib/i18n/routes'
+import { legacyTarget } from '@/lib/legacyRoutes'
 
 // URL prefiksli dillər: /en, /ru. AZ default-dur (prefikssiz).
 const PREFIXED = ['en', 'ru']
@@ -38,6 +39,20 @@ export function proxy(request) {
   //   2) səhv slug istifadə olunubsa 308 ilə düzgün URL-ə yönləndirilir —
   //      /en/elaqe → /en/contact. Beləcə eyni məzmun iki URL-də qalmır.
   const { locale: prefixLang, path: stripped, prefixed } = splitLocale(pathname)
+
+  // ── Köhnə statik saytın ünvanları ──
+  //
+  // Dil məntiqindən ƏVVƏL yoxlanılır: köhnə ünvanlar (/ingilis-dili-kurslari)
+  // heç bir dilin slug lüğətində yoxdur, ona görə aşağıdakı addımlar onları
+  // toxunulmaz buraxıb 404-ə göndərərdi.
+  //
+  // Dil prefiksi saxlanılır — /en/english-test də düzgün hədəfə düşsün.
+  const legacy = legacyTarget(stripped)
+  if (legacy) {
+    const url = request.nextUrl.clone()
+    url.pathname = buildPath(legacy, prefixLang)
+    return NextResponse.redirect(url, 301)
+  }
 
   // Prefikssiz gələn əcnəbi slug (/contact) → aid olduğu dilin URL-inə yönəlt.
   if (!prefixed) {

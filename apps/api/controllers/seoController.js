@@ -9,7 +9,7 @@ import {
   Branch,
   Teacher,
   Destination,
-  BlogPost,
+  BlogPost, Quiz,
   Page,
 } from "#models";
 
@@ -24,7 +24,7 @@ const getRobots = asyncHandler(async (_req, res) => {
  * Returns paths only; the Next.js sitemap route prefixes the site origin.
  */
 const getUrls = asyncHandler(async (_req, res) => {
-  const [courses, categories, branches, teachers, destinations, posts, pages] =
+  const [courses, categories, branches, teachers, destinations, posts, pages, quizzes] =
     await Promise.all([
       Course.findPublic().select("slug updatedAt"),
       CourseCategory.findPublic().select("slug updatedAt"),
@@ -33,6 +33,7 @@ const getUrls = asyncHandler(async (_req, res) => {
       Destination.findPublic().select("slug updatedAt"),
       BlogPost.findPublished().select("slug updatedAt"),
       Page.findPublic().select("slug updatedAt"),
+      Quiz.findPublic().select("slug updatedAt"),
     ]);
 
   const map = (items, prefix, priority) =>
@@ -51,12 +52,15 @@ const getUrls = asyncHandler(async (_req, res) => {
     { path: "/xaricde-tehsil", priority: 0.7 },
     { path: "/bloq", priority: 0.7 },
     { path: "/elaqe", priority: 0.6 },
+    // Testlər — köhnə saytda ən çox girilən səhifələr idi, indeksdə qalmalıdır.
+    { path: "/testler", priority: 0.8 },
     ...map(categories, "/kurslar", 0.8),
     ...map(courses, "/kurslar", 0.8),
     ...map(branches, "/filiallar", 0.6),
     ...map(teachers, "/muellimler", 0.6),
     ...map(destinations, "/xaricde-tehsil", 0.6),
     ...map(posts, "/bloq", 0.6),
+    ...map(quizzes, "/testler", 0.7),
     ...map(pages, "", 0.5),
   ];
 

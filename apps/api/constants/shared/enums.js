@@ -34,6 +34,8 @@ const adminSections = [
   "users",         // İstifadəçilər
   "logs",          // Loglar
   "stats",         // Statistika
+  "links",         // İzlənilən linklər (reklam kampaniyaları)
+  "quizzes",       // Testlər
   "settings",      // Tənzimləmələr
   "developer",     // Texniki alətlər
 ];

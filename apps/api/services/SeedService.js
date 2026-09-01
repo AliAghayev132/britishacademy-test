@@ -10,11 +10,12 @@
 import { TEACHERS as TEACHER_ROWS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
 import { BRANCHES } from "../data/branchData.mjs";
 import { tri, FAQS } from "../data/translations.mjs";
+import { QUIZZES } from "../data/quizData.mjs";
 
 // Models
 import {
   SiteSetting, Branch, Teacher, CourseCategory, Course, CourseGroup,
-  Testimonial, Destination, MenuItem, Partner, Advantage, Page, Faq,
+  Testimonial, Destination, MenuItem, Partner, Advantage, Page, Faq, Quiz,
 } from "#models";
 
 // Local
@@ -41,7 +42,7 @@ const CATEGORIES = [
 ];
 
 const COURSES = [
-  { slug: "ingilis-dili-kursu", title: "İngilis dili kursu", cat: "dil-kurslari", featured: true },
+  { slug: "ingilis-dili-kurslari", title: "İngilis dili kursu", cat: "dil-kurslari", featured: true },
   { slug: "biznes-ingilis-dili-kursu", title: "Biznes İngilis dili kursu", cat: "dil-kurslari", featured: true },
   { slug: "huquqsunaslar-ingilis-dili-kursu", title: "Hüquqşünaslar üçün İngilis dili", cat: "dil-kurslari" },
   { slug: "otel-turizm-ingilis-dili-kursu", title: "Otel və Turizm üçün İngilis dili", cat: "dil-kurslari" },
@@ -53,11 +54,11 @@ const COURSES = [
   { slug: "fransiz-dili-kursu", title: "Fransız dili kursu", cat: "dil-kurslari" },
   { slug: "conversation-club", title: "Conversation Club", cat: "danisiq" },
   { slug: "workshop", title: "Workshop", cat: "danisiq" },
-  { slug: "ielts", title: "IELTS & Pre-IELTS", cat: "imtahanlar", featured: true },
+  { slug: "ielts-kurslari", title: "IELTS & Pre-IELTS", cat: "imtahanlar", featured: true },
   { slug: "toefl", title: "TOEFL & Pre-TOEFL", cat: "imtahanlar" },
   { slug: "oet", title: "OET (Tibb işçiləri üçün)", cat: "imtahanlar" },
   { slug: "toeic", title: "TOEIC (Rəsmi imtahan)", cat: "imtahanlar" },
-  { slug: "sat", title: "SAT & Pre-SAT", cat: "imtahanlar" },
+  { slug: "sat-kurslari", title: "SAT & Pre-SAT", cat: "imtahanlar" },
   { slug: "duolingo", title: "Duolingo", cat: "imtahanlar" },
   { slug: "toles", title: "TOLES", cat: "imtahanlar" },
   { slug: "tefl-kurslari", title: "TEFL Kursları", cat: "sertifikat" },
@@ -321,12 +322,22 @@ export function buildGraph() {
   // ona görə /api/faqs boş qayıdırdı və bölmə sabit mətnlərə düşürdü.
   const faqs = FAQS.map((f, i) => new Faq({ ...f, order: i }));
 
+  // Səviyyə testləri — köhnə saytın ən çox girilən iki səhifəsi
+  // (/english-test, /rus-dili-test) bunlara yönləndirilir.
+  const quizzes = QUIZZES.map(
+    (z) =>
+      new Quiz({
+        ...z,
+        questions: z.questions.map((qq, qi) => ({ ...qq, order: qi, isActive: true })),
+      }),
+  );
+
   const pages = [
     new Page({ title: "Haqqımızda", slug: "haqqimizda", isSystem: true, h1: "2014-cü ildən dünya dillərini Azərbaycana öyrədirik", lead: "British Academy — “English UK” akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti və rəsmi TOEFL beynəlxalq imtahan mərkəzidir.", order: 0 }),
     new Page({ title: "Əlaqə", slug: "elaqe", isSystem: true, h1: "Əlaqə", lead: "Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.", order: 1 }),
   ];
 
-  return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages, faqs };
+  return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages, faqs, quizzes };
 }
 
 // ── Validation ──
@@ -355,7 +366,7 @@ async function insert(graph) {
     Branch.deleteMany({}), Teacher.deleteMany({}), CourseCategory.deleteMany({}),
     Course.deleteMany({}), CourseGroup.deleteMany({}), Testimonial.deleteMany({}),
     Destination.deleteMany({}), MenuItem.deleteMany({}), Partner.deleteMany({}),
-    Advantage.deleteMany({}), Page.deleteMany({}), Faq.deleteMany({}),
+    Advantage.deleteMany({}), Page.deleteMany({}), Faq.deleteMany({}), Quiz.deleteMany({}),
   ]);
   await graph.site.save();
   await Branch.insertMany(graph.branches);
@@ -370,12 +381,13 @@ async function insert(graph) {
   await MenuItem.insertMany(graph.menu);
   await Page.insertMany(graph.pages);
   await Faq.insertMany(graph.faqs);
+  await Quiz.insertMany(graph.quizzes);
 
   return {
     Branch: graph.branches.length, Category: graph.categories.length, Teacher: graph.teachers.length,
     Course: graph.courses.length, CourseGroup: graph.groups.length, Destination: graph.destinations.length,
     Testimonial: graph.testimonials.length, Advantage: graph.advantages.length, Partner: graph.partners.length,
-    Menu: graph.menu.length, Page: graph.pages.length, Faq: graph.faqs.length,
+    Menu: graph.menu.length, Page: graph.pages.length, Faq: graph.faqs.length, Quiz: graph.quizzes.length,
   };
 }
 
