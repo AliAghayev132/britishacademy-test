@@ -129,19 +129,21 @@ sudo certbot certonly --webroot -w /var/www/html \
      --agree-tos -m <sənin@epoçtun> --no-eff-email
 ```
 
-Certbot-un SSL parametr faylları ilk dəfə yaranmaya bilər — yoxla:
+Sertifikatın yarandığını yoxla — yekun konfiq ona istinad edir:
 
 ```bash
-ls /etc/letsencrypt/options-ssl-nginx.conf /etc/letsencrypt/ssl-dhparams.pem
+sudo ls /etc/letsencrypt/live/britishacademy.az/
+# fullchain.pem və privkey.pem görünməlidir
 ```
 
-Yoxdursa yarat (yekun konfiq onlara istinad edir):
-
-```bash
-sudo curl -s -o /etc/letsencrypt/options-ssl-nginx.conf \
-  https://raw.githubusercontent.com/certbot/certbot/main/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
-sudo openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
-```
+> `options-ssl-nginx.conf` və `ssl-dhparams.pem` fayllarına **ehtiyac yoxdur**.
+> Onlar `python3-certbot-nginx` plaqini ilə gəlir, biz isə `certonly`
+> işlədirik. TLS parametrləri konfiqin öz içindədir. Əgər əvvəllər həmin
+> faylları yaratmağa cəhd edilibsə və içləri boş/səhvdirsə, nginx
+> `unexpected end of file` ilə çökür — sil:
+> ```bash
+> sudo rm -f /etc/letsencrypt/options-ssl-nginx.conf /etc/letsencrypt/ssl-dhparams.pem
+> ```
 
 İndi yekun (HTTPS) konfiqi qoy — lokal maşından:
 
@@ -151,8 +153,8 @@ scp "deploy\nginx\britishacademy.az.conf" `
 ```
 
 ```bash
-# Faylın tam getdiyini yoxla — 165 sətir olmalıdır.
-wc -l /etc/nginx/sites-available/britishacademy.az
+# Faylın tam getdiyini yoxla — 187 sətir olmalıdır.
+wc -l /etc/nginx/sites-available/britishacademy.az   # 187
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
