@@ -18,6 +18,12 @@
  *   node scripts/adminDoctor.js --reset --email=x@y.z --password='YeniParol123!'
  *       → konkret hesabın parolunu sıfırlayır
  *
+ *   node scripts/adminDoctor.js --dev
+ *       → DEVELOPER hesabını yoxlayır (.env-dəki DEFAULT_DEVELOPER_*)
+ *
+ *   node scripts/adminDoctor.js --dev --reset
+ *       → developer hesabını yaradır və ya parolunu sıfırlayır
+ *
  * Parol dəyişdirildikdə `tokenVersion` artırılır — bütün köhnə sessiyalar düşür.
  */
 
@@ -41,8 +47,15 @@ const mask = (s) => (s ? `${s.slice(0, 2)}${"•".repeat(Math.max(s.length - 2, 
 async function main() {
   await mongoDBService.connect();
 
-  const email = (arg("email") || config.defaultAdmin.email || "").toLowerCase();
-  const password = arg("password") || config.defaultAdmin.password;
+  // --dev bayrağı hədəfi developer hesabına çevirir. Ayrıca skript yazmaq
+  // əvəzinə eyni diaqnostikanı işlədirik — problem eynidir: bootstrap hesabı
+  // YALNIZ yoxdursa yaradır, .env dəyişikliyi mövcud hesaba təsir etmir.
+  const devMode = has("dev");
+  const defaults = devMode ? config.defaultDeveloper : config.defaultAdmin;
+  const targetRole = devMode ? "developer" : "admin";
+
+  const email = (arg("email") || defaults.email || "").toLowerCase();
+  const password = arg("password") || defaults.password;
 
   // ── 1) Mövcud vəziyyət ──
   const users = await User.find({ role: { $in: ["admin", "editor"] } })
@@ -101,7 +114,10 @@ async function main() {
         target.password = hash;
         target.status = "active";
         target.isDeleted = false;
-        target.role = target.role === "editor" ? "admin" : target.role;
+        // --dev ilə çağırılıbsa rolu developer-ə qaldırırıq; əks halda
+        // editor-u admin edirik (köhnə davranış).
+        if (devMode) target.role = "developer";
+        else if (target.role === "editor") target.role = "admin";
         target.tokenVersion = (target.tokenVersion || 0) + 1; // köhnə sessiyaları düşür
         await target.save();
         console.log(`\n✅ Parol sıfırlandı: ${target.email}`);

@@ -59,3 +59,43 @@ export const canSee = (user, section) => {
 /** Aktor hədəf rolu təyin edə bilərmi? (özündən aşağı olmalıdır) */
 export const canAssignRole = (actorRole, targetRole) =>
   (ROLE_RANK[actorRole] ?? -1) > (ROLE_RANK[targetRole] ?? 99);
+
+/**
+ * URL → bölmə açarı.
+ *
+ * Sidebar-da gizlətmək kifayət deyil: linki bilən istifadəçi ünvanı birbaşa
+ * yaza bilər. Bu xəritə route mühafizəsi üçündür. Serverdəki requireSection
+ * onsuz da API-ni bağlayır, bu isə istifadəçinin boş səhifə görməməsi
+ * («icazəniz yoxdur» mesajı) üçündür.
+ *
+ * Ən UZUN uyğunluq qazanır — /dashboard/resurslar/courses həm «resources»,
+ * həm «courses» ilə üst-üstə düşür, kurs bölməsi daha dəqiqdir.
+ */
+const ROUTE_SECTIONS = [
+  ["/dashboard/resurslar/courses", "courses"],
+  ["/dashboard/resurslar/teachers", "teachers"],
+  ["/dashboard/resurslar/branches", "branches"],
+  ["/dashboard/resurslar/course-groups", "course-groups"],
+  ["/dashboard/resurslar/testimonials", "testimonials"],
+  ["/dashboard/resurslar/destinations", "destinations"],
+  ["/dashboard/resurslar/blog-posts", "blog"],
+  ["/dashboard/resurslar/blog-categories", "blog"],
+  ["/dashboard/resurslar", "resources"],
+  ["/dashboard/muracietler", "leads"],
+  ["/dashboard/whatsapp", "whatsapp"],
+  ["/dashboard/istifadeciler", "users"],
+  ["/dashboard/loglar", "logs"],
+  ["/dashboard/tenzimlemeler", "settings"],
+  ["/dashboard/developer", "developer"],
+  ["/dashboard/profile", null], // profil hər kəsə açıqdır
+  ["/dashboard", "dashboard"],
+];
+
+/** Verilmiş path hansı bölməyə aiddir? (null = icazə tələb olunmur) */
+export const sectionForPath = (pathname) => {
+  const p = pathname || "";
+  for (const [prefix, section] of ROUTE_SECTIONS) {
+    if (p === prefix || p.startsWith(prefix + "/")) return section;
+  }
+  return null;
+};

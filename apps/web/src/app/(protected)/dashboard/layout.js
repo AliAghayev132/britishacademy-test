@@ -1,4 +1,5 @@
 import { DashboardSidebar } from '@/components/DashboardSidebar'
+import { SectionGuard } from '@/components/SectionGuard'
 import { FeedbackHost } from '@/components/ui/feedback'
 
 // The dashboard is private — keep it out of search indexes.
@@ -12,7 +13,12 @@ export const metadata = {
 export default function DashboardLayout({ children }) {
   return (
     <>
-      <DashboardSidebar>{children}</DashboardSidebar>
+      {/* SectionGuard icazəsiz bölmələri bağlayır. Əsas qoruma serverdədir
+          (requireSection); bu, istifadəçiyə boş səhifə əvəzinə aydın mesaj
+          göstərir. */}
+      <DashboardSidebar>
+        <SectionGuard>{children}</SectionGuard>
+      </DashboardSidebar>
       {/* Brand toast + confirm/alert host (custom, replaces SweetAlert) */}
       <FeedbackHost />
     </>

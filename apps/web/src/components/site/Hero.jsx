@@ -23,9 +23,9 @@ const SLOTS_RIGHT = [
   { pos: { bottom: 150, right: "10%" }, rot: 8, anim: "ba-float 6.8s ease-in-out infinite 1.4s", weight: 600 },
 ];
 
-// Admin siyahısı boşdursa istifadə olunan hazır dəyərlər.
-const DEFAULT_LEFT = ["Speaking", "IELTS 8.5", "Hallo"];
-const DEFAULT_RIGHT = ["Привет", "A1 → C1", "Konfrans"];
+// Defolt siyahılar TƏRCÜMƏ AÇARLARINDADIR (hero.default*), sabit deyil.
+// Əvvəl onlar burada azərbaycanca yazılmışdı: admin siyahını doldurmayanda
+// EN/RU səhifədə də azərbaycanca «İngilis dili, Uşaqlar üçün…» görünürdü.
 
 /** Fisher–Yates — siyahını qarışdırıb ilk n elementi qaytarır. */
 function sample(list, n) {
@@ -36,12 +36,6 @@ function sample(list, n) {
   }
   return a.slice(0, n);
 }
-
-/** Kateqoriya həbləri — admin siyahısı boşdursa bunlar işlənir. */
-const DEFAULT_PILLS = [
-  "İngilis dili", "IELTS", "Duolingo", "Rus dili", "Alman dili", "Danışıq klubu",
-  "Kompüter", "Uşaqlar üçün", "Biznes İngilis", "TOEFL", "SAT", "Xaricdə təhsil",
-];
 
 const CHIP_STYLE = {
   display: "inline-block",
@@ -116,7 +110,7 @@ export function Hero({ hero, stats = [] }) {
   // ── Derived / state ──
   const t = useT();
   const wordList = toList(hero?.words);
-  const words = wordList.length ? wordList : ["ingiliscə danış"];
+  const words = wordList.length ? wordList : toList(t("hero.defaultWords"));
   const colors = hero?.colors?.length ? hero.colors : ["#001478"];
   const [i, setI] = useState(0);
   const [reduced, setReduced] = useState(false);
@@ -126,9 +120,10 @@ export function Hero({ hero, stats = [] }) {
   const leftPool = toList(hero?.chipsLeft);
   const rightPool = toList(hero?.chipsRight);
   const pills = toList(hero?.pills);
-  const poolL = leftPool.length ? leftPool : DEFAULT_LEFT;
-  const poolR = rightPool.length ? rightPool : DEFAULT_RIGHT;
-  const pillList = pills.length ? pills : DEFAULT_PILLS;
+  // Boş olanda cari dilin defolt siyahısı işlənir.
+  const poolL = leftPool.length ? leftPool : toList(t("hero.defaultChipsLeft"));
+  const poolR = rightPool.length ? rightPool : toList(t("hero.defaultChipsRight"));
+  const pillList = pills.length ? pills : toList(t("hero.defaultPills"));
 
   /**
    * SSR-də deterministik ilk N söz göstərilir, mount-dan SONRA təsadüfi
