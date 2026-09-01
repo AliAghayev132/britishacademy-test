@@ -168,6 +168,11 @@ export default async function CoursePage({ params }) {
   const tr = await getT();
   const { course, teachersByBranch = [], related = [] } = res.data;
 
+  // Qiymət varmı? Boşdursa bölmə ümumiyyətlə göstərilmir — əvvəl başlıq
+  // görünür, altı boş qalırdı (qiymətlər admin paneldən doldurulana qədər).
+  const hasPricing =
+    (course.pricing || []).length > 0 || (course.customPricing || []).length > 0;
+
   // ── Unique teachers across all branches (for the standalone section) ──
   const uniqueTeachers = [];
   const seenTeachers = new Set();
@@ -253,11 +258,13 @@ export default async function CoursePage({ params }) {
       </section>
 
       {/* Prices */}
+      {hasPricing && (
       <section id="qiymetler" style={{ ...wrap, padding: "56px 28px 0" }}>
         <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 22px" }}>{course.pricingMode === "custom" ? tr("course.prices") : tr("course.pricesByBranch")}</h2>
         <PriceCards course={course} teachersByBranch={teachersByBranch} />
         <p style={{ fontSize: 13.5, color: "#63636E", margin: "14px 0 0" }}>{tr("course.priceHelp")} <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>{tr("course.contactSave")}</Link>.</p>
       </section>
+      )}
 
       {/* Features */}
       {course.features?.length > 0 && <FeaturesGrid features={course.features} tr={tr} />}
