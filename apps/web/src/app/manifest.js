@@ -14,9 +14,18 @@ export default async function manifest() {
     display: "standalone",
     background_color: "#ffffff",
     theme_color: s?.brand?.themeColor || "#00157A",
+    // Ölçülər FAKTİKİ fayl ölçüləri olmalıdır. Əvvəl 192x192 və 512x512
+    // yazılmışdı, halbuki fayllar 76x76 və 180x180-dir — brauzer
+    // «Resource size is not correct» xəbərdarlığı verib ikonu atırdı.
     icons: [
-      { src: s?.brand?.favicon || "/assets/favicon.png", sizes: "192x192", type: "image/png" },
-      { src: "/assets/favicon-180.png", sizes: "512x512", type: "image/png" },
+      // Admin paneldən yüklənən favicon: ölçüsü əvvəlcədən məlum deyil, ona
+      // görə konkret ölçü elan edilmir. `any` — spesifikasiyada icazə verilən
+      // dəyərdir və yanlış ölçü iddiası yaratmır.
+      ...(s?.brand?.favicon
+        ? [{ src: s.brand.favicon, sizes: "any", type: "image/png" }]
+        : []),
+      { src: "/assets/favicon.png", sizes: "76x76", type: "image/png" },
+      { src: "/assets/favicon-180.png", sizes: "180x180", type: "image/png" },
     ],
   };
 }
