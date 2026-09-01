@@ -58,13 +58,17 @@ async function main() {
   const password = arg("password") || defaults.password;
 
   // ── 1) Mövcud vəziyyət ──
-  const users = await User.find({ role: { $in: ["admin", "editor"] } })
+  // --dev rejimində yalnız developer hesabları göstərilir.
+  const roleFilter = devMode
+    ? ["developer"]
+    : ["admin", "editor", "superadmin", "developer"];
+  const users = await User.find({ role: { $in: roleFilter } })
     .select("+password")
     .lean();
 
-  console.log("\n═══ ADMIN HESABLARI ═══");
+  console.log(`\n═══ ${devMode ? "DEVELOPER" : "ADMIN"} HESABLARI ═══`);
   if (!users.length) {
-    console.log("  ⚠️  HEÇ BİR admin/editor hesabı yoxdur.");
+    console.log(`  ⚠️  HEÇ BİR ${devMode ? "developer" : "admin/editor"} hesabı yoxdur.`);
   } else {
     for (const u of users) {
       const flags = [
@@ -80,8 +84,9 @@ async function main() {
   }
 
   console.log("\n═══ .env GÖZLƏNTİSİ ═══");
-  console.log("  DEFAULT_ADMIN_EMAIL   :", config.defaultAdmin.email);
-  console.log("  DEFAULT_ADMIN_PASSWORD:", mask(config.defaultAdmin.password));
+  const envPrefix = devMode ? "DEFAULT_DEVELOPER" : "DEFAULT_ADMIN";
+  console.log(`  ${envPrefix}_EMAIL   :`, defaults.email);
+  console.log(`  ${envPrefix}_PASSWORD:`, mask(defaults.password));
 
   // ── 2) Hədəf hesabı yoxla ──
   const target = await User.findOne({ email }).select("+password");
@@ -123,20 +128,20 @@ async function main() {
         console.log(`\n✅ Parol sıfırlandı: ${target.email}`);
       } else {
         const created = await User.create({
-          firstName: "Default",
-          lastName: "Admin",
+          firstName: devMode ? "Developer" : "Default",
+          lastName: devMode ? "" : "Admin",
           email,
           password: hash,
-          role: "admin",
+          role: targetRole,
           status: "active",
         });
-        console.log(`\n✅ Yeni admin yaradıldı: ${created.email}`);
+        console.log(`\n✅ Yeni ${targetRole} yaradıldı: ${created.email}`);
       }
       console.log(`   Parol: ${password}`);
       console.log("   ⚠️  Girişdən sonra dəyişdirin.");
     }
   } else {
-    console.log("\n(Sıfırlamaq üçün: node scripts/adminDoctor.js --reset)");
+    console.log(`\n(Sıfırlamaq üçün: node scripts/adminDoctor.js${devMode ? " --dev" : ""} --reset)`);
   }
 
   await mongoDBService.disconnect();
