@@ -4,13 +4,22 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler, fuzzyRegex } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole } from "#utils";
 import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
 import { HashService, logAction } from "#services";
 import { adminRoles, adminSections } from "#constants";
 
-const isAdmin = (req) => req.user?.role === "admin";
+/**
+ * İstifadəçi idarəsi üçün minimum səlahiyyət.
+ *
+ * ƏVVƏL bu, rolun dəqiq «admin» olmasını tələb edirdi. Rollar genişlənəndə
+ * (superadmin, developer) həmin yoxlama ONLARI bloklayırdı, halbuki route
+ * səviyyəsində məhz onlara icazə verilir. Nəticədə HEÇ KİM istifadəçi idarə
+ * edə bilmirdi: admin route-dan, superadmin/developer isə buradan geri
+ * qaytarılırdı.
+ */
+const canManageUsers = (req) => hasRole(req.user, "superadmin");
 const publicUser = (u) => ({
   _id: u._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
   phone: u.phone, role: u.role, status: u.status, lastLogin: u.lastLogin,
@@ -37,7 +46,7 @@ const listUsers = asyncHandler(async (req, res) => {
 
 // ── POST /api/admin/users ──
 const createUser = asyncHandler(async (req, res) => {
-  if (!isAdmin(req)) return res.status(403).json({ success: false, message: "Yalnız admin istifadəçi yarada bilər" });
+  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
   const {
     firstName, lastName, email, password, phone,
     role = "editor", status = "active", permissions = [],
@@ -69,7 +78,7 @@ const createUser = asyncHandler(async (req, res) => {
 
 // ── PUT /api/admin/users/:id ──
 const updateUser = asyncHandler(async (req, res) => {
-  if (!isAdmin(req)) return res.status(403).json({ success: false, message: "Yalnız admin dəyişə bilər" });
+  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
 
@@ -105,16 +114,28 @@ const updateUser = asyncHandler(async (req, res) => {
 
 // ── DELETE /api/admin/users/:id ──
 const removeUser = asyncHandler(async (req, res) => {
-  if (!isAdmin(req)) return res.status(403).json({ success: false, message: "Yalnız admin silə bilər" });
+  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
   if (String(req.params.id) === String(req.user._id)) {
     return res.status(400).json({ success: false, message: "Özünü silə bilməzsən" });
   }
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
 
-  if (user.role === "admin") {
-    const admins = await User.countDocuments({ role: "admin", isDeleted: false });
-    if (admins <= 1) return res.status(400).json({ success: false, message: "Sonuncu admini silmək olmaz" });
+  // Panelə girişi olan SONUNCU hesabı silməyə imkan vermirik. Əvvəl yalnız
+  // "admin" rolu sayılırdı — superadmin/developer varsa admin silinə bilmirdi,
+  // əksinə sonuncu developer isə asanlıqla silinirdi.
+  if (["admin", "superadmin", "developer"].includes(user.role)) {
+    const remaining = await User.countDocuments({
+      role: { $in: ["admin", "superadmin", "developer"] },
+      isDeleted: false,
+      _id: { $ne: user._id },
+    });
+    if (remaining === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Panelə girişi olan sonuncu hesabı silmək olmaz",
+      });
+    }
   }
   user.isDeleted = true;
   await user.save();
