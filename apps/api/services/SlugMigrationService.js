@@ -1,5 +1,7 @@
 // Models
 import { Course } from "#models";
+// Data
+import { SLUG_RENAMES } from "../data/slugAliases.mjs";
 
 /**
  * Kurs slug-larının köhnə saytın ünvanlarına uyğunlaşdırılması.
@@ -21,12 +23,9 @@ import { Course } from "#models";
  * İDEMPOTENTDİR — təkrar işlədilə bilər, ikinci dəfə heç nə dəyişmir.
  */
 
-/** Köhnə slug → yeni slug. Sağ tərəf legacyRoutes.js-dəki hədəflərlə eynidir. */
-export const SLUG_RENAMES = {
-  "ingilis-dili-kursu": "ingilis-dili-kurslari",
-  ielts: "ielts-kurslari",
-  sat: "sat-kurslari",
-};
+// Xəritə ortaq data faylındadır — publicController-dəki ehtiyat axtarış da
+// eyni mənbədən oxuyur ki, iki yerdə ayrılmasınlar.
+export { SLUG_RENAMES } from "../data/slugAliases.mjs";
 
 /**
  * @param {object} opts

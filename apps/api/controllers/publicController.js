@@ -18,6 +18,8 @@ import {
   Advantage,
   Faq,
 } from "#models";
+// Data
+import { LEGACY_SLUG_OF } from "../data/slugAliases.mjs";
 
 /* ---------------- Site chrome ---------------- */
 
@@ -143,14 +145,20 @@ const listCourses = asyncHandler(async (req, res) => {
  * Populates category + the price matrix's branches, and derives the
  * "who teaches here" chips per branch from the schedule (CourseGroup).
  */
-const getCourseBySlug = asyncHandler(async (req, res) => {
-  const course = await Course.findOne({
-    slug: req.params.slug,
-    isActive: true,
-    isDeleted: false,
-  })
+const findCourse = (slug) =>
+  Course.findOne({ slug, isActive: true, isDeleted: false })
     .populate("category")
     .populate("pricing.branch");
+
+const getCourseBySlug = asyncHandler(async (req, res) => {
+  let course = await findCourse(req.params.slug);
+
+  // Slug dəyişdirilib, amma baza miqrasiyası hələ işlədilməyibsə yeni slug
+  // bazada olmur. Yönləndirmə isə artıq yeni slug-a işarə edir — nəticədə
+  // 301 → 404 zənciri yaranırdı. Ehtiyat olaraq köhnə slug ilə axtarırıq.
+  if (!course && LEGACY_SLUG_OF[req.params.slug]) {
+    course = await findCourse(LEGACY_SLUG_OF[req.params.slug]);
+  }
 
   if (!course) {
     return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
