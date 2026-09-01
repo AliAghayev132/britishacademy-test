@@ -129,7 +129,7 @@ async function main() {
       } else {
         const created = await User.create({
           firstName: devMode ? "Developer" : "Default",
-          lastName: devMode ? "" : "Admin",
+          lastName: devMode ? "Hesabı" : "Admin",
           email,
           password: hash,
           role: targetRole,

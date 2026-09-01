@@ -65,8 +65,10 @@ const bootstrapDeveloper = async () => {
     );
 
     const dev = await User.create({
+      // lastName modeldə MƏCBURİDİR — boş string validasiyadan keçmir və
+      // hesab səssizcə yaradılmırdı ("User validation failed: lastName").
       firstName: "Developer",
-      lastName: "",
+      lastName: "Hesabı",
       email: config.defaultDeveloper.email,
       password: hashedPassword,
       role: "developer",
