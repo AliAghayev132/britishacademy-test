@@ -4,6 +4,9 @@ import { jwt } from "#lib";
 // Config
 import { config } from "#config";
 
+// Constants
+import { ROLE_RANK } from "#constants";
+
 // Models
 import { User } from "#models";
 
