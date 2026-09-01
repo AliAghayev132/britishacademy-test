@@ -7,13 +7,16 @@
 
 // React
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Pagination } from "@/components/ui/Pagination";
 // UI / kit
 import { Overlay, Field, TextInput, NativeSelect } from "../_forms/kit";
 import { notify, confirmDialog } from "@/components/ui/feedback";
 import { ActionsMenu } from "@/components/ui/ActionsMenu";
+import { PermissionsModal } from "./PermissionsModal";
+import { ROLE_LABELS, SEES_EVERYTHING, SECTIONS, canAssignRole } from "@/lib/permissions";
 // Icons
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ShieldCheck } from "lucide-react";
 // Data (RTK Query)
 import {
   useAdminUsersQuery,
@@ -24,9 +27,13 @@ import {
 import { QueryState } from "@/components/ui/QueryState";
 
 // ── Constants ──
-const ROLES = [
+// Rol siyahısı komponent daxilində filtrlənir: kimsə ÖZÜNDƏN yüksək və ya
+// bərabər rol təyin edə bilməz (serverdə də canAssignRole yoxlayır).
+const ALL_ROLES = [
+  { value: "editor", label: "Redaktor" },
   { value: "admin", label: "Admin" },
-  { value: "editor", label: "Editor" },
+  { value: "superadmin", label: "Super admin" },
+  { value: "developer", label: "Developer" },
 ];
 const STATUSES = [
   { value: "active", label: "Aktiv" },
@@ -35,7 +42,9 @@ const STATUSES = [
 ];
 
 const ROLE_BADGE = {
-  admin: "bg-[#00157A] text-white",
+  developer: "bg-violet-600 text-white",
+  superadmin: "bg-[#00157A] text-white",
+  admin: "bg-blue-100 text-blue-800",
   editor: "bg-gray-200 text-gray-700",
 };
 const STATUS_BADGE = {
@@ -52,6 +61,7 @@ const fmt = (d) =>
 // ── Create / edit modal ──
 function UserForm({ user, onClose }) {
   const editing = !!user;
+  const me = useSelector((st) => st.auth.user);
   const [form, setForm] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
@@ -68,6 +78,10 @@ function UserForm({ user, onClose }) {
   const saving = creating || updating;
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Özündən yüksək və ya bərabər rol təyin etmək olmaz — server də bunu
+  // rədd edir, burada isə seçim ümumiyyətlə göstərilmir.
+  const assignableRoles = ALL_ROLES.filter((r) => canAssignRole(me?.role, r.value));
 
   const save = async () => {
     setError("");
@@ -127,7 +141,7 @@ function UserForm({ user, onClose }) {
           <TextInput value={form.phone} onChange={set("phone")} placeholder="+994 ..." />
         </Field>
         <Field label="Rol">
-          <NativeSelect options={ROLES} value={form.role} onChange={set("role")} />
+          <NativeSelect options={assignableRoles} value={form.role} onChange={set("role")} />
         </Field>
         <Field label="Status">
           <NativeSelect options={STATUSES} value={form.status} onChange={set("status")} />
@@ -149,6 +163,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(null); // null | "create" | user object
+  const [perms, setPerms] = useState(null); // icazə modalının hədəf istifadəçisi
 
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsersQuery({ page, search });
   const [del] = useAdminDeleteUserMutation();
@@ -215,6 +230,7 @@ export default function UsersPage() {
                   <th className="px-4 py-3">Ad Soyad</th>
                   <th className="px-4 py-3">E-poçt</th>
                   <th className="px-4 py-3">Rol</th>
+                  <th className="px-4 py-3">İcazələr</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="hidden px-4 py-3 md:table-cell">Son giriş</th>
                   <th className="px-4 py-3 text-right">Əməliyyat</th>
@@ -231,20 +247,42 @@ export default function UsersPage() {
                       <td className="px-4 py-3 text-gray-600">{u.email}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${ROLE_BADGE[u.role] || ROLE_BADGE.editor}`}>
-                          {u.role === "admin" ? "Admin" : "Editor"}
+                          {ROLE_LABELS[u.role] || u.role}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {SEES_EVERYTHING.includes(u.role) ? (
+                          <span className="text-xs font-semibold text-blue-700">Hamısı</span>
+                        ) : (u.permissions || []).length === 0 ? (
+                          <span className="text-xs text-amber-600" title="Məhdudiyyət yoxdur — bütün bölmələr açıqdır">
+                            Məhdudiyyətsiz
+                          </span>
+                        ) : (
+                          <span className="text-xs font-semibold text-gray-700">
+                            {u.permissions.length} / {SECTIONS.length} bölmə
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
                       </td>
                       <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(u.lastLogin)}</td>
                       <td className="px-4 py-3">
-                        <ActionsMenu
-                          actions={[
-                            { label: "Redaktə", icon: Pencil, onClick: () => setModal(u) },
-                            { label: "Sil", icon: Trash2, tone: "danger", onClick: () => remove(u) },
-                          ]}
-                        />
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setPerms(u)}
+                            title="Bölmə icazələri"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-blue-300 hover:text-[#00157A]"
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5" /> İcazələr
+                          </button>
+                          <ActionsMenu
+                            actions={[
+                              { label: "Redaktə", icon: Pencil, onClick: () => setModal(u) },
+                              { label: "Sil", icon: Trash2, tone: "danger", onClick: () => remove(u) },
+                            ]}
+                          />
+                        </div>
                       </td>
                     </tr>
                   );
@@ -263,6 +301,7 @@ export default function UsersPage() {
       />
 
       {modal && <UserForm user={modal === "create" ? null : modal} onClose={() => setModal(null)} />}
+      {perms && <PermissionsModal user={perms} onClose={() => setPerms(null)} />}
     </div>
   );
 }

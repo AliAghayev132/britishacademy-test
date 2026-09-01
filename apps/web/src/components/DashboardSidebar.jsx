@@ -36,6 +36,14 @@ import {
   Database,
   ShieldCheck,
   ScrollText,
+  ChevronDown,
+  Tags,
+  HelpCircle,
+  Sparkles,
+  Handshake,
+  Menu as MenuIcon,
+  Image as ImageIcon,
+  FileStack,
 } from 'lucide-react'
 
 // Utils
@@ -48,24 +56,113 @@ import { ADMIN_RESOURCES } from '@/lib/adminResources'
 // at /dashboard/resurslar/<resource> (see resourceRegistry on the server).
 // `section` icazə açarıdır — serverdəki adminSections ilə eyni.
 // Profil hər kəsə açıqdır, ona görə onun bölməsi yoxdur.
-const navItems = [
+/**
+ * Naviqasiya QRUPLARA bölünüb.
+ *
+ * Əvvəl 16 element bir siyahıda idi və «Digər resurslar» adlı ümumi düymə
+ * altında 8 bölmə gizlənirdi — istifadəçi nə olduğunu görmək üçün ora girib
+ * axtarmalı olurdu. İndi hər bölmənin öz sətri var, oxşarlar isə açılan
+ * qrupda toplanıb.
+ *
+ * `section` icazə açarıdır (serverdəki adminSections ilə eyni). Alt-resurslar
+ * məntiqi valideynlərinin icazəsini paylaşır: kurs kateqoriyaları «courses»,
+ * bloq kateqoriyaları «blog», qalanı isə «resources».
+ */
+const NAV_TOP = [
   { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
   { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, section: 'leads' },
-  { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap, section: 'courses' },
-  { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
-  { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
-  { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock, section: 'course-groups' },
-  { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote, section: 'testimonials' },
-  { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2, section: 'destinations' },
-  { name: 'Bloq', href: '/dashboard/resurslar/blog-posts', icon: FileText, section: 'blog' },
-  { name: 'Digər resurslar', href: '/dashboard/resurslar', icon: Boxes, exact: true, section: 'resources' },
-  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
-  { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
-  { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
-  { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
-  { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },
-  { name: 'Profil', href: '/dashboard/profile', icon: User },
 ]
+
+const NAV_GROUPS = [
+  {
+    key: 'tedris',
+    label: 'Tədris',
+    icon: GraduationCap,
+    items: [
+      { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap, section: 'courses' },
+      { name: 'Kurs kateqoriyaları', href: '/dashboard/resurslar/course-categories', icon: Tags, section: 'courses' },
+      { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock, section: 'course-groups' },
+      { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
+      { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
+    ],
+  },
+  {
+    key: 'mezmun',
+    label: 'Məzmun',
+    icon: FileText,
+    items: [
+      { name: 'Bloq yazıları', href: '/dashboard/resurslar/blog-posts', icon: FileText, section: 'blog' },
+      { name: 'Bloq kateqoriyaları', href: '/dashboard/resurslar/blog-categories', icon: Tags, section: 'blog' },
+      { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote, section: 'testimonials' },
+      { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2, section: 'destinations' },
+      { name: 'Səhifələr', href: '/dashboard/resurslar/pages', icon: FileStack, section: 'resources' },
+      { name: 'FAQ', href: '/dashboard/resurslar/faqs', icon: HelpCircle, section: 'resources' },
+      { name: 'Üstünlüklər', href: '/dashboard/resurslar/advantages', icon: Sparkles, section: 'resources' },
+      { name: 'Tərəfdaşlar', href: '/dashboard/resurslar/partners', icon: Handshake, section: 'resources' },
+      { name: 'Menyu', href: '/dashboard/resurslar/menu-items', icon: MenuIcon, section: 'resources' },
+      { name: 'Media', href: '/dashboard/resurslar/media', icon: ImageIcon, section: 'resources' },
+    ],
+  },
+  {
+    key: 'sistem',
+    label: 'Sistem',
+    icon: Settings,
+    items: [
+      { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
+      { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
+      { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
+      { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
+      { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },
+    ],
+  },
+]
+
+const NAV_BOTTOM = [{ name: 'Profil', href: '/dashboard/profile', icon: User }]
+
+/**
+ * Sidebar-ın tək naviqasiya sətri.
+ *
+ * Əvvəl bu markup nav dövrünün içində idi; qruplar əlavə olunanda üç yerdə
+ * təkrarlanmalı olardı, ona görə ayrıca komponentə çıxarıldı.
+ *
+ * `open` — sidebar açıqdırmı (yığılanda yalnız ikon görünür).
+ */
+function NavLink({ item, active, open, badge = 0 }) {
+  return (
+    <Link
+      href={item.href}
+      title={!open ? item.name : undefined}
+      style={active ? { background: '#00157A', color: '#fff' } : undefined}
+      className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+        active ? 'shadow-md shadow-[#00157A]/25' : 'text-gray-700 hover:bg-[#00157A] hover:text-white'
+      }`}
+    >
+      <item.icon
+        className="h-5 w-5 shrink-0 group-hover:text-white"
+        style={active ? { color: '#fff' } : undefined}
+      />
+      <span
+        className={`overflow-hidden whitespace-nowrap text-[15px] font-bold transition-all duration-200 group-hover:text-white ${
+          open ? 'max-w-[170px] opacity-100' : 'max-w-0 opacity-0'
+        }`}
+        style={active ? { color: '#fff' } : undefined}
+        aria-hidden={!open}
+      >
+        {item.name}
+      </span>
+
+      {/* Yeni müraciət sayı */}
+      {badge > 0 &&
+        (open ? (
+          <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        ) : (
+          <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+        ))}
+    </Link>
+  )
+}
 
 /**
  * The full dashboard shell: collapsible sidebar + top header + main content.
@@ -97,9 +194,48 @@ export const DashboardSidebar = ({ children }) => {
   // Mount-dan əvvəl user null olduğu üçün siyahı boş qalardı və hidratasiyadan
   // sonra sıçrayardı; ona görə mount olana qədər tam siyahı göstərilir və
   // filtrləmə klient tərəfdə tətbiq olunur.
-  const visibleNav = mounted
-    ? navItems.filter((i) => !i.section || canSee(user, i.section))
-    : navItems
+  const allow = (i) => !mounted || !i.section || canSee(user, i.section)
+
+  const topNav = NAV_TOP.filter(allow)
+  const bottomNav = NAV_BOTTOM.filter(allow)
+  // Boş qalan qrup ümumiyyətlə göstərilmir.
+  const groups = NAV_GROUPS
+    .map((g) => ({ ...g, items: g.items.filter(allow) }))
+    .filter((g) => g.items.length)
+
+  // Başlıq axtarışı üçün düz siyahı.
+  const flatNav = [...topNav, ...groups.flatMap((g) => g.items), ...bottomNav]
+
+  // Qruplar AÇIQ başlayır. Bağlı başlasaydı, silinən «Digər resurslar»
+  // düyməsinin problemini təkrarlayardıq: bölmələr yenə gizli qalardı.
+  // İstifadəçi bağlayanda seçim localStorage-da saxlanılır ki, hər səhifə
+  // keçidində açılmasın.
+  const [openGroups, setOpenGroups] = useState(() =>
+    Object.fromEntries(NAV_GROUPS.map((g) => [g.key, true])),
+  )
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('ba-nav-groups') || 'null')
+      if (saved && typeof saved === 'object') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage yalnız brauzerdə oxunur; SSR-də defolt (hamısı açıq) qalmalıdır
+        setOpenGroups((prev) => ({ ...prev, ...saved }))
+      }
+    } catch {
+      // Pozulmuş dəyər — defolt saxlanılır.
+    }
+  }, [])
+
+  const toggleGroup = (key) =>
+    setOpenGroups((prev) => {
+      const next = { ...prev, [key]: !prev[key] }
+      try {
+        localStorage.setItem('ba-nav-groups', JSON.stringify(next))
+      } catch {
+        // Quota/privat rejim — yaddaş olmadan da işləməlidir.
+      }
+      return next
+    })
   const [logoutApi] = useLogoutMutation()
 
   // Yeni (baxılmamış) müraciət sayı — sidebar-da qırmızı badge. Status
@@ -115,7 +251,7 @@ export const DashboardSidebar = ({ children }) => {
   const resourceMatch = pathname.match(/^\/dashboard\/resurslar\/([^/]+)/)
   const currentTitle = resourceMatch
     ? ADMIN_RESOURCES[resourceMatch[1]]?.name || 'Resurs'
-    : [...visibleNav]
+    : [...flatNav]
         .reverse()
         .find((item) =>
           item.exact ? pathname === item.href : pathname.startsWith(item.href)
@@ -175,47 +311,59 @@ export const DashboardSidebar = ({ children }) => {
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-          {visibleNav.map((item) => {
-            const active = isActive(item)
-            const badge = item.href === '/dashboard/muracietler' ? newLeads : 0
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={!sidebarOpen ? item.name : undefined}
-                style={active ? { background: '#00157A', color: '#fff' } : undefined}
-                className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                  active
-                    ? 'shadow-md shadow-[#00157A]/25'
-                    : 'text-gray-700 hover:bg-[#00157A] hover:text-white'
-                }`}
-              >
-                <item.icon className="w-5 h-5 shrink-0 group-hover:text-white" style={active ? { color: '#fff' } : undefined} />
-                <span
-                  className={`text-[15px] font-bold whitespace-nowrap overflow-hidden group-hover:text-white transition-all duration-200 ${
-                    sidebarOpen ? 'opacity-100 max-w-[170px]' : 'opacity-0 max-w-0'
-                  }`}
-                  style={active ? { color: '#fff' } : undefined}
-                  aria-hidden={!sidebarOpen}
-                >
-                  {item.name}
-                </span>
+        {/* Navigation — qruplu */}
+        <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
+          {topNav.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              active={isActive(item)}
+              open={sidebarOpen}
+              badge={item.href === '/dashboard/muracietler' ? newLeads : 0}
+            />
+          ))}
 
-                {/* Yeni müraciət badge-i (varsa) */}
-                {badge > 0 && (
-                  sidebarOpen ? (
-                    <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
-                      {badge > 99 ? '99+' : badge}
-                    </span>
-                  ) : (
-                    <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
-                  )
+          {groups.map((g) => {
+            const hasActive = g.items.some((i) => isActive(i))
+            // Sidebar yığılanda başlıqlar yer tutmasın — elementlər düz sıralanır.
+            if (!sidebarOpen) {
+              return g.items.map((item) => (
+                <NavLink key={item.href} item={item} active={isActive(item)} open={false} badge={0} />
+              ))
+            }
+            const expanded = openGroups[g.key] || hasActive
+            return (
+              <div key={g.key} className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(g.key)}
+                  aria-expanded={expanded}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 transition hover:text-gray-600"
+                >
+                  <g.icon className="h-3.5 w-3.5" />
+                  <span>{g.label}</span>
+                  <ChevronDown
+                    className={`ml-auto h-3.5 w-3.5 transition-transform duration-200 ${expanded ? '' : '-rotate-90'}`}
+                  />
+                </button>
+                {expanded && (
+                  <div className="mt-1 space-y-1">
+                    {g.items.map((item) => (
+                      <NavLink key={item.href} item={item} active={isActive(item)} open badge={0} />
+                    ))}
+                  </div>
                 )}
-              </Link>
+              </div>
             )
           })}
+
+          {bottomNav.length > 0 && (
+            <div className="mt-2 border-t border-gray-100 pt-2">
+              {bottomNav.map((item) => (
+                <NavLink key={item.href} item={item} active={isActive(item)} open={sidebarOpen} badge={0} />
+              ))}
+            </div>
+          )}
         </nav>
 
         {/* Logout */}

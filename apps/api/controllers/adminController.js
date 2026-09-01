@@ -70,6 +70,29 @@ const list = asyncHandler(async (req, res) => {
     filter[key] = raw === "true" ? true : raw === "false" ? false : raw;
   }
 
+  // ── Tarix aralığı ──
+  // Müraciətlərdə «bu həftə nə gəldi» ən çox verilən sualdır; əvvəl yalnız
+  // bərabərlik filtrləri vardı. `to` günün SONUNA qədər götürülür, əks halda
+  // eyni günü seçəndə heç nə tapılmırdı (00:00-dan 00:00-a aralıq boşdur).
+  const dateField = entry.model.schema.path("createdAt") ? "createdAt" : null;
+  if (dateField) {
+    const range = {};
+    const from = req.query.from;
+    const to = req.query.to;
+    if (from) {
+      const d = new Date(from);
+      if (!Number.isNaN(d.getTime())) range.$gte = d;
+    }
+    if (to) {
+      const d = new Date(to);
+      if (!Number.isNaN(d.getTime())) {
+        d.setHours(23, 59, 59, 999);
+        range.$lte = d;
+      }
+    }
+    if (Object.keys(range).length) filter[dateField] = range;
+  }
+
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
     model.countDocuments(filter),
