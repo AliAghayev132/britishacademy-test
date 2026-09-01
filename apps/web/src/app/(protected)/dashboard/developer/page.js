@@ -11,7 +11,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap } from "lucide-react";
+import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database } from "lucide-react";
 // Data
 import {
   useAdminMigrateI18nMutation,
@@ -19,6 +19,8 @@ import {
   useAdminImportCoursesMutation,
   useImportFlagsMutation,
   useImportTeachersMutation,
+  useImportBranchesMutation,
+  useAdminSeedMutation,
 } from "@/store/api/adminApi";
 
 export default function DeveloperPage() {
@@ -33,11 +35,55 @@ export default function DeveloperPage() {
   const [flagReport, setFlagReport] = useState(null);
   const [importTeachers, { isLoading: teaching }] = useImportTeachersMutation();
   const [teacherReport, setTeacherReport] = useState(null);
+  const [importBranches, { isLoading: branching }] = useImportBranchesMutation();
+  const [branchReport, setBranchReport] = useState(null);
+  const [seed, { isLoading: seeding }] = useAdminSeedMutation();
+  const [seedConfirm, setSeedConfirm] = useState("");
+  const [counts, setCounts] = useState(null);
 
   // Müştəri kurs məlumatlarını tətbiq et (dryRun=true → yalnız yoxlama).
   // Bayraqları flagcdn.com-dan endirib qalereyaya yazır və ölkə kartlarına
   // bağlayır. `overwrite` — şəkli olan ölkələri də yenilə.
   // Müəllim → filial → dərs təyinatları. Dərs saatı yazılmır.
+  // Filial əlaqə məlumatları — yalnız filial sətirlərini yeniləyir.
+  const runImportBranches = async (dryRun) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        title: "Filial məlumatları tətbiq olunsun?",
+        text: "Dörd filialın <b>ünvanı, telefonu, WhatsApp nömrəsi, xəritə linki və iş saatları</b> müştəri məlumatı ilə əvəz olunacaq. Başqa heç nəyə toxunulmur.",
+        confirmText: "Tətbiq et",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await importBranches({ dryRun }).unwrap();
+      setBranchReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "İmport alınmadı");
+    }
+  };
+
+  // TAM SIFIRLAMA — bütün məzmunu silib yenidən qurur.
+  const runSeed = async () => {
+    const ok = await confirmDialog({
+      tone: "error",
+      title: "Bütün məzmun silinsin?",
+      text: "Kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, ölkələr, menyu və səhifələr <b>TAMAMİLƏ SİLİNİR</b> və başlanğıc data ilə yenidən qurulur.<br><br>Müraciətlər (leads) və istifadəçi hesabları silinmir.<br><br><b>Bu əməliyyat geri qaytarıla bilməz.</b>",
+      confirmText: "Bəli, sil və yenidən yüklə",
+      cancelText: "İmtina",
+    });
+    if (!ok) return;
+    try {
+      const res = await seed().unwrap();
+      setCounts(res?.data?.counts || null);
+      setSeedConfirm("");
+      notify.success(res?.message || "Yenidən yükləndi");
+    } catch (e) {
+      notify.error(e?.data?.message || "Alınmadı");
+    }
+  };
+
   const runImportTeachers = async (dryRun) => {
     if (!dryRun) {
       const ok = await confirmDialog({
@@ -465,6 +511,145 @@ export default function DeveloperPage() {
                     {teacherReport.warnings.map((w, i) => <li key={i}>⚠️ {w}</li>)}
                   </ul>
                 )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Filial əlaqə məlumatları */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-teal-50 text-teal-700">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Filial məlumatlarını tətbiq et</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Dörd filialın <b>ünvanı, telefonu, WhatsApp nömrəsi, xəritə linki</b> və
+              iş saatları müştəri məlumatı ilə yenilənir. Filial <b>adına görə</b> tapılır.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-teal-50 p-3 text-sm text-teal-800">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Yalnız sadalanan sahələr yazılır — kurslar, müəllimlər və qrafik
+                toxunulmur. Təkrar işlədilə bilər. Əvvəlcə <b>«Yoxla»</b> ilə baxın.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportBranches(true)}
+                disabled={branching}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                <MapPin className="h-4 w-4" /> Yoxla (quru rejim)
+              </button>
+              <button
+                onClick={() => runImportBranches(false)}
+                disabled={branching}
+                className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-60"
+              >
+                <MapPin className="h-4 w-4" />
+                {branching ? "Tətbiq olunur…" : "Tətbiq et"}
+              </button>
+            </div>
+
+            {branchReport && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  Nəticə — {branchReport.updated} yeniləndi, {branchReport.created} yaradıldı
+                  {branchReport.dryRun ? " (quru rejim)" : ""}
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-gray-100">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-3 py-2">Filial</th>
+                        <th className="px-3 py-2">Vəziyyət</th>
+                        <th className="px-3 py-2">Telefon</th>
+                        <th className="px-3 py-2">Xəritə</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {branchReport.report?.map((r, i) => (
+                        <tr key={i} className="border-t border-gray-100">
+                          <td className="px-3 py-2 font-medium text-gray-900">{r.name}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.status}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.phone}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.map}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {branchReport.warnings?.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs text-amber-700">
+                    {branchReport.warnings.map((w, i) => <li key={i}>⚠️ {w}</li>)}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* TAM SIFIRLAMA — ən altda, qırmızı çərçivə ilə */}
+      <div className="mt-8 max-w-2xl rounded-xl border-2 border-red-200 bg-red-50/40 p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-red-100 text-red-700">
+            <Database className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-red-900">Bütün datanı sil və yenidən yüklə</h2>
+            <p className="mt-1 text-sm text-red-800">
+              Kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, ölkələr, menyu və
+              səhifələr <b>tamamilə silinir</b> və başlanğıc data ilə yenidən qurulur.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-100 p-3 text-sm text-red-900">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                <b>Geri qaytarıla bilməz.</b> Müraciətlər və istifadəçi hesabları
+                silinmir. Bu əməliyyatdan sonra müştəri məlumatlarını (filial,
+                müəllim, kurs importları) yenidən tətbiq etmək lazımdır.
+              </span>
+            </div>
+
+            {/* Yazılı təsdiq — təsadüfi klikin qarşısını alır */}
+            <div className="mt-4">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-red-700">
+                Təsdiq üçün «SIFIRLA» yazın
+              </label>
+              <input
+                value={seedConfirm}
+                onChange={(e) => setSeedConfirm(e.target.value)}
+                placeholder="SIFIRLA"
+                className="w-48 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm outline-none focus:border-red-500"
+              />
+            </div>
+
+            <button
+              onClick={runSeed}
+              disabled={seeding || seedConfirm.trim().toUpperCase() !== "SIFIRLA"}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-40"
+            >
+              <Database className="h-4 w-4" />
+              {seeding ? "Yüklənir…" : "Sil və yenidən yüklə"}
+            </button>
+
+            {counts && (
+              <div className="mt-6">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">Yükləndi</div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {Object.entries(counts).map(([k, v]) => (
+                    <div key={k} className="rounded-lg border border-gray-100 bg-white px-3 py-2 text-sm">
+                      <span className="font-bold text-gray-900">{v}</span>{" "}
+                      <span className="text-gray-500">{k}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

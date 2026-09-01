@@ -148,6 +148,15 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/dev/import-teachers", method: "POST", body: body || {} }),
       invalidatesTags: ["Resource", "Site"],
     }),
+    importBranches: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-branches", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
+    // Bütün məzmunu silib yenidən qurur — YALNIZ developer.
+    adminSeed: builder.mutation({
+      query: () => ({ url: "/admin/dev/seed", method: "POST" }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
 
     // ── Toplu göndəriş (WhatsApp + e-poçt) ──
     // Mənbə: müraciətlər / Excel / əl ilə siyahı. Göndərişdən əvvəl
@@ -245,6 +254,8 @@ export const {
   useMediaUpdateMutation,
   useImportFlagsMutation,
   useImportTeachersMutation,
+  useImportBranchesMutation,
+  useAdminSeedMutation,
   useBulkStatusQuery,
   useBulkPreviewMutation,
   useBulkSendMutation,

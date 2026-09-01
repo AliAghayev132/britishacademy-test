@@ -67,8 +67,8 @@ export const HOME_SECTIONS = [
   {
     key: "faq",
     label: "Tez-tez verilən suallar",
-    hint: "Mətnlər tərcümə fayllarındadır (hfaq.*)",
-    manage: "",
+    hint: "Admin paneldəki FAQ siyahısı (boşdursa hazır mətnlər)",
+    manage: "/dashboard/resurslar/faqs",
   },
   {
     key: "partners",

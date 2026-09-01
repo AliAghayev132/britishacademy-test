@@ -88,6 +88,17 @@ export default async function HomePage() {
   const videoTestimonials = home?.videoTestimonials || [];
   const partners = home?.partners || [];
 
+  // FAQ — admin paneldən idarə olunan siyahı. Əvvəl burada tərcümə
+  // faylındakı 6 sabit sual göstərilirdi: 3 dilli idi, amma admin onları
+  // redaktə edə bilmirdi (FAQ resursu mövcud olsa da işlədilmirdi).
+  // Admin heç nə əlavə etməyibsə köhnə mətnlərə düşürük ki, bölmə boş qalmasın.
+  const adminFaqs = (home?.faqs || [])
+    .map((f) => ({ question: f.question, answer: f.answer }))
+    .filter((f) => f.question && f.answer);
+  const faqItems = adminFaqs.length
+    ? adminFaqs
+    : [1, 2, 3, 4, 5, 6].map((n) => ({ question: t(`hfaq.q${n}`), answer: t(`hfaq.a${n}`) }));
+
   // Bölmə admin paneldən bağlanıbmı? Boş konfiq = hamısı açıq.
   const on = (key) => sectionEnabled(s.homeSections, key);
 
@@ -171,7 +182,7 @@ export default async function HomePage() {
       {on("faq") && (
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
         <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
-        <FaqAccordion items={[1, 2, 3, 4, 5, 6].map((n) => ({ question: t(`hfaq.q${n}`), answer: t(`hfaq.a${n}`) }))} />
+        <FaqAccordion items={faqItems} />
       </section>
       )}
 

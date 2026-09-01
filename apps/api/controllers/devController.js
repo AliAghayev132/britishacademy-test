@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, MailService } from "#services";
 
 /**
  * POST /api/admin/dev/seed
@@ -185,4 +185,32 @@ const runImportTeachers = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers };
+/**
+ * Filial əlaqə məlumatlarının importu (ünvan, telefon, WhatsApp, xəritə).
+ *
+ * Seed BÜTÜN məzmunu silir, ona görə mövcud saytda işlədilə bilməz. Bu isə
+ * yalnız filial sətirlərini yeniləyir.
+ */
+const runImportBranches = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await importBranchData({ dryRun });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Filial məlumatları: ${result.updated} yeniləndi, ${result.created} yaradıldı`,
+    });
+  }
+  res.json({
+    success: true,
+    message: dryRun
+      ? `Quru rejim: ${result.updated} yenilənəcək, ${result.created} yaradılacaq`
+      : `${result.updated} filial yeniləndi, ${result.created} yaradıldı`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches };
