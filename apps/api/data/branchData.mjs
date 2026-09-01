@@ -10,9 +10,10 @@
  * çevirərkən yalnız AZ-ı doldurur — EN/RU boş qalır və sayt onlarda da
  * azərbaycanca göstərirdi.
  *
- * `coords` müştərinin Google Maps linklərindəki @lat,lng dəyərləridir.
- * Onlar OLANDA xəritə birbaşa embed olunur (qısa goo.gl linkləri iframe-də
- * açılmır). `mapUrl` isə «Xəritədə aç» düyməsi üçündür.
+ * Koordinatlar müştərinin Google Maps linklərindəki @lat,lng dəyərləridir —
+ * DÖRD filialın hamısında var. Xəritə birbaşa həmin nöqtəyə embed olunur;
+ * qısa goo.gl linkləri iframe-də açılmır, ona görə tam URL saxlanılır.
+ * mapUrl «Xəritədə aç» düyməsi üçündür.
  *
  * Sıra müştərinin verdiyi ardıcıllıqdır: Caspian → Elmlər → Nərimanov → Əhmədli.
  */
@@ -63,10 +64,9 @@ export const BRANCHES = [
     },
     phone: "(+994) 55 215 35 77",
     whatsapp: "994552153577",
-    // Müştərinin linkində @lat,lng yox idi (yalnız ftid) — koordinat
-    // uydurmuruq; xəritə ünvana görə qurulur.
+    coords: { lat: 40.3799872, lng: 49.8128913 },
     mapUrl:
-      "https://www.google.com/maps?q=British+Academy+-+Elml%C9%99r+filial%C4%B1,+48+%C6%8Fbd%C3%BCrr%C9%99him+B%C9%99y+Haqverdiyev,+Baku+1141&ftid=0x40307de9861dc6bf:0xed0648981d6adff1",
+      "https://www.google.com/maps/place/British+Academy+-+Elml%C9%99r+filial%C4%B1/@40.3799872,49.8128913,17z/data=!3m1!4b1!4m6!3m5!1s0x40307de9861dc6bf:0xed0648981d6adff1!8m2!3d40.3799872!4d49.8128913",
     workingHours: HOURS("10:00", "20:00"),
   },
   {
