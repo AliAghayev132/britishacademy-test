@@ -39,39 +39,69 @@ açmaq olar; bu, ikiqat məzmun deməkdir və axtarış reytinqinə zərər veri
 ### 2. Konfiqurasiya faylı
 
 Serverdə **bu qovluq yoxdur** — orada yalnız `client` və `server` repoları
-klonlanıb, `deploy/` isə monorepodadır. Ona görə fayl birbaşa yaradılır:
-`britishacademy.az.conf`-un məzmununu köçürüb aşağıdakı kimi yapışdır.
+klonlanıb, `deploy/` isə monorepodadır.
+
+**Faylı `scp` ilə göndər — terminala yapışdırma.** 150 sətirlik konfiqi SSH
+seansına yapışdıranda terminal sətirləri bir-birinin üstünə salır və fayl
+səssizcə yarımçıq yazılır (praktikada baş verdi: `nginx -t` tanınmayan
+direktiv göstərdi, çünki blokun ortası itmişdi).
+
+Lokal maşından (PowerShell):
+
+```powershell
+scp "deploy\nginx\britishacademy.az.conf" `
+    root@169.58.130.173:/etc/nginx/sites-available/britishacademy.az
+```
+
+Sonra serverdə:
 
 ```bash
-sudo tee /etc/nginx/sites-available/britishacademy.az > /dev/null <<'NGINX'
-# ... britishacademy.az.conf faylının məzmunu ...
-NGINX
-
-sudo ln -s /etc/nginx/sites-available/britishacademy.az \
-           /etc/nginx/sites-enabled/britishacademy.az
+sudo ln -sfn /etc/nginx/sites-available/britishacademy.az \
+             /etc/nginx/sites-enabled/britishacademy.az
 
 # Defolt sayt qalsa "Welcome to nginx" səhifəsi bizimkini üstələyə bilər.
 sudo rm -f /etc/nginx/sites-enabled/default
+
+# Faylın tam getdiyini yoxla — 153 sətir olmalıdır.
+wc -l /etc/nginx/sites-available/britishacademy.az
 ```
 
-Heredoc `<<'NGINX'` **tək dırnaqla** yazılır — dırnaqsız olsa bash konfiqdəki
-`$host`, `$remote_addr` kimi dəyişənləri boş sətirlə əvəz edər və proxy
-başlıqları sınar.
+`ln -sfn` işlədilir (`ln -s` yox): simvolik keçid artıq varsa `ln -s`
+«File exists» ilə dayanır, `-f` isə onu əvəz edir.
 
 **Hələ `nginx -t` işlətmə** — fayl SSL sertifikatına istinad edir, o isə
 sertifikat alınana qədər yoxdur. 4-cü addımdan sonra yoxlanacaq.
 
-### 3. DNS
+### 3. DNS (Cloudflare)
 
-Domen panelində A qeydlərini dəyiş:
+Domenin ad serverləri Cloudflare-dədir (`*.ns.cloudflare.com`), ona görə
+qeydlər **Cloudflare → DNS → Records** bölməsində dəyişdirilir.
 
-| Tip | Ad | Dəyər |
-|-----|-----|-------|
-| A | `@` | `169.58.130.173` |
-| A | `www` | `169.58.130.173` |
+| Tip | Ad | Dəyər | Proxy |
+|-----|-----|-------|-------|
+| A | `@` | `169.58.130.173` | **DNS only** (boz) |
+| AAAA | `@` | `2a02:c207:2348:8731::1` | **DNS only** (boz) |
+| A | `www` | `169.58.130.173` | **DNS only** (boz) |
+| AAAA | `www` | `2a02:c207:2348:8731::1` | **DNS only** (boz) |
 
-**MX və TXT qeydlərinə toxunma** — poçt onlardan asılıdır, A qeydinin
+TTL-i `Auto` et — köçürmə zamanı dəyişikliyin tez yayılması üçün.
+
+**MX və TXT qeydlərinə toxunma** — poçt onlardan asılıdır, A/AAAA qeydinin
 dəyişməsi poçta təsir etmir.
+
+#### Narıncı buludu (proxy) köçürmə zamanı yandırma
+
+İki səbəb var:
+
+1. **Sonsuz yönləndirmə dövrü.** Cloudflare-in SSL rejimi *Flexible*-dırsa,
+   o, origin-ə HTTP ilə qoşulur, bu konfiq isə HTTP-ni HTTPS-ə yönləndirir →
+   Cloudflare yenidən HTTP ilə gəlir → `ERR_TOO_MANY_REDIRECTS`.
+   Proxy yandırılacaqsa **SSL/TLS → Full (strict)** seçilməlidir.
+2. **certbot.** Boz buludda HTTP-01 doğrulaması birbaşa serverə gəlir və
+   heç bir əlavə tənzimləmə tələb etmir.
+
+Hər şey işləyəndən sonra proxy yandırıla bilər; o zaman keşi də təmizlə
+(*Caching → Purge Everything*).
 
 Yayılmanı yoxla (bir neçə dəqiqədən bir neçə saata qədər çəkir):
 
