@@ -310,6 +310,22 @@ img { display: block; max-width: 100%; }
 .ba-burger.is-open span:nth-child(2) { opacity: 0; }
 .ba-burger.is-open span:nth-child(3) { transform: translateY(-7.4px) rotate(-45deg); }
 
+/* Mobil sağ küncdəki dəst (dil + hamburger). Masaüstündə gizlidir — header
+   sətrində boş yer tutmasın deyə `display:none`, sadəcə uşaqları gizlətmək
+   kifayət etmir, çünki valideynin `gap`-i yenə də boşluq yaradardı. */
+.ba-mobile-actions { display: none; align-items: center; gap: 8px; flex: none; }
+
+/* Dil dropdown-u — yalnız mobil (bax responsive bölməsi) */
+.ba-langmenu { position: relative; flex: none; }
+.ba-langmenu-btn { display: inline-flex; align-items: center; gap: 5px; height: 44px; padding: 0 12px; border: 1px solid #E7E8EE; border-radius: 12px; background: #F1F2F6; color: #14141C; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ba-langmenu-btn:hover { background: #E9EAF1; }
+.ba-langmenu-pop { position: absolute; right: 0; top: calc(100% + 8px); min-width: 178px; background: #fff; border: 1px solid #ECEDF2; border-radius: 14px; box-shadow: 0 14px 38px rgba(20,20,45,.16); padding: 6px; z-index: 80; animation: ba-sr-in .18s ease both; }
+.ba-langmenu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: none; border-radius: 10px; background: transparent; color: #33333D; font-family: inherit; font-size: 14.5px; text-align: left; cursor: pointer; }
+.ba-langmenu-item b { font-size: 12px; font-weight: 800; letter-spacing: .3px; color: #8A8A99; min-width: 24px; }
+.ba-langmenu-item:hover { background: #F4F5F9; }
+.ba-langmenu-item.is-on { background: var(--accent); color: #fff; }
+.ba-langmenu-item.is-on b { color: rgba(255,255,255,.75); }
+
 /* mobile drawer */
 .ba-mnav { position: fixed; inset: 0 0 0 auto; width: min(360px, 86vw); background: #fff; z-index: 120; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,.1,.2,1); box-shadow: -20px 0 60px rgba(0,0,0,.22); overflow-y: auto; padding: 20px 16px 44px; visibility: hidden; }
 .ba-mnav.open { transform: translateX(0); visibility: visible; }
@@ -655,6 +671,10 @@ body.ba-home #qeydiyyat > div {
   /* On mobile the header shows just logo + hamburger (far right); the desktop
      search/apply cluster moves into the drawer. */
   .ba-head-actions { display: none !important; }
+    /* Üst lent (e-poçt/telefon/saat/dil) mobildə header-i ikiqat hündür
+       edirdi — gizlədilir, dil isə hamburgerin yanına keçir. */
+    .ba-topbar { display: none !important; }
+    .ba-mobile-actions { display: flex !important; }
 }
 /* header loqosu sabit 231px-dir — dar ekranda yer açmaq üçün kiçilir */
 @media (max-width: 620px) {

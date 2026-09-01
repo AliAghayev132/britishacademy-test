@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 // Next
 import { usePathname } from "next/navigation";
 // Local
@@ -12,21 +12,41 @@ import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
 import { useT } from "@/lib/i18n/useT";
 
-// ── Dil seçicisi (AZ/EN/RU) ──
-const LanguageSwitcher = memo(function LanguageSwitcher() {
+// ── Dillər ──
+// Ad öz dilində yazılır (endonim): rus dilli ziyarətçi «Rus dili» yox,
+// «Русский» axtarır.
+const LANGS = [
+  { code: "az", label: "AZ", name: "Azərbaycan" },
+  { code: "en", label: "EN", name: "English" },
+  { code: "ru", label: "RU", name: "Русский" },
+];
+
+/**
+ * Dil dəyişdirmə məntiqi — iki fərqli görünüş (masaüstü lent, mobil dropdown)
+ * eyni davranışı paylaşsın deyə ayrıca hook-dur.
+ */
+function useLangSwitch() {
   const locale = useLocale();
   const pathname = usePathname();
   const base = stripLocale(pathname);
-  const go = (l) => {
-    if (l === locale) return;
-    // eslint-disable-next-line react-hooks/immutability -- document.cookie hadisə işləyicisinin içindədir — render zamanı deyil, yalan siqnal
-    document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    // withLocale həm prefiksi qoyur, həm slug-u hədəf dilə çevirir
-    // (/en/contact → /ru/kontakty).
-    const target = withLocale(l, base);
-    // Hard reload — serverdən tam yenidən render (nav/menyu daxil) yeni dildə.
-    window.location.assign(target || "/");
-  };
+  const go = useCallback(
+    (l) => {
+      if (l === locale) return;
+      document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
+      // withLocale həm prefiksi qoyur, həm slug-u hədəf dilə çevirir
+      // (/en/contact → /ru/kontakty).
+      const target = withLocale(l, base);
+      // Hard reload — serverdən tam yenidən render (nav/menyu daxil) yeni dildə.
+      window.location.assign(target || "/");
+    },
+    [locale, base],
+  );
+  return { locale, go };
+}
+
+// ── Dil seçicisi (AZ/EN/RU) — üst lentdə, yalnız masaüstü ──
+const LanguageSwitcher = memo(function LanguageSwitcher() {
+  const { locale, go } = useLangSwitch();
   return (
     <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
       {["az", "en", "ru"].map((l) => {
@@ -42,6 +62,79 @@ const LanguageSwitcher = memo(function LanguageSwitcher() {
           </button>
         );
       })}
+    </div>
+  );
+});
+
+/**
+ * Mobil dil seçicisi — hamburger düyməsinin yanında dropdown.
+ *
+ * Masaüstündə dil üst lentdədir, lakin o lent mobildə gizlədilir: e-poçt,
+ * telefon, iş saatı və üç dil düyməsi dar ekranda alt-alta düşüb header-i
+ * ikiqat hündürlüyə çıxarırdı. Dil seçimi isə lazımdır, ona görə bura
+ * yığcam dropdown kimi köçürüldü.
+ */
+const LanguageMenu = memo(function LanguageMenu() {
+  const { locale, go } = useLangSwitch();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Kənara toxunanda və Escape-də bağlan.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    // `pointerdown` — `click` gec işləyir və menyu açıq qalmış görünür.
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const current = LANGS.find((l) => l.code === locale) || LANGS[0];
+
+  return (
+    <div className="ba-langmenu" ref={ref}>
+      <button
+        type="button"
+        className="ba-langmenu-btn"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Dil: ${current.name}`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span>{current.label}</span>
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"
+          style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="ba-langmenu-pop" role="menu">
+          {LANGS.map((l) => (
+            <button
+              key={l.code}
+              type="button"
+              role="menuitem"
+              className={`ba-langmenu-item${l.code === locale ? " is-on" : ""}`}
+              onClick={() => { setOpen(false); go(l.code); }}
+            >
+              <b>{l.label}</b>
+              <span>{l.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 });
@@ -256,8 +349,10 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
     <ScrollProgress />
 
     <div className="ba-fixhead" style={{ position: "sticky", top: 0, zIndex: 60 }}>
-      {/* top bar */}
-      <div style={{ background: "#001452", color: "#C7C8DA", fontSize: 13 }}>
+      {/* Üst lent — mobildə gizlədilir (.ba-topbar, globals.css). Dar ekranda
+          e-poçt/telefon/saat/dil alt-alta düşüb header-i ikiqat hündürlüyə
+          çıxarırdı; dil seçimi hamburgerin yanına köçürüldü. */}
+      <div className="ba-topbar" style={{ background: "#001452", color: "#C7C8DA", fontSize: 13 }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "8px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 22, flexWrap: "wrap" }}>
             <span>✉ {site?.contact?.email}</span>
@@ -310,15 +405,21 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             </button>
           </div>
 
-          {/* Hamburger — far right on mobile */}
-          <button
-            className={`ba-burger${mobile ? " is-open" : ""}`}
-            aria-label="Menyu"
-            aria-expanded={mobile}
-            onClick={() => setMobile((m) => !m)}
-          >
-            <span></span><span></span><span></span>
-          </button>
+          {/* Mobil sağ küncdəki dəst: dil seçicisi + hamburger.
+              Ayrıca sarğı lazımdır, çünki header sətri `space-between`-dir —
+              sarğısız üç element (loqo, dil, hamburger) bərabər paylanıb dil
+              ortada qalardı. */}
+          <div className="ba-mobile-actions">
+            <LanguageMenu />
+            <button
+              className={`ba-burger${mobile ? " is-open" : ""}`}
+              aria-label="Menyu"
+              aria-expanded={mobile}
+              onClick={() => setMobile((m) => !m)}
+            >
+              <span></span><span></span><span></span>
+            </button>
+          </div>
         </div>
       </header>
 
