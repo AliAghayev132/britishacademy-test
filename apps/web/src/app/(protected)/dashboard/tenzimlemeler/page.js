@@ -41,7 +41,6 @@ const Section = ({ title, children }) => (
 const TABS = [
   { id: "brand", label: "Brend" },
   { id: "contact", label: "Əlaqə" },
-  { id: "home", label: "Ana səhifə" },
   { id: "seo", label: "SEO / Texniki" },
   { id: "smtp", label: "SMTP (email)" },
   { id: "ai", label: "AI (OpenRouter)" },
@@ -76,18 +75,6 @@ export default function SettingsPage() {
         },
         contact: { ...s.contact },
         socials: { ...s.socials },
-        hero: {
-          titlePrefix: toLoc(s.hero?.titlePrefix),
-          subtitle: toLoc(s.hero?.subtitle),
-          // Siyahılar hər dil üçün vergüllə ayrılmış mətndir.
-          words: toLoc(Array.isArray(s.hero?.words) ? s.hero.words.join(", ") : s.hero?.words),
-          chipsLeft: toLoc(s.hero?.chipsLeft),
-          chipsRight: toLoc(s.hero?.chipsRight),
-          pills: toLoc(s.hero?.pills),
-          colors: (s.hero?.colors || []).join(", "),
-        },
-        stats: (s.stats || []).map((x) => ({ label: toLoc(x.label), value: toLoc(x.value) })),
-        marquee: toLoc(Array.isArray(s.marquee) ? s.marquee.join(", ") : s.marquee),
         smtp: {
           enabled: Boolean(s.smtp?.enabled),
           host: s.smtp?.host || "",
@@ -145,28 +132,16 @@ export default function SettingsPage() {
     });
   };
 
+  // Hero, lent və statistika BU SƏHİFƏDƏN İDARƏ OLUNMUR — onlar
+  // «Ana səhifə» bölməsinə köçürülüb. Onları burada saxlamaq təhlükəli idi:
+  // köhnə tabdan yadda saxlamaq yeni səhifədəki dəyişiklikləri üstündən
+  // yazardı.
   const save = async () => {
-    // Statistika sətirləri — boş olanlar atılır.
-    const stats = form.stats
-      .map((x) => ({ label: trimLoc(x.label), value: trimLoc(x.value) }))
-      .filter((x) => x.label.az || x.value.az);
-    const csv = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
     try {
       await update({
         brand: form.brand,
         contact: form.contact,
         socials: form.socials,
-        hero: {
-          titlePrefix: trimLoc(form.hero.titlePrefix),
-          subtitle: trimLoc(form.hero.subtitle),
-          words: trimLoc(form.hero.words),
-          chipsLeft: trimLoc(form.hero.chipsLeft),
-          chipsRight: trimLoc(form.hero.chipsRight),
-          pills: trimLoc(form.hero.pills),
-          colors: csv(form.hero.colors),
-        },
-        stats,
-        marquee: trimLoc(form.marquee),
         codeInjection: form.codeInjection,
         robotsTxt: form.robotsTxt,
         maxImageSizeKb: Number(form.maxImageSizeKb) || 500,
@@ -211,7 +186,7 @@ export default function SettingsPage() {
   };
 
   // Bu tab-larda çoxdilli sahələr var — dil düyməsi yalnız orada göstərilir.
-  const hasLocalized = tab === "home" || tab === "seo";
+  const hasLocalized = tab === "seo";
 
   return (
     <LocalizedFormProvider>
@@ -305,107 +280,6 @@ export default function SettingsPage() {
         </>
       )}
 
-      {/* ── Ana səhifə ── */}
-      {tab === "home" && (
-        <Section title="Ana səhifə hero">
-          <div>
-            <label className={label}>Başlıq prefiksi (3 dildə)</label>
-            <LocalizedInput value={form.hero.titlePrefix} onChange={(v) => set("hero.titlePrefix", v)} />
-          </div>
-          <div>
-            <label className={label}>Alt yazı (3 dildə)</label>
-            <LocalizedInput value={form.hero.subtitle} onChange={(v) => set("hero.subtitle", v)} />
-          </div>
-          <div>
-            <label className={label}>Fırlanan sözlər — vergüllə (3 dildə)</label>
-            <LocalizedInput value={form.hero.words} onChange={(v) => set("hero.words", v)} />
-          </div>
-          <div>
-            <label className={label}>Rənglər (vergüllə, hex)</label>
-            <input className={input} value={form.hero.colors} onChange={(e) => set("hero.colors", e.target.value)} />
-          </div>
-          <div className="sm:col-span-2 rounded-lg border border-gray-100 bg-gray-50 p-3">
-            <p className="mb-3 text-xs text-gray-500">
-              Hero-nun <b>solunda və sağında</b> üzən sözlər. Hər səhifə açılışında
-              siyahıdan <b>təsadüfi 3-ü</b> seçilir — sol və sağ müstəqil şəkildə.
-              Boş buraxsanız hazır dəyərlər işlənir.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={label}>Sol tərəf — vergüllə (3 dildə)</label>
-                <LocalizedInput
-                  value={form.hero.chipsLeft}
-                  onChange={(v) => set("hero.chipsLeft", v)}
-                  placeholder="Speaking, IELTS 8.5, Hallo"
-                />
-              </div>
-              <div>
-                <label className={label}>Sağ tərəf — vergüllə (3 dildə)</label>
-                <LocalizedInput
-                  value={form.hero.chipsRight}
-                  onChange={(v) => set("hero.chipsRight", v)}
-                  placeholder="Привет, A1 → C1, Konfrans"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className={label}>Kateqoriya həbləri — vergüllə (3 dildə)</label>
-            <LocalizedInput
-              value={form.hero.pills}
-              onChange={(v) => set("hero.pills", v)}
-              placeholder="İngilis dili, IELTS, Rus dili, Danışıq klubu"
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              Hero-nun altında görünən kateqoriya sırası. Təsadüfi
-              qarışdırılmır — yazdığınız ardıcıllıqla göstərilir.
-            </p>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className={label}>Marquee sözləri — vergüllə (3 dildə)</label>
-            <LocalizedInput value={form.marquee} onChange={(v) => set("marquee", v)} />
-          </div>
-
-          {/* Statistika — sətir-sətir, hər sahə 3 dilli */}
-          <div className="sm:col-span-2">
-            <div className="mb-2 flex items-center justify-between">
-              <label className={label}>Statistika (məs. 20 000+ · məzun)</label>
-              <button
-                onClick={() => set("stats", [...form.stats, { label: toLoc(""), value: toLoc("") }])}
-                className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
-              >
-                + Göstərici
-              </button>
-            </div>
-            {form.stats.length === 0 && <p className="text-sm text-gray-400">Göstərici əlavə edilməyib</p>}
-            <div className="space-y-3">
-              {form.stats.map((row, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <label className={label}>Dəyər</label>
-                    <LocalizedInput value={row.value} onChange={(v) => set(`stats.${i}.value`, v)} placeholder="20 000+" />
-                  </div>
-                  <div className="flex-1">
-                    <label className={label}>Etiket</label>
-                    <LocalizedInput value={row.label} onChange={(v) => set(`stats.${i}.label`, v)} placeholder="məzun tələbə" />
-                  </div>
-                  <button
-                    onClick={() => set("stats", form.stats.filter((_, j) => j !== i))}
-                    className="mt-6 rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50"
-                    aria-label="Sil"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Section>
-      )}
-
-      {/* ── SEO / Texniki ── */}
       {tab === "seo" && (
         <>
           <Section title="SEO (qlobal)">
