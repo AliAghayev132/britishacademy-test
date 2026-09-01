@@ -24,6 +24,7 @@ export const ROLE_LABELS = {
 export const SECTIONS = [
   { key: "dashboard", label: "İdarə paneli" },
   { key: "leads", label: "Müraciətlər" },
+  { key: "home", label: "Ana səhifə" },
   { key: "courses", label: "Kurslar" },
   { key: "teachers", label: "Müəllimlər" },
   { key: "branches", label: "Filiallar" },
@@ -82,6 +83,7 @@ const ROUTE_SECTIONS = [
   ["/dashboard/resurslar/blog-categories", "blog"],
   ["/dashboard/resurslar", "resources"],
   ["/dashboard/muracietler", "leads"],
+  ["/dashboard/ana-sehife", "home"],
   ["/dashboard/whatsapp", "whatsapp"],
   ["/dashboard/istifadeciler", "users"],
   ["/dashboard/loglar", "logs"],

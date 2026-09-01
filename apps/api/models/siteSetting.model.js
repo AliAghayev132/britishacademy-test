@@ -61,6 +61,26 @@ const siteSettingSchema = new Schema(
       pills: localizedField(),
     },
 
+    /**
+     * Ana səhifə bölmələrinin görünüşü və sırası.
+     *
+     * Əvvəl bölmələr kodda sabit ardıcıllıqla idi və bir bölməni gizlətmək
+     * üçün deploy lazım gəlirdi. İndi admin paneldən idarə olunur.
+     *
+     * BOŞ massiv = «hamısı göstərilir» (kodakı defolt sıra ilə) — köhnə
+     * qurulumlar heç nə itirmir.
+     */
+    homeSections: {
+      type: [
+        {
+          key: { type: String, required: true },
+          enabled: { type: Boolean, default: true },
+          _id: false,
+        },
+      ],
+      default: [],
+    },
+
     // "20 000+ məzun" style counters
     stats: { type: [factSchema], default: [] },
     // Scrolling marquee strip

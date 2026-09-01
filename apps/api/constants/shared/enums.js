@@ -21,6 +21,7 @@ const ROLE_RANK = { user: 0, editor: 1, admin: 2, superadmin: 3, developer: 4 };
 const adminSections = [
   "dashboard",     // İdarə paneli (hamıya açıq)
   "leads",         // Müraciətlər
+  "home",          // Ana səhifə bölmələri
   "courses",       // Kurslar
   "teachers",      // Müəllimlər
   "branches",      // Filiallar

@@ -16,6 +16,7 @@ import RevealOnScroll from "@/components/site/RevealOnScroll";
 import PartnersCarousel from "@/components/site/PartnersCarousel";
 import ServicesShowcase from "@/components/site/ServicesShowcase";
 import VideoSwiper from "@/components/site/VideoSwiper";
+import { sectionEnabled } from "@/lib/homeSections";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
@@ -87,6 +88,9 @@ export default async function HomePage() {
   const videoTestimonials = home?.videoTestimonials || [];
   const partners = home?.partners || [];
 
+  // Bölmə admin paneldən bağlanıbmı? Boş konfiq = hamısı açıq.
+  const on = (key) => sectionEnabled(s.homeSections, key);
+
   // ── render ──
   return (
     <>
@@ -95,23 +99,27 @@ export default async function HomePage() {
       <Hero hero={s.hero} stats={s.stats} />
 
       {/* Marquee */}
-      <Marquee words={s.marquee} />
+      {on("marquee") && <Marquee words={s.marquee} />}
 
       {/* Courses / services — interaktiv Swiper (kliklə yuxarıda inline açılır) */}
-      <div id="kurslar">
-        <ServicesShowcase courses={courses} />
-      </div>
+      {on("courses") && (
+        <div id="kurslar">
+          <ServicesShowcase courses={courses} />
+        </div>
+      )}
 
       {/* Advantages */}
+      {on("advantages") && advantages.length > 0 && (
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
         <SectionHead title={t("home.adv.title")} sub={t("home.adv.sub")} />
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
           {advantages.map((a, i) => <AdvantageCard key={a._id} advantage={a} index={i} />)}
         </div>
       </section>
+      )}
 
       {/* Study abroad */}
-      {destinations.length > 0 && (
+      {on("destinations") && destinations.length > 0 && (
         <section className="ba-reveal" style={{ background: "linear-gradient(165deg,#F4F7FF,#FDF6F0 55%,#F3FAF6)", marginTop: 84 }}>
           <div style={{ ...wrap, padding: "80px 28px" }}>
             <SectionHead title={t("home.abroad.title")} sub={t("home.abroad.sub")} />
@@ -126,7 +134,7 @@ export default async function HomePage() {
       )}
 
       {/* Student videos — Swiper (loopsuz) */}
-      {videoTestimonials.length > 0 && (
+      {on("videos") && videoTestimonials.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
           <SectionHead title={t("page.students.speak")} sub={t("page.students.speakSub")} />
           <VideoSwiper videos={videoTestimonials} />
@@ -134,7 +142,7 @@ export default async function HomePage() {
       )}
 
       {/* Testimonials */}
-      {testimonials.length > 0 && (
+      {on("testimonials") && testimonials.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
           <SectionHead title={t("home.reviews.title")} sub={t("home.reviews.sub")} />
           <div className="ba-wall">
@@ -147,7 +155,7 @@ export default async function HomePage() {
       )}
 
       {/* Blog / news */}
-      {posts.length > 0 && (
+      {on("blog") && posts.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 40 }}>
             <SectionHead title={t("home.blog.title")} sub={t("home.blog.sub")} />
@@ -160,13 +168,15 @@ export default async function HomePage() {
       )}
 
       {/* FAQ */}
+      {on("faq") && (
       <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
         <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
         <FaqAccordion items={[1, 2, 3, 4, 5, 6].map((n) => ({ question: t(`hfaq.q${n}`), answer: t(`hfaq.a${n}`) }))} />
       </section>
+      )}
 
       {/* Partners */}
-      {partners.length > 0 && (
+      {on("partners") && partners.length > 0 && (
         <section className="ba-reveal ba-partners" style={{ background: "#F6F7FA", marginTop: 84, borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2" }}>
           <div style={{ ...wrap, padding: "70px 28px" }}>
             <SectionHead title={t("home.partners.title")} sub={t("home.partners.sub")} />
@@ -176,6 +186,7 @@ export default async function HomePage() {
       )}
 
       {/* CTA */}
+      {on("cta") && (
       <section className="ba-reveal" style={{ ...wrap, padding: "80px 28px 20px" }}>
         <div style={{ background: "linear-gradient(115deg, var(--accent) 0%, #7C4DFF 52%, #C13DBF 115%)", borderRadius: 28, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
           <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,40px)", color: "#fff", margin: 0, letterSpacing: "-.02em" }}>{t("home.cta.title")}</h2>
@@ -183,6 +194,7 @@ export default async function HomePage() {
           <ApplyButton style={{ marginTop: 26, background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 13, cursor: "pointer" }} />
         </div>
       </section>
+      )}
     </>
   );
 }

@@ -37,6 +37,7 @@ import {
   ShieldCheck,
   ScrollText,
   ChevronDown,
+  Home,
   Tags,
   HelpCircle,
   Sparkles,
@@ -71,6 +72,7 @@ import { ADMIN_RESOURCES } from '@/lib/adminResources'
 const NAV_TOP = [
   { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
   { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, section: 'leads' },
+  { name: 'Ana səhifə', href: '/dashboard/ana-sehife', icon: Home, section: 'home' },
 ]
 
 const NAV_GROUPS = [
