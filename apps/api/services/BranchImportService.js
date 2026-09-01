@@ -33,9 +33,9 @@ const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v |
 /** Filial adından tanınma açar sözü. */
 const KEYWORDS = [
   { kw: "caspian", match: "Mərkəz — Caspian Plaza" },
+  { kw: "elmler", match: "Elmlər Akademiyası filialı" },
   { kw: "nerimanov", match: "Nəriman Nərimanov filialı" },
   { kw: "ehmedli", match: "Əhmədli filialı" },
-  { kw: "elmler", match: "Elmlər Akademiyası filialı" },
 ];
 
 /**
@@ -51,8 +51,8 @@ export async function importBranchData({ dryRun = false } = {}) {
   let created = 0;
 
   for (const row of BRANCHES) {
-    const key = KEYWORDS.find((k) => k.match === row.name);
-    const kw = key ? key.kw : norm(row.name);
+    const key = KEYWORDS.find((k) => k.match === az(row.name));
+    const kw = key ? key.kw : norm(az(row.name));
 
     const found = existing.find((b) => norm(az(b.name)).includes(kw));
 
@@ -62,7 +62,9 @@ export async function importBranchData({ dryRun = false } = {}) {
       if (az(found.phone) !== row.phone) changes.push("telefon");
       if (found.whatsapp !== row.whatsapp) changes.push("WhatsApp");
       if (found.mapUrl !== row.mapUrl) changes.push("xəritə");
-      if (norm(az(found.address)) !== norm(row.address)) changes.push("ünvan");
+      if (norm(az(found.address)) !== norm(az(row.address))) changes.push("ünvan");
+      const c = row.coords;
+      if (c && (found.coords?.lat !== c.lat || found.coords?.lng !== c.lng)) changes.push("koordinat");
     }
 
     if (!dryRun) {
@@ -73,6 +75,9 @@ export async function importBranchData({ dryRun = false } = {}) {
         found.phone = row.phone;
         found.whatsapp = row.whatsapp;
         found.mapUrl = row.mapUrl;
+        // Koordinat OLANDA xəritə birbaşa embed olunur; olmayanda ünvana
+        // görə qurulur, ona görə köhnə dəyəri silmirik.
+        if (row.coords) found.coords = row.coords;
         found.workingHours = row.workingHours;
         if (row.isMain) found.isMain = true;
         await found.save();
@@ -85,14 +90,14 @@ export async function importBranchData({ dryRun = false } = {}) {
     else created += 1;
 
     if (!found) {
-      warnings.push(`«${row.name}» bazada tapılmadı — yeni filial kimi yaradılır`);
+      warnings.push(`«${az(row.name)}» bazada tapılmadı — yeni filial kimi yaradılır`);
     }
 
     report.push({
-      name: row.name,
+      name: az(row.name),
       status: found ? (changes.length ? `yeniləndi: ${changes.join(", ")}` : "dəyişiklik yoxdur") : "yaradıldı",
       phone: row.phone,
-      map: row.mapUrl ? "var" : "—",
+      map: row.coords ? "koordinat" : row.mapUrl ? "ünvan" : "—",
     });
   }
 

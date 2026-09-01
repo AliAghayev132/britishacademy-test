@@ -24,9 +24,9 @@ function mapSrc(b) {
   const lat = Number(b?.coords?.lat);
   const lng = Number(b?.coords?.lng);
   if (Number.isFinite(lat) && Number.isFinite(lng)) {
-    const d = 0.004; // ~400 m çərçivə
-    const bbox = [lng - d, lat - d, lng + d, lat + d].join("%2C");
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`;
+    // Google embed — açar tələb etmir. Əvvəl OpenStreetMap işlədilirdi, amma
+    // filialların linkləri Google-dandır və ziyarətçi eyni görünüşü gözləyir.
+    return `https://maps.google.com/maps?q=${lat},${lng}&z=17&hl=az&output=embed`;
   }
 
   const q = [b?.name, b?.address].filter(Boolean).join(", ");

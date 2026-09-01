@@ -1,5 +1,6 @@
 // Data
 import { apiGet } from "@/lib/api";
+import { BranchMapSwitcher } from "@/components/site/BranchMapSwitcher";
 
 // Components
 import { PageBanner } from "@/components/site/PageBanner";
@@ -50,28 +51,6 @@ function BranchCard({ branch, accent, tr }) {
   );
 }
 
-/** Full-width map placeholder below the branch grid (mirrors the static site). */
-function BranchMap({ branches, tr }) {
-  const embed = branches.find((b) => b.mapEmbedUrl)?.mapEmbedUrl;
-  if (embed) {
-    return (
-      <iframe
-        src={embed}
-        title={tr("page.branchesMap")}
-        loading="lazy"
-        allowFullScreen
-        referrerPolicy="no-referrer-when-downgrade"
-        style={{ width: "100%", minHeight: 340, border: 0, borderRadius: 22, marginTop: 24, display: "block" }}
-      />
-    );
-  }
-  return (
-    <div className="img-slot" style={{ minHeight: 340, borderRadius: 22, marginTop: 24 }}>
-      <span>{tr("common.mapSoon")}<br />{tr("page.mapNote")}</span>
-    </div>
-  );
-}
-
 export default async function BranchesPage() {
   const tr = await getT();
   // ── data fetching ──
@@ -109,7 +88,7 @@ export default async function BranchesPage() {
         <div className="grid-2 ba-pricegrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 18 }}>
           {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} tr={tr} />)}
         </div>
-        <BranchMap branches={branches} tr={tr} />
+        <BranchMapSwitcher branches={branches} />
       </section>
 
       <CtaBand />
