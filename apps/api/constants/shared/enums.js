@@ -33,6 +33,7 @@ const adminSections = [
   "whatsapp",      // WhatsApp / toplu göndəriş
   "users",         // İstifadəçilər
   "logs",          // Loglar
+  "stats",         // Statistika
   "settings",      // Tənzimləmələr
   "developer",     // Texniki alətlər
 ];

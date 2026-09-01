@@ -42,6 +42,7 @@ const destinationSchema = new Schema(
 
     image: { type: String, trim: true },
 
+    views: { type: Number, default: 0 },
     isScholarship: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false }, // homepage grid
 

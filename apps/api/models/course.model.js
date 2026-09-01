@@ -85,6 +85,9 @@ const courseSchema = new Schema(
     icon: { type: String, trim: true },
 
     seo: { type: seoSchema, default: () => ({}) },
+    // Səhifə baxışı — statistika üçün. Detal səhifəsi açılanda artır.
+    views: { type: Number, default: 0 },
+
     isFeatured: { type: Boolean, default: false }, // homepage card
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },

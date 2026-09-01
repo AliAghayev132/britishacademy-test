@@ -155,6 +155,9 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   if (!course) {
     return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
   }
+  // Baxış sayğacı — statistika səhifəsi üçün. updateOne işlədilir ki,
+  // sənəd yenidən yazılmasın və versiya konflikti olmasın.
+  Course.updateOne({ _id: course._id }, { $inc: { views: 1 } }).catch(() => {});
 
   // Distinct teachers per branch, from the timetable.
   const groups = await CourseGroup.find({
@@ -257,6 +260,7 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
   if (!teacher) {
     return res.status(404).json({ success: false, message: "Müəllim tapılmadı" });
   }
+  Teacher.updateOne({ _id: teacher._id }, { $inc: { views: 1 } }).catch(() => {});
 
   // Vaxtlı qrafik yalnız təyinat DOLDURULMAYIB isə göstərilir — köhnə
   // məlumatlarda müəllimin dərsləri yalnız CourseGroup-da ola bilər, onda
@@ -302,6 +306,7 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
   if (!destination) {
     return res.status(404).json({ success: false, message: "Ölkə tapılmadı" });
   }
+  Destination.updateOne({ _id: destination._id }, { $inc: { views: 1 } }).catch(() => {});
   res.json({ success: true, data: { destination } });
 });
 

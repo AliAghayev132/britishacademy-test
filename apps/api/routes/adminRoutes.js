@@ -4,7 +4,7 @@ import { Router, adminRoles } from "#constants";
 // Controllers
 import {
   adminController, leadController, courseComposer, devController,
-  userAdminController, whatsappController, bulkController,
+  userAdminController, whatsappController, bulkController, statsController,
 } from "#controllers";
 
 // Middlewares
@@ -24,6 +24,8 @@ AdminRouter.use(authenticate, requireRole(adminRoles));
 
 // Fixed routes MUST be registered before the generic /:resource matcher.
 AdminRouter.get("/stats", adminController.stats);
+// Məzmun statistikası — «Statistika» səhifəsi üçün. Ayrıca bölmə icazəsi var.
+AdminRouter.get("/stats/content", requireSection("stats"), statsController.contentStats);
 AdminRouter.get("/settings", adminController.getSettings);
 AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);

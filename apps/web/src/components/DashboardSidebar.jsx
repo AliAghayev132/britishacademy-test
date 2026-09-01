@@ -37,6 +37,7 @@ import {
   ShieldCheck,
   ScrollText,
   ChevronDown,
+  BarChart3,
   Home,
   Tags,
   HelpCircle,
@@ -112,6 +113,7 @@ const NAV_GROUPS = [
     items: [
       { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
       { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
+      { name: 'Statistika', href: '/dashboard/statistika', icon: BarChart3, section: 'stats' },
       { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
       { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
       { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },

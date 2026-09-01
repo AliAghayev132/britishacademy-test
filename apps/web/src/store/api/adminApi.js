@@ -220,6 +220,10 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/admin/logs", params }),
       providesTags: [{ type: "Resource", id: "logs" }],
     }),
+    adminContentStats: builder.query({
+      query: ({ days } = {}) => ({ url: "/admin/stats/content", params: { days } }),
+      providesTags: [{ type: "Site", id: "content-stats" }],
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -239,6 +243,7 @@ export const {
   useAdminDeleteMutation,
   useAdminLeadStatusMutation,
   useAdminStatsQuery,
+  useAdminContentStatsQuery,
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
   useAdminLookupsQuery,

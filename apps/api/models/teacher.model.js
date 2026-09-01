@@ -72,6 +72,7 @@ const teacherSchema = new Schema(
     },
 
     seo: { type: seoSchema, default: () => ({}) },
+    views: { type: Number, default: 0 },
     isFeatured: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },

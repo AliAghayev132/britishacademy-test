@@ -13,3 +13,4 @@ export * as leadController from "./leadController.js";
 export * as seoController from "./seoController.js";
 export * as whatsappController from "./whatsappController.js";
 export * as bulkController from "./bulkController.js";
+export * as statsController from "./statsController.js";
