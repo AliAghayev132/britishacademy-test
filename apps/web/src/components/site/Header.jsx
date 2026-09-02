@@ -139,6 +139,15 @@ const LanguageMenu = memo(function LanguageMenu() {
   );
 });
 
+/**
+ * Xidmətlər menyusundakı bəndin ünvanı.
+ *
+ * Standart bəndlər kurs kateqoriyası/kursudur və /kurslar/<slug> naxışını
+ * izləyir. «Onlayn Testlər» qrupu isə kurs deyil — o, açıq `href` verir
+ * (bax (public)/layout.js).
+ */
+const svcHref = (x) => x.href || `/kurslar/${x.slug}`;
+
 // ── Constants ──
 const caret = (
   <svg className="ba-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -186,10 +195,10 @@ const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, de
         <div className="ba-dd ba-dd--nest">
           {services.map((g) => (
             <div key={g.category._id} className="ba-dd-item">
-              <Link href={`/kurslar/${g.category.slug}`}><span>{g.category.name}</span>{ddArrow}</Link>
+              <Link href={svcHref(g.category)}><span>{g.category.name}</span>{ddArrow}</Link>
               <div className="ba-dd-sub">
                 {g.courses.map((c) => (
-                  <Link key={c._id} href={`/kurslar/${c.slug}`}>{c.title}</Link>
+                  <Link key={c._id} href={svcHref(c)}>{c.title}</Link>
                 ))}
               </div>
             </div>
@@ -247,9 +256,9 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
               <details key={g.category._id} className="ba-macc ba-macc--sub">
                 <summary>{g.category.name}</summary>
                 <div className="ba-macc-body">
-                  <Link className="ba-msub ba-msub--all" href={`/kurslar/${g.category.slug}`} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
+                  <Link className="ba-msub ba-msub--all" href={svcHref(g.category)} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
                   {g.courses.map((c) => (
-                    <Link key={c._id} className="ba-msub" href={`/kurslar/${c.slug}`} onClick={onClose}>{c.title}</Link>
+                    <Link key={c._id} className="ba-msub" href={svcHref(c)} onClick={onClose}>{c.title}</Link>
                   ))}
                 </div>
               </details>
