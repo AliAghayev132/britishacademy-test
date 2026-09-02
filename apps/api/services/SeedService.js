@@ -117,7 +117,7 @@ const PARTNERS = ["Rabitəbank", "AzerGold", "Veysəloğlu", "ARB 24", "Araz Mar
 // Müəllimlər və Tələbələrimiz əvvəl ayrıca üst səviyyə bəndləri idi; menyu
 // yeddi bənddən ibarət olub dar ekranlarda sıxılırdı. İndi hər ikisi
 // «Haqqımızda» altındadır — məzmunca da ora aiddirlər.
-const HEADER_MENU = [
+export const HEADER_MENU = [
   {
     label: "Haqqımızda",
     href: "/haqqimizda",

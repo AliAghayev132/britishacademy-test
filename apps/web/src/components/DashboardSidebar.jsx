@@ -72,16 +72,24 @@ import { ADMIN_RESOURCES } from '@/lib/adminResources'
  */
 const NAV_TOP = [
   { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
-  // `exact` vacibdir: alt bənd (/muracietler/xaricde-tehsil) açılanda
-  // startsWith yoxlaması ikisini birdən aktiv göstərərdi.
-  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, exact: true, section: 'leads' },
-  // Xaricdə təhsil müraciətləri ayrıca göstərilir — axını fərqlidir (kurs
-  // deyil, ölkə seçilir). Eyni `leads` icazəsindən asılıdır.
-  { name: 'Xaricdə təhsil müraciətləri', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads' },
   { name: 'Ana səhifə', href: '/dashboard/ana-sehife', icon: Home, section: 'home' },
 ]
 
 const NAV_GROUPS = [
+  // Müraciətlər ayrıca qrupdur: iki bənd var (ümumi və xaricdə təhsil) və
+  // onların axını fərqlidir. Qrup ən yuxarıdadır — gündəlik ən çox açılan
+  // bölmədir.
+  {
+    key: 'muracietler',
+    label: 'Müraciətlər',
+    icon: Inbox,
+    items: [
+      // `exact` vacibdir: alt bənd açılanda startsWith yoxlaması ikisini
+      // birdən aktiv göstərərdi.
+      { name: 'Bütün müraciətlər', href: '/dashboard/muracietler', icon: Inbox, exact: true, section: 'leads' },
+      { name: 'Xaricdə təhsil', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads' },
+    ],
+  },
   {
     key: 'tedris',
     label: 'Tədris',
@@ -254,6 +262,11 @@ export const DashboardSidebar = ({ children }) => {
   const { data: stats } = useAdminStatsQuery()
   const newLeads = stats?.data?.newLeads ?? 0
 
+  // Yeni müraciət sayı yalnız «Bütün müraciətlər» bəndində göstərilir.
+  // Əvvəl bu, NAV_TOP render dövrəsinə sabit yazılmışdı; bənd qrupa köçəndə
+  // rozetka itmişdi.
+  const badgeOf = (item) => (item.href === '/dashboard/muracietler' ? newLeads : 0)
+
   const isActive = (item) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href)
 
@@ -330,7 +343,7 @@ export const DashboardSidebar = ({ children }) => {
               item={item}
               active={isActive(item)}
               open={sidebarOpen}
-              badge={item.href === '/dashboard/muracietler' ? newLeads : 0}
+              badge={badgeOf(item)}
             />
           ))}
 
@@ -339,7 +352,7 @@ export const DashboardSidebar = ({ children }) => {
             // Sidebar yığılanda başlıqlar yer tutmasın — elementlər düz sıralanır.
             if (!sidebarOpen) {
               return g.items.map((item) => (
-                <NavLink key={item.href} item={item} active={isActive(item)} open={false} badge={0} />
+                <NavLink key={item.href} item={item} active={isActive(item)} open={false} badge={badgeOf(item)} />
               ))
             }
             const expanded = openGroups[g.key] || hasActive
@@ -353,6 +366,13 @@ export const DashboardSidebar = ({ children }) => {
                 >
                   <g.icon className="h-3.5 w-3.5" />
                   <span>{g.label}</span>
+                    {/* Qrup bağlı olanda yeni müraciət tamamilə görünməz
+                        qalardı — say başlıqda da göstərilir. */}
+                    {!expanded && g.items.some((it) => badgeOf(it) > 0) && (
+                      <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        {g.items.reduce((sum, it) => sum + badgeOf(it), 0)}
+                      </span>
+                    )}
                   <ChevronDown
                     className={`ml-auto h-3.5 w-3.5 transition-transform duration-200 ${expanded ? '' : '-rotate-90'}`}
                   />
@@ -360,7 +380,7 @@ export const DashboardSidebar = ({ children }) => {
                 {expanded && (
                   <div className="mt-1 space-y-1">
                     {g.items.map((item) => (
-                      <NavLink key={item.href} item={item} active={isActive(item)} open badge={0} />
+                      <NavLink key={item.href} item={item} active={isActive(item)} open badge={badgeOf(item)} />
                     ))}
                   </div>
                 )}
@@ -371,7 +391,7 @@ export const DashboardSidebar = ({ children }) => {
           {bottomNav.length > 0 && (
             <div className="mt-2 border-t border-gray-100 pt-2">
               {bottomNav.map((item) => (
-                <NavLink key={item.href} item={item} active={isActive(item)} open={sidebarOpen} badge={0} />
+                <NavLink key={item.href} item={item} active={isActive(item)} open={sidebarOpen} badge={badgeOf(item)} />
               ))}
             </div>
           )}

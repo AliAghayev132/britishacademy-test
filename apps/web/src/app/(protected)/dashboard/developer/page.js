@@ -11,7 +11,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList } from "lucide-react";
+import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList, Menu as MenuIcon } from "lucide-react";
 // Data
 import {
   useAdminMigrateI18nMutation,
@@ -21,6 +21,7 @@ import {
   useImportTeachersMutation,
   useImportBranchesMutation,
   useMigrateSlugsMutation,
+  useImportMenuMutation,
   useImportQuizzesMutation,
   useAdminSeedMutation,
 } from "@/store/api/adminApi";
@@ -39,6 +40,8 @@ export default function DeveloperPage() {
   const [teacherReport, setTeacherReport] = useState(null);
   const [importBranches, { isLoading: branching }] = useImportBranchesMutation();
   const [branchReport, setBranchReport] = useState(null);
+  const [importMenu, { isLoading: menuing }] = useImportMenuMutation();
+  const [menuReport, setMenuReport] = useState(null);
   const [migrateSlugs, { isLoading: slugging }] = useMigrateSlugsMutation();
   const [slugReport, setSlugReport] = useState(null);
   const [importQuizzes, { isLoading: quizzing }] = useImportQuizzesMutation();
@@ -52,6 +55,25 @@ export default function DeveloperPage() {
   // bağlayır. `overwrite` — şəkli olan ölkələri də yenilə.
   // Müəllim → filial → dərs təyinatları. Dərs saatı yazılmır.
   // Filial əlaqə məlumatları — yalnız filial sətirlərini yeniləyir.
+  // Menyu quruluşu dəyişəndə tam seed işlətməmək üçün — yalnız header menyusu.
+  const runImportMenu = async (dryRun) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        title: "Başlıq menyusu yenidən qurulsun?",
+        text: "Header menyusu <b>tamamilə silinib</b> yenidən yaradılacaq (Haqqımızda → Müəllimlər, Tələbələrimiz). Footer menyusu və qalan məzmun toxunulmur.",
+        confirmText: "Yenidən qur",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await importMenu({ dryRun }).unwrap();
+      setMenuReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "Alınmadı");
+    }
+  };
+
   const runImportBranches = async (dryRun) => {
     if (!dryRun) {
       const ok = await confirmDialog({
@@ -693,6 +715,65 @@ export default function DeveloperPage() {
         </div>
       </div>
 
+
+        {/* Başlıq menyusu */}
+        <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+          <div className="flex items-start gap-4">
+            <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-indigo-50 text-indigo-700">
+              <MenuIcon className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-base font-bold text-gray-900">Başlıq menyusunu yenidən qur</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Menyu quruluşu koda əlavə olunub, amma <b>bazada köhnə qalıb</b>.
+                Bu düymə yalnız <b>header menyusunu</b> yenidən qurur —
+                «Haqqımızda» altında Müəllimlər və Tələbələrimiz görünəcək.
+              </p>
+
+              <div className="mt-4 flex items-start gap-2 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-800">
+                <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+                <span>
+                  Kurslar, müəllimlər, müraciətlər və footer menyusu
+                  <b> toxunulmur</b>. Tam seed işlətməyə ehtiyac yoxdur.
+                </span>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <button
+                  onClick={() => runImportMenu(true)}
+                  disabled={menuing}
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  <MenuIcon className="h-4 w-4" /> Yoxla (quru rejim)
+                </button>
+                <button
+                  onClick={() => runImportMenu(false)}
+                  disabled={menuing}
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+                >
+                  <MenuIcon className="h-4 w-4" />
+                  {menuing ? "Qurulur…" : "Yenidən qur"}
+                </button>
+              </div>
+
+              {menuReport && (
+                <div className="mt-6">
+                  <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                    Nəticə — {menuReport.before} → {menuReport.after} bənd
+                    {menuReport.dryRun ? " (quru rejim)" : ""}
+                  </div>
+                  <div className="space-y-1 rounded-lg border border-gray-100 p-3">
+                    {(menuReport.items || []).map((m, i) => (
+                      <div key={i} className={`text-sm ${m.level ? "pl-6 text-gray-500" : "font-semibold text-gray-800"}`}>
+                        {m.level ? "└ " : ""}{m.label} <span className="text-xs text-gray-400">{m.href}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
       {/* Filial əlaqə məlumatları */}
       <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

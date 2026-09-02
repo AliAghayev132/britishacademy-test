@@ -61,6 +61,8 @@ AdminRouter.post("/dev/import-teachers", devOnly, devController.runImportTeacher
 AdminRouter.post("/dev/import-branches", devOnly, devController.runImportBranches);
 // Kurs sluglarını köhnə saytın ünvanlarına uyğunlaşdır (SEO trafikinin qorunması).
 AdminRouter.post("/dev/migrate-slugs", devOnly, writeRateLimiter, devController.runMigrateSlugs);
+// Başlıq menyusunu yenidən qur — tam seed işlətmədən.
+AdminRouter.post("/dev/import-menu", devOnly, writeRateLimiter, devController.runImportMenu);
 // Səviyyə testlərini yüklə (köhnə saytın ən çox girilən iki səhifəsi).
 AdminRouter.post("/dev/import-quizzes", devOnly, writeRateLimiter, devController.runImportQuizzes);
 

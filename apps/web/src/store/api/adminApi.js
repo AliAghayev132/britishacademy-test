@@ -157,6 +157,11 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/dev/migrate-slugs", method: "POST", body: body || {} }),
       invalidatesTags: ["Resource", "Site"],
     }),
+    // Başlıq menyusunu yenidən qurur — tam seed işlətmədən.
+    importMenu: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-menu", method: "POST", body: body || {} }),
+      invalidatesTags: ["Resource", "Site"],
+    }),
     // Səviyyə testlərini yüklə (mövcud test toxunulmur).
     importQuizzes: builder.mutation({
       query: (body) => ({ url: "/admin/dev/import-quizzes", method: "POST", body: body || {} }),
@@ -293,6 +298,7 @@ export const {
   useImportTeachersMutation,
   useImportBranchesMutation,
   useMigrateSlugsMutation,
+  useImportMenuMutation,
   useImportQuizzesMutation,
   useAdminSeedMutation,
   useBulkStatusQuery,

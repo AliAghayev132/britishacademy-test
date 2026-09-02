@@ -2,7 +2,9 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService, importHeaderMenu } from "#services";
+import { HEADER_MENU } from "../services/SeedService.js";
+import { tri } from "../data/translations.mjs";
 
 /**
  * POST /api/admin/dev/seed
@@ -270,4 +272,33 @@ const runImportQuizzes = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes };
+/**
+ * POST /api/admin/dev/import-menu
+ *
+ * Başlıq menyusunu yenidən qurur. Menyu quruluşu dəyişəndə tam seed
+ * işlətməmək üçündür: bu əməliyyat YALNIZ header menyusuna toxunur, kurslar,
+ * müəllimlər və müraciətlər yerində qalır.
+ */
+const runImportMenu = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await importHeaderMenu(HEADER_MENU, tri, { dryRun });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Menyu yeniləndi: ${result.before} → ${result.after} bənd`,
+    });
+  }
+  res.json({
+    success: true,
+    message: dryRun
+      ? `${result.after} bənd quraşdırılacaq (sınaq rejimi)`
+      : `Menyu yeniləndi — ${result.after} bənd`,
+    data: result,
+  });
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu };

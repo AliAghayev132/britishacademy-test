@@ -142,7 +142,9 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
         <DestinationPicker destinations={destinations} selected={picked} onToggle={onTogglePick} />
       )}
 
-      {branches.length > 0 && (
+      {/* Xaricdə təhsildə filialın mənası yoxdur — müraciət ölkə üzrədir,
+          dərs filialda keçilmir. */}
+      {interest !== ABROAD && branches.length > 0 && (
         <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
       {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}
@@ -185,6 +187,13 @@ export function ApplyModal({ open, onClose, preset, branches = [], destinations 
 
   // ── Handlers ──
   const change = useCallback((e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value })), []);
+
+  // Maraq «Xaricdə təhsil»ə keçəndə seçilmiş filial təmizlənir — sahə
+  // gizlənir, amma dəyər formada qalıb müraciətlə göndərilərdi.
+  const changeInterest = useCallback((v) => {
+    setInterest(v);
+    if (v === ABROAD) setBranch("");
+  }, []);
 
   const togglePick = useCallback((id) => {
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -231,7 +240,7 @@ export function ApplyModal({ open, onClose, preset, branches = [], destinations 
           <ApplyForm
             form={form}
             interest={interest}
-            setInterest={setInterest}
+            setInterest={changeInterest}
             branch={branch}
             setBranch={setBranch}
             branches={branches}

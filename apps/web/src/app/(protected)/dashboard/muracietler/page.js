@@ -163,6 +163,8 @@ export function LeadsView({ abroadOnly = false }) {
               onChange={(e) => setFilter(setSource)(e.target.value)}
             />
           </div>
+          {/* Xaricdə təhsil müraciətlərində filial olmur — filtr gizlənir. */}
+          {!abroadOnly && (
           <div className="w-48">
             <NativeSelect
               placeholder="Bütün filiallar"
@@ -171,6 +173,9 @@ export function LeadsView({ abroadOnly = false }) {
               onChange={(e) => setFilter(setBranch)(e.target.value)}
             />
           </div>
+          )}
+          {/* Kurs da eyni səbəbdən gizlənir — müraciət ölkə üzrədir. */}
+          {!abroadOnly && (
           <div className="w-52">
             <NativeSelect
               placeholder="Bütün kurslar"
@@ -179,6 +184,7 @@ export function LeadsView({ abroadOnly = false }) {
               onChange={(e) => setFilter(setCourse)(e.target.value)}
             />
           </div>
+          )}
             {destinationOptions.length > 0 && (
               <div className="w-52">
                 <NativeSelect
@@ -230,7 +236,7 @@ export function LeadsView({ abroadOnly = false }) {
                   <th className="px-4 py-3">Ad</th>
                   <th className="px-4 py-3">Əlaqə</th>
                   <th className="hidden px-4 py-3 lg:table-cell">Kurs / maraq</th>
-                  <th className="hidden px-4 py-3 xl:table-cell">Filial</th>
+                  {!abroadOnly && <th className="hidden px-4 py-3 xl:table-cell">Filial</th>}
                   <th className="hidden px-4 py-3 lg:table-cell">Mənbə</th>
                   <th className="hidden px-4 py-3 md:table-cell">Tarix</th>
                   <th className="px-4 py-3">Status</th>
@@ -292,9 +298,11 @@ export function LeadsView({ abroadOnly = false }) {
                       )}
                     </td>
 
+                    {!abroadOnly && (
                     <td className="hidden px-4 py-3 text-gray-600 xl:table-cell">
                       {pickAz(l.branch?.name) || "—"}
                     </td>
+                    )}
 
                     <td className="hidden px-4 py-3 lg:table-cell">
                       <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
