@@ -16,6 +16,12 @@ const leadSchema = new Schema(
     branch: { type: Schema.Types.ObjectId, ref: "Branch" },
     // Free-text interest when the visitor did not pick a real course
     interest: { type: String, trim: true },
+    // Xaricdə təhsil müraciətlərində seçilən ölkələr.
+    //
+    // Ayrıca sahədir, `message` içinə mətn kimi yazılmır: admin panel bunlara
+    // görə süzgəc qura bilsin və hansı ölkənin nə qədər maraq gördüyü
+    // statistikada görünsün.
+    destinations: [{ type: Schema.Types.ObjectId, ref: "Destination" }],
     message: { type: String, trim: true },
 
     source: { type: String, enum: leadSources, default: "apply-modal" },

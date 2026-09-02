@@ -40,7 +40,8 @@ const branchNames = (t) =>
     ? t.assignments.map((a) => a.branch?.name).filter(Boolean).join(" · ")
     : (t.branches || []).map((b) => b?.name).filter(Boolean).join(" · ");
 
-const TeacherCard = memo(function TeacherCard({ t }) {
+// Ana səhifədəki swiper də eyni kartı işlədir — görünüş bir yerdə qalsın.
+export const TeacherCard = memo(function TeacherCard({ t }) {
   const badge = badgeText(t);
   return (
     <Link

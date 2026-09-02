@@ -62,6 +62,9 @@ const list = asyncHandler(async (req, res) => {
     "pricingMode", "location", "group", "region", "source",
     "category", "branch", "teacher", "course", "parent", "author",
     "folder", // qalereya bölməsi
+    // Xaricdə təhsil müraciətləri: massiv sahədir, Mongo bərabərlik
+    // müqayisəsini massiv elementlərinə də tətbiq edir — ayrıca kod lazım deyil.
+    "destinations",
   ];
   for (const key of FILTERABLE) {
     const raw = req.query[key];

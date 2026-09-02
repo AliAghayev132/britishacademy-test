@@ -9,7 +9,7 @@
 // we don't leave a half-built course behind.
 
 import { asyncHandler } from "#utils";
-import { Course, CourseGroup, Branch, Teacher, CourseCategory } from "#models";
+import { Course, CourseGroup, Branch, Teacher, CourseCategory, Destination } from "#models";
 import { logAction } from "#services";
 
 // ── Helpers ──
@@ -76,15 +76,17 @@ async function syncTeacherLinks(courseId, branches) {
 const getLookups = asyncHandler(async (_req, res) => {
   // `courses` müəllim formasına lazımdır: filial üzrə hansı dərsləri
   // apardığını seçmək üçün siyahı göstərilir.
-  const [branches, teachers, categories, courses] = await Promise.all([
+  // `destinations` müraciətlər səhifəsindəki «Bütün ölkələr» filtri üçündür.
+  const [branches, teachers, categories, courses, destinations] = await Promise.all([
     Branch.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name address"),
     Teacher.find({ isDeleted: false })
       .sort({ order: 1, fullName: 1 })
       .select("fullName title branches color"),
     CourseCategory.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name parent"),
     Course.find({ isDeleted: false }).sort({ order: 1, title: 1 }).select("title slug"),
+    Destination.find({ isDeleted: false }).sort({ order: 1, country: 1 }).select("country slug"),
   ]);
-  res.json({ success: true, data: { branches, teachers, categories, courses } });
+  res.json({ success: true, data: { branches, teachers, categories, courses, destinations } });
 });
 
 // ── GET /api/admin/courses/full/:id ──

@@ -68,7 +68,64 @@ const SuccessCard = memo(function SuccessCard({ onClose }) {
   );
 });
 
-const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch, setBranch, branches, error, isLoading, onChange, onSubmit }) {
+/** «Xaricdə təhsil» seçiminin AZ dəyəri — müraciətdə `interest` belə yazılır. */
+const ABROAD = tAz("apply.int.abroad");
+
+/**
+ * Ölkə seçimi — çoxlu seçim, düymə şəklində.
+ *
+ * Açılan siyahı (select) əvəzinə düymələr işlədilir: ziyarətçi adətən bir neçə
+ * ölkəyə baxır və hamısını bir ekranda görmək seçimi asanlaşdırır. Seçilmiş
+ * ölkələr müraciətlə birlikdə göndərilir, ona görə operator ilk zəngdə hansı
+ * istiqamətdən danışacağını bilir.
+ */
+const DestinationPicker = memo(function DestinationPicker({ destinations, selected, onToggle }) {
+  const t = useT();
+  if (!destinations.length) return null;
+  return (
+    <div>
+      <div style={{ fontSize: 13.5, fontWeight: 600, color: "#4A4A57", marginBottom: 9 }}>
+        {t("apply.pickCountries")}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {destinations.map((d) => {
+          const on = selected.includes(d._id);
+          return (
+            <button
+              key={d._id}
+              type="button"
+              onClick={() => onToggle(d._id)}
+              aria-pressed={on}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                border: `1px solid ${on ? "var(--accent)" : "#E4E5EC"}`,
+                background: on ? "var(--accent)" : "#fff",
+                color: on ? "#fff" : "#4A4A57",
+                borderRadius: 99,
+                padding: "8px 15px",
+                fontSize: 14,
+                fontWeight: on ? 700 : 600,
+                fontFamily: "inherit",
+                cursor: "pointer",
+                transition: "all .18s",
+              }}
+            >
+              {d.flag && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={d.flag} alt="" width={18} height={13} style={{ borderRadius: 2, display: "block" }} />
+              )}
+              {d.country}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch, setBranch, branches, destinations, picked, onTogglePick, error, isLoading, onChange, onSubmit }) {
   const t = useT();
   return (
     <form onSubmit={onSubmit} style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -78,6 +135,13 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
         <input className="ba-field" name="email" type="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
       <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} style={field} options={INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }))} />
+
+      {/* Ölkələr yalnız «Xaricdə təhsil» seçiləndə görünür — digər hallarda
+          forma lüzumsuz uzanardı. */}
+      {interest === ABROAD && (
+        <DestinationPicker destinations={destinations} selected={picked} onToggle={onTogglePick} />
+      )}
+
       {branches.length > 0 && (
         <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
@@ -90,13 +154,14 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
   );
 });
 
-export function ApplyModal({ open, onClose, preset, branches = [] }) {
+export function ApplyModal({ open, onClose, preset, branches = [], destinations = [] }) {
   const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [interest, setInterest] = useState("");
   const [branch, setBranch] = useState("");
+  const [picked, setPicked] = useState([]);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
@@ -108,6 +173,7 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
       setError("");
       setInterest(preset || "");
       setBranch("");
+      setPicked([]);
     }
   }, [open, preset]);
 
@@ -120,6 +186,10 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
   // ── Handlers ──
   const change = useCallback((e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value })), []);
 
+  const togglePick = useCallback((id) => {
+    setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }, []);
+
   const submit = useCallback(async (e) => {
     e.preventDefault();
     setError("");
@@ -128,6 +198,9 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
         ...form,
         interest,
         branch: branch || undefined,
+        // Yalnız «Xaricdə təhsil» seçiləndə göndərilir — başqa hallarda
+        // istifadəçi ölkə seçmir, seçim isə ekranda qalmış ola bilər.
+        destinations: interest === ABROAD && picked.length ? picked : undefined,
         source: "apply-modal",
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
@@ -135,7 +208,7 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
     } catch (err) {
       setError(err?.data?.message || t("apply.error"));
     }
-  }, [createLead, form, interest, branch, t]);
+  }, [createLead, form, interest, branch, picked, t]);
 
   const onOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) onClose();
@@ -162,6 +235,9 @@ export function ApplyModal({ open, onClose, preset, branches = [] }) {
             branch={branch}
             setBranch={setBranch}
             branches={branches}
+            destinations={destinations}
+            picked={picked}
+            onTogglePick={togglePick}
             error={error}
             isLoading={isLoading}
             onChange={change}

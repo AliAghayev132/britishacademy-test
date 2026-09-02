@@ -52,6 +52,13 @@ export const HOME_SECTIONS = [
     limit: 8,
   },
   {
+    key: "teachers",
+    label: "Müəllimlər",
+    hint: "Seçilmiş müəllimlər — sıra hər açılışda qarışır",
+    manage: "/dashboard/resurslar/teachers",
+    limit: 8,
+  },
+  {
     key: "testimonials",
     label: "Yazılı rəylər",
     hint: "Mətn rəyləri divarı",

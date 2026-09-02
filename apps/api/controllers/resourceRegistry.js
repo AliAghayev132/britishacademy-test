@@ -92,7 +92,7 @@ export const RESOURCES = {
     model: Lead,
     search: ["name", "phone", "email"],
     sort: { createdAt: -1 },
-    populate: ["course", "branch", "handledBy"],
+    populate: ["course", "branch", "handledBy", "destinations"],
   },
   pages: {
     model: Page,

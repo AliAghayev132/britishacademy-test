@@ -53,16 +53,26 @@ export default async function PublicLayout({ children }) {
   }));
 
   // Map API menu items to header nav variants.
+  //
+  // `children` olan adi bənd sadə dropdown olur (variant: "links") — məsələn
+  // «Haqqımızda» altında Müəllimlər və Tələbələrimiz. Uşaqlar admin paneldən
+  // idarə olunur, ona görə burada sabit siyahı yazılmır.
   const nav = menu.map((m) => {
     if (m.type === "mega") return { label: m.label, href: "/kurslar", variant: "mega" };
     if (m.type === "dropdown") return { label: m.label, href: "/xaricde-tehsil", variant: "destinations" };
+    const children = (m.children || [])
+      .filter((c) => c.label && c.href)
+      .map((c) => ({ label: c.label, href: c.href }));
+    if (children.length) {
+      return { label: m.label, href: m.href || "/", variant: "links", children };
+    }
     return { label: m.label, href: m.href || "/" };
   });
 
   // ── render ──
   return (
     <LocaleProvider locale={locale}>
-      <SiteProvider branches={branches}>
+      <SiteProvider branches={branches} destinations={destinations}>
         <Suspense fallback={null}>
           <RouteLoader />
         </Suspense>

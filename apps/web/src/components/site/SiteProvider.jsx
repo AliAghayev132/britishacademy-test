@@ -16,7 +16,7 @@ export function useApply() {
  * overlays (apply modal + WhatsApp branch picker). Server-rendered Header,
  * page content and Footer are passed through as `children`.
  */
-export function SiteProvider({ branches = [], children }) {
+export function SiteProvider({ branches = [], destinations = [], children }) {
   const [applyOpen, setApplyOpen] = useState(false);
   const [preset, setPreset] = useState(null);
 
@@ -29,7 +29,7 @@ export function SiteProvider({ branches = [], children }) {
   return (
     <ApplyCtx.Provider value={{ open, close }}>
       {children}
-      <ApplyModal open={applyOpen} onClose={close} preset={preset} branches={branches} />
+      <ApplyModal open={applyOpen} onClose={close} preset={preset} branches={branches} destinations={destinations} />
       <WhatsAppWidget branches={branches} />
     </ApplyCtx.Provider>
   );

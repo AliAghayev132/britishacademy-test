@@ -210,6 +210,20 @@ const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, de
       </div>
     );
   }
+  // Sadə dropdown — menyu bəndinin öz uşaqları (məs. Haqqımızda → Müəllimlər,
+  // Tələbələrimiz). Siyahı DB-dən gəlir, burada sabit yazılmır.
+  if (item.variant === "links") {
+    return (
+      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
+        <Link href={item.href}>{label} {caret}</Link>
+        <div className="ba-dd">
+          {item.children.map((c) => (
+            <Link key={c.href} href={c.href}>{c.label}</Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`ba-nav-item${active ? " is-active" : ""}`}>
       <Link href={item.href}>{label}</Link>
@@ -244,6 +258,11 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
           {item.variant === "destinations" &&
             destinations.map((d) => (
               <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
+            ))}
+
+          {item.variant === "links" &&
+            (item.children || []).map((c) => (
+              <Link key={c.href} className="ba-msub" href={c.href} onClick={onClose}>{c.label}</Link>
             ))}
         </div>
       </details>

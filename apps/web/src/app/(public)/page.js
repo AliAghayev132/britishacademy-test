@@ -16,6 +16,7 @@ import RevealOnScroll from "@/components/site/RevealOnScroll";
 import PartnersCarousel from "@/components/site/PartnersCarousel";
 import ServicesShowcase from "@/components/site/ServicesShowcase";
 import VideoSwiper from "@/components/site/VideoSwiper";
+import TeacherSwiper from "@/components/site/TeacherSwiper";
 import { sectionEnabled } from "@/lib/homeSections";
 
 // Utils / SEO
@@ -149,6 +150,14 @@ export default async function HomePage() {
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
           <SectionHead title={t("page.students.speak")} sub={t("page.students.speakSub")} />
           <VideoSwiper videos={videoTestimonials} />
+        </section>
+      )}
+
+      {/* Müəllimlər — seçilmişlər, sıra hər açılışda qarışır (TeacherSwiper) */}
+      {on("teachers") && (home?.teachers || []).length > 0 && (
+        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+          <SectionHead title={t("common.teachers")} sub={t("home.teachers.sub")} />
+          <TeacherSwiper teachers={home.teachers} />
         </section>
       )}
 

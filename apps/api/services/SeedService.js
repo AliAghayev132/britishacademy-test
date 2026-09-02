@@ -111,13 +111,26 @@ const ADVANTAGES = [
 
 const PARTNERS = ["Rabitəbank", "AzerGold", "Veysəloğlu", "ARB 24", "Araz Market", "PMD Group", "Alfa Telekom", "Petrochem", "A+CO", "Green Plast", "Caspian Pipe", "Enefcon"].map((name, i) => ({ name, order: i }));
 
+// Menyu ağacı. `children` olan bənd başlıqda dropdown kimi göstərilir
+// (bax apps/web (public)/layout.js — variant: "links").
+//
+// Müəllimlər və Tələbələrimiz əvvəl ayrıca üst səviyyə bəndləri idi; menyu
+// yeddi bənddən ibarət olub dar ekranlarda sıxılırdı. İndi hər ikisi
+// «Haqqımızda» altındadır — məzmunca da ora aiddirlər.
 const HEADER_MENU = [
-  { label: "Haqqımızda", href: "/haqqimizda", type: "link" },
+  {
+    label: "Haqqımızda",
+    href: "/haqqimizda",
+    type: "link",
+    children: [
+      { label: "Haqqımızda", href: "/haqqimizda", type: "link" },
+      { label: "Müəllimlər", href: "/muellimler", type: "link" },
+      { label: "Tələbələrimiz", href: "/telebelerimiz", type: "link" },
+    ],
+  },
   { label: "Xidmətlər", href: "/kurslar/xidmetler", type: "mega" },
   { label: "Xaricdə təhsil", href: "/xaricde-tehsil", type: "dropdown" },
   { label: "Filiallar", href: "/filiallar", type: "link" },
-  { label: "Müəllimlər", href: "/muellimler", type: "link" },
-  { label: "Tələbələrimiz", href: "/telebelerimiz", type: "link" },
   { label: "Əlaqə", href: "/elaqe", type: "link" },
 ];
 
@@ -341,9 +354,20 @@ export function buildGraph() {
     new Advantage({ ...a, title: tri(a.title), text: tri(a.text), order: i }),
   );
   const partners = PARTNERS.map((p) => new Partner(p));
-  const menu = HEADER_MENU.map((m, i) =>
-    new MenuItem({ ...m, label: tri(m.label), location: "header", order: i }),
-  );
+  // Valideyn və uşaq bəndləri BİR massivdə qaytarılır — `parent` sahəsi
+  // əlaqəni qurur. `new MenuItem()` _id-ni dərhal verir, ona görə iki
+  // mərhələli yazmaq lazım gəlmir.
+  const menu = [];
+  HEADER_MENU.forEach((m, i) => {
+    const { children, ...rest } = m;
+    const parent = new MenuItem({ ...rest, label: tri(m.label), location: "header", order: i });
+    menu.push(parent);
+    (children || []).forEach((c, ci) => {
+      menu.push(
+        new MenuItem({ ...c, label: tri(c.label), location: "header", parent: parent._id, order: ci }),
+      );
+    });
+  });
 
   // Sayt üzrə FAQ — ana səhifədəki bölmə. Əvvəl seed-də ümumiyyətlə yox idi,
   // ona görə /api/faqs boş qayıdırdı və bölmə sabit mətnlərə düşürdü.

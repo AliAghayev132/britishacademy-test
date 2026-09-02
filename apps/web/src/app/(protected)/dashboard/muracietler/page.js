@@ -48,6 +48,7 @@ export default function LeadsPage() {
   const [source, setSource] = useState("");
   const [branch, setBranch] = useState("");
   const [course, setCourse] = useState("");
+  const [destination, setDestination] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -62,15 +63,22 @@ export default function LeadsPage() {
     label: pickAz(c.title),
   }));
 
+  // Ölkə siyahısı lookups-dan gəlir; boşdursa filtr ümumiyyətlə göstərilmir.
+  const destinationOptions = (lookups?.data?.destinations || []).map((d) => ({
+    value: d._id,
+    label: pickAz(d.country),
+  }));
+
   const activeFilters = {
     ...(status ? { status } : {}),
     ...(source ? { source } : {}),
     ...(branch ? { branch } : {}),
     ...(course ? { course } : {}),
+    ...(destination ? { destinations: destination } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
   };
-  const hasFilter = Boolean(search || status || source || branch || course || from || to);
+  const hasFilter = Boolean(search || status || source || branch || course || destination || from || to);
 
   // Backend leads-i həmişə createdAt: -1 (ən yenilər ən yuxarıda) qaytarır.
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({
@@ -157,6 +165,16 @@ export default function LeadsPage() {
               onChange={(e) => setFilter(setCourse)(e.target.value)}
             />
           </div>
+            {destinationOptions.length > 0 && (
+              <div className="w-52">
+                <NativeSelect
+                  placeholder="Bütün ölkələr"
+                  options={destinationOptions}
+                  value={destination}
+                  onChange={(e) => setFilter(setDestination)(e.target.value)}
+                />
+              </div>
+            )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -244,6 +262,20 @@ export default function LeadsPage() {
 
                     <td className="hidden px-4 py-3 text-gray-600 lg:table-cell">
                       {pickAz(l.course?.title) || pickAz(l.interest) || "—"}
+                      {/* Xaricdə təhsil müraciətlərində seçilən ölkələr — operator
+                          ilk zəngdən əvvəl hansı istiqamətdən danışacağını bilsin. */}
+                      {l.destinations?.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {l.destinations.map((d) => (
+                            <span
+                              key={d._id || d}
+                              className="rounded-md bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-700"
+                            >
+                              {pickAz(d.country) || "—"}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </td>
 
                     <td className="hidden px-4 py-3 text-gray-600 xl:table-cell">

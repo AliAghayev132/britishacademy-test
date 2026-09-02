@@ -72,7 +72,7 @@ const getHome = asyncHandler(async (_req, res) => {
   // Rəy sorğuları da bu dəstəyə daxildir. Əvvəl onlar ARDICIL icra olunurdu
   // (əvvəl mətn rəyləri gözlənilir, sonra videolar) — ana səhifə üçün 3 gediş
   // demək idi. İndi normal halda hamısı BİR gedişdə paralel gedir.
-  const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo] =
+  const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo, featuredTeachers] =
     await Promise.all([
       SiteSetting.get(),
       Course.findFeatured(HOME_COURSE_COUNT).populate("category"),
@@ -82,6 +82,10 @@ const getHome = asyncHandler(async (_req, res) => {
       Faq.findPublic().limit(8),
       Testimonial.findPublic({ type: "text", isFeatured: true }).limit(6),
       Testimonial.findPublic({ type: "video", isFeatured: true }).limit(8),
+      // Ana səhifədəki müəllim lenti. Sıra klientdə qarışdırılır (bax
+      // TeacherSwiper) — burada sabit sıra qaytarılır ki, SSR ilə ilk render
+      // uyğun gəlsin və hidratasiya uyğunsuzluğu yaranmasın.
+      Teacher.findPublic({ isFeatured: true }).limit(12),
     ]);
 
   // Seçilmiş kurslar 6-dan azdırsa qalanını sıraya görə digər aktiv
@@ -117,6 +121,7 @@ const getHome = asyncHandler(async (_req, res) => {
     data: {
       settings: publicSettings(settings),
       courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs,
+      teachers: featuredTeachers,
     },
   });
 });

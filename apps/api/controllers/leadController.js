@@ -10,6 +10,12 @@ const createLead = asyncHandler(async (req, res) => {
   const { name, phone, email, course, branch, interest, message, source, pageUrl } =
     req.body;
 
+  // Ölkə seçimi yalnız massiv kimi qəbul olunur və ObjectId formasına
+  // uyğunluğu yoxlanılır — açıq endpointdir, gələn dəyərə etibar etmirik.
+  const destinations = Array.isArray(req.body?.destinations)
+    ? req.body.destinations.filter((id) => /^[a-fd]{24}$/i.test(String(id))).slice(0, 12)
+    : [];
+
   if (!name || !phone) {
     return res.status(400).json({
       success: false,
@@ -27,6 +33,7 @@ const createLead = asyncHandler(async (req, res) => {
     message,
     source,
     pageUrl,
+    destinations: destinations.length ? destinations : undefined,
   });
 
   res.status(201).json({
