@@ -333,7 +333,11 @@ export function DestinationForm({ item, onClose }) {
       </section>
 
       {/* ── SEO ── */}
-      <SeoFields value={seo} onChange={setSeo} />
+      <SeoFields
+        value={seo}
+        onChange={setSeo}
+        context={{ kind: "xaricdə təhsil ölkəsi", title: country, body: [region, tagline, lead, contentHtml] }}
+      />
 
       {/* ── Parametrlər ── */}
       <section className="space-y-4">

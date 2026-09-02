@@ -470,7 +470,11 @@ export function TeacherForm({ item, onClose }) {
       </div>
 
       {/* ── SEO ── */}
-      <SeoFields value={seo} onChange={setSeo} />
+      <SeoFields
+        value={seo}
+        onChange={setSeo}
+        context={{ kind: "müəllim profili", title: fullName, body: [title, bio] }}
+      />
 
       {/* ── Parametrlər ── */}
       <div className="space-y-4">

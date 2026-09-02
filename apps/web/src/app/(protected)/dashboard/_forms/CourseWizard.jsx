@@ -387,7 +387,11 @@ export function CourseWizard({ item, onClose }) {
           </section>
 
           {/* ── SEO ── */}
-          <SeoFields value={seo} onChange={setSeo} />
+          <SeoFields
+            value={seo}
+            onChange={setSeo}
+            context={{ kind: "dil kursu", title: course.title, body: [course.h1, course.lead, course.excerpt, contentHtml] }}
+          />
         </>
       )}
     </Overlay>

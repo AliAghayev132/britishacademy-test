@@ -233,7 +233,11 @@ export function PageForm({ item, onClose }) {
       </section>
 
       {/* 3. SEO */}
-      <SeoFields value={seo} onChange={setSeo} />
+      <SeoFields
+        value={seo}
+        onChange={setSeo}
+        context={{ kind: "statik səhifə", title, body: [lead, contentHtml] }}
+      />
 
       {/* 4. Parametrlər */}
       <section className="space-y-4">

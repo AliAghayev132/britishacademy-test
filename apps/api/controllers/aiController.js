@@ -158,6 +158,56 @@ const processAI = asyncHandler(async (req, res) => {
       break;
     }
 
+    /**
+     * SEO dəsti — hər üç dil bir çağırışda.
+     *
+     * NİYƏ AYRICA `generate-seo`-dan: köhnə əməliyyat yalnız bir dil üçün
+     * işləyirdi. Sayt üçdillidir, ona görə admin eyni düyməni üç dəfə basmalı
+     * olurdu və EN/RU çox vaxt boş qalırdı. Bir çağırış həm ucuzdur, həm də
+     * üç dilin bir-birinə uyğun olmasını təmin edir.
+     *
+     * EN/RU AZ-ın hərfi tərcüməsi DEYİL: hər auditoriya fərqli axtarır
+     * («ingilis dili kursu» ≠ «English courses in Baku» ≠ «курсы английского
+     * в Баку»), ona görə model hər dil üçün ayrıca açar söz seçir.
+     */
+    case "seo-suite": {
+      const kind = String(req.body?.kind || "səhifə").slice(0, 40);
+      const name = String(req.body?.title || "").slice(0, 200);
+
+      systemPrompt = `You are an SEO specialist for the Azerbaijani market, writing for a language-school website based in Baku, Azerbaijan.
+
+CONTEXT — how people in Azerbaijan actually search:
+- Azerbaijani queries are usually plural and colloquial: "ingilis dili kursları", "IELTS hazırlıq", "xaricdə təhsil".
+- A large share of users search in Russian, especially in Baku: "курсы английского в Баку".
+- English queries come mostly from expats and study-abroad seekers.
+- Location words matter: Bakı / Баку / Baku, and district names (Nərimanov, Əhmədli, Elmlər Akademiyası).
+- Do NOT invent prices, guarantees, exam scores, rankings or awards.
+
+TASK: produce SEO metadata in THREE languages for the given content.
+
+RULES per language:
+- metaTitle: max 60 characters, includes the main search term, no clickbait.
+- metaDescription: max 160 characters, one concrete benefit, ends without a period-heavy sales tone.
+- keywords: 6-10 items, comma-separated in ONE string (not an array), lowercase, no hashtags, no duplicates.
+- az = Azerbaijani, en = English, ru = Russian.
+- en and ru must be written the way THAT audience searches, not a literal translation of az.
+
+Return ONLY valid JSON, no markdown, no code fences:
+{"az":{"metaTitle":"","metaDescription":"","keywords":""},"en":{...},"ru":{...}}`;
+
+      userPrompt = [
+        `Content type: ${kind}`,
+        name ? `Name/title: ${name}` : "",
+        "",
+        "Content:",
+        content || "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      break;
+    }
+
+
     default:
       return res
         .status(400)
@@ -168,6 +218,9 @@ const processAI = asyncHandler(async (req, res) => {
     system: systemPrompt,
     user: userPrompt,
     temperature: action === "generate-slug" ? 0.1 : 0.3,
+    // seo-suite bir cavabda ÜÇ dil qaytarır — defolt limit onu yarımçıq
+    // kəsir və JSON parse olunmur.
+    maxTokens: action === "seo-suite" ? 2200 : undefined,
   });
   if (!ai.ok) {
     return res.status(ai.status).json({ success: false, message: ai.message });
@@ -184,7 +237,8 @@ const processAI = asyncHandler(async (req, res) => {
   if (
     isFieldsBatch ||
     action === "generate-keywords" ||
-    action === "generate-seo"
+    action === "generate-seo" ||
+    action === "seo-suite"
   ) {
     result = tryParseJson(raw);
   }

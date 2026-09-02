@@ -119,7 +119,7 @@ function EmptyWarn({ value }) {
 }
 
 /** Kiçik AI düyməsi (loading spinner ilə). */
-function AiBtn({ onClick, busy, disabled, icon: Icon, children }) {
+export function AiBtn({ onClick, busy, disabled, icon: Icon, children }) {
   return (
     <button
       type="button"

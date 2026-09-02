@@ -211,7 +211,11 @@ export function BlogPostForm({ item, onClose }) {
       </section>
 
       {/* ── SEO ── */}
-      <SeoFields value={seo} onChange={setSeo} />
+      <SeoFields
+        value={seo}
+        onChange={setSeo}
+        context={{ kind: "bloq yazısı", title, body: [excerpt, content] }}
+      />
     </Overlay>
   );
 }

@@ -360,7 +360,11 @@ export function BranchForm({ item, onClose }) {
       </section>
 
       {/* 6. SEO */}
-      <SeoFields value={seo} onChange={setSeo} />
+      <SeoFields
+        value={seo}
+        onChange={setSeo}
+        context={{ kind: "filial", title: name, body: [address, district, metro] }}
+      />
 
       {/* 7. Parametrlər */}
       <section className="space-y-4">
