@@ -23,6 +23,21 @@ export const seesEverything = (user) =>
  * İstifadəçi həmin bölməni görə bilirmi?
  * superadmin/developer üçün `permissions` doldurulmur — hamısı açıqdır.
  */
+/**
+ * İstifadəçinin görə biləcəyi ölkələr (ObjectId sətirləri).
+ *
+ * `null` = məhdudiyyət yoxdur (hamısını görür). Massiv qaytarılırsa sorğu
+ * məhz o ölkələrlə məhdudlaşdırılmalıdır.
+ *
+ * seesEverything (developer/superadmin) həmişə `null` alır — sahibin öz
+ * hesabını təsadüfən kilidləməsinin qarşısını alır.
+ */
+export const destinationScope = (user) => {
+  if (!user || seesEverything(user)) return null;
+  const list = Array.isArray(user.allowedDestinations) ? user.allowedDestinations : [];
+  return list.length ? list.map(String) : null;
+};
+
 export const canAccessSection = (user, section) => {
   if (!user) return false;
   if (seesEverything(user)) return true;

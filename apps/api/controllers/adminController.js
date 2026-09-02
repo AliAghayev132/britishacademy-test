@@ -4,7 +4,7 @@
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex, hasRole } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, destinationScope } from "#utils";
 
 // Services
 import { logAction } from "#services";
@@ -24,6 +24,35 @@ function resolve(req, res) {
     return null;
   }
   return entry;
+}
+
+/**
+ * İstifadəçinin ölkə əhatəsini sorğuya tətbiq edir.
+ *
+ * YALNIZ `leads` resursuna aiddir. Məhdudiyyət SERVERDƏ qoyulur — filtri
+ * yalnız arayüzdə gizlətmək təhlükəsizlik deyil: istifadəçi sorğunu əl ilə
+ * dəyişib başqa ölkənin müraciətlərini görə bilərdi.
+ *
+ * Şərt iki hala baxır:
+ *   • müraciətdə icazə verilən ölkələrdən ən azı biri var, VƏ YA
+ *   • müraciət ümumiyyətlə ölkəsizdir (adi kurs müraciəti) — belələri
+ *     ölkə məhdudiyyətindən kənardır, əks halda məhdud admin adi
+ *     müraciətləri də görməzdi.
+ */
+function applyDestinationScope(filter, req, resource) {
+  if (resource !== "leads") return filter;
+  const scope = destinationScope(req.user);
+  if (!scope) return filter;
+  const cond = {
+    $or: [
+      { destinations: { $in: scope } },
+      { destinations: { $size: 0 } },
+      { destinations: { $exists: false } },
+    ],
+  };
+  // Mövcud $and-a əlavə edirik ki, axtarışdakı $or ilə toqquşmasın.
+  filter.$and = [...(filter.$and || []), cond];
+  return filter;
 }
 
 function applyPopulate(query, populate) {
@@ -99,6 +128,9 @@ const list = asyncHandler(async (req, res) => {
     if (Object.keys(range).length) filter[dateField] = range;
   }
 
+  // Ölkə əhatəsi — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə görə çıxır.
+  applyDestinationScope(filter, req, req.params.resource);
+
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
     model.countDocuments(filter),
@@ -123,6 +155,15 @@ const getOne = asyncHandler(async (req, res) => {
   );
   if (!item) {
     return res.status(404).json({ success: false, message: "Not found" });
+  }
+  // Siyahı məhduddursa tək sənəd də məhdud olmalıdır — əks halda id-ni
+  // bilən istifadəçi icazəsi olmayan müraciəti aça bilərdi.
+  const scope = destinationScope(req.user);
+  if (req.params.resource === "leads" && scope) {
+    const own = (item.destinations || []).map(String);
+    if (own.length && !own.some((d) => scope.includes(d))) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
   }
   res.json({ success: true, data: { item } });
 });

@@ -8,7 +8,7 @@
 // with cleanup — if group creation fails, the just-created course is removed so
 // we don't leave a half-built course behind.
 
-import { asyncHandler } from "#utils";
+import { asyncHandler, destinationScope } from "#utils";
 import { Course, CourseGroup, Branch, Teacher, CourseCategory, Destination } from "#models";
 import { logAction } from "#services";
 
@@ -73,7 +73,10 @@ async function syncTeacherLinks(courseId, branches) {
 
 // ── GET /api/admin/lookups ──
 // Lightweight option lists for the wizard selects (branches, teachers, categories).
-const getLookups = asyncHandler(async (_req, res) => {
+const getLookups = asyncHandler(async (req, res) => {
+  // Ölkə siyahısı istifadəçinin əhatəsinə görə süzülür — filtrdə icazəsi
+  // olmayan ölkə ümumiyyətlə seçim kimi görünməsin.
+  const scope = destinationScope(req.user);
   // `courses` müəllim formasına lazımdır: filial üzrə hansı dərsləri
   // apardığını seçmək üçün siyahı göstərilir.
   // `destinations` müraciətlər səhifəsindəki «Bütün ölkələr» filtri üçündür.
@@ -84,7 +87,9 @@ const getLookups = asyncHandler(async (_req, res) => {
       .select("fullName title branches color"),
     CourseCategory.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name parent"),
     Course.find({ isDeleted: false }).sort({ order: 1, title: 1 }).select("title slug"),
-    Destination.find({ isDeleted: false }).sort({ order: 1, country: 1 }).select("country slug"),
+    Destination.find({ isDeleted: false, ...(scope ? { _id: { $in: scope } } : {}) })
+      .sort({ order: 1, country: 1 })
+      .select("country slug"),
   ]);
   res.json({ success: true, data: { branches, teachers, categories, courses, destinations } });
 });

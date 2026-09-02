@@ -62,6 +62,18 @@ const userSchema = new Schema(
       default: [],
     },
 
+    /**
+     * Xaricdə təhsil müraciətlərində əhatə dairəsi.
+     *
+     * BOŞ = MƏHDUDİYYƏT YOXDUR — `permissions` ilə eyni konvensiya. Belə
+     * olmasaydı, bu sahə əlavə olunan kimi bütün mövcud adminlər xaricdə
+     * təhsil müraciətlərini görməyi dayandırardı.
+     *
+     * Doludursa istifadəçi YALNIZ sadalanan ölkələrə aid müraciətləri görür —
+     * həm siyahıda, həm də filtr seçimlərində.
+     */
+    allowedDestinations: [{ type: Schema.Types.ObjectId, ref: "Destination" }],
+
     // Token version for "logout all devices"
     tokenVersion: {
       type: Number,

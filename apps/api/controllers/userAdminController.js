@@ -19,11 +19,19 @@ import { adminRoles, adminSections } from "#constants";
  * edə bilmirdi: admin route-dan, superadmin/developer isə buradan geri
  * qaytarılırdı.
  */
+/**
+ * Ölkə əhatəsi — yalnız ObjectId formasındakı dəyərlər qəbul olunur.
+ * Boş massiv «məhdudiyyət yoxdur» deməkdir (bax utils/roles.js).
+ */
+const cleanDestinations = (v) =>
+  Array.isArray(v) ? v.filter((id) => /^[a-fd]{24}$/i.test(String(id))) : [];
+
 const canManageUsers = (req) => hasRole(req.user, "superadmin");
 const publicUser = (u) => ({
   _id: u._id, firstName: u.firstName, lastName: u.lastName, email: u.email,
   phone: u.phone, role: u.role, status: u.status, lastLogin: u.lastLogin,
   permissions: u.permissions || [],
+  allowedDestinations: (u.allowedDestinations || []).map((d) => (d?._id ? d._id : d)),
   createdAt: u.createdAt,
 });
 
@@ -49,7 +57,7 @@ const createUser = asyncHandler(async (req, res) => {
   if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
   const {
     firstName, lastName, email, password, phone,
-    role = "editor", status = "active", permissions = [],
+    role = "editor", status = "active", permissions = [], allowedDestinations = [],
   } = req.body || {};
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ success: false, message: "Ad, soyad, e-poçt və parol tələb olunur" });
@@ -70,6 +78,7 @@ const createUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     firstName, lastName, email, phone, role, status, permissions: cleanPerms,
+    allowedDestinations: cleanDestinations(allowedDestinations),
     password: await HashService.hashPassword(password),
   });
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi yaradıldı: ${email} (${role})` });
@@ -82,7 +91,7 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
 
-  const { firstName, lastName, phone, role, status, password, permissions } = req.body || {};
+  const { firstName, lastName, phone, role, status, password, permissions, allowedDestinations } = req.body || {};
 
   // Özündən yüksək/bərabər istifadəçiyə toxunmaq olmaz — admin superadmin-i
   // dəyişə bilməməlidir.
@@ -101,6 +110,9 @@ const updateUser = asyncHandler(async (req, res) => {
   if (Array.isArray(permissions)) {
     user.permissions = permissions.filter((x) => adminSections.includes(x));
   }
+    if (Array.isArray(allowedDestinations)) {
+      user.allowedDestinations = cleanDestinations(allowedDestinations);
+    }
   if (status) user.status = status;
   if (password) {
     if (String(password).length < 8) return res.status(400).json({ success: false, message: "Parol ən azı 8 simvol olmalıdır" });

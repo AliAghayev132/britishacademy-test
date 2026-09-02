@@ -5,14 +5,14 @@ import { useState } from "react";
 // UI / kit
 import { notify } from "@/components/ui/feedback";
 import { NativeSelect } from "../_forms/kit";
-import { DatePicker } from "@/components/ui/DatePicker";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
 import { Pagination } from "@/components/ui/Pagination";
 // Data (RTK Query)
 import { useAdminListQuery, useAdminLeadStatusMutation, useAdminLookupsQuery } from "@/store/api/adminApi";
 import { QueryState } from "@/components/ui/QueryState";
 import { pickAz } from "@/lib/adminResources";
 // Icons
-import { Search, X } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 
 const STATUS = [
   { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },
@@ -61,6 +61,9 @@ export function LeadsView({ abroadOnly = false }) {
   const [destination, setDestination] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  // Filtr paneli yığcamdır: yalnız axtarış görünür, qalanı açılan paneldədir.
+  // Filtr aktivdirsə panel avtomatik açıq gəlir — gizli süzgəc çaşdırardı.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Filial və kurs siyahıları — filtr üçün.
   const { data: lookups } = useAdminLookupsQuery();
@@ -92,6 +95,11 @@ export function LeadsView({ abroadOnly = false }) {
     ...(to ? { to } : {}),
   };
   const hasFilter = Boolean(search || status || source || branch || course || destination || from || to);
+  // Düymədəki rəqəm — neçə süzgəc aktivdir (axtarış ayrıca sahədir, sayılmır).
+  const activeCount = [status, source, branch, course, destination, from, to].filter(Boolean).length;
+  // Filtr aktivdirsə panel açıq qalır — gizli süzgəc nəticəni dəyişir,
+  // amma səbəbi görünmür və bu, çaşdırıcıdır.
+  const panelOpen = filtersOpen || activeCount > 0;
 
   // Backend leads-i həmişə createdAt: -1 (ən yenilər ən yuxarıda) qaytarır.
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({
@@ -135,7 +143,11 @@ export function LeadsView({ abroadOnly = false }) {
 
   return (
     <div>
-      {/* ── Filtrlər ── iki sıra: axtarış + seçimlər, sonra tarix aralığı */}
+      {/* ── Filtrlər ──
+          Yığcam sətir: axtarış + «Filtrlər» düyməsi. Qalan süzgəclər açılan
+          paneldədir — beş seçici yan-yana duranda sətir dolurdu.
+          Filtr aktivdirsə panel avtomatik açıq gəlir: gizli süzgəc nəticəni
+          dəyişir, amma səbəbi görünmür və bu, çaşdırıcıdır. */}
       <div className="mb-4 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
@@ -147,44 +159,81 @@ export function LeadsView({ abroadOnly = false }) {
               className="w-64 rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
             />
           </div>
-          <div className="w-44">
-            <NativeSelect
-              placeholder="Bütün statuslar"
-              options={STATUS_OPTIONS}
-              value={status}
-              onChange={(e) => setFilter(setStatusFilter)(e.target.value)}
-            />
-          </div>
-          <div className="w-44">
-            <NativeSelect
-              placeholder="Bütün mənbələr"
-              options={SOURCE_OPTIONS}
-              value={source}
-              onChange={(e) => setFilter(setSource)(e.target.value)}
-            />
-          </div>
-          {/* Xaricdə təhsil müraciətlərində filial olmur — filtr gizlənir. */}
-          {!abroadOnly && (
-          <div className="w-48">
-            <NativeSelect
-              placeholder="Bütün filiallar"
-              options={branchOptions}
-              value={branch}
-              onChange={(e) => setFilter(setBranch)(e.target.value)}
-            />
-          </div>
+
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((o) => !o)}
+            aria-expanded={panelOpen}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+              activeCount > 0
+                ? "border-[#00157A] bg-[#00157A]/5 text-[#00157A]"
+                : "border-gray-200 text-gray-600 hover:border-gray-300"
+            }`}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtrlər
+            {activeCount > 0 && (
+              <span className="rounded-full bg-[#00157A] px-1.5 text-[11px] font-bold text-white">
+                {activeCount}
+              </span>
+            )}
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${panelOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {hasFilter && (
+            <button
+              onClick={resetFilters}
+              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-500 transition hover:border-gray-300 hover:text-[#00157A]"
+            >
+              <X className="h-3.5 w-3.5" /> Təmizlə
+            </button>
           )}
-          {/* Kurs da eyni səbəbdən gizlənir — müraciət ölkə üzrədir. */}
-          {!abroadOnly && (
-          <div className="w-52">
-            <NativeSelect
-              placeholder="Bütün kurslar"
-              options={courseOptions}
-              value={course}
-              onChange={(e) => setFilter(setCourse)(e.target.value)}
-            />
-          </div>
-          )}
+        </div>
+
+        {panelOpen && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3">
+            <div className="w-44">
+              <NativeSelect
+                placeholder="Bütün statuslar"
+                options={STATUS_OPTIONS}
+                value={status}
+                onChange={(e) => setFilter(setStatusFilter)(e.target.value)}
+              />
+            </div>
+            <div className="w-44">
+              <NativeSelect
+                placeholder="Bütün mənbələr"
+                options={SOURCE_OPTIONS}
+                value={source}
+                onChange={(e) => setFilter(setSource)(e.target.value)}
+              />
+            </div>
+
+            {/* Xaricdə təhsil müraciətlərində filial və kurs olmur — müraciət
+                ölkə üzrədir, dərs filialda keçilmir. */}
+            {!abroadOnly && (
+              <div className="w-48">
+                <NativeSelect
+                  placeholder="Bütün filiallar"
+                  options={branchOptions}
+                  value={branch}
+                  onChange={(e) => setFilter(setBranch)(e.target.value)}
+                />
+              </div>
+            )}
+            {!abroadOnly && (
+              <div className="w-52">
+                <NativeSelect
+                  placeholder="Bütün kurslar"
+                  options={courseOptions}
+                  value={course}
+                  onChange={(e) => setFilter(setCourse)(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Siyahı istifadəçinin ölkə əhatəsinə görə serverdə süzülür —
+                icazəsi olmayan ölkə burada ümumiyyətlə görünmür. */}
             {destinationOptions.length > 0 && (
               <div className="w-52">
                 <NativeSelect
@@ -195,28 +244,16 @@ export function LeadsView({ abroadOnly = false }) {
                 />
               </div>
             )}
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Tarix</span>
-          <div className="w-44">
-            <DatePicker value={from} onChange={setFilter(setFrom)} placeholder="Başlanğıc" max={to || undefined} />
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Tarix</span>
+            {/* İki ayrı input çox yer tuturdu — bir çərçivədə birləşdirildi. */}
+            <div className="w-72">
+              <DateRangePicker from={from} to={to} onFrom={setFilter(setFrom)} onTo={setFilter(setTo)} />
+            </div>
           </div>
-          <span className="text-gray-300">—</span>
-          <div className="w-44">
-            <DatePicker value={to} onChange={setFilter(setTo)} placeholder="Son" min={from || undefined} />
-          </div>
-
-          {hasFilter && (
-            <button
-              onClick={resetFilters}
-              className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-500 transition hover:border-gray-300 hover:text-[#00157A]"
-            >
-              <X className="h-3.5 w-3.5" /> Filtrləri təmizlə
-            </button>
-          )}
-        </div>
+        )}
       </div>
+
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading || isError || items.length === 0 ? (

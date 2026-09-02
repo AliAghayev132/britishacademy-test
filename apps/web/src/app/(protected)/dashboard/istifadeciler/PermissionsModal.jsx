@@ -4,7 +4,8 @@
 import { useState } from "react";
 // Data
 import { useSelector } from "react-redux";
-import { useAdminUpdateUserMutation } from "@/store/api/adminApi";
+import { pickAz } from "@/lib/adminResources";
+import { useAdminUpdateUserMutation, useAdminLookupsQuery } from "@/store/api/adminApi";
 // UI
 import { Overlay } from "../_forms/kit";
 import { notify } from "@/components/ui/feedback";
@@ -26,6 +27,10 @@ import { Check, ShieldCheck, Info } from "lucide-react";
 export function PermissionsModal({ user, onClose }) {
   const me = useSelector((s) => s.auth.user);
   const [selected, setSelected] = useState(() => new Set(user?.permissions || []));
+  // Ölkə əhatəsi — boş = məhdudiyyət yoxdur (serverdəki konvensiya ilə eyni).
+  const [dests, setDests] = useState(() => new Set((user?.allowedDestinations || []).map(String)));
+  const { data: lookups } = useAdminLookupsQuery();
+  const allDestinations = lookups?.data?.destinations || [];
   const [error, setError] = useState("");
   const [update, { isLoading }] = useAdminUpdateUserMutation();
 
@@ -39,10 +44,18 @@ export function PermissionsModal({ user, onClose }) {
       return next;
     });
 
+  const toggleDest = (id) =>
+    setDests((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
   const save = async () => {
     setError("");
     try {
-      await update({ id: user._id, data: { permissions: [...selected] } }).unwrap();
+      await update({ id: user._id, data: { permissions: [...selected], allowedDestinations: [...dests] } }).unwrap();
       notify.success("İcazələr yeniləndi");
       onClose();
     } catch (err) {
@@ -143,6 +156,47 @@ export function PermissionsModal({ user, onClose }) {
               );
             })}
           </div>
+
+            {/* Ölkə əhatəsi — yalnız xaricdə təhsil müraciətlərinə aiddir. */}
+            {allDestinations.length > 0 && (
+              <div className="mt-7">
+                <div className="mb-1 text-sm font-bold text-gray-900">Xaricdə təhsil — ölkə əhatəsi</div>
+                <p className="mb-3 text-xs text-gray-500">
+                  Heç nə seçilməyibsə <b>bütün ölkələr</b> görünür. Ölkə seçilsə,
+                  istifadəçi yalnız həmin ölkələrə aid müraciətləri görəcək —
+                  siyahıda da, filtrdə də.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {allDestinations.map((d) => {
+                    const on = dests.has(String(d._id));
+                    return (
+                      <button
+                        key={d._id}
+                        type="button"
+                        onClick={() => toggleDest(String(d._id))}
+                        aria-pressed={on}
+                        className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${
+                          on
+                            ? "border-violet-300 bg-violet-50 text-violet-700"
+                            : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        }`}
+                      >
+                        {pickAz(d.country)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {dests.size > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setDests(new Set())}
+                    className="mt-2 text-xs font-semibold text-gray-500 underline"
+                  >
+                    Məhdudiyyəti götür (bütün ölkələr)
+                  </button>
+                )}
+              </div>
+            )}
         </>
       )}
     </Overlay>
