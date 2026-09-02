@@ -8,6 +8,7 @@
 //
 // ⚠️ seedDatabase() WIPES the BA content collections before inserting.
 import { TEACHERS as TEACHER_ROWS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
+import { triName } from "../data/teacherNames.mjs";
 import { BRANCHES } from "../data/branchData.mjs";
 import { tri, FAQS } from "../data/translations.mjs";
 import { QUIZZES } from "../data/quizData.mjs";
@@ -128,23 +129,42 @@ const HEADER_MENU = [
 // həqiqi qiymətlərlə əlaqəsi yox idi. Belə rəqəmlər saytda göstərilməkdənsə
 // heç olmaması yaxşıdır: admin paneldən doldurulur.
 
+/**
+ * Siyahı tipli sahə ({ az, en, ru } — hər dil üçün sətir-sətir mətn).
+ *
+ * `content.$.items` LIST_LOCALIZED_FIELDS-dədir: massiv yox, hər dil üçün
+ * sətir keçidi ilə ayrılmış MƏTN saxlanılır (boş massiv truthy olduğuna görə
+ * AZ fallback-i sındırardı).
+ */
+const triList = (arr) => {
+  const parts = (arr || []).map(tri);
+  return {
+    az: parts.map((x) => x.az).join("\n"),
+    en: parts.map((x) => x.en).join("\n"),
+    ru: parts.map((x) => x.ru).join("\n"),
+  };
+};
+
+/** Boş dəyəri toxunulmaz burax — tri(undefined) {az:undefined} qaytarardı. */
+const triOpt = (v) => (v ? tri(v) : undefined);
+
 function toContentBlocks(C) {
   const blocks = [];
-  (C.intro || []).forEach((body) => blocks.push({ type: "paragraph", body }));
+  (C.intro || []).forEach((body) => blocks.push({ type: "paragraph", body: tri(body) }));
   (C.sections || []).forEach((s) => {
-    const base = { heading: s.t, headingLevel: s.h === 3 ? 3 : 2 };
-    if (s.p && s.p.length) blocks.push({ ...base, type: "paragraph", body: s.p.join("\n\n") });
-    else blocks.push({ ...base, type: "paragraph", body: "" });
-    if (s.ul) blocks.push({ type: "list", items: s.ul });
-    if (s.dl) blocks.push({ type: "definitions", definitions: s.dl.map(([term, description]) => ({ term, description })) });
-    if (s.highlight) blocks.push({ type: "highlight", body: s.highlight });
-    if (s.note) blocks.push({ type: "note", body: s.note });
+    const base = { heading: triOpt(s.t), headingLevel: s.h === 3 ? 3 : 2 };
+    if (s.p && s.p.length) blocks.push({ ...base, type: "paragraph", body: tri(s.p.join("\n\n")) });
+    else blocks.push({ ...base, type: "paragraph", body: tri("") });
+    if (s.ul) blocks.push({ type: "list", items: triList(s.ul) });
+    if (s.dl) blocks.push({ type: "definitions", definitions: s.dl.map(([term, description]) => ({ term: tri(term), description: tri(description) })) });
+    if (s.highlight) blocks.push({ type: "highlight", body: tri(s.highlight) });
+    if (s.note) blocks.push({ type: "note", body: tri(s.note) });
   });
   return blocks;
 }
 
-const toInfo = (C) => (C.info || []).map(([label, value]) => ({ label, value }));
-const toFaq = (C) => (C.faq || []).map(([question, answer]) => ({ question, answer }));
+const toInfo = (C) => (C.info || []).map(([label, value]) => ({ label: tri(label), value: tri(value) }));
+const toFaq = (C) => (C.faq || []).map(([question, answer]) => ({ question: tri(question), answer: tri(answer) }));
 
 /** Fotosu olmayan müəllim üçün avatar rəngi. */
 const TEACHER_COLORS = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D", "#F5A524", "#0EA5E9", "#FF3D8B", "#22B07D"];
@@ -209,7 +229,8 @@ export function buildGraph() {
   const teachers = [...teacherRowsByName.keys()].map(
     (name, i) =>
       new Teacher({
-        fullName: name,
+          // Ad tərcümə olunmur; RU üçün kiril yazılışı verilir.
+          fullName: triName(name),
         slug: SlugService.slugify(name),
         color: TEACHER_COLORS[i % TEACHER_COLORS.length],
         order: i,
@@ -220,14 +241,14 @@ export function buildGraph() {
     const C = COURSE_CONTENT[`${c.slug}.html`] || {};
     return new Course({
       title: tri(c.title), slug: c.slug, category: catByKey[c.cat]._id,
-      h1: C.h1, lead: C.lead, excerpt: C.lead,
+      h1: triOpt(C.h1), lead: triOpt(C.lead), excerpt: triOpt(C.lead),
       content: toContentBlocks(C), faq: toFaq(C), info: toInfo(C),
       levels: ["A1", "A2", "B1", "B2", "C1", "C2"],
       // Qiymətlər BOŞ gəlir — admin paneldən filial üzrə doldurulur.
       pricingMode: "branch",
       pricing: [],
       customPricing: [],
-      pricingNote: (C.pricing && C.pricing.note) || undefined,
+      pricingNote: triOpt(C.pricing && C.pricing.note),
       isFeatured: Boolean(c.featured),
       order: i,
     });
@@ -309,7 +330,10 @@ export function buildGraph() {
       isFeatured: i < 8,
     }),
   );
-  const testimonials = TESTIMONIALS.map((t, i) => new Testimonial({ ...t, order: i }));
+  const testimonials = TESTIMONIALS.map((t, i) =>
+    // Ad tərcümə olunmur (şəxs adıdır); rəy mətni və nailiyyət olunur.
+    new Testimonial({ ...t, quote: triOpt(t.quote), achievement: triOpt(t.achievement), order: i }),
+  );
   const advantages = ADVANTAGES.map((a, i) =>
     new Advantage({ ...a, title: tri(a.title), text: tri(a.text), order: i }),
   );
@@ -333,8 +357,8 @@ export function buildGraph() {
   );
 
   const pages = [
-    new Page({ title: "Haqqımızda", slug: "haqqimizda", isSystem: true, h1: "2014-cü ildən dünya dillərini Azərbaycana öyrədirik", lead: "British Academy — “English UK” akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti və rəsmi TOEFL beynəlxalq imtahan mərkəzidir.", order: 0 }),
-    new Page({ title: "Əlaqə", slug: "elaqe", isSystem: true, h1: "Əlaqə", lead: "Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır.", order: 1 }),
+    new Page({ title: tri("Haqqımızda"), slug: "haqqimizda", isSystem: true, h1: tri("2014-cü ildən dünya dillərini Azərbaycana öyrədirik"), lead: tri("British Academy — “English UK” akkreditasiyasından keçmiş yeganə Azərbaycan şirkəti və rəsmi TOEFL beynəlxalq imtahan mərkəzidir."), order: 0 }),
+    new Page({ title: tri("Əlaqə"), slug: "elaqe", isSystem: true, h1: tri("Əlaqə"), lead: tri("Sualların var? Bizimlə əlaqə saxla — komandamız kömək etməyə hazırdır."), order: 1 }),
   ];
 
   return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages, faqs, quizzes };

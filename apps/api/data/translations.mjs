@@ -13,6 +13,10 @@
  * məzmun üçündür. Bura yalnız seed-in gətirdiyi sabit mətnlərdir.
  */
 
+// Kurs səhifələrinin uzun mətnləri ayrıca fayldadır — bu faylda qısa etiketlər
+// (menyu, kateqoriya, üstünlük) qalır ki, axtarmaq asan olsun.
+import { COURSE_T } from "./courseTranslations.mjs";
+
 /** AZ mətn → { en, ru } */
 export const T = {
   // ── Kateqoriyalar ──
@@ -129,6 +133,11 @@ export const T = {
   "Tələbələrimiz": { en: "Our students", ru: "Наши студенты" },
   "Əlaqə": { en: "Contact", ru: "Контакты" },
 };
+
+// Kurs mətnləri əsas lüğətə əlavə olunur. Yayma İSTİQAMƏTİ vacibdir: kurs
+// faylı sonra gəlir, yəni eyni açar hər iki yerdə olsa kurs versiyası qalib
+// gəlir — uzun mətn üçün kontekst daha dəqiqdir.
+Object.assign(T, COURSE_T);
 
 /**
  * Sayt üzrə FAQ — ana səhifədəki bölmə.
