@@ -65,6 +65,9 @@ const list = asyncHandler(async (req, res) => {
     // Xaricdə təhsil müraciətləri: massiv sahədir, Mongo bərabərlik
     // müqayisəsini massiv elementlərinə də tətbiq edir — ayrıca kod lazım deyil.
     "destinations",
+    // Müraciətin maraq növü («Xaricdə təhsil», «IELTS» …). Sidebar-dakı
+    // ayrıca «Xaricdə təhsil müraciətləri» bölməsi bununla süzülür.
+    "interest",
   ];
   for (const key of FILTERABLE) {
     const raw = req.query[key];

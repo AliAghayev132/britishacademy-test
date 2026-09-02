@@ -72,7 +72,12 @@ import { ADMIN_RESOURCES } from '@/lib/adminResources'
  */
 const NAV_TOP = [
   { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
-  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, section: 'leads' },
+  // `exact` vacibdir: alt bənd (/muracietler/xaricde-tehsil) açılanda
+  // startsWith yoxlaması ikisini birdən aktiv göstərərdi.
+  { name: 'Müraciətlər', href: '/dashboard/muracietler', icon: Inbox, exact: true, section: 'leads' },
+  // Xaricdə təhsil müraciətləri ayrıca göstərilir — axını fərqlidir (kurs
+  // deyil, ölkə seçilir). Eyni `leads` icazəsindən asılıdır.
+  { name: 'Xaricdə təhsil müraciətləri', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads' },
   { name: 'Ana səhifə', href: '/dashboard/ana-sehife', icon: Home, section: 'home' },
 ]
 

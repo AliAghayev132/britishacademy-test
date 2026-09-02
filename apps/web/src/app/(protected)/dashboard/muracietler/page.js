@@ -35,13 +35,23 @@ const SOURCE_LABEL = Object.fromEntries(SOURCE_OPTIONS.map((s) => [s.value, s.la
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric" });
+/** «Xaricdə təhsil» maraq dəyəri — müraciətdə AZ yazılır (bax ApplyModal). */
+const ABROAD_INTEREST = "Xaricdə təhsil";
+
 const fmtTime = (d) =>
   new Date(d).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" });
 
 /** Telefonu wa.me üçün rəqəmlərə çevir. */
 const waNumber = (phone) => String(phone || "").replace(/[^\d]/g, "");
 
-export default function LeadsPage() {
+/**
+ * Müraciətlər siyahısı.
+ *
+ * `abroadOnly` — yalnız xaricdə təhsil müraciətləri. Sidebar-da ayrıca bənd
+ * var və o, bu komponenti həmin bayraqla render edir; siyahı, filtrlər və
+ * əməliyyatlar eynidir, ona görə ayrı səhifə yazmaq təkrar olardı.
+ */
+export function LeadsView({ abroadOnly = false }) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatusFilter] = useState("");
@@ -70,6 +80,9 @@ export default function LeadsPage() {
   }));
 
   const activeFilters = {
+    // Xaricdə təhsil bölməsində maraq növü SABİT süzgəcdir — istifadəçi onu
+    // dəyişə bilmir, ona görə filtr panelində göstərilmir.
+    ...(abroadOnly ? { interest: ABROAD_INTEREST } : {}),
     ...(status ? { status } : {}),
     ...(source ? { source } : {}),
     ...(branch ? { branch } : {}),
@@ -114,6 +127,7 @@ export default function LeadsPage() {
     setSource("");
     setBranch("");
     setCourse("");
+    setDestination("");
     setFrom("");
     setTo("");
     setPage(1);
@@ -327,4 +341,9 @@ export default function LeadsPage() {
       />
     </div>
   );
+}
+
+
+export default function LeadsPage() {
+  return <LeadsView />;
 }
