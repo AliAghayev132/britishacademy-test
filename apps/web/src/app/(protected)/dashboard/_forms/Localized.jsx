@@ -12,7 +12,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { useAiProcessMutation } from "@/store/api/adminApi";
+import { useAiProcessMutation, useAiStatusQuery } from "@/store/api/adminApi";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { Languages, Wand2, Loader2 } from "lucide-react";
 
@@ -118,14 +118,44 @@ function EmptyWarn({ value }) {
   );
 }
 
-/** Kiçik AI düyməsi (loading spinner ilə). */
-export function AiBtn({ onClick, busy, disabled, icon: Icon, children }) {
+/**
+ * AI-ın işlək olub-olmadığı — bütün AI düymələri bunu paylaşır.
+ *
+ * RTK Query eyni sorğunu təkrarlamır, ona görə düymə sayı nə qədər olsa da
+ * server bir dəfə soruşulur. Tənzimləmələr yenilənəndə `Site` tagı
+ * invalidasiya olunur və status özü təzələnir.
+ */
+function useAiEnabled() {
+  const { data, isLoading } = useAiStatusQuery();
+  const d = data?.data;
+  return {
+    // Yüklənərkən düymə söndürülmür — qısa anlıq sönüb-yanma pis görünür.
+    enabled: isLoading ? true : Boolean(d?.enabled),
+    reason: d?.reason || "AI xidməti əlçatan deyil",
+  };
+}
+
+/**
+ * AI düyməsi.
+ *
+ * AI konfiqurasiya olunmayıbsa düymə SÖNÜLÜ olur və üzərinə gələndə səbəbi
+ * yazır. Əvvəl düymələr həmişə aktiv görünürdü: istifadəçi basır, 503 gəlir
+ * və səbəbi yalnız səhv mesajından öyrənirdi.
+ */
+export function AiBtn({ onClick, busy, disabled, icon: Icon, children, title }) {
+  const ai = useAiEnabled();
+  const off = !ai.enabled;
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={busy || disabled}
-      className="inline-flex items-center gap-1.5 rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 disabled:opacity-50"
+      disabled={busy || disabled || off}
+      title={off ? ai.reason : title}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition disabled:opacity-50 ${
+        off
+          ? "cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400"
+          : "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100"
+      }`}
     >
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Icon className="h-3.5 w-3.5" />}
       {children}

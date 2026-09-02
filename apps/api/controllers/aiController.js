@@ -246,4 +246,29 @@ Return ONLY valid JSON, no markdown, no code fences:
   return res.status(200).json({ success: true, data: { result } });
 });
 
-export { processAI as process };
+/**
+ * GET /api/ai/status  (auth)
+ *
+ * AI-ın işlək olub-olmadığını bildirir. Admin panel bunu düymələri
+ * söndürmək üçün işlədir: əvvəl düymələr həmişə aktiv görünürdü və basanda
+ * 503 gəlirdi — istifadəçi səbəbi yalnız səhv mesajından öyrənirdi.
+ *
+ * Açar QAYTARILMIR, yalnız mövcudluğu. Model adı göstərilir ki, admin hansı
+ * modelin işlədiyini panelə baxmadan bilsin.
+ */
+const status = asyncHandler(async (_req, res) => {
+  const cfg = await resolveAiConfig();
+  const enabled = Boolean(cfg.apiKey);
+  res.json({
+    success: true,
+    data: {
+      enabled,
+      model: enabled ? cfg.model : null,
+      reason: enabled
+        ? null
+        : "AI açarı təyin olunmayıb — Tənzimləmələr → AI bölməsindən əlavə edin",
+    },
+  });
+});
+
+export { processAI as process, status };

@@ -979,6 +979,59 @@ export const COURSE_T = {
     ru: "Долгие годы я понимала язык, но не могла говорить. Разговорные блоки здесь помогли мне преодолеть этот барьер.",
   },
 
+  // ── Ana səhifə hero ──
+  //
+  // `titlePrefix` fırlanan sözlə BİRLƏŞİR: «British Academy ilə ingiliscə danış».
+  // Ona görə tərcümələr də birləşəndə düzgün oxunmalıdır, ayrılıqda yox:
+  //   EN «With British Academy» + «speak English»
+  //   RU «С British Academy»    + «заговори по-английски»
+  "British Academy ilə": {
+    en: "With British Academy",
+    ru: "С British Academy",
+  },
+  "British Academy ilə top universitetlərə qəbul ol.": {
+    en: "Get into a top university with British Academy.",
+    ru: "Поступи в топовый университет вместе с British Academy.",
+  },
+
+  // Fırlanan sözlər — əmr formasında, qısa saxlanılır (ekranda tək sətir).
+  "ingiliscə danış": { en: "speak English", ru: "заговори по-английски" },
+  "IELTS 8.5 al": { en: "score 8.5 in IELTS", ru: "сдай IELTS на 8.5" },
+  "rus dili öyrən": { en: "learn Russian", ru: "выучи русский" },
+  "almanca danış": { en: "speak German", ru: "заговори по-немецки" },
+  "top universitetlərə qəbul ol": {
+    en: "get into a top university",
+    ru: "поступи в топовый университет",
+  },
+  "Duolingo-ya hazırlaş": {
+    en: "prepare for Duolingo",
+    ru: "подготовься к Duolingo",
+  },
+
+  // Statistika
+  "məzun tələbə": { en: "graduates", ru: "выпускников" },
+  "20 000+": { en: "20,000+", ru: "20 000+" },
+  "korporativ tərəfdaş": { en: "corporate partners", ru: "корпоративных партнёров" },
+  "30+": { en: "30+", ru: "30+" },
+  "filial · Bakı": { en: "branches · Baku", ru: "филиала · Баку" },
+  "4": { en: "4", ru: "4" },
+
+  // Hərəkət edən lent — böyük hərflərlə göstərilir, ona görə elə də yazılır.
+  "İNGİLİS DİLİ": { en: "ENGLISH", ru: "АНГЛИЙСКИЙ" },
+  "IELTS 8.5": { en: "IELTS 8.5", ru: "IELTS 8.5" },
+  DUOLINGO: { en: "DUOLINGO", ru: "DUOLINGO" },
+  "DANIŞIQ KLUBU": { en: "CONVERSATION CLUB", ru: "РАЗГОВОРНЫЙ КЛУБ" },
+  "XARİCDƏ TƏHSİL": { en: "STUDY ABROAD", ru: "ОБУЧЕНИЕ ЗА РУБЕЖОМ" },
+  "RUS DİLİ": { en: "RUSSIAN", ru: "РУССКИЙ" },
+  "ALMAN DİLİ": { en: "GERMAN", ru: "НЕМЕЦКИЙ" },
+  "BİZNES İNGİLİS": { en: "BUSINESS ENGLISH", ru: "ДЕЛОВОЙ АНГЛИЙСКИЙ" },
+
+  // SEO — ana səhifənin defolt təsviri
+  "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.": {
+    en: "British Academy — a language centre accredited by English UK. English, Russian and German courses, IELTS and TOEFL preparation, and study abroad.",
+    ru: "British Academy — языковой центр с аккредитацией English UK. Курсы английского, русского и немецкого, подготовка к IELTS и TOEFL, обучение за рубежом.",
+  },
+
   // ── Ölkə və filial sahələri ──
   Region: { en: "Region", ru: "Регион" },
   Yasamal: { en: "Yasamal", ru: "Ясамал" },

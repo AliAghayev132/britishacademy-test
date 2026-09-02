@@ -200,22 +200,22 @@ export function buildGraph() {
       youtube: "https://youtube.com/@britishacademy", whatsapp: "https://wa.me/994552124151",
     },
     hero: {
-      titlePrefix: "British Academy ilə",
+      titlePrefix: tri("British Academy ilə"),
       // «xaricdə oxu» prefikslə birləşəndə «British Academy ilə xaricdə oxu»
       // oxunurdu; müştəri vurğunu universitet qəbuluna keçirdi.
-      words: ["ingiliscə danış", "IELTS 8.5 al", "rus dili öyrən", "almanca danış", "top universitetlərə qəbul ol", "Duolingo-ya hazırlaş"],
+      words: triList(["ingiliscə danış", "IELTS 8.5 al", "rus dili öyrən", "almanca danış", "top universitetlərə qəbul ol", "Duolingo-ya hazırlaş"]),
       colors: ["#001478", "#0B2A9C", "#C8102E", "#00105E", "#1438B8"],
-      subtitle: "British Academy ilə top universitetlərə qəbul ol.",
+      subtitle: tri("British Academy ilə top universitetlərə qəbul ol."),
     },
     stats: [
-      { label: "məzun tələbə", value: "20 000+" },
-      { label: "korporativ tərəfdaş", value: "30+" },
-      { label: "filial · Bakı", value: "4" },
+      { label: tri("məzun tələbə"), value: tri("20 000+") },
+      { label: tri("korporativ tərəfdaş"), value: tri("30+") },
+      { label: tri("filial · Bakı"), value: tri("4") },
     ],
-    marquee: ["İNGİLİS DİLİ", "IELTS 8.5", "DUOLINGO", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"],
+    marquee: triList(["İNGİLİS DİLİ", "IELTS 8.5", "DUOLINGO", "DANIŞIQ KLUBU", "XARİCDƏ TƏHSİL", "RUS DİLİ", "ALMAN DİLİ", "BİZNES İNGİLİS"]),
     seo: {
       titleTemplate: "%s — British Academy",
-      defaultDescription: "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.",
+      defaultDescription: tri("British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil."),
       defaultOgImage: "/assets/og-cover.png",
     },
     robotsTxt: "User-agent: *\nAllow: /\n\nSitemap: https://britishacademy.az/sitemap.xml\n",

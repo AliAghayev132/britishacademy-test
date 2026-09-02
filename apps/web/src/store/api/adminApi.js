@@ -203,6 +203,12 @@ export const adminApi = baseApi.injectEndpoints({
     // ── AI köməkçi (OpenRouter): tərcümə / səliqə / slug / SEO ──
     // Body: { action, content?|fields?, sourceLang?, targetLang?, isHtml? }
     // Cavab: { data: { result } } (string | object | array).
+    // AI işlək vəziyyətdədirmi — düymələri söndürmək üçün. Cavab açar
+    // saxlamır, yalnız mövcudluğunu bildirir.
+    aiStatus: builder.query({
+      query: () => "/ai/status",
+      providesTags: [{ type: "Site", id: "ai-status" }],
+    }),
     aiProcess: builder.mutation({
       query: (body) => ({ url: "/ai/process", method: "POST", body }),
     }),
@@ -278,6 +284,7 @@ export const {
   useAdminMigrateI18nMutation,
   useAdminTestMailMutation,
   useAiProcessMutation,
+  useAiStatusQuery,
   useAdminAutoTranslateMutation,
   useAdminImportCoursesMutation,
   useMediaFoldersQuery,
