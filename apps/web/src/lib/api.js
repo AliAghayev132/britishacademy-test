@@ -2,7 +2,19 @@
 // the Express API during SSR. Client interactivity uses RTK Query (store/api).
 import { headers } from "next/headers";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// SSR MÜTLƏQ ünvan tələb edir — server tərəfdə nisbi yol ilə `fetch` işləmir.
+// (Brauzer tərəfi nisbi `/api` işlədir, bax store/api/baseApi.js.)
+//
+// Üstünlük sırası:
+//   1) API_INTERNAL_URL — server-only. Birbaşa 127.0.0.1:30002-ə gedir:
+//      sorğu nginx və Cloudflare dövrəsindən keçmir, ona görə həm sürətlidir,
+//      həm də public domenin DNS/sertifikat vəziyyətindən asılı deyil.
+//   2) NEXT_PUBLIC_API_URL — köhnə konfiqurasiyalarla uyğunluq üçün.
+//   3) localhost defoltu — dev mühiti.
+const API_URL =
+  process.env.API_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
 
 // Cari dil (middleware-in qoyduğu x-lang header-i). Static kontekstdə "az".
 async function currentLang() {

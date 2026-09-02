@@ -3,11 +3,19 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 // Resolve the API base URL from the public env var. Next.js inlines
 // NEXT_PUBLIC_* variables at build time so this works in the browser.
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+//
+// BOŞDURSA NİSBİ `/api` işlədilir — sorğu səhifə ilə eyni origin-ə gedir və
+// nginx onu Express-ə ötürür. Bu, iki nasazlığın qarşısını alır:
+//   • domen dəyişəndə yenidən build unudulanda köhnə ünvan paketdə qalırdı;
+//   • HTTPS səhifədən HTTP ünvana sorğu getdiyi üçün brauzer admin girişini
+//     «Mixed Content» ilə bloklayırdı (paketdə http://<ip>:30002 yazılı idi).
+// Dev-də dəyişən .env.development ilə verilir, mütləq ünvan işlədilir.
+const RAW = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')
+const BASE_URL = RAW ? `${RAW}/api` : '/api'
 
 // ============ BASE QUERY ============
 const baseQuery = fetchBaseQuery({
-  baseUrl: `${API_URL}/api`,
+  baseUrl: BASE_URL,
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     // Don't overwrite if already set (e.g. an explicit reset token).
