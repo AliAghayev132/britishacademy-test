@@ -32,11 +32,23 @@ export const seesEverything = (user) =>
  * seesEverything (developer/superadmin) həmişə `null` alır — sahibin öz
  * hesabını təsadüfən kilidləməsinin qarşısını alır.
  */
-export const destinationScope = (user) => {
+const scopeOf = (user, field) => {
   if (!user || seesEverything(user)) return null;
-  const list = Array.isArray(user.allowedDestinations) ? user.allowedDestinations : [];
+  const list = Array.isArray(user[field]) ? user[field] : [];
   return list.length ? list.map(String) : null;
 };
+
+/** Xaricdə təhsil müraciətlərində icazəli ölkələr. */
+export const destinationScope = (user) => scopeOf(user, "allowedDestinations");
+
+/**
+ * Adi müraciətlərdə icazəli filiallar.
+ *
+ * Filial menecerinin yalnız öz filialının müraciətlərini görməsi üçün.
+ * Ölkə əhatəsi ilə eyni qaydalar: boş = məhdudiyyət yoxdur,
+ * developer/superadmin həmişə hamısını görür.
+ */
+export const branchScope = (user) => scopeOf(user, "allowedBranches");
 
 export const canAccessSection = (user, section) => {
   if (!user) return false;

@@ -74,6 +74,12 @@ const userSchema = new Schema(
      */
     allowedDestinations: [{ type: Schema.Types.ObjectId, ref: "Destination" }],
 
+    /**
+     * Adi müraciətlərdə filial əhatəsi — eyni qaydalarla (boş = hamısı).
+     * Filial meneceri yalnız öz filialının müraciətlərini görsün.
+     */
+    allowedBranches: [{ type: Schema.Types.ObjectId, ref: "Branch" }],
+
     // Token version for "logout all devices"
     tokenVersion: {
       type: Number,

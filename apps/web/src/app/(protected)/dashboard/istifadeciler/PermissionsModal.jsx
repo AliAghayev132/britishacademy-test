@@ -31,6 +31,8 @@ export function PermissionsModal({ user, onClose }) {
   const [dests, setDests] = useState(() => new Set((user?.allowedDestinations || []).map(String)));
   const { data: lookups } = useAdminLookupsQuery();
   const allDestinations = lookups?.data?.destinations || [];
+  const [branches, setBranches] = useState(() => new Set((user?.allowedBranches || []).map(String)));
+  const allBranches = lookups?.data?.branches || [];
   const [error, setError] = useState("");
   const [update, { isLoading }] = useAdminUpdateUserMutation();
 
@@ -52,10 +54,18 @@ export function PermissionsModal({ user, onClose }) {
       return next;
     });
 
+  const toggleBranch = (id) =>
+    setBranches((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
   const save = async () => {
     setError("");
     try {
-      await update({ id: user._id, data: { permissions: [...selected], allowedDestinations: [...dests] } }).unwrap();
+      await update({ id: user._id, data: { permissions: [...selected], allowedDestinations: [...dests], allowedBranches: [...branches] } }).unwrap();
       notify.success("İcazələr yeniləndi");
       onClose();
     } catch (err) {
@@ -197,6 +207,47 @@ export function PermissionsModal({ user, onClose }) {
                 )}
               </div>
             )}
+
+              {/* Filial əhatəsi — adi müraciətlər üçün. */}
+              {allBranches.length > 0 && (
+                <div className="mt-7">
+                  <div className="mb-1 text-sm font-bold text-gray-900">Müraciətlər — filial əhatəsi</div>
+                  <p className="mb-3 text-xs text-gray-500">
+                    Heç nə seçilməyibsə <b>bütün filiallar</b> görünür. Filialsız
+                    müraciətlər (ziyarətçi filial seçməyib) həmişə görünür — əks
+                    halda onlar cavabsız qalardı.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {allBranches.map((b) => {
+                      const on = branches.has(String(b._id));
+                      return (
+                        <button
+                          key={b._id}
+                          type="button"
+                          onClick={() => toggleBranch(String(b._id))}
+                          aria-pressed={on}
+                          className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${
+                            on
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                              : "border-gray-200 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          {pickAz(b.name)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {branches.size > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setBranches(new Set())}
+                      className="mt-2 text-xs font-semibold text-gray-500 underline"
+                    >
+                      Məhdudiyyəti götür (bütün filiallar)
+                    </button>
+                  )}
+                </div>
+              )}
         </>
       )}
     </Overlay>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { destinationScope } from "#utils";
+import { destinationScope, branchScope } from "#utils";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,13 +35,27 @@ describe("destinationScope", () => {
   it("istifadəçi yoxdursa null", () => {
     expect(destinationScope(null)).toBeNull();
   });
+
+  it("branchScope eyni qaydalarla işləyir", () => {
+    const id = "6a96938ef18b3da0562c1eca";
+    expect(branchScope({ role: "developer", allowedBranches: [id] })).toBeNull();
+    expect(branchScope({ role: "admin", allowedBranches: [] })).toBeNull();
+    expect(branchScope({ role: "admin", allowedBranches: [id] })).toEqual([id]);
+  });
 });
 
 describe("əhatənin serverdə tətbiqi", () => {
   const SRC = fs.readFileSync(path.join(ROOT, "controllers/adminController.js"), "utf8");
 
   it("siyahı sorğusuna tətbiq olunur", () => {
-    expect(SRC).toMatch(/applyDestinationScope\(filter, req, req\.params\.resource\)/);
+    expect(SRC).toContain("applyLeadScope(filter, req, req.params.resource)");
+  });
+
+  it("filial əhatəsi də tətbiq olunur", () => {
+    expect(SRC).toContain("branchScope(req.user)");
+    // Filialsız müraciətlər kənarda qalmamalıdır — əks halda məhdud admin
+    // onları heç görməzdi və müraciət cavabsız qalardı.
+    expect(SRC).toMatch(/{ branch: null }/);
   });
 
   it("tək sənəd də yoxlanılır", () => {

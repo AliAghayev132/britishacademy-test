@@ -8,7 +8,7 @@
 // with cleanup — if group creation fails, the just-created course is removed so
 // we don't leave a half-built course behind.
 
-import { asyncHandler, destinationScope } from "#utils";
+import { asyncHandler, destinationScope, branchScope } from "#utils";
 import { Course, CourseGroup, Branch, Teacher, CourseCategory, Destination } from "#models";
 import { logAction } from "#services";
 
@@ -77,11 +77,14 @@ const getLookups = asyncHandler(async (req, res) => {
   // Ölkə siyahısı istifadəçinin əhatəsinə görə süzülür — filtrdə icazəsi
   // olmayan ölkə ümumiyyətlə seçim kimi görünməsin.
   const scope = destinationScope(req.user);
+  const bScope = branchScope(req.user);
   // `courses` müəllim formasına lazımdır: filial üzrə hansı dərsləri
   // apardığını seçmək üçün siyahı göstərilir.
   // `destinations` müraciətlər səhifəsindəki «Bütün ölkələr» filtri üçündür.
   const [branches, teachers, categories, courses, destinations] = await Promise.all([
-    Branch.find({ isDeleted: false }).sort({ order: 1, name: 1 }).select("name address"),
+    Branch.find({ isDeleted: false, ...(bScope ? { _id: { $in: bScope } } : {}) })
+      .sort({ order: 1, name: 1 })
+      .select("name address"),
     Teacher.find({ isDeleted: false })
       .sort({ order: 1, fullName: 1 })
       .select("fullName title branches color"),

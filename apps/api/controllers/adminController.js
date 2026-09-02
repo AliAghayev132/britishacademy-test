@@ -4,7 +4,7 @@
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex, hasRole, destinationScope } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope } from "#utils";
 
 // Services
 import { logAction } from "#services";
@@ -39,19 +39,34 @@ function resolve(req, res) {
  *     ölkə məhdudiyyətindən kənardır, əks halda məhdud admin adi
  *     müraciətləri də görməzdi.
  */
-function applyDestinationScope(filter, req, resource) {
+function applyLeadScope(filter, req, resource) {
   if (resource !== "leads") return filter;
-  const scope = destinationScope(req.user);
-  if (!scope) return filter;
-  const cond = {
-    $or: [
-      { destinations: { $in: scope } },
-      { destinations: { $size: 0 } },
-      { destinations: { $exists: false } },
-    ],
-  };
+  const and = [];
+
+  // Ölkə əhatəsi — xaricdə təhsil müraciətləri.
+  const dScope = destinationScope(req.user);
+  if (dScope) {
+    and.push({
+      $or: [
+        { destinations: { $in: dScope } },
+        { destinations: { $size: 0 } },
+        { destinations: { $exists: false } },
+      ],
+    });
+  }
+
+  // Filial əhatəsi — adi müraciətlər. Filialsız müraciətlər (ziyarətçi filial
+  // seçməyib) kənarda qalmır: əks halda məhdud admin onları heç görməzdi və
+  // müraciət cavabsız qalardı.
+  const bScope = branchScope(req.user);
+  if (bScope) {
+    and.push({
+      $or: [{ branch: { $in: bScope } }, { branch: null }, { branch: { $exists: false } }],
+    });
+  }
+
   // Mövcud $and-a əlavə edirik ki, axtarışdakı $or ilə toqquşmasın.
-  filter.$and = [...(filter.$and || []), cond];
+  if (and.length) filter.$and = [...(filter.$and || []), ...and];
   return filter;
 }
 
@@ -128,8 +143,9 @@ const list = asyncHandler(async (req, res) => {
     if (Object.keys(range).length) filter[dateField] = range;
   }
 
-  // Ölkə əhatəsi — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə görə çıxır.
-  applyDestinationScope(filter, req, req.params.resource);
+  // Əhatə məhdudiyyətləri — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə
+  // görə çıxır.
+  applyLeadScope(filter, req, req.params.resource);
 
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
@@ -158,10 +174,15 @@ const getOne = asyncHandler(async (req, res) => {
   }
   // Siyahı məhduddursa tək sənəd də məhdud olmalıdır — əks halda id-ni
   // bilən istifadəçi icazəsi olmayan müraciəti aça bilərdi.
-  const scope = destinationScope(req.user);
-  if (req.params.resource === "leads" && scope) {
+  if (req.params.resource === "leads") {
+    const dScope = destinationScope(req.user);
     const own = (item.destinations || []).map(String);
-    if (own.length && !own.some((d) => scope.includes(d))) {
+    if (dScope && own.length && !own.some((d) => dScope.includes(d))) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+    const bScope = branchScope(req.user);
+    const b = item.branch ? String(item.branch._id || item.branch) : null;
+    if (bScope && b && !bScope.includes(b)) {
       return res.status(404).json({ success: false, message: "Not found" });
     }
   }
