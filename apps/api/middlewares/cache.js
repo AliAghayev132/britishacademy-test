@@ -24,7 +24,23 @@ const NEVER_CACHE = [/^\/api\/admin/, /^\/api\/auth/, /^\/api\/ai/];
 
 export function cacheHeaders(req, res, next) {
   const isGet = req.method === "GET" || req.method === "HEAD";
-  const isPrivate = NEVER_CACHE.some((re) => re.test(req.path));
+
+  // `req.path` MOUNT NÖQTƏSİNƏ NİSBİDİR. Bu middleware `app.use("/api", ...)`
+  // ilə quraşdırılıb, ona görə /api/admin/courses sorğusunda `req.path`
+  // «/admin/courses» olur — «/api» hissəsi kəsilir.
+  //
+  // NEVER_CACHE naxışları isə «/api/admin» gözləyirdi və HEÇ VAXT uyğun
+  // gəlmirdi. Nəticədə BÜTÜN admin cavabları `public, max-age=60,
+  // stale-while-revalidate=300` alırdı:
+  //   • admin paneldə yadda saxlayandan sonra siyahı 60 saniyə köhnə qalırdı
+  //     (RTK Query yenidən sorğu göndərir, brauzer isə keşdən köhnə cavabı
+  //     verir) — «yadda saxlanmır, refresh atmalı oluram» buradan gəlirdi;
+  //   • müraciətlər (telefon nömrələri), istifadəçi siyahısı və tənzimləmələr
+  //     `public` işarələnirdi, yəni ara keşlər onları saxlaya bilərdi.
+  //
+  // Tam yol `baseUrl + path` ilə bərpa olunur.
+  const fullPath = `${req.baseUrl || ""}${req.path}`;
+  const isPrivate = NEVER_CACHE.some((re) => re.test(fullPath));
 
   if (!isGet || isPrivate) {
     res.set("Cache-Control", "no-store");
