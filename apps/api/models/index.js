@@ -21,6 +21,7 @@ export { Advantage } from "./advantage.model.js";
 export { Media } from "./media.model.js";
 export { WhatsAppMessage } from "./whatsappMessage.model.js";
 export { Faq } from "./faq.model.js";
+export { QuizCategory } from "./quizCategory.model.js";
 export { SiteSetting } from "./siteSetting.model.js";
 export { AuditLog } from "./auditLog.model.js";
 export { ShortLink } from "./shortLink.model.js";

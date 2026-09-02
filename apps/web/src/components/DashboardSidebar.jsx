@@ -101,6 +101,7 @@ const NAV_GROUPS = [
       { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
       { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
       { name: 'Testlər', href: '/dashboard/testler', icon: ClipboardList, section: 'quizzes' },
+      { name: 'Test kateqoriyaları', href: '/dashboard/resurslar/quiz-categories', icon: Tags, section: 'quizzes' },
     ],
   },
   {

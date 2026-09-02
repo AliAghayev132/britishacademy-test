@@ -26,6 +26,7 @@ import {
   Media,
   ShortLink,
   Quiz,
+  QuizCategory,
 } from "#models";
 
 export const RESOURCES = {
@@ -109,6 +110,11 @@ export const RESOURCES = {
     search: ["title"],
     sort: { order: 1 },
   },
+  "quiz-categories": {
+    model: QuizCategory,
+    search: ["name"],
+    sort: { order: 1, name: 1 },
+  },
   faqs: {
     model: Faq,
     search: ["question"],
@@ -118,6 +124,7 @@ export const RESOURCES = {
     model: Quiz,
     search: ["title", "slug"],
     sort: { order: 1, createdAt: -1 },
+    populate: ["category"],
   },
   "short-links": {
     model: ShortLink,

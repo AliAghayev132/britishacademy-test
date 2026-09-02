@@ -67,6 +67,9 @@ const quizSchema = new Schema(
       lowercase: true,
       match: /^[a-z0-9][a-z0-9-]*$/,
     },
+    // Testin kateqoriyası (İngilis dili, Rus dili …). Boş ola bilər —
+    // kateqoriyasız testlər siyahıda «Digər» altında toplanır.
+    category: { type: Schema.Types.ObjectId, ref: "QuizCategory", default: null },
     lead: localizedField(),
     description: localizedField(),
 

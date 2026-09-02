@@ -106,6 +106,16 @@ const listQuizzes = asyncHandler(async (_req, res) => {
         // Siyahıda yalnız sual SAYI göstərilir — sualların özü yox.
         questionCount: q.questionCount || (q.questions || []).filter((x) => x.isActive !== false).length,
         timeLimitMin: q.timeLimitMin || 0,
+        // Kateqoriya siyahını bölmələrə ayırmaq üçündür; yoxdursa null.
+        category: q.category
+          ? {
+              _id: q.category._id,
+              name: q.category.name,
+              slug: q.category.slug,
+              color: q.category.color,
+              order: q.category.order,
+            }
+          : null,
       })),
     },
   });

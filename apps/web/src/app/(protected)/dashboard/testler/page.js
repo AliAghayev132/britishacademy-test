@@ -14,6 +14,7 @@ import { QueryState } from "@/components/ui/QueryState";
 import { confirmDialog, notify } from "@/components/ui/feedback";
 // Form kit
 import { Field, TextInput, NumberInput, NativeSelect, Toggle, SectionTitle, AddButton, RemoveButton } from "../_forms/kit";
+import { pickAz } from "@/lib/adminResources";
 import { LocalizedInput, LocalizedFormProvider, LocaleSwitcher, toLoc, locAz } from "../_forms/Localized";
 // Icons
 import { ClipboardList, Plus, Trash2, Pencil, Eye, ArrowLeft, Check, GripVertical } from "lucide-react";
@@ -137,10 +138,20 @@ function QuizEditor({ item, onBack }) {
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
+  // Kateqoriya seçimi üçün siyahı. Boşdursa sahə göstərilmir — admin əvvəlcə
+  // «Test kateqoriyaları» bölməsindən yaratmalıdır.
+  const { data: catData } = useAdminListQuery({ resource: "quiz-categories", limit: 100 });
+  const categoryOptions = (catData?.data?.items || []).map((c) => ({
+    value: c._id,
+    label: pickAz(c.name),
+  }));
+
   const [tab, setTab] = useState("meta");
   const [form, setForm] = useState({
     title: toLoc(item?.title),
     slug: item?.slug || "",
+    // Kateqoriya boş ola bilər — testlər səhifəsində «Digər» altında toplanır.
+    category: item?.category?._id || item?.category || "",
     lead: toLoc(item?.lead),
     description: toLoc(item?.description),
     questionOrder: item?.questionOrder || "sequential",
@@ -188,6 +199,8 @@ function QuizEditor({ item, onBack }) {
       questionCount: Number(form.questionCount) || 0,
       timeLimitMin: Number(form.timeLimitMin) || 0,
       order: Number(form.order) || 0,
+      // Boş sətir ObjectId kimi yazıla bilməz — sahə ümumiyyətlə göndərilmir.
+      category: form.category || null,
       questions: form.questions.map((q, i) => ({ ...q, order: i })),
     };
 
@@ -254,6 +267,16 @@ function QuizEditor({ item, onBack }) {
             <Field label="Slug" required hint="Ünvanda görünür: /testler/<slug>">
               <TextInput value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="english-test" />
             </Field>
+            {categoryOptions.length > 0 && (
+              <Field label="Kateqoriya" hint="Testlər səhifəsində bölmələrə ayırmaq üçün.">
+                <NativeSelect
+                  placeholder="Kateqoriyasız"
+                  options={categoryOptions}
+                  value={form.category}
+                  onChange={(e) => set("category", e.target.value)}
+                />
+              </Field>
+            )}
 
             <Field label="Sıra">
               <NumberInput value={form.order} onChange={(e) => set("order", e.target.value)} />

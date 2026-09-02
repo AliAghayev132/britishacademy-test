@@ -75,6 +75,7 @@ export const LOCALIZED_FIELDS = {
   Media: [
     "alt",
   ],
+  QuizCategory: ["name"],
   SiteSetting: [
     "hero.titlePrefix", "hero.subtitle", "hero.words", "hero.chipsLeft",
     "hero.chipsRight", "hero.pills", "marquee", "stats.$.label", "stats.$.value",

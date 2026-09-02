@@ -60,9 +60,24 @@ export default async function PublicLayout({ children }) {
   // /api/quizzes cavabı { items: [...] } formasındadır (bax quizController).
   const quizzes = quizData?.items || [];
   if (quizzes.length) {
+    // Alt bəndlər TESTLƏRİN ÖZÜ deyil, KATEQORİYALARDIR: test sayı artdıqca
+    // menyu oxunmaz olurdu. Hər kateqoriya testlər səhifəsindəki öz bölməsinə
+    // aparır (#<slug> lövbəri).
+    //
+    // Kateqoriyalar test siyahısından çıxarılır — ayrıca sorğuya ehtiyac yoxdur.
+    const seen = new Map();
+    for (const q of quizzes) {
+      const c = q.category;
+      if (!c || seen.has(c.slug)) continue;
+      seen.set(c.slug, { _id: c._id, title: c.name, slug: c.slug, href: `/testler#${c.slug}` });
+    }
+    const subs = [...seen.values()];
     services.push({
       category: { _id: "__quizzes", name: "Onlayn Testlər", slug: "testler", href: "/testler" },
-      courses: quizzes.map((q) => ({ _id: q._id, title: q.title, slug: q.slug, href: `/testler/${q.slug}` })),
+      // Kateqoriya yoxdursa testlərin özü göstərilir — bölmə boş qalmasın.
+      courses: subs.length
+        ? subs
+        : quizzes.map((q) => ({ _id: q._id, title: q.title, slug: q.slug, href: `/testler/${q.slug}` })),
     });
   }
 

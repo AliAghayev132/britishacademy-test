@@ -44,7 +44,9 @@ export default async function QuizPage({ params }) {
   const quiz = res.data;
 
   return (
-    <main className="container" style={{ padding: "48px 0 72px", maxWidth: 760 }}>
+    // `container` sinfi globals.css-də YOXDUR — səhifə mərkəzləşmirdi və sol
+    // kənara yapışırdı. Digər public səhifələrdəki sarğı naxışı işlədilir.
+    <main style={{ maxWidth: 760, margin: "0 auto", padding: "48px 28px 72px" }}>
       <header style={{ marginBottom: 26 }}>
         <h1
           style={{

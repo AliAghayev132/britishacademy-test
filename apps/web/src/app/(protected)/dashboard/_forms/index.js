@@ -11,6 +11,7 @@ import { DestinationForm } from "./DestinationForm";
 import { TestimonialForm } from "./TestimonialForm";
 import { BlogPostForm } from "./BlogPostForm";
 import { BlogCategoryForm } from "./BlogCategoryForm";
+import { QuizCategoryForm } from "./QuizCategoryForm";
 import { MenuItemForm } from "./MenuItemForm";
 import { PageForm } from "./PageForm";
 import { PartnerForm } from "./PartnerForm";
@@ -28,6 +29,7 @@ export const BESPOKE_FORMS = {
   testimonials: TestimonialForm,
   "blog-posts": BlogPostForm,
   "blog-categories": BlogCategoryForm,
+  "quiz-categories": QuizCategoryForm,
   "menu-items": MenuItemForm,
   pages: PageForm,
   partners: PartnerForm,
