@@ -208,7 +208,10 @@ export function buildGraph() {
     robotsTxt: "User-agent: *\nAllow: /\n\nSitemap: https://britishacademy.az/sitemap.xml\n",
   });
 
-  const branches = BRANCHES.map((b, i) => new Branch({ ...b, slug: SlugService.slugify(b.name), order: i }));
+  // Filial adı üçdillidir ({az,en,ru}); slugify obyekti «object-object»-ə
+  // çevirirdi və dörd filialın hamısı eyni slug alıb unikal indeksi pozurdu
+  // (seed 409 Conflict ilə dayanırdı). Slug AZ mətndən qurulur.
+  const branches = BRANCHES.map((b, i) => new Branch({ ...b, slug: SlugService.slugify(b.name?.az || b.name), order: i }));
 
   const catByKey = {};
   const categories = CATEGORIES.map((c) => {
@@ -380,6 +383,36 @@ export function validateGraph(graph) {
       }
     }
   }
+
+  // ── Unikal sahələrin təkrarı ──
+  //
+  // validateSync YALNIZ bir sənədə baxır — sənədlər arası təkrarı görmür.
+  // Təkrar yalnız MongoDB insertMany zamanı üzə çıxırdı və istifadəçi
+  // mənasız «409 Conflict» alırdı: hansı model, hansı sahə, hansı dəyər —
+  // heç biri məlum olmurdu. İndi seed heç nə silmədən əvvəl dayanır.
+  for (const [key, value] of Object.entries(graph)) {
+    if (!Array.isArray(value) || !value.length) continue;
+    const schema = value[0].schema;
+    if (!schema) continue;
+    const uniques = Object.entries(schema.paths)
+      .filter(([, path]) => path.options?.unique)
+      .map(([name]) => name);
+    for (const field of uniques) {
+      const seen = new Map();
+      for (const doc of value) {
+        const v = doc[field];
+        if (v == null) continue;
+        const id = typeof v === "object" ? JSON.stringify(v) : String(v);
+        seen.set(id, (seen.get(id) || 0) + 1);
+      }
+      for (const [v, n] of seen) {
+        if (n > 1) {
+          errors.push({ key, name: v, path: field, message: `«${field}» dəyəri ${n} sənəddə təkrarlanır: ${v}` });
+        }
+      }
+    }
+  }
+
   return { ok: errors.length === 0, total, errors };
 }
 

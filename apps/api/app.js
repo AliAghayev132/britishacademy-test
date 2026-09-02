@@ -175,10 +175,19 @@ const setupErrorHandlers = (app) => {
     }
 
     // Mongoose duplicate key
+    // Hansı sahə və hansı dəyər — mesaja YAZILIR. Əvvəl yalnız «This record
+    // already exists» qaytarılırdı: seed 409 verəndə nə modelin, nə sahənin,
+    // nə də dəyərin nə olduğu bilinmirdi və səbəbi tapmaq üçün kodu əl ilə
+    // gəzmək lazım gəlirdi.
     if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
+      const value = field ? err.keyValue?.[field] : undefined;
       return res.status(409).json({
         success: false,
-        message: "This record already exists",
+        message: field
+          ? `Təkrarlanan dəyər: «${field}» = ${JSON.stringify(value)} artıq mövcuddur`
+          : "This record already exists",
+        field,
       });
     }
 
