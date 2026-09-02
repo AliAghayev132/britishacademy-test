@@ -22,7 +22,7 @@ export default async function PublicLayout({ children }) {
   const locale = (await headers()).get("x-lang") || "az";
 
   // ── data fetching ──
-  const [site, cats, coursesData, destData, branchData, quizData] = await Promise.all([
+  const [site, cats, coursesData, destData, branchData, quizData, projectData] = await Promise.all([
     apiGet("/site"),
     apiGet("/categories"),
     apiGet("/courses"),
@@ -30,6 +30,8 @@ export default async function PublicLayout({ children }) {
     apiGet("/branches"),
     // Xidmətlər menyusunda «Onlayn Testlər» bölməsi üçün.
     apiGet("/quizzes"),
+    // «Xidmətlər» menyusundakı «Layihələr» bölməsi üçün.
+    apiGet("/projects"),
   ]);
 
   const settings = site?.settings || {};
@@ -58,6 +60,15 @@ export default async function PublicLayout({ children }) {
   // yeri var: ziyarətçi səviyyəsini yoxlayıb sonra kurs seçir. Qrupa açıq
   // `href` verilir, çünki qalan bəndlər /kurslar/<slug> naxışı ilə qurulur.
   // /api/quizzes cavabı { items: [...] } formasındadır (bax quizController).
+  // Layihələr — testlərdən ƏVVƏL, çünki xidmət kimi daha yaxındır.
+  const projects = projectData?.projects || [];
+  if (projects.length) {
+    services.push({
+      category: { _id: "__projects", name: "Layihələr", slug: "layiheler", href: "/layiheler" },
+      courses: projects.map((p) => ({ _id: p._id, title: p.title, slug: p.slug, href: `/layiheler/${p.slug}` })),
+    });
+  }
+
   const quizzes = quizData?.items || [];
   if (quizzes.length) {
     // Alt bəndlər TESTLƏRİN ÖZÜ deyil, KATEQORİYALARDIR: test sayı artdıqca

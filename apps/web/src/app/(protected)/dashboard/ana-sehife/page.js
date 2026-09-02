@@ -49,6 +49,7 @@ const TABS = [
 const PICKERS = [
   { key: "courses", label: "Kurslar", resource: "courses", limit: 6, title: "title", sub: "slug" },
   { key: "destinations", label: "Ölkələr", resource: "destinations", limit: 8, title: "country", sub: "tagline" },
+  { key: "projects", label: "Layihələr", resource: "projects", limit: 6, title: "title", sub: "tagline" },
   { key: "videos", label: "Video rəylər", resource: "testimonials", limit: 8, title: "name", sub: "achievement", filter: { type: "video" } },
   { key: "testimonials", label: "Yazılı rəylər", resource: "testimonials", limit: 6, title: "name", sub: "achievement", filter: { type: "text" } },
   { key: "teachers", label: "Müəllimlər", resource: "teachers", limit: 8, title: "fullName", sub: "title" },

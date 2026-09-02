@@ -1,5 +1,6 @@
 // Next
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 // Data
 import { apiGet } from "@/lib/api";
@@ -141,6 +142,35 @@ export default async function HomePage() {
                 <span className="ba-fdest-body"><span className="ba-fdest-tag" style={{ display: "block" }}>{t("home.abroad.tag")}</span><span className="ba-fdest-name" style={{ display: "block" }}>{t("home.abroad.all")}</span></span>
               </Link>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Layihələr — seçilmişlər. Müraciət düyməsi BURADA yoxdur: müraciət
+          yalnız layihənin öz səhifəsindən edilir. */}
+      {on("projects") && (home?.projects || []).length > 0 && (
+        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+          <SectionHead title={t("page.projects.title")} sub={t("page.projects.sub")} />
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+            {home.projects.map((p) => (
+              <Link
+                key={p._id}
+                href={`/layiheler/${p.slug}`}
+                className="mt-card"
+                style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 22, overflow: "hidden", "--accent": p.color || "#00157A" }}
+              >
+                <div style={{ aspectRatio: "16 / 9", background: p.color || "#00157A", overflow: "hidden" }}>
+                  {p.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={getImageUrl(p.image)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  )}
+                </div>
+                <div style={{ padding: "18px 20px 20px" }}>
+                  <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 18, margin: 0, color: "#17171F" }}>{p.title}</h3>
+                  {p.tagline && <div style={{ fontSize: 13.5, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{p.tagline}</div>}
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}

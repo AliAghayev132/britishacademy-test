@@ -34,6 +34,8 @@ const createLead = asyncHandler(async (req, res) => {
     source,
     pageUrl,
     destinations: destinations.length ? destinations : undefined,
+    // Layihə müraciəti — yalnız layihənin öz səhifəsindən gəlir.
+    project: /^[a-fd]{24}$/i.test(String(req.body?.project || "")) ? req.body.project : undefined,
   });
 
   res.status(201).json({

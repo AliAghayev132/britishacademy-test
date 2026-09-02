@@ -156,7 +156,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
   );
 });
 
-export function ApplyModal({ open, onClose, preset, branches = [], destinations = [] }) {
+export function ApplyModal({ open, onClose, preset, project, branches = [], destinations = [] }) {
   const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
@@ -210,6 +210,8 @@ export function ApplyModal({ open, onClose, preset, branches = [], destinations 
         // Yalnız «Xaricdə təhsil» seçiləndə göndərilir — başqa hallarda
         // istifadəçi ölkə seçmir, seçim isə ekranda qalmış ola bilər.
         destinations: interest === ABROAD && picked.length ? picked : undefined,
+        // Layihə səhifəsindən açılıbsa müraciət ona bağlanır.
+        project: project || undefined,
         source: "apply-modal",
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
@@ -217,7 +219,7 @@ export function ApplyModal({ open, onClose, preset, branches = [], destinations 
     } catch (err) {
       setError(err?.data?.message || t("apply.error"));
     }
-  }, [createLead, form, interest, branch, picked, t]);
+  }, [createLead, form, interest, branch, picked, project, t]);
 
   const onOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) onClose();

@@ -8,6 +8,7 @@ import { CourseWizard } from "./CourseWizard";
 import { CourseCategoryForm } from "./CourseCategoryForm";
 import { CourseGroupForm } from "./CourseGroupForm";
 import { DestinationForm } from "./DestinationForm";
+import { ProjectForm } from "./ProjectForm";
 import { TestimonialForm } from "./TestimonialForm";
 import { BlogPostForm } from "./BlogPostForm";
 import { BlogCategoryForm } from "./BlogCategoryForm";
@@ -26,6 +27,7 @@ export const BESPOKE_FORMS = {
   "course-categories": CourseCategoryForm,
   "course-groups": CourseGroupForm,
   destinations: DestinationForm,
+  projects: ProjectForm,
   testimonials: TestimonialForm,
   "blog-posts": BlogPostForm,
   "blog-categories": BlogCategoryForm,

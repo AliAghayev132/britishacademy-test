@@ -27,6 +27,7 @@ export const ROUTE_SLUGS = {
   muellimler: { az: "muellimler", en: "teachers", ru: "prepodavateli" },
   filiallar: { az: "filiallar", en: "branches", ru: "filialy" },
   "xaricde-tehsil": { az: "xaricde-tehsil", en: "study-abroad", ru: "obuchenie-za-rubezhom" },
+  layiheler: { az: "layiheler", en: "projects", ru: "proekty" },
   telebelerimiz: { az: "telebelerimiz", en: "students", ru: "studenty" },
   bloq: { az: "bloq", en: "blog", ru: "blog" },
   elaqe: { az: "elaqe", en: "contact", ru: "kontakty" },

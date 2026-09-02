@@ -27,6 +27,7 @@ import {
   ShortLink,
   Quiz,
   QuizCategory,
+  Project,
 } from "#models";
 
 export const RESOURCES = {
@@ -93,7 +94,7 @@ export const RESOURCES = {
     model: Lead,
     search: ["name", "phone", "email"],
     sort: { createdAt: -1 },
-    populate: ["course", "branch", "handledBy", "destinations"],
+    populate: ["course", "branch", "handledBy", "destinations", "project"],
   },
   pages: {
     model: Page,
@@ -109,6 +110,11 @@ export const RESOURCES = {
     model: Advantage,
     search: ["title"],
     sort: { order: 1 },
+  },
+  projects: {
+    model: Project,
+    search: ["title", "tagline", "lead"],
+    sort: { order: 1, createdAt: -1 },
   },
   "quiz-categories": {
     model: QuizCategory,

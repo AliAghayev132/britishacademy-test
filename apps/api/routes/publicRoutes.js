@@ -48,6 +48,11 @@ PublicRouter.get("/testimonials", publicController.listTestimonials);
 PublicRouter.get("/destinations", publicController.listDestinations);
 PublicRouter.get("/destinations/:slug", publicController.getDestinationBySlug);
 
+// Layihələr — xaricdə təhsil ilə eyni quruluş; müraciət layihənin öz
+// səhifəsindən edilir.
+PublicRouter.get("/projects", publicController.listProjects);
+PublicRouter.get("/projects/:slug", publicController.getProjectBySlug);
+
 // Timetable
 PublicRouter.get("/schedule", publicController.listSchedule);
 

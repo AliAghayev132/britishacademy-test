@@ -45,6 +45,13 @@ export const HOME_SECTIONS = [
     limit: 8,
   },
   {
+    key: "projects",
+    label: "Layihələr",
+    hint: "Seçilmiş layihələr — müraciət layihənin öz səhifəsindən edilir",
+    manage: "/dashboard/resurslar/projects",
+    limit: 6,
+  },
+  {
     key: "videos",
     label: "Məzunlar danışır",
     hint: "Video rəylər (swiper)",

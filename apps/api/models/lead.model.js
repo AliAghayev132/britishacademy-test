@@ -22,6 +22,8 @@ const leadSchema = new Schema(
     // görə süzgəc qura bilsin və hansı ölkənin nə qədər maraq gördüyü
     // statistikada görünsün.
     destinations: [{ type: Schema.Types.ObjectId, ref: "Destination" }],
+    // Layihə müraciətləri — YALNIZ layihənin öz səhifəsindən doldurulur.
+    project: { type: Schema.Types.ObjectId, ref: "Project" },
     message: { type: String, trim: true },
 
     source: { type: String, enum: leadSources, default: "apply-modal" },

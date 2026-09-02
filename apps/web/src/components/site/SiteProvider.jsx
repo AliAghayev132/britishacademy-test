@@ -19,9 +19,12 @@ export function useApply() {
 export function SiteProvider({ branches = [], destinations = [], children }) {
   const [applyOpen, setApplyOpen] = useState(false);
   const [preset, setPreset] = useState(null);
+  // Layihə səhifəsindən açılanda müraciət həmin layihəyə bağlanır.
+  const [presetProject, setPresetProject] = useState(null);
 
-  const open = useCallback((interest) => {
+  const open = useCallback((interest, extra) => {
     setPreset(interest || null);
+    setPresetProject(extra?.project || null);
     setApplyOpen(true);
   }, []);
   const close = useCallback(() => setApplyOpen(false), []);
@@ -29,7 +32,14 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
   return (
     <ApplyCtx.Provider value={{ open, close }}>
       {children}
-      <ApplyModal open={applyOpen} onClose={close} preset={preset} branches={branches} destinations={destinations} />
+      <ApplyModal
+        open={applyOpen}
+        onClose={close}
+        preset={preset}
+        project={presetProject}
+        branches={branches}
+        destinations={destinations}
+      />
       <WhatsAppWidget branches={branches} />
     </ApplyCtx.Provider>
   );

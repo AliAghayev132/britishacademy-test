@@ -46,7 +46,7 @@ import {
   Menu as MenuIcon,
   Image as ImageIcon,
   FileStack,
-Link2, ClipboardList } from 'lucide-react'
+Link2, ClipboardList, Rocket } from 'lucide-react'
 
 // Utils
 import { logout } from '@/store/slices/authSlice'
@@ -113,6 +113,7 @@ const NAV_GROUPS = [
       { name: 'Bloq kateqoriyaları', href: '/dashboard/resurslar/blog-categories', icon: Tags, section: 'blog' },
       { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote, section: 'testimonials' },
       { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2, section: 'destinations' },
+        { name: 'Layihələr', href: '/dashboard/resurslar/projects', icon: Rocket, section: 'projects' },
       { name: 'Səhifələr', href: '/dashboard/resurslar/pages', icon: FileStack, section: 'resources' },
       { name: 'FAQ', href: '/dashboard/resurslar/faqs', icon: HelpCircle, section: 'resources' },
       { name: 'Üstünlüklər', href: '/dashboard/resurslar/advantages', icon: Sparkles, section: 'resources' },

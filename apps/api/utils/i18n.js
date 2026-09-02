@@ -75,6 +75,13 @@ export const LOCALIZED_FIELDS = {
   Media: [
     "alt",
   ],
+  Project: [
+    "title", "tagline", "lead", "contentHtml", "applyLabel",
+    "seo.metaTitle", "seo.metaDescription", "seo.keywords",
+    "facts.$.label", "facts.$.value", "faq.$.question", "faq.$.answer",
+    "content.$.heading", "content.$.body", "content.$.items",
+    "content.$.definitions.$.term", "content.$.definitions.$.description",
+  ],
   QuizCategory: ["name"],
   SiteSetting: [
     "hero.titlePrefix", "hero.subtitle", "hero.words", "hero.chipsLeft",

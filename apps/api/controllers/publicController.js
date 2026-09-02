@@ -17,6 +17,7 @@ import {
   Partner,
   Advantage,
   Faq,
+  Project,
 } from "#models";
 // Data
 import { LEGACY_SLUG_OF } from "../data/slugAliases.mjs";
@@ -72,7 +73,7 @@ const getHome = asyncHandler(async (_req, res) => {
   // Rəy sorğuları da bu dəstəyə daxildir. Əvvəl onlar ARDICIL icra olunurdu
   // (əvvəl mətn rəyləri gözlənilir, sonra videolar) — ana səhifə üçün 3 gediş
   // demək idi. İndi normal halda hamısı BİR gedişdə paralel gedir.
-  const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo, featuredTeachers] =
+  const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo, featuredTeachers, featuredProjects] =
     await Promise.all([
       SiteSetting.get(),
       Course.findFeatured(HOME_COURSE_COUNT).populate("category"),
@@ -86,6 +87,8 @@ const getHome = asyncHandler(async (_req, res) => {
       // TeacherSwiper) — burada sabit sıra qaytarılır ki, SSR ilə ilk render
       // uyğun gəlsin və hidratasiya uyğunsuzluğu yaranmasın.
       Teacher.findPublic({ isFeatured: true }).limit(12),
+      // Ana səhifədəki layihə lenti.
+      Project.findPublic({ isFeatured: true }).limit(8),
     ]);
 
   // Seçilmiş kurslar 6-dan azdırsa qalanını sıraya görə digər aktiv
@@ -122,6 +125,7 @@ const getHome = asyncHandler(async (_req, res) => {
       settings: publicSettings(settings),
       courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs,
       teachers: featuredTeachers,
+      projects: featuredProjects,
     },
   });
 });
@@ -323,6 +327,29 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { destination } });
 });
 
+/* ---------------- Projects ---------------- */
+
+/** GET /api/projects — aktiv layihələr. */
+const listProjects = asyncHandler(async (_req, res) => {
+  const projects = await Project.findPublic();
+  res.json({ success: true, data: { projects } });
+});
+
+/** GET /api/projects/:slug */
+const getProjectBySlug = asyncHandler(async (req, res) => {
+  const project = await Project.findOne({
+    slug: req.params.slug,
+    isActive: true,
+    isDeleted: false,
+  });
+  if (!project) {
+    return res.status(404).json({ success: false, message: "Layihə tapılmadı" });
+  }
+  // Baxış sayğacı — statistika səhifəsi üçün (Destination ilə eyni yanaşma).
+  Project.updateOne({ _id: project._id }, { $inc: { views: 1 } }).catch(() => {});
+  res.json({ success: true, data: { project } });
+});
+
 /* ---------------- Schedule (timetable) ---------------- */
 
 /** GET /api/schedule?course=<slug>&branch=<slug> */
@@ -431,6 +458,8 @@ export {
   listTestimonials,
   listDestinations,
   getDestinationBySlug,
+  listProjects,
+  getProjectBySlug,
   listSchedule,
   listBlog,
   getBlogBySlug,
