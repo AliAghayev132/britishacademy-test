@@ -222,7 +222,10 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
 
   return (
     <LocalizedFormProvider>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && requestClose()}>
+      {/* role/aria-modal — həm ekran oxuyucular, həm də testlər modalı
+          səhifənin qalanından ayıra bilsin (əvvəl testdə səhifədəki axtarış
+          qutusu modalın sahəsi kimi seçilirdi). */}
+      <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && requestClose()}>
         <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
           <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4">
             <div className="min-w-0">

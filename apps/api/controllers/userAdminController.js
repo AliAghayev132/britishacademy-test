@@ -4,7 +4,7 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler, fuzzyRegex, hasRole } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, cleanIds } from "#utils";
 import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
 import { HashService, logAction } from "#services";
@@ -24,7 +24,7 @@ import { adminRoles, adminSections } from "#constants";
  * Boş massiv «məhdudiyyət yoxdur» deməkdir (bax utils/roles.js).
  */
 const cleanDestinations = (v) =>
-  Array.isArray(v) ? v.filter((id) => /^[a-fd]{24}$/i.test(String(id))) : [];
+  cleanIds(v);
 
 const canManageUsers = (req) => hasRole(req.user, "superadmin");
 const publicUser = (u) => ({

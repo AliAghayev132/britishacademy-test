@@ -92,7 +92,10 @@ export function scoreAnswers(questions, answers) {
  */
 const listQuizzes = asyncHandler(async (_req, res) => {
   const items = await Quiz.findPublic()
-    .select("title slug lead questions questionCount timeLimitMin order")
+    // `category` HƏM select-də, HƏM populate-də olmalıdır: select-dən düşsə
+    // populate ediləcək sahə sənəddə olmur və nəticə həmişə null qalır.
+    .select("title slug lead questions questionCount timeLimitMin order category")
+    .populate("category", "name slug color order")
     .lean();
 
   res.json({

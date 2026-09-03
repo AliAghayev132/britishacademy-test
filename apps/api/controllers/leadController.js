@@ -1,5 +1,5 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
-import { asyncHandler } from "#utils";
+import { asyncHandler, isObjectId, cleanIds } from "#utils";
 import { Lead } from "#models";
 
 /**
@@ -12,9 +12,7 @@ const createLead = asyncHandler(async (req, res) => {
 
   // Ölkə seçimi yalnız massiv kimi qəbul olunur və ObjectId formasına
   // uyğunluğu yoxlanılır — açıq endpointdir, gələn dəyərə etibar etmirik.
-  const destinations = Array.isArray(req.body?.destinations)
-    ? req.body.destinations.filter((id) => /^[a-fd]{24}$/i.test(String(id))).slice(0, 12)
-    : [];
+  const destinations = cleanIds(req.body?.destinations, 12);
 
   if (!name || !phone) {
     return res.status(400).json({
@@ -35,7 +33,7 @@ const createLead = asyncHandler(async (req, res) => {
     pageUrl,
     destinations: destinations.length ? destinations : undefined,
     // Layihə müraciəti — yalnız layihənin öz səhifəsindən gəlir.
-    project: /^[a-fd]{24}$/i.test(String(req.body?.project || "")) ? req.body.project : undefined,
+    project: isObjectId(req.body?.project) ? req.body.project : undefined,
   });
 
   res.status(201).json({
