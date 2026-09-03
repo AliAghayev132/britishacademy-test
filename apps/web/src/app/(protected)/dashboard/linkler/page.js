@@ -13,10 +13,11 @@ import {
 } from "@/store/api/adminApi";
 // UI
 import { QueryState } from "@/components/ui/QueryState";
+import { QrStudio } from "@/components/ui/QrStudio";
 import { confirmDialog, notify } from "@/components/ui/feedback";
 // Icons
 import {
-  Link2, Plus, Copy, Check, Trash2, BarChart3, Power,
+  Link2, Plus, Copy, Check, Trash2, BarChart3, Power, QrCode,
   Smartphone, Monitor, Globe, Clock, Users, MousePointerClick, X,
 } from "lucide-react";
 
@@ -45,6 +46,18 @@ const WINDOWS = [
 
 const input =
   "w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#00157A] focus:ring-2 focus:ring-[#00157A]/10";
+
+/**
+ * Paylaşıla bilən TAM ünvan.
+ *
+ * `NEXT_PUBLIC_SITE_URL` build zamanı verilməyəndə boş qalır — onda kopyalanan
+ * mətn «/r/kod» olurdu, QR isə tamamilə yararsız çıxardı (nisbi ünvanı skaner
+ * aça bilmir). Brauzerin öz origin-i həmişə düzgün domendir.
+ */
+const fullUrl = (code) => {
+  const base = SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+  return `${base}/r/${code}`;
+};
 
 /** Kodu ünvana yararlı hala gətir — boşluq və AZ hərfləri linki sındırır. */
 const slugify = (s) =>
@@ -290,6 +303,7 @@ export default function LinksPage() {
   const [form, setForm] = useState({ code: "", target: "", title: "", note: "" });
   const [openId, setOpenId] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [qrLink, setQrLink] = useState(null);
 
   const items = useMemo(() => data?.data?.items || [], [data]);
 
@@ -319,7 +333,7 @@ export default function LinksPage() {
 
   const copy = async (code) => {
     try {
-      await navigator.clipboard.writeText(`${SITE_URL}/r/${code}`);
+      await navigator.clipboard.writeText(fullUrl(code));
       setCopied(code);
       setTimeout(() => setCopied(null), 1600);
     } catch {
@@ -491,6 +505,13 @@ export default function LinksPage() {
                           : <Copy className="h-4 w-4" />}
                       </button>
                       <button
+                        onClick={() => setQrLink(l)}
+                        title="QR kod"
+                        className="rounded-lg border border-gray-200 p-1.5 text-gray-500 transition hover:bg-gray-50"
+                      >
+                        <QrCode className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => setOpenId(openId === l._id ? null : l._id)}
                         title="Hesabat"
                         className={`rounded-lg border p-1.5 transition ${
@@ -529,6 +550,15 @@ export default function LinksPage() {
       </div>
 
       {openId && <LinkStats id={openId} onClose={() => setOpenId(null)} />}
+
+      {qrLink && (
+        <QrStudio
+          value={fullUrl(qrLink.code)}
+          name={qrLink.code}
+          title={qrLink.title}
+          onClose={() => setQrLink(null)}
+        />
+      )}
     </div>
   );
 }

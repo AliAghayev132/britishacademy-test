@@ -130,6 +130,30 @@ test.describe("admin panel", () => {
     }
   });
 
+  test("QR studiyası kod çəkir və logonu içəri yazır", async ({ page }) => {
+    // QR-ın DÜZGÜNLÜYÜ vahid testlərdə (tests/qr.test.js) yoxlanılır. Burada
+    // yalnız komponentin brauzerdə çökmədiyi və logonun `data:` URI kimi
+    // içəriyə düşdüyü təsdiqlənir — logo xarici linkə baxsaydı, endirilən
+    // faylda görünməzdi və bunu yalnız real brauzer üzə çıxarır.
+    await page.goto("/dashboard/linkler");
+    const qr = page.locator('button[title="QR kod"]').first();
+    if ((await qr.count()) === 0) test.skip(true, "izlənilən link yoxdur");
+
+    await qr.click();
+    const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible();
+
+    // `svg image` yalnız QR-da var (lucide ikonlarında yoxdur) — logo
+    // şəbəkədən gətirilir, ona görə görünənə qədər gözlənilir.
+    const logo = modal.locator("svg image");
+    await expect(logo).toHaveCount(1, { timeout: 15000 });
+    expect(await logo.getAttribute("href")).toMatch(/^data:/);
+
+    // Üslub dəyişəndə kod yenidən qurulur.
+    await modal.getByRole("button", { name: "Nöqtə", exact: true }).click();
+    await expect(modal.getByText(/\d+ × \d+ px/)).toBeVisible();
+  });
+
   test("icazələr dialoqunda ölkə və filial əhatəsi var", async ({ page }) => {
     await page.goto("/dashboard/istifadeciler");
     const permBtn = page.getByRole("button", { name: /icazə/i }).first();
