@@ -393,7 +393,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
 
       <header style={{ background: "rgba(255,255,255,.94)", backdropFilter: "blur(14px)", borderBottom: "1px solid #ECEDF2" }}>
         <div className="ba-headrow" style={{ maxWidth: 1240, margin: "0 auto", padding: "14px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
-          <Link href="/" aria-label="British Academy — ana səhifə" style={{ display: "flex", alignItems: "center", flex: "none" }}>
+          <Link href="/" aria-label={t("common.homeAria")} style={{ display: "flex", alignItems: "center", flex: "none" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={site?.brand?.logo || "/assets/logo.png"} alt="British Academy" style={{ height: 46, width: "auto", display: "block" }} />
           </Link>

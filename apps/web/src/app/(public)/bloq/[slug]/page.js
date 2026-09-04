@@ -49,7 +49,7 @@ export async function generateMetadata({ params }) {
 
 // ── Subcomponents ──
 /** Banner: breadcrumb, title, meta row. */
-function BlogHero({ p }) {
+function BlogHero({ p, t }) {
   return (
     <section className="ba-banner">
       <div className="ba-banner-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "36px 28px 56px" }}>
@@ -60,7 +60,7 @@ function BlogHero({ p }) {
         <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,44px)", letterSpacing: "-.02em", margin: "14px 0 0", lineHeight: 1.18, color: "#fff" }}>{p.title}</h1>
         <div style={{ display: "flex", gap: 16, marginTop: 16, fontSize: 14, color: "rgba(255,255,255,.85)", flexWrap: "wrap" }}>
           <span>{fmtDate(p.publishedAt)}</span>
-          {p.readMinutes && <span>· {p.readMinutes} dəq oxu</span>}
+          {p.readMinutes && <span>· {p.readMinutes} {t("blog.readMin")}</span>}
           {p.author && <span>· {`${p.author.firstName || ""} ${p.author.lastName || ""}`.trim()}</span>}
         </div>
       </div>
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
 
-      <BlogHero p={p} />
+      <BlogHero p={p} t={tr} />
 
       {p.cover && <CoverImage src={p.cover} alt={p.title} />}
 

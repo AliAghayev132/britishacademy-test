@@ -8,7 +8,7 @@
 import { Lead } from "#models";
 
 // Services
-import { BulkQueue, normalizeRecipients, logAction } from "#services";
+import { BulkQueue, normalizeRecipients, logAction, resolveDelaySec, DELAY_LIMITS } from "#services";
 
 // Utils
 import { asyncHandler, hasRole } from "#utils";
@@ -47,12 +47,18 @@ async function buildRecipients(body) {
  */
 const preview = asyncHandler(async (req, res) => {
   const { channel, source, valid, invalid, duplicates } = await buildRecipients(req.body);
+  // Fasilə burada da həll olunur ki, təsdiq dialoqu göndərişin NƏ QƏDƏR
+  // çəkəcəyini göstərə bilsin: 500 alıcı × 6 saniyə = 50 dəqiqə. Admin bunu
+  // başlamazdan ƏVVƏL bilməlidir.
+  const delaySec = resolveDelaySec(channel, req.body?.delaySec);
   res.json({
     success: true,
     data: {
       channel,
       source,
       total: valid.length,
+      delaySec,
+      etaSec: Math.max(0, valid.length - 1) * delaySec,
       duplicates,
       invalid: invalid.slice(0, 50),
       invalidCount: invalid.length,
@@ -77,7 +83,7 @@ const send = asyncHandler(async (req, res) => {
     return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
   }
 
-  const { template, subject, skipDuplicates = true, confirm } = req.body || {};
+  const { template, subject, skipDuplicates = true, confirm, delaySec } = req.body || {};
   if (confirm !== true) {
     return res.status(400).json({ success: false, message: "Təsdiq olunmayıb" });
   }
@@ -104,15 +110,16 @@ const send = asyncHandler(async (req, res) => {
       source,
       sentBy: req.user?._id,
       skipDuplicates,
+      delaySec,
     });
     await logAction(req, {
       action: "settings",
       resource: "bulk",
-      summary: `Toplu göndəriş (${channel}/${source}): ${state.total} alıcı`,
+      summary: `Toplu göndəriş (${channel}/${source}): ${state.total} alıcı, ${state.delaySec} san fasilə`,
     });
     res.json({
       success: true,
-      message: `Toplu göndəriş başladı — ${state.total} alıcı`,
+      message: `Toplu göndəriş başladı — ${state.total} alıcı, ${state.delaySec} san fasilə`,
       data: { ...state, skipped: invalid.length },
     });
   } catch (err) {
@@ -122,7 +129,9 @@ const send = asyncHandler(async (req, res) => {
 
 /** GET /api/admin/bulk/status */
 const status = asyncHandler(async (_req, res) => {
-  res.json({ success: true, data: BulkQueue.getState() });
+  // Həddlər cavabla birlikdə gedir — panel slayderin sərhədlərini serverdən
+  // öyrənir, əks halda iki yerdə saxlanılıb bir-birindən ayrı düşərdi.
+  res.json({ success: true, data: { ...BulkQueue.getState(), limits: DELAY_LIMITS } });
 });
 
 /** POST /api/admin/bulk/cancel */

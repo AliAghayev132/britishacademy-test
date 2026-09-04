@@ -16,6 +16,27 @@ export const STATUS_BADGE = {
   delivered: { label: "Çatdırıldı", cls: "bg-indigo-100 text-indigo-700" },
   read: { label: "Oxundu", cls: "bg-emerald-100 text-emerald-700" },
   failed: { label: "Alınmadı", cls: "bg-red-100 text-red-700" },
+  // Qəsdən göndərilməyib (son 24 saatda mesaj alıb) — xəta DEYİL.
+  skipped: { label: "Ötürüldü", cls: "bg-amber-100 text-amber-700" },
+  cancelled: { label: "Dayandırıldı", cls: "bg-gray-200 text-gray-700" },
 };
 
 export const fmt = (d) => (d ? new Date(d).toLocaleString("az-AZ") : "—");
+
+/** Yalnız saat:dəqiqə:saniyə — canlı axında tarix yer tutur. */
+export const fmtTime = (d) =>
+  d ? new Date(d).toLocaleTimeString("az-AZ", { hour12: false }) : "—";
+
+/**
+ * Saniyəni oxunaqlı müddətə çevir: 50 → «50 san», 3720 → «1 saat 2 dəq».
+ * Toplu göndəriş saatlarla çəkə bilir — «3720 saniyə» heç nə demir.
+ */
+export function fmtDuration(sec) {
+  const s = Math.max(0, Math.round(Number(sec) || 0));
+  if (s < 60) return `${s} san`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m} dəq`;
+  const h = Math.floor(m / 60);
+  const rest = m % 60;
+  return rest ? `${h} saat ${rest} dəq` : `${h} saat`;
+}

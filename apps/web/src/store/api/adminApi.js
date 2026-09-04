@@ -158,6 +158,10 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["Resource", "Site"],
     }),
     // Başlıq menyusunu yenidən qurur — tam seed işlətmədən.
+    importContact: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-contact", method: "POST", body: body || {} }),
+      invalidatesTags: [{ type: "Site", id: "settings" }, "Site"],
+    }),
     importMenu: builder.mutation({
       query: (body) => ({ url: "/admin/dev/import-menu", method: "POST", body: body || {} }),
       invalidatesTags: ["Resource", "Site"],
@@ -298,6 +302,7 @@ export const {
   useImportTeachersMutation,
   useImportBranchesMutation,
   useMigrateSlugsMutation,
+  useImportContactMutation,
   useImportMenuMutation,
   useImportQuizzesMutation,
   useAdminSeedMutation,

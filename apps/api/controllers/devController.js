@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService, importHeaderMenu } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService, importHeaderMenu, importContactI18n } from "#services";
 import { HEADER_MENU } from "../services/SeedService.js";
 import { tri } from "../data/translations.mjs";
 
@@ -301,4 +301,32 @@ const runImportMenu = asyncHandler(async (req, res) => {
   });
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu };
+/**
+ * POST /api/admin/dev/import-contact
+ * «Əlaqə» tənzimləmələrindəki ünvan və iş saatlarını 3 dilə tamamlayır.
+ * Sahələr sonradan çoxdilli edildi; canlı bazadakı köhnə sətirlər isə yalnız
+ * AZ qalmışdı və hər səhifədə (üst lent, footer) azərbaycanca görünürdü.
+ */
+const runImportContact = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const result = await importContactI18n(tri, { dryRun, force: Boolean(req.body?.force) });
+  if (!dryRun && result.applied) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Əlaqə tərcümələri yeniləndi: ${result.applied} sahə`,
+    });
+  }
+  res.json({
+    success: true,
+    message: result.applied
+      ? `${result.applied} sahə 3 dilə tamamlandı${dryRun ? " (sınaq rejimi)" : ""}`
+      : "Dəyişiklik lazım deyil — hər şey artıq tərcümə olunub",
+    data: result,
+  });
+});
+
+export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu };

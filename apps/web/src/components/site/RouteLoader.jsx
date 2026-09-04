@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useT } from "@/lib/i18n/useT";
 
 /**
  * Client navigation loader — a "walking" mascot overlay shown while moving
@@ -13,6 +14,7 @@ import { usePathname, useSearchParams } from "next/navigation";
  */
 export function RouteLoader() {
   // ── State / derived ──
+  const t = useT();
   const pathname = usePathname();
   const search = useSearchParams();
   const [active, setActive] = useState(false);
@@ -80,7 +82,7 @@ export function RouteLoader() {
   if (!active) return null;
 
   return (
-    <div className="ba-loader" role="status" aria-live="polite" aria-label="Yüklənir">
+    <div className="ba-loader" role="status" aria-live="polite" aria-label={t("common.loader")}>
       <div className="ba-loader-inner">
         {/* The shield logo "walks" while the page loads. Swap the background to
             /assets/mascot/walk.png here once a dedicated walking mascot exists. */}

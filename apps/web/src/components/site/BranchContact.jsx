@@ -165,7 +165,7 @@ function MapPane({ b, t }) {
         // key — filial dəyişəndə iframe yenidən yüklənsin
         key={src}
         src={src}
-        title={b?.name || "Xəritə"}
+        title={b?.name || t("common.map")}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         style={{ width: "100%", height: "100%", minHeight: 340, border: 0, display: "block" }}

@@ -42,9 +42,14 @@ const whatsappMessageSchema = new Schema(
 
     // sent → serverə verildi · delivered/read → message_ack ilə yenilənir
     // (delivered/read yalnız WhatsApp-da mümkündür)
+    //
+    // skipped → QƏSDƏN göndərilməyib (son 24 saatda mesaj alıb). Ayrıca
+    // status lazımdır: əvvəl belə sətirlər ümumiyyətlə yazılmırdı və admin
+    // «bu adama niyə getmədi» sualına cavab tapa bilmirdi. «failed» kimi
+    // yazmaq da olmazdı — hesabatda xəta kimi görünərdi.
     status: {
       type: String,
-      enum: ["sent", "delivered", "read", "failed"],
+      enum: ["sent", "delivered", "read", "failed", "skipped"],
       default: "sent",
       index: true,
     },

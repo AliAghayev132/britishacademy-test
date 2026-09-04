@@ -63,6 +63,7 @@ AdminRouter.post("/dev/import-branches", devOnly, devController.runImportBranche
 AdminRouter.post("/dev/migrate-slugs", devOnly, writeRateLimiter, devController.runMigrateSlugs);
 // Başlıq menyusunu yenidən qur — tam seed işlətmədən.
 AdminRouter.post("/dev/import-menu", devOnly, writeRateLimiter, devController.runImportMenu);
+AdminRouter.post("/dev/import-contact", devOnly, writeRateLimiter, devController.runImportContact);
 // Səviyyə testlərini yüklə (köhnə saytın ən çox girilən iki səhifəsi).
 AdminRouter.post("/dev/import-quizzes", devOnly, writeRateLimiter, devController.runImportQuizzes);
 

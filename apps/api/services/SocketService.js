@@ -177,6 +177,22 @@ class SocketService {
   }
 
   /**
+   * Emit an event to every connected socket whose role is in `roles`.
+   *
+   * NİYƏ OTAQ DEYİL: `join:room` istənilən autentifikasiya olunmuş
+   * istifadəçidən qəbul olunur — adi «user» rolu da özünü admin otağına yaza
+   * bilərdi. Toplu göndərişin canlı axını alıcıların telefon nömrələrini
+   * daşıyır, ona görə rol SERVERDƏ yoxlanılır.
+   */
+  emitToRole(roles, event, data) {
+    if (!this.io) return;
+    const allowed = new Set(roles);
+    for (const socket of this.io.sockets.sockets.values()) {
+      if (allowed.has(socket.userRole)) socket.emit(event, data);
+    }
+  }
+
+  /**
    * Emit an event to a specific connected user
    */
   emitToUser(userId, event, data) {

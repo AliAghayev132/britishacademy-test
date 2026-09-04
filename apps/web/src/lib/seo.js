@@ -11,8 +11,37 @@ import { toList } from "@/utils/toList";
 
 export const SITE_NAME = "British Academy";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-export const DEFAULT_TITLE = "British Academy — Dil kursları, IELTS/TOEFL hazırlığı və xaricdə təhsil";
-export const DEFAULT_DESCRIPTION = "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.";
+/**
+ * Ehtiyat başlıq və təsvir — DİL ÜZRƏ.
+ *
+ * Bunlar yalnız admin paneldə «SEO → Defolt başlıq/təsvir» boş qalanda
+ * işləyir. Sabit azərbaycanca sətir olduqları müddətdə /en və /ru
+ * səhifələrinin <title> və <meta description>-ı azərbaycanca gedirdi — yəni
+ * axtarış nəticələrində ingilis və rus dilli istifadəçi AZ mətn görürdü.
+ */
+const DEFAULTS = {
+  az: {
+    title: "British Academy — Dil kursları, IELTS/TOEFL hazırlığı və xaricdə təhsil",
+    description:
+      "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.",
+  },
+  en: {
+    title: "British Academy — Language courses, IELTS/TOEFL preparation and study abroad",
+    description:
+      "British Academy — a language centre accredited by English UK. English, Russian and German courses, IELTS · TOEFL preparation and study abroad.",
+  },
+  ru: {
+    title: "British Academy — Языковые курсы, подготовка к IELTS/TOEFL и обучение за рубежом",
+    description:
+      "British Academy — языковой центр с аккредитацией English UK. Курсы английского, русского и немецкого, подготовка к IELTS · TOEFL и обучение за рубежом.",
+  },
+};
+
+/** Dil üzrə ehtiyat dəyərlər (naməlum dil → AZ). */
+export const defaultsFor = (locale) => DEFAULTS[locale] || DEFAULTS.az;
+
+export const DEFAULT_TITLE = DEFAULTS.az.title;
+export const DEFAULT_DESCRIPTION = DEFAULTS.az.description;
 export const DEFAULT_IMAGE = "/assets/og-cover.png";
 
 const abs = (img) => (!img ? `${SITE_URL}${DEFAULT_IMAGE}` : img.startsWith("http") ? img : `${SITE_URL}${img}`);
@@ -39,8 +68,9 @@ export async function resolveMetadata({
   const seo = s?.seo || {};
   const name = s?.brand?.name || SITE_NAME;
   const titleTemplate = seo.titleTemplate || `%s — ${name}`;
-  const defTitle = seo.defaultTitle || DEFAULT_TITLE;
-  const desc = description || seo.defaultDescription || DEFAULT_DESCRIPTION;
+  const def = defaultsFor(locale);
+  const defTitle = seo.defaultTitle || def.title;
+  const desc = description || seo.defaultDescription || def.description;
   // `path` KANONİK AZ formadadır; public URL cari dilin slug-ı ilə qurulur.
   const url = `${SITE_URL}${buildPath(path || "/", locale)}`;
   const canon = canonical || url;

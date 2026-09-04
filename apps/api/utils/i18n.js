@@ -84,6 +84,7 @@ export const LOCALIZED_FIELDS = {
   ],
   QuizCategory: ["name"],
   SiteSetting: [
+    "contact.address", "contact.hours",
     "hero.titlePrefix", "hero.subtitle", "hero.words", "hero.chipsLeft",
     "hero.chipsRight", "hero.pills", "marquee", "stats.$.label", "stats.$.value",
     "seo.defaultTitle", "seo.defaultDescription", "seo.keywords",

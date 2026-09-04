@@ -7,13 +7,13 @@
 import { useState } from "react";
 import {
   Loader2, StopCircle, Users, MessageCircle, Mail, FileSpreadsheet,
-  ListPlus, Upload, X,
+  ListPlus, Upload, X, Timer, CheckCircle2, XCircle, SkipForward, Radio,
 } from "lucide-react";
 import { notify } from "@/components/ui/feedback";
 import { useBulkPreviewMutation, useBulkSendMutation } from "@/store/api/adminApi";
 import { parseSpreadsheet, parseLines } from "@/lib/recipientParser";
 import { ConfirmSend } from "./ConfirmSend";
-import { input, label, LEAD_STATUSES, fmt } from "./shared";
+import { input, label, LEAD_STATUSES, fmt, fmtTime, fmtDuration, STATUS_BADGE } from "./shared";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle, hint: "Nömrələrə mesaj" },
@@ -26,8 +26,78 @@ const SOURCES = [
   { id: "list", label: "Əl ilə siyahı", icon: ListPlus, hint: "Sətir-sətir yaz" },
 ];
 
-function Progress({ queue, onCancel }) {
-  const done = queue.sent + queue.failed;
+const FEED_ICON = {
+  sent: { Icon: CheckCircle2, cls: "text-emerald-600" },
+  failed: { Icon: XCircle, cls: "text-red-500" },
+  skipped: { Icon: SkipForward, cls: "text-amber-500" },
+  cancelled: { Icon: StopCircle, cls: "text-gray-500" },
+};
+
+/**
+ * Canlı axın — hər alıcı üçün bir sətir, ən yenisi yuxarıda.
+ *
+ * NİYƏ LAZIMDIR: əvvəl yalnız «12 / 300» sayğacı vardı. Göndəriş saatlarla
+ * çəkəndə admin nəyin baş verdiyini görmürdü: hansı nömrəyə getdi, hansı
+ * ötürüldü, xəta nədir. Tarixçə bazadadır, amma o, göndəriş BİTƏNDƏN sonra
+ * baxmaq üçündür — bu isə gedişatı canlı izləmək üçün.
+ */
+function LiveFeed({ feed = [] }) {
+  if (!feed.length) {
+    return (
+      <p className="rounded-lg border border-dashed border-gray-200 p-4 text-center text-sm text-gray-400">
+        İlk mesaj göndəriləndə burada görünəcək…
+      </p>
+    );
+  }
+  return (
+    <div className="max-h-72 overflow-auto rounded-lg border border-gray-100">
+      <table className="w-full text-sm">
+        <tbody className="divide-y divide-gray-50">
+          {feed.map((e, i) => {
+            const { Icon, cls } = FEED_ICON[e.status] || FEED_ICON.sent;
+            const b = STATUS_BADGE[e.status];
+            return (
+              <tr key={`${e.at}-${e.to || "x"}-${i}`} className="hover:bg-gray-50/60">
+                <td className="w-9 py-2 pl-3">
+                  <Icon className={`h-4 w-4 ${cls}`} />
+                </td>
+                <td className="w-12 py-2 pr-2 text-right font-mono text-xs text-gray-400">
+                  {e.i ? `#${e.i}` : ""}
+                </td>
+                <td className="py-2 pr-2">
+                  <span className="font-mono text-gray-900">{e.to || "—"}</span>
+                  {e.name && <span className="ml-2 text-xs text-gray-500">{e.name}</span>}
+                  {e.error && <div className="text-xs text-gray-500">{e.error}</div>}
+                </td>
+                <td className="w-24 py-2 pr-2">
+                  {b && (
+                    <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold ${b.cls}`}>
+                      {b.label}
+                    </span>
+                  )}
+                </td>
+                <td className="w-16 py-2 pr-3 text-right font-mono text-xs text-gray-400">
+                  {fmtTime(e.at)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function Stat({ Icon, cls, value, label: text }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${cls}`}>
+      <Icon className="h-4 w-4" /> <b>{value}</b> {text}
+    </span>
+  );
+}
+
+function Progress({ queue, onCancel, live }) {
+  const done = queue.done ?? (queue.sent || 0) + (queue.failed || 0) + (queue.skipped || 0);
   const pct = Math.round((done / (queue.total || 1)) * 100);
   return (
     <div>
@@ -35,24 +105,60 @@ function Progress({ queue, onCancel }) {
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
           <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
           {queue.channel === "email" ? "E-poçt" : "WhatsApp"} göndərilir — {done} / {queue.total}
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+            {pct}%
+          </span>
         </div>
-        <button
-          onClick={onCancel}
-          className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-        >
-          <StopCircle className="h-4 w-4" /> Dayandır
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Bağlantı göstəricisi: socket qopsa admin niyə yenilənmədiyini bilsin. */}
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+              live ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"
+            }`}
+            title={live ? "Canlı bağlantı aktivdir" : "Canlı bağlantı yoxdur — arada bir yoxlanılır"}
+          >
+            <Radio className={`h-3.5 w-3.5 ${live ? "animate-pulse" : ""}`} />
+            {live ? "Canlı" : "Sorğu ilə"}
+          </span>
+          <button
+            onClick={onCancel}
+            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+          >
+            <StopCircle className="h-4 w-4" /> Dayandır
+          </button>
+        </div>
       </div>
+
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100">
         <div
           className="h-full rounded-full bg-blue-900 transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
-        <span className="text-emerald-600">✓ {queue.sent} göndərildi</span>
-        <span className="text-red-600">✕ {queue.failed} alınmadı</span>
-        {queue.current && <span className="font-mono">→ {queue.current}</span>}
+
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+        <Stat Icon={CheckCircle2} cls="text-emerald-600" value={queue.sent || 0} label="göndərildi" />
+        <Stat Icon={XCircle} cls="text-red-600" value={queue.failed || 0} label="alınmadı" />
+        <Stat Icon={SkipForward} cls="text-amber-600" value={queue.skipped || 0} label="ötürüldü" />
+        {queue.delaySec > 0 && (
+          <span className="inline-flex items-center gap-1.5">
+            <Timer className="h-4 w-4" /> {queue.delaySec} san fasilə
+          </span>
+        )}
+        {queue.etaSec > 0 && <span>təxminən {fmtDuration(queue.etaSec)} qalıb</span>}
+      </div>
+
+      {queue.current && (
+        <div className="mt-2 text-sm text-gray-500">
+          hazırda: <span className="font-mono text-gray-900">{queue.current}</span>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-gray-500">
+          Canlı gediş
+        </div>
+        <LiveFeed feed={queue.feed} />
       </div>
     </div>
   );
@@ -64,7 +170,10 @@ function LastRun({ queue }) {
     <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm">
       <b className="text-gray-900">Son göndəriş:</b>{" "}
       <span className="text-emerald-600">{queue.sent} göndərildi</span>,{" "}
-      <span className="text-red-600">{queue.failed} alınmadı</span>{" "}
+      <span className="text-red-600">{queue.failed} alınmadı</span>
+      {queue.skipped > 0 && (
+        <>, <span className="text-amber-600">{queue.skipped} ötürüldü</span></>
+      )}{" "}
       <span className="text-gray-400">({fmt(queue.finishedAt)})</span>
       {queue.errors?.length > 0 && (
         <ul className="mt-2 max-h-40 space-y-1 overflow-auto text-xs text-gray-500">
@@ -104,13 +213,16 @@ function Picker({ options, value, onChange }) {
   );
 }
 
-export function BulkTab({ queue = {}, isReady, onCancel }) {
+export function BulkTab({ queue = {}, isReady, onCancel, live = false }) {
   const [channel, setChannel] = useState("whatsapp");
   const [source, setSource] = useState("leads");
   const [leadStatus, setLeadStatus] = useState("new");
   const [template, setTemplate] = useState("");
   const [subject, setSubject] = useState("");
   const [skipDuplicates, setSkipDuplicates] = useState(true);
+  // Fasilə: null = kanalın defoltu. Kanal dəyişəndə defolt da dəyişir, ona
+  // görə dəyər burada saxlanılmır — yalnız adminin ƏLİ ilə verdiyi rəqəm.
+  const [delaySec, setDelaySec] = useState("");
 
   const [rows, setRows] = useState([]);        // Excel/əl ilə parse nəticəsi
   const [fileName, setFileName] = useState("");
@@ -123,6 +235,9 @@ export function BulkTab({ queue = {}, isReady, onCancel }) {
   const [runSend, { isLoading: sending }] = useBulkSendMutation();
 
   const isEmail = channel === "email";
+  // Həddlər serverdən gəlir (bax bulkController.status) — iki yerdə
+  // saxlanılsaydı bir-birindən ayrı düşərdi.
+  const limits = queue.limits?.[channel] || (isEmail ? { min: 1, max: 300, def: 2 } : { min: 2, max: 300, def: 6 });
   // WhatsApp qoşulmayıbsa yalnız e-poçt mümkündür.
   const channelBlocked = !isEmail && !isReady;
 
@@ -149,6 +264,7 @@ export function BulkTab({ queue = {}, isReady, onCancel }) {
   const buildBody = () => ({
     channel,
     source,
+    ...(delaySec === "" ? {} : { delaySec: Number(delaySec) }),
     ...(source === "leads" ? { leadStatus } : {}),
     ...(source === "excel" ? { recipients: rows } : {}),
     ...(source === "list" ? { recipients: parseLines(lines) } : {}),
@@ -197,7 +313,7 @@ export function BulkTab({ queue = {}, isReady, onCancel }) {
   if (queue.running) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-5">
-        <Progress queue={queue} onCancel={onCancel} />
+        <Progress queue={queue} onCancel={onCancel} live={live} />
       </div>
     );
   }
@@ -316,6 +432,56 @@ export function BulkTab({ queue = {}, isReady, onCancel }) {
         <p className="mt-1 text-xs text-gray-400">
           Dəyişənlər: <span className="font-mono">{"{{ad}}"}</span>,{" "}
           <span className="font-mono">{isEmail ? "{{email}}" : "{{telefon}}"}</span>
+        </p>
+      </div>
+
+      {/* Fasilə */}
+      <div>
+        <label className={label}>Mesajlar arası fasilə</label>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <input
+              type="number"
+              min={limits.min}
+              max={limits.max}
+              step={1}
+              value={delaySec}
+              onChange={(e) => setDelaySec(e.target.value)}
+              placeholder={String(limits.def)}
+              className={`${input} w-32 pr-12`}
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">
+              san
+            </span>
+          </div>
+          {[3, 6, 10, 20, 30].map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setDelaySec(String(v))}
+              className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                String(v) === delaySec
+                  ? "border-blue-900 bg-blue-900 text-white"
+                  : "border-gray-200 text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              {v} san
+            </button>
+          ))}
+          {delaySec !== "" && (
+            <button
+              type="button"
+              onClick={() => setDelaySec("")}
+              className="text-xs font-semibold text-gray-500 underline-offset-2 hover:underline"
+            >
+              defolt
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-400">
+          Boş buraxsan {limits.def} san işlənir. İcazə verilən aralıq{" "}
+          {limits.min}–{limits.max} san.
+          {!isEmail && " WhatsApp-da fasiləyə 0–30% təsadüfi əlavə olunur — eyni ritm avtomat kimi görünür və bloklanma riskini artırır."}
         </p>
       </div>
 

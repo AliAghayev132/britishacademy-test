@@ -22,6 +22,7 @@ import {
   useImportBranchesMutation,
   useMigrateSlugsMutation,
   useImportMenuMutation,
+  useImportContactMutation,
   useImportQuizzesMutation,
   useAdminSeedMutation,
 } from "@/store/api/adminApi";
@@ -41,6 +42,7 @@ export default function DeveloperPage() {
   const [importBranches, { isLoading: branching }] = useImportBranchesMutation();
   const [branchReport, setBranchReport] = useState(null);
   const [importMenu, { isLoading: menuing }] = useImportMenuMutation();
+  const [importContact, { isLoading: contacting }] = useImportContactMutation();
   const [menuReport, setMenuReport] = useState(null);
   const [migrateSlugs, { isLoading: slugging }] = useMigrateSlugsMutation();
   const [slugReport, setSlugReport] = useState(null);
@@ -56,6 +58,17 @@ export default function DeveloperPage() {
   // Müəllim → filial → dərs təyinatları. Dərs saatı yazılmır.
   // Filial əlaqə məlumatları — yalnız filial sətirlərini yeniləyir.
   // Menyu quruluşu dəyişəndə tam seed işlətməmək üçün — yalnız header menyusu.
+  // Ünvan/iş saatları sonradan çoxdilli edildi — bazadakı köhnə sətirlər
+  // yalnız AZ qalmışdı və hər səhifədə azərbaycanca görünürdü.
+  const runImportContact = async (dryRun) => {
+    try {
+      const res = await importContact({ dryRun }).unwrap();
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "Alınmadı");
+    }
+  };
+
   const runImportMenu = async (dryRun) => {
     if (!dryRun) {
       const ok = await confirmDialog({
@@ -715,6 +728,50 @@ export default function DeveloperPage() {
         </div>
       </div>
 
+
+        {/* Əlaqə tərcümələri */}
+        <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+          <div className="flex items-start gap-4">
+            <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-teal-50 text-teal-700">
+              <Languages className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-base font-bold text-gray-900">Əlaqə məlumatlarını 3 dilə tamamla</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                <b>Ünvan</b> və <b>iş saatları</b> əvvəl tək dildə saxlanılırdı və
+                /en, /ru saytlarında azərbaycanca görünürdü — həm də hər
+                səhifədə (üst lent və footer). Bu düymə onları lüğətdən
+                tamamlayır.
+              </p>
+
+              <div className="mt-4 flex items-start gap-2 rounded-lg bg-teal-50 p-3 text-sm text-teal-800">
+                <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+                <span>
+                  Artıq DOLU olan dilə toxunmur — panelə əl ilə yazdığın mətn
+                  üstündən yazılmır. Təkrar işlədilə bilər.
+                </span>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <button
+                  onClick={() => runImportContact(true)}
+                  disabled={contacting}
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  <Languages className="h-4 w-4" /> Yoxla (quru rejim)
+                </button>
+                <button
+                  onClick={() => runImportContact(false)}
+                  disabled={contacting}
+                  className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-60"
+                >
+                  <Languages className="h-4 w-4" />
+                  {contacting ? "Tamamlanır…" : "Tamamla"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Başlıq menyusu */}
         <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

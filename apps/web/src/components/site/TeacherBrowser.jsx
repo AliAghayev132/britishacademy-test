@@ -99,7 +99,7 @@ const inputStyle = {
   fontSize: 14.5, fontFamily: "inherit", color: "#14141C", background: "#fff", width: "100%",
 };
 
-const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCourse, onReset, hasFilter }) {
+const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCourse, onReset, hasFilter, t }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginBottom: 28 }}>
       {/* Name search */}
@@ -110,7 +110,7 @@ const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCou
         <input
           value={name}
           onChange={(e) => onName(e.target.value)}
-          placeholder="Ad, ixtisas və ya filial üzrə axtar…"
+          placeholder={t("teacher.searchPh")}
           className="ba-field"
           style={{ ...inputStyle, paddingLeft: 42 }}
         />
@@ -120,14 +120,14 @@ const FilterBar = memo(function FilterBar({ courses, course, name, onName, onCou
         <SiteSelect
           value={course}
           onChange={onCourse}
-          placeholder="Bütün kurslar"
+          placeholder={t("teacher.allCourses")}
           style={inputStyle}
           options={courses.map((c) => ({ value: c.slug, label: c.title }))}
         />
       </div>
       {hasFilter && (
         <button onClick={onReset} style={{ ...chip(false), fontWeight: 600, color: "#63636F" }}>
-          Sıfırla
+          {t("common.reset")}
         </button>
       )}
     </div>
@@ -216,6 +216,7 @@ export function TeacherBrowser({ courses = [], initialTeachers = [] }) {
           onCourse={handleCourse}
           onReset={handleReset}
           hasFilter={hasFilter}
+          t={tr}
         />
       )}
 

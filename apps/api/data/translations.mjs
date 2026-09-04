@@ -19,6 +19,16 @@ import { COURSE_T } from "./courseTranslations.mjs";
 
 /** AZ mətn → { en, ru } */
 export const T = {
+  // ── Əlaqə (tənzimləmələr) ──
+  "C.Cabbarlı 44, Caspian Plaza": {
+    en: "44 J.Jabbarli St, Caspian Plaza",
+    ru: "ул. Дж.Джаббарлы 44, Caspian Plaza",
+  },
+  "Həftə içi 09:00–21:00 · Şənbə 10:00–16:00": {
+    en: "Weekdays 09:00–21:00 · Saturday 10:00–16:00",
+    ru: "Будни 09:00–21:00 · Суббота 10:00–16:00",
+  },
+
   // ── Kateqoriyalar ──
   "Xidmətlər": { en: "Services", ru: "Услуги" },
   "Dil Kursları": { en: "Language Courses", ru: "Языковые курсы" },

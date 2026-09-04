@@ -23,7 +23,7 @@ export async function Footer({ site }) {
       <div style={{ height: 5, background: "var(--accent)" }} />
       <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 104, height: 104, borderRadius: "50%", background: "#fff", border: "7px solid #00103D", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={s.brand?.badge || "/assets/badge11.png"} alt="11 il sizinlə" style={{ width: 74, height: "auto" }} />
+        <img src={s.brand?.badge || "/assets/badge11.png"} alt={t("common.badgeAlt")} style={{ width: 74, height: "auto" }} />
       </div>
       <div className="footer-grid" style={{ position: "relative", zIndex: 2, maxWidth: 1240, margin: "0 auto", padding: "64px 28px 20px", display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 36 }}>
         <div>

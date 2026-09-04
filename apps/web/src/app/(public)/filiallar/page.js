@@ -8,7 +8,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 
 // Utils / SEO
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
@@ -53,6 +53,7 @@ function BranchCard({ branch, accent, tr }) {
 
 export default async function BranchesPage() {
   const tr = await getT();
+  const locale = await getLocale();
   // ── data fetching ──
   const data = await apiGet("/branches");
   const branches = data?.branches || [];
@@ -67,7 +68,7 @@ export default async function BranchesPage() {
       item: {
         "@type": "EducationalOrganization",
         name: `${SITE_NAME} — ${b.name}`,
-        address: { "@type": "PostalAddress", streetAddress: b.address, addressLocality: "Bakı", addressCountry: "AZ" },
+        address: { "@type": "PostalAddress", streetAddress: b.address, addressLocality: { az: "Bakı", en: "Baku", ru: "Баку" }[locale] || "Bakı", addressCountry: "AZ" },
         telephone: b.phone || undefined,
       },
     })),

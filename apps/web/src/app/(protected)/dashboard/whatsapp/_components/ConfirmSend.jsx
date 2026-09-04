@@ -15,7 +15,8 @@
 // Serverdə üçüncü qapı var: `confirm: true` olmayan sorğu rədd edilir.
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, Send, X, ArrowRight } from "lucide-react";
+import { AlertTriangle, Loader2, Send, X, ArrowRight, Timer } from "lucide-react";
+import { fmtDuration } from "./shared";
 
 export function ConfirmSend({ preview, channel, template, subject, onCancel, onConfirm, sending }) {
   const [step, setStep] = useState(1);
@@ -48,6 +49,19 @@ export function ConfirmSend({ preview, channel, template, subject, onCancel, onC
                 <Stat label="Alıcı" value={total} accent />
                 <Stat label="Ötürülən" value={preview?.invalidCount || 0} />
               </div>
+
+              {/* Müddət: 500 alıcı × 6 saniyə = 50 dəqiqə. Admin bunu
+                  BAŞLAMAZDAN əvvəl bilməlidir — göndəriş dayandırılana və ya
+                  bitənə qədər ikincisi başlaya bilmir. */}
+              {preview?.delaySec > 0 && (
+                <p className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                  <Timer className="h-4 w-4 flex-none" />
+                  <span>
+                    Fasilə <b>{preview.delaySec} san</b> — göndəriş təxminən{" "}
+                    <b>{fmtDuration(preview.etaSec)}</b> çəkəcək.
+                  </span>
+                </p>
+              )}
 
               {preview?.duplicates > 0 && (
                 <p className="rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-600">

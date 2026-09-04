@@ -33,8 +33,12 @@ const siteSettingSchema = new Schema(
       phone: { type: String },
       phone2: { type: String },
       email: { type: String },
-      address: { type: String },
-      hours: { type: String },
+      // Ünvan və iş saatları ÇOXDİLLİDİR: onlar header-in üst lentində,
+      // footer-də və «Əlaqə» səhifəsində — yəni BÜTÜN səhifələrdə görünür.
+      // Adi sətir olduqları müddətdə /en və /ru saytında azərbaycanca
+      // qalırdılar («Həftə içi 09:00–21:00 · Şənbə 10:00–16:00»).
+      address: localizedField(),
+      hours: localizedField(),
     },
 
     socials: {

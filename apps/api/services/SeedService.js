@@ -193,7 +193,8 @@ export function buildGraph() {
     },
     contact: {
       phone: "(+994) 55 212 41 51", phone2: "(+994 12) 497 62 97", email: "office@britishacademy.az",
-      address: "C.Cabbarlı 44, Caspian Plaza", hours: "Həftə içi 09:00–21:00 · Şənbə 10:00–16:00",
+      address: tri("C.Cabbarlı 44, Caspian Plaza"),
+      hours: tri("Həftə içi 09:00–21:00 · Şənbə 10:00–16:00"),
     },
     socials: {
       instagram: "https://instagram.com/britishacademy.az", facebook: "https://facebook.com/britishacademy.az",

@@ -12,6 +12,9 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { RouteLoader } from "@/components/site/RouteLoader";
 
+// Utils
+import { getT } from "@/lib/i18n/serverT";
+
 /**
  * Public marketing shell. Fetches the site chrome data server-side (SSR nav +
  * SEO-visible links) and wraps every public page with header/footer + the
@@ -20,6 +23,9 @@ import { RouteLoader } from "@/components/site/RouteLoader";
 export default async function PublicLayout({ children }) {
   // ── cari dil (middleware x-lang) ──
   const locale = (await headers()).get("x-lang") || "az";
+  // «Layihələr» və «Onlayn Testlər» menyu bəndləri DB-dən gəlmir — burada
+  // qurulur, ona görə tərcümələri lüğətdən götürülür.
+  const t = await getT();
 
   // ── data fetching ──
   const [site, cats, coursesData, destData, branchData, quizData, projectData] = await Promise.all([
@@ -64,7 +70,7 @@ export default async function PublicLayout({ children }) {
   const projects = projectData?.projects || [];
   if (projects.length) {
     services.push({
-      category: { _id: "__projects", name: "Layihələr", slug: "layiheler", href: "/layiheler" },
+      category: { _id: "__projects", name: t("nav.projects"), slug: "layiheler", href: "/layiheler" },
       courses: projects.map((p) => ({ _id: p._id, title: p.title, slug: p.slug, href: `/layiheler/${p.slug}` })),
     });
   }
@@ -84,7 +90,7 @@ export default async function PublicLayout({ children }) {
     }
     const subs = [...seen.values()];
     services.push({
-      category: { _id: "__quizzes", name: "Onlayn Testlər", slug: "testler", href: "/testler" },
+      category: { _id: "__quizzes", name: t("nav.quizzes"), slug: "testler", href: "/testler" },
       // Kateqoriya yoxdursa testlərin özü göstərilir — bölmə boş qalmasın.
       courses: subs.length
         ? subs

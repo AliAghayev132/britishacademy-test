@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeRecipients, renderTemplate } from "#services";
+import { normalizeRecipients, renderTemplate, resolveDelaySec, DELAY_LIMITS } from "#services";
 
 // Toplu göndəriş real insanlara mesaj yollayır — səhv nömrə formatı və ya
 // təkrarlanan sətir birbaşa istifadəçiyə çatan xətadır. Bu testlər həmin
@@ -85,5 +85,40 @@ describe("normalizeRecipients — e-poçt", () => {
     );
     expect(valid).toHaveLength(1);
     expect(duplicates).toBe(1);
+  });
+});
+
+describe("resolveDelaySec — mesajlar arası fasilə", () => {
+  it("boş və ya yanlış dəyərdə kanalın defoltunu verir", () => {
+    // Fasilə əvvəl sabit idi (WhatsApp 4–9 san). Admin onu indi özü seçir,
+    // amma boş qoya da bilər — o zaman kanal üçün ağlabatan defolt işləyir.
+    expect(resolveDelaySec("whatsapp", undefined)).toBe(DELAY_LIMITS.whatsapp.def);
+    expect(resolveDelaySec("whatsapp", "")).toBe(DELAY_LIMITS.whatsapp.def);
+    expect(resolveDelaySec("whatsapp", "abc")).toBe(DELAY_LIMITS.whatsapp.def);
+    expect(resolveDelaySec("email", null)).toBe(DELAY_LIMITS.email.def);
+  });
+
+  it("həddən kənar dəyəri sıxır", () => {
+    // 0 saniyə WhatsApp-da nömrənin bloklanması deməkdir; sonsuz böyük dəyər
+    // isə göndərişi əbədi asardı. Hər ikisi açıq endpointdən gələ bilər.
+    expect(resolveDelaySec("whatsapp", 0)).toBe(DELAY_LIMITS.whatsapp.min);
+    expect(resolveDelaySec("whatsapp", -50)).toBe(DELAY_LIMITS.whatsapp.min);
+    expect(resolveDelaySec("whatsapp", 99999)).toBe(DELAY_LIMITS.whatsapp.max);
+  });
+
+  it("aralıqdakı dəyəri olduğu kimi saxlayır", () => {
+    expect(resolveDelaySec("whatsapp", 6)).toBe(6);
+    expect(resolveDelaySec("whatsapp", 30)).toBe(30);
+    expect(resolveDelaySec("email", 1.5)).toBe(1.5);
+  });
+
+  it("naməlum kanalda WhatsApp həddlərinə düşür", () => {
+    // Ehtiyatlı tərəf: naməlum kanal üçün DAHA UZUN fasilə seçilir.
+    expect(resolveDelaySec("sms", undefined)).toBe(DELAY_LIMITS.whatsapp.def);
+  });
+
+  it("e-poçt WhatsApp-dan sürətli, amma sıfır deyil", () => {
+    expect(DELAY_LIMITS.email.def).toBeLessThan(DELAY_LIMITS.whatsapp.def);
+    expect(DELAY_LIMITS.email.min).toBeGreaterThan(0);
   });
 });

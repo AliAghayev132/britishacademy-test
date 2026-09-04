@@ -73,7 +73,12 @@ export default function SettingsPage() {
           ogImage: s.brand?.ogImage || "",
           themeColor: s.brand?.themeColor || "#00157A",
         },
-        contact: { ...s.contact },
+        contact: {
+          ...s.contact,
+          // Ünvan və iş saatları çoxdillidir — hər səhifədə görünürlər.
+          address: toLoc(s.contact?.address),
+          hours: toLoc(s.contact?.hours),
+        },
         socials: { ...s.socials },
         smtp: {
           enabled: Boolean(s.smtp?.enabled),
@@ -140,7 +145,11 @@ export default function SettingsPage() {
     try {
       await update({
         brand: form.brand,
-        contact: form.contact,
+        contact: {
+          ...form.contact,
+          address: trimLoc(form.contact.address),
+          hours: trimLoc(form.contact.hours),
+        },
         socials: form.socials,
         codeInjection: form.codeInjection,
         robotsTxt: form.robotsTxt,
@@ -186,7 +195,7 @@ export default function SettingsPage() {
   };
 
   // Bu tab-larda çoxdilli sahələr var — dil düyməsi yalnız orada göstərilir.
-  const hasLocalized = tab === "seo";
+  const hasLocalized = tab === "seo" || tab === "contact";
 
   return (
     <LocalizedFormProvider>
@@ -261,12 +270,22 @@ export default function SettingsPage() {
       {tab === "contact" && (
         <>
           <Section title="Əlaqə">
-            {["phone", "phone2", "email", "address", "hours"].map((k) => (
+            {["phone", "phone2", "email"].map((k) => (
               <div key={k}>
-                <label className={label}>{{ phone: "Telefon", phone2: "Telefon 2", email: "E-poçt", address: "Ünvan", hours: "İş saatları" }[k]}</label>
+                <label className={label}>{{ phone: "Telefon", phone2: "Telefon 2", email: "E-poçt" }[k]}</label>
                 <input className={input} value={form.contact?.[k] || ""} onChange={(e) => set(`contact.${k}`, e.target.value)} />
               </div>
             ))}
+            {/* Ünvan və iş saatları 3 dildədir — header-in üst lentində,
+                footer-də və «Əlaqə» səhifəsində, yəni bütün saytda görünürlər. */}
+            <div>
+              <label className={label}>Ünvan <span className="text-gray-400">· 3 dildə</span></label>
+              <LocalizedInput value={form.contact.address} onChange={(v) => set("contact.address", v)} />
+            </div>
+            <div>
+              <label className={label}>İş saatları <span className="text-gray-400">· 3 dildə</span></label>
+              <LocalizedInput value={form.contact.hours} onChange={(v) => set("contact.hours", v)} />
+            </div>
           </Section>
 
           <Section title="Sosial şəbəkələr">

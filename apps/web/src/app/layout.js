@@ -2,7 +2,7 @@ import "../styles/globals.css";
 
 import { Providers } from "./providers";
 import {
-  SITE_NAME, SITE_URL, DEFAULT_TITLE, DEFAULT_DESCRIPTION, DEFAULT_IMAGE,
+  SITE_NAME, SITE_URL, DEFAULT_IMAGE, defaultsFor,
   getSiteSettings,
 } from "@/lib/seo";
 import { toList } from "@/utils/toList";
@@ -14,10 +14,12 @@ const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? 
 // Admin-driven site metadata (defaults + verification codes from SiteSetting).
 export async function generateMetadata() {
   const s = await getSiteSettings();
+  const locale = await getLocale();
   const seo = s?.seo || {};
   const name = s?.brand?.name || SITE_NAME;
-  const defTitle = seo.defaultTitle || DEFAULT_TITLE;
-  const defDesc = seo.defaultDescription || DEFAULT_DESCRIPTION;
+  const def = defaultsFor(locale);
+  const defTitle = seo.defaultTitle || def.title;
+  const defDesc = seo.defaultDescription || def.description;
   const ogImg = abs(seo.defaultOgImage || s?.brand?.ogImage);
 
   return {
@@ -28,7 +30,7 @@ export async function generateMetadata() {
     keywords: toList(seo.keywords).length ? toList(seo.keywords) : undefined,
     icons: { icon: s?.brand?.favicon || "/assets/favicon.png", apple: "/assets/favicon-180.png" },
     openGraph: {
-      type: "website", siteName: name, locale: "az_AZ", url: SITE_URL,
+      type: "website", siteName: name, locale: { az: "az_AZ", en: "en_US", ru: "ru_RU" }[locale] || "az_AZ", url: SITE_URL,
       title: defTitle, description: defDesc,
       images: [{ url: ogImg, width: 1200, height: 630, alt: name }],
     },
@@ -53,7 +55,7 @@ export const viewport = {
 
 /** Global Organization + WebSite JSON-LD (admin-driven). */
 async function siteJsonLd() {
-  const s = await getSiteSettings();
+  const [s, locale] = await Promise.all([getSiteSettings(), getLocale()]);
   const name = s?.brand?.name || SITE_NAME;
   const socials = Object.values(s?.socials || {}).filter(Boolean);
   const org = {
@@ -62,8 +64,8 @@ async function siteJsonLd() {
     name,
     url: SITE_URL,
     logo: abs(s?.brand?.logo || s?.brand?.shield),
-    description: s?.seo?.defaultDescription || DEFAULT_DESCRIPTION,
-    ...(s?.contact?.address ? { address: { "@type": "PostalAddress", streetAddress: s.contact.address, addressLocality: "Bakı", addressCountry: "AZ" } } : {}),
+    description: s?.seo?.defaultDescription || defaultsFor(locale).description,
+    ...(s?.contact?.address ? { address: { "@type": "PostalAddress", streetAddress: s.contact.address, addressLocality: { az: "Bakı", en: "Baku", ru: "Баку" }[locale] || "Bakı", addressCountry: "AZ" } } : {}),
     ...(s?.contact?.phone ? { telephone: s.contact.phone } : {}),
     ...(s?.contact?.email ? { email: s.contact.email } : {}),
     ...(socials.length ? { sameAs: socials } : {}),

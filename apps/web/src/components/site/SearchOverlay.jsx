@@ -94,7 +94,7 @@ export function SearchOverlay({ open, onClose }) {
             onClick={onClose}
             style={{ display: "flex", alignItems: "center", gap: 8, background: "#F1F2F6", border: "1px solid #E7E8EE", color: "#4C4C58", fontWeight: 600, fontSize: 14, padding: "9px 16px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit" }}
           >
-            Bağla ✕
+            {t("common.close")} ✕
           </button>
         </div>
 
