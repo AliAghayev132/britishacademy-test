@@ -148,3 +148,43 @@ export const RESOURCES = {
 };
 
 export const resourceNames = Object.keys(RESOURCES);
+
+/**
+ * Resurs → panel bölməsi (icazə açarı).
+ *
+ * NİYƏ LAZIMDIR: generic CRUD marşrutları (`/admin/:resource`) heç bir bölmə
+ * yoxlamasından keçmirdi. Yəni icazələr YALNIZ arayüzdə işləyirdi: sidebar-da
+ * bənd gizlədilirdi, amma yalnız «müraciətlər» icazəsi olan admin sorğunu əl
+ * ilə yazıb kursları, müəllimləri, testləri, linkləri və logları oxuya
+ * bilirdi. Panelin özündə düymə yoxdur, lakin API açıq idi.
+ *
+ * Bölmə adları arayüzdəki `SECTIONS` siyahısı ilə eyni olmalıdır
+ * (apps/web/src/lib/permissions.js) — testlə də yoxlanılır.
+ */
+export const RESOURCE_SECTION = {
+  leads: "leads",
+
+  courses: "courses",
+  "course-categories": "courses",
+  "course-groups": "course-groups",
+  teachers: "teachers",
+  branches: "branches",
+  quizzes: "quizzes",
+  "quiz-categories": "quizzes",
+
+  "blog-posts": "blog",
+  "blog-categories": "blog",
+  testimonials: "testimonials",
+  destinations: "destinations",
+  projects: "projects",
+
+  // «Digər resurslar» — ayrıca bölməsi olmayan kiçik məzmun növləri.
+  pages: "resources",
+  faqs: "resources",
+  advantages: "resources",
+  partners: "resources",
+  "menu-items": "resources",
+  media: "resources",
+
+  "short-links": "links",
+};

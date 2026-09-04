@@ -1,5 +1,5 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
-import { asyncHandler, isObjectId, cleanIds } from "#utils";
+import { asyncHandler, isObjectId, cleanIds, canAccessSection } from "#utils";
 import { Lead } from "#models";
 
 /**
@@ -48,6 +48,12 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
   const { status, note } = req.body;
   const lead = await Lead.findById(req.params.id);
   if (!lead) {
+    return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
+  }
+  // Statusu dəyişmək müraciəti görmək deməkdir. Adi müraciətlərə baxan adam
+  // xaricdə təhsil müraciətini id ilə tapıb işarələyə bilməməlidir.
+  const section = lead.interest === "Xaricdə təhsil" ? "leads-abroad" : "leads";
+  if (!canAccessSection(req.user, section)) {
     return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
   }
   if (status) lead.status = status;

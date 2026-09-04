@@ -24,6 +24,9 @@ export const ROLE_LABELS = {
 export const SECTIONS = [
   { key: "dashboard", label: "İdarə paneli" },
   { key: "leads", label: "Müraciətlər" },
+  // Xaricdə təhsil müraciətləri AYRI bölmədir: onları başqa komanda aparır,
+  // ona görə adi müraciətlərə icazə vermək bunları açmamalıdır.
+  { key: "leads-abroad", label: "Xaricdə təhsil müraciətləri" },
   { key: "home", label: "Ana səhifə" },
   { key: "courses", label: "Kurslar" },
   { key: "teachers", label: "Müəllimlər" },
@@ -31,6 +34,9 @@ export const SECTIONS = [
   { key: "course-groups", label: "Dərs qrafiki" },
   { key: "testimonials", label: "Rəylər" },
   { key: "destinations", label: "Xaricdə təhsil" },
+  // Sidebar-da «Layihələr» bəndi bu açarı işlədirdi, amma siyahıda yox idi —
+  // yəni icazəsi məhdud admin ona heç vaxt giriş ala bilmirdi.
+  { key: "projects", label: "Layihələr" },
   { key: "blog", label: "Bloq" },
   { key: "resources", label: "Digər resurslar" },
   { key: "whatsapp", label: "WhatsApp" },
@@ -84,7 +90,10 @@ const ROUTE_SECTIONS = [
   ["/dashboard/resurslar/destinations", "destinations"],
   ["/dashboard/resurslar/blog-posts", "blog"],
   ["/dashboard/resurslar/blog-categories", "blog"],
+  ["/dashboard/resurslar/projects", "projects"],
+  ["/dashboard/resurslar/quiz-categories", "quizzes"],
   ["/dashboard/resurslar", "resources"],
+  ["/dashboard/muracietler/xaricde-tehsil", "leads-abroad"],
   ["/dashboard/muracietler", "leads"],
   ["/dashboard/ana-sehife", "home"],
   ["/dashboard/whatsapp", "whatsapp"],

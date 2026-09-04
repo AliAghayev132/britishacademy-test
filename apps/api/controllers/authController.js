@@ -481,7 +481,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    message: "Profile updated",
+    message: "Profil yeniləndi",
     data: { user: toUserResponse(user) },
   });
 });

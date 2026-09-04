@@ -30,8 +30,15 @@ AdminRouter.get("/stats/content", requireSection("stats"), statsController.conte
 // bu iki marşrut isə ondan ƏVVƏL qeydiyyatdan keçməlidir.
 AdminRouter.get("/links/:id/stats", requireSection("links"), linkController.stats);
 AdminRouter.delete("/links/:id/clicks", requireSection("links"), linkController.resetClicks);
+// Tənzimləmələr bir SƏNƏDDƏ saxlanılır, amma üç bölmə ondan istifadə edir:
+// «Tənzimləmələr» (hamısı), «Ana səhifə» (hero/marquee/stats) və QR studiyası
+// (brend logosu). Ona görə oxumaq hər admin üçün açıqdır — cavab onsuz da
+// maskalanır (SMTP parolu, AI açarı çıxarılır) — YAZMAQ isə sahə səviyyəsində
+// yoxlanılır (bax updateSettings).
 AdminRouter.get("/settings", adminController.getSettings);
 AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
+// Status dəyişmək müraciəti GÖRMƏK deməkdir — controller müraciətin növünə
+// görə «leads» / «leads-abroad» yoxlayır.
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
 
 // Course composer — select lists + atomic course-with-timetable create/edit.
@@ -69,6 +76,10 @@ AdminRouter.post("/dev/import-quizzes", devOnly, writeRateLimiter, devController
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
+// WhatsApp və toplu göndəriş — hamısı «whatsapp» bölməsindədir.
+AdminRouter.use("/whatsapp", requireSection("whatsapp"));
+AdminRouter.use("/bulk", requireSection("whatsapp"));
+
 AdminRouter.get("/whatsapp/status", whatsappController.getStatus);
 AdminRouter.get("/whatsapp/check", whatsappController.checkNumber);
 AdminRouter.get("/whatsapp/messages", whatsappController.listMessages);
@@ -97,7 +108,7 @@ AdminRouter.get("/users", userAdmin, userAdminController.listUsers);
 AdminRouter.post("/users", userAdmin, writeRateLimiter, userAdminController.createUser);
 AdminRouter.put("/users/:id", userAdmin, writeRateLimiter, userAdminController.updateUser);
 AdminRouter.delete("/users/:id", userAdmin, writeRateLimiter, userAdminController.removeUser);
-AdminRouter.get("/logs", userAdminController.listLogs);
+AdminRouter.get("/logs", requireSection("logs"), userAdminController.listLogs);
 
 // Generic CRUD over the resource registry.
 AdminRouter.get("/:resource", adminController.list);

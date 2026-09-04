@@ -20,14 +20,16 @@ const ROLE_RANK = { user: 0, editor: 1, admin: 2, superadmin: 3, developer: 4 };
  */
 const adminSections = [
   "dashboard",     // İdarə paneli (hamıya açıq)
-  "leads",         // Müraciətlər
+  "leads",         // Müraciətlər (xaricdə təhsildən BAŞQA)
+  "leads-abroad",  // Xaricdə təhsil müraciətləri — ayrı komanda aparır
   "home",          // Ana səhifə bölmələri
   "courses",       // Kurslar
   "teachers",      // Müəllimlər
   "branches",      // Filiallar
   "course-groups", // Dərs qrafiki
   "testimonials",  // Rəylər
-  "destinations",  // Xaricdə təhsil
+  "destinations",  // Xaricdə təhsil (məzmun səhifələri)
+  "projects",      // Layihələr
   "blog",          // Bloq
   "resources",     // Digər resurslar
   "whatsapp",      // WhatsApp / toplu göndəriş

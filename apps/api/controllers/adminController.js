@@ -4,17 +4,26 @@
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAccessSection } from "#utils";
 
 // Services
 import { logAction } from "#services";
 
 // Local
-import { RESOURCES } from "./resourceRegistry.js";
+import { RESOURCES, RESOURCE_SECTION } from "./resourceRegistry.js";
 
 /** Human-readable label for a document (for audit summaries). */
 const labelOf = (doc) =>
   doc?.title || doc?.name || doc?.fullName || doc?.question || doc?.label || doc?.country || String(doc?._id || "");
+
+/**
+ * «Xaricdə təhsil» müraciətinin əlaməti.
+ *
+ * Panel bu dəyəri süzgəc kimi göndərir (ApplyModal onu müraciətə belə yazır),
+ * server isə icazə sərhədini onunla çəkir. İkisi eyni sətir olmalıdır —
+ * `tests/leadSections.test.js` bunu təsbit edir.
+ */
+export const ABROAD_INTEREST = "Xaricdə təhsil";
 
 /** Resolve `:resource` from the URL to its registry entry (or 404). */
 function resolve(req, res) {
@@ -24,6 +33,69 @@ function resolve(req, res) {
     return null;
   }
   return entry;
+}
+
+/**
+ * Bu resursa girişi olan bölmələr.
+ *
+ * Müraciətlər İKİ bölməyə bölünür: adi müraciətlər («leads») və xaricdə
+ * təhsil müraciətləri («leads-abroad»). Onları ayrı adamlar aparır, ona görə
+ * birinə icazə vermək o birini açmamalıdır. Hər ikisi bir resursda
+ * saxlanıldığı üçün sərhəd SORĞUDA çəkilir — bax `applyLeadAccess`.
+ */
+function sectionsFor(resource) {
+  if (resource === "leads") return ["leads", "leads-abroad"];
+  const s = RESOURCE_SECTION[resource];
+  return s ? [s] : [];
+}
+
+/**
+ * Bölmə icazəsini yoxla. `true` qaytarırsa çağıran davam etməməlidir.
+ *
+ * ƏVVƏL BU YOXLAMA ÜMUMİYYƏTLƏ YOX İDİ: `/admin/:resource` marşrutları
+ * yalnız «admin roludur?» yoxlamasından keçirdi. Yəni icazələr praktikada
+ * yalnız sidebar-ı gizlədirdi — sorğunu əl ilə yazan istifadəçi bütün
+ * resursları oxuya və dəyişə bilirdi.
+ */
+function denySection(req, res, resource) {
+  const sections = sectionsFor(resource);
+  // Reyestrdə olmayan resurs — fail-closed.
+  if (!sections.length) {
+    res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+    return true;
+  }
+  if (sections.some((s) => canAccessSection(req.user, s))) return false;
+  res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+  return true;
+}
+
+/**
+ * Müraciətləri istifadəçinin bölmə icazəsinə görə süz.
+ *
+ * • hər ikisi           → süzgəc yoxdur
+ * • yalnız «leads»      → xaricdə təhsil müraciətləri GİZLƏNİR
+ * • yalnız «leads-abroad» → YALNIZ onlar görünür
+ *
+ * Sərhəd serverdədir: arayüzdə bəndi gizlətmək kifayət deyil, sorğu əl ilə
+ * dəyişdirilə bilər.
+ */
+function applyLeadAccess(filter, req, resource) {
+  if (resource !== "leads") return filter;
+  const general = canAccessSection(req.user, "leads");
+  const abroad = canAccessSection(req.user, "leads-abroad");
+  if (general && abroad) return filter;
+
+  const cond = general
+    ? { interest: { $ne: ABROAD_INTEREST } }
+    : { interest: ABROAD_INTEREST };
+  filter.$and = [...(filter.$and || []), cond];
+  return filter;
+}
+
+/** Bu müraciət istifadəçinin bölmə icazəsinə düşürmü? */
+function canSeeLead(user, lead) {
+  const isAbroad = lead?.interest === ABROAD_INTEREST;
+  return canAccessSection(user, isAbroad ? "leads-abroad" : "leads");
 }
 
 /**
@@ -83,6 +155,7 @@ function applyPopulate(query, populate) {
 const list = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
   const { model, search = [], sort, softDelete = true, populate } = entry;
 
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -146,6 +219,7 @@ const list = asyncHandler(async (req, res) => {
   // Əhatə məhdudiyyətləri — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə
   // görə çıxır.
   applyLeadScope(filter, req, req.params.resource);
+  applyLeadAccess(filter, req, req.params.resource);
 
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
@@ -165,6 +239,7 @@ const list = asyncHandler(async (req, res) => {
 const getOne = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
   const item = await applyPopulate(
     entry.model.findById(req.params.id),
     entry.populate,
@@ -175,6 +250,11 @@ const getOne = asyncHandler(async (req, res) => {
   // Siyahı məhduddursa tək sənəd də məhdud olmalıdır — əks halda id-ni
   // bilən istifadəçi icazəsi olmayan müraciəti aça bilərdi.
   if (req.params.resource === "leads") {
+    // Bölmə icazəsi: adi müraciətlərə baxa bilən adam id ilə xaricdə təhsil
+    // müraciətini aça bilməməlidir (və əksinə).
+    if (!canSeeLead(req.user, item)) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
     const dScope = destinationScope(req.user);
     const own = (item.destinations || []).map(String);
     if (dScope && own.length && !own.some((d) => dScope.includes(d))) {
@@ -193,6 +273,7 @@ const getOne = asyncHandler(async (req, res) => {
 const create = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
   // Slug/defaults are handled by each model's pre-save hook.
   const item = await entry.model.create(req.body);
   await logAction(req, { action: "create", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yaradıldı: ${labelOf(item)}` });
@@ -203,8 +284,12 @@ const create = asyncHandler(async (req, res) => {
 const update = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
   const item = await entry.model.findById(req.params.id);
   if (!item) {
+    return res.status(404).json({ success: false, message: "Not found" });
+  }
+  if (req.params.resource === "leads" && !canSeeLead(req.user, item)) {
     return res.status(404).json({ success: false, message: "Not found" });
   }
   // Never let the client rewrite immutable/system fields.
@@ -222,6 +307,13 @@ const update = asyncHandler(async (req, res) => {
 const remove = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
+  if (req.params.resource === "leads") {
+    const lead = await entry.model.findById(req.params.id).select("interest");
+    if (lead && !canSeeLead(req.user, lead)) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+  }
   if (entry.softDelete === false) {
     await entry.model.findByIdAndDelete(req.params.id);
   } else {
@@ -238,6 +330,7 @@ const remove = asyncHandler(async (req, res) => {
 const reorder = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
   const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
   await Promise.all(
     ids.map((id, index) => entry.model.findByIdAndUpdate(id, { order: index })),
@@ -256,6 +349,9 @@ const reorder = asyncHandler(async (req, res) => {
  *  - maxImageSizeKb       → yükləmə limiti
  * `editor` rolu məzmun sahələrini (contact, hero, seo mətnləri, stats…) dəyişə bilər.
  */
+/** «Ana səhifə» bölməsinin idarə etdiyi tənzimləmə blokları. */
+const HOME_SETTING_FIELDS = ["homeSections", "hero", "marquee", "stats"];
+
 const ADMIN_ONLY_SETTING_FIELDS = [
   "smtp", "ai", "codeInjection", "robotsTxt", "organizationSchema", "maxImageSizeKb",
 ];
@@ -278,6 +374,21 @@ const getSettings = asyncHandler(async (_req, res) => {
 const updateSettings = asyncHandler(async (req, res) => {
   const settings = await SiteSetting.get();
   const body = { ...req.body };
+
+  // «Ana səhifə» bölməsi də bu endpointə yazır (hero, lent, statistika).
+  // Ona görə iki icazədən biri kifayətdir, LAKİN yalnız «home» icazəsi olan
+  // adam qalan bloklara — SMTP, AI, brend, SEO, kod inyeksiyası — toxuna
+  // bilməməlidir. Əvvəl endpoint tamamilə açıq idi.
+  const canSettings = canAccessSection(req.user, "settings");
+  const canHome = canAccessSection(req.user, "home");
+  if (!canSettings && !canHome) {
+    return res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+  }
+  if (!canSettings) {
+    for (const key of Object.keys(body)) {
+      if (!HOME_SETTING_FIELDS.includes(key)) delete body[key];
+    }
+  }
   delete body._id;
   delete body.key;
   delete body.createdAt;
@@ -308,7 +419,7 @@ const updateSettings = asyncHandler(async (req, res) => {
 });
 
 /** GET /api/admin/stats — dashboard overview: per-resource counts + new leads. */
-const stats = asyncHandler(async (_req, res) => {
+const stats = asyncHandler(async (req, res) => {
   const counts = {};
   await Promise.all(
     Object.entries(RESOURCES).map(async ([key, entry]) => {
@@ -316,9 +427,24 @@ const stats = asyncHandler(async (_req, res) => {
       counts[key] = await entry.model.countDocuments(filter);
     }),
   );
+
+  // İdarə paneli hər admin üçün açıqdır, amma son müraciətlərin adı və
+  // telefonu müraciət icazəsi olmayana getməməlidir. Bölünmə də qorunur:
+  // yalnız «leads» icazəsi olan adam burada xaricdə təhsil müraciətini
+  // görməməlidir.
+  const general = canAccessSection(req.user, "leads");
+  const abroad = canAccessSection(req.user, "leads-abroad");
+  if (!general && !abroad) {
+    return res.json({ success: true, data: { counts, newLeads: 0, latestLeads: [] } });
+  }
+  const leadFilter = { isDeleted: false };
+  if (general !== abroad) {
+    leadFilter.interest = general ? { $ne: ABROAD_INTEREST } : ABROAD_INTEREST;
+  }
+
   const [newLeads, latestLeads] = await Promise.all([
-    Lead.countDocuments({ status: "new", isDeleted: false }),
-    Lead.find({ isDeleted: false })
+    Lead.countDocuments({ ...leadFilter, status: "new" }),
+    Lead.find(leadFilter)
       .sort({ createdAt: -1 })
       .limit(8)
       .populate("course", "title")

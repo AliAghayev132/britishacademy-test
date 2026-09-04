@@ -87,7 +87,7 @@ const NAV_GROUPS = [
       // `exact` vacibdir: alt bənd açılanda startsWith yoxlaması ikisini
       // birdən aktiv göstərərdi.
       { name: 'Bütün müraciətlər', href: '/dashboard/muracietler', icon: Inbox, exact: true, section: 'leads' },
-      { name: 'Xaricdə təhsil', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads' },
+      { name: 'Xaricdə təhsil', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads-abroad' },
     ],
   },
   {

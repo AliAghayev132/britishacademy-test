@@ -70,9 +70,12 @@ const createUser = asyncHandler(async (req, res) => {
   if (!canAssignRole(req.user?.role, role)) {
     return res.status(403).json({ success: false, message: "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz" });
   }
-  const cleanPerms = (Array.isArray(permissions) ? permissions : []).filter((x) =>
-    adminSections.includes(x),
-  );
+  let cleanPerms;
+  try {
+    cleanPerms = cleanPermissions(permissions);
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
 
   const exists = await User.findOne({ email: String(email).toLowerCase() });
   if (exists) return res.status(409).json({ success: false, message: "Bu e-poçt artıq istifadə olunur" });
@@ -86,6 +89,27 @@ const createUser = asyncHandler(async (req, res) => {
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi yaradıldı: ${email} (${role})` });
   res.status(201).json({ success: true, message: "İstifadəçi yaradıldı", data: { item: publicUser(user) } });
 });
+
+/**
+ * İcazə siyahısını süz.
+ *
+ * TƏHLÜKƏLİ HAL: boş massiv «məhdudiyyət yoxdur» deməkdir (geriyə uyğunluq
+ * üçün). Yəni tanınmayan açar səssizcə atılsaydı, ["projects"] göndərmək
+ * istifadəçini məhdudlaşdırmaq əvəzinə ona TAM SƏLAHİYYƏT verərdi — məhz belə
+ * olmuşdu: «projects» və «leads-abroad» ağ siyahıda yox idi.
+ *
+ * Ona görə hamısı tanınmayanda xəta qaytarılır.
+ */
+function cleanPermissions(list) {
+  const arr = Array.isArray(list) ? list : [];
+  const clean = arr.filter((x) => adminSections.includes(x));
+  if (arr.length && !clean.length) {
+    const err = new Error(`Tanınmayan bölmə: ${arr.join(", ")}`);
+    err.status = 400;
+    throw err;
+  }
+  return clean;
+}
 
 // ── PUT /api/admin/users/:id ──
 const updateUser = asyncHandler(async (req, res) => {
@@ -110,7 +134,11 @@ const updateUser = asyncHandler(async (req, res) => {
     user.role = role;
   }
   if (Array.isArray(permissions)) {
-    user.permissions = permissions.filter((x) => adminSections.includes(x));
+    try {
+      user.permissions = cleanPermissions(permissions);
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
   }
     if (Array.isArray(allowedDestinations)) {
       user.allowedDestinations = cleanDestinations(allowedDestinations);
