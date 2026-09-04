@@ -35,7 +35,10 @@ export const BRANCHES = [
       en: "44 J.Jabbarli St, Caspian Plaza, 9th floor",
       ru: "ул. Дж.Джаббарлы 44, Caspian Plaza, 9-й этаж",
     },
-    district: { az: "Nəsimi", en: "Nasimi", ru: "Насими" },
+    // Rayon QƏSDƏN boşdur: ünvan («C.Cabbarlı 44, Caspian Plaza») binanı
+    // artıq birmənalı göstərir, «Nəsimi» isə heç nə əlavə etmirdi.
+    district: { az: "", en: "", ru: "" },
+    // Nizami stansiyası ~680 m-dədir (ən yaxın).
     metro: { az: "Nizami m.", en: "Nizami metro", ru: "м. Низами" },
     phone: "(+994) 55 226 24 85",
     whatsapp: "994552262485",
@@ -100,11 +103,16 @@ export const BRANCHES = [
       en: "Ahmadli, 88 Babek Ave",
       ru: "Ахмедли, пр. Бабека 88",
     },
-    district: { az: "Xətai", en: "Khatai", ru: "Хатаи" },
+    // İnzibati rayon Xətaidir, lakin bakılılar bu yeri «Əhmədli» adlandırır
+    // və ünvan da onunla başlayır — «Xətai» ziyarətçi üçün yanlış istiqamət
+    // verirdi.
+    district: { az: "Əhmədli", en: "Ahmadli", ru: "Ахмедли" },
+    // ƏVVƏL «Həzi Aslanov m.» yazılmışdı — o, 1427 m-dədir. Əhmədli stansiyası
+    // isə filialdan cəmi 55 m aralıdadır (koordinatlarla ölçülüb).
     metro: {
-      az: "Həzi Aslanov m.",
-      en: "Hazi Aslanov metro",
-      ru: "м. Ази Асланов",
+      az: "Əhmədli m.",
+      en: "Ahmadli metro",
+      ru: "м. Ахмедлы",
     },
     phone: "(+994) 50 370 05 09",
     whatsapp: "994503700509",

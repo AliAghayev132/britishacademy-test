@@ -2,6 +2,8 @@
 
 import { LocaleLink as Link } from "./LocaleLink";
 import { useT } from "@/lib/i18n/useT";
+import { useLocale } from "@/components/site/LocaleProvider";
+import { metroLabel } from "@/utils/branch";
 
 // ── Constants ──
 const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];
@@ -28,12 +30,13 @@ function CustomPricing({ course }) {
 
 function BranchPriceCard({ p, cc, teachers }) {
   const t = useT();
+  const locale = useLocale();
   const b = p.branch;
   return (
     <div className="ba-pricecard" style={{ "--c": cc }}>
       <div className="ba-pricecard-head">
         <span className="ba-pricecard-name">{b?.name}</span>
-        <span className="ba-pricecard-addr">{b?.address}{b?.metro ? ` · ${b.metro}` : ""}</span>
+        <span className="ba-pricecard-addr">{b?.address}{b?.metro ? ` · ${metroLabel(b.metro, locale)}` : ""}</span>
       </div>
       <table className="ba-ptable">
         <thead>

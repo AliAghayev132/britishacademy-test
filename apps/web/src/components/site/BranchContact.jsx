@@ -16,6 +16,8 @@
 import { useState } from "react";
 import { MapPin, Phone, Mail, Clock, Train, MessageCircle, ExternalLink } from "lucide-react";
 import { useT } from "@/lib/i18n/useT";
+import { useLocale } from "@/components/site/LocaleProvider";
+import { addressLine, metroLabel } from "@/utils/branch";
 
 /** Seçilmiş filial üçün embed URL-i qur. */
 function mapSrc(b) {
@@ -73,6 +75,7 @@ function Row({ icon: Icon, label, children }) {
 
 export function BranchContact({ branches = [], fallback = {} }) {
   const t = useT();
+  const locale = useLocale();
   const [idx, setIdx] = useState(0);
 
   // Filial yoxdursa ümumi əlaqə məlumatına düş.
@@ -120,11 +123,12 @@ export function BranchContact({ branches = [], fallback = {} }) {
 
         {/* Seçilmiş filialın məlumatları */}
         <div style={{ border: "1px solid #ECEDF2", borderRadius: 22, background: "#fff", padding: "8px 24px 20px" }}>
+          {/* Rayon ünvanda ARTIQ varsa təkrarlanmır — «Əhmədli, Babək pr. 88,
+              Əhmədli» kimi görünürdü. */}
           <Row icon={MapPin} label={t("common.address")}>
-            {b.address}
-            {b.district ? `, ${b.district}` : ""}
+            {addressLine(b.address, b.district)}
           </Row>
-          <Row icon={Train} label="Metro">{b.metro}</Row>
+          <Row icon={Train} label="Metro">{metroLabel(b.metro, locale)}</Row>
           <Row icon={Phone} label={t("common.phone")}>
             {b.phone ? <a href={`tel:${String(b.phone).replace(/[^\d+]/g, "")}`}>{b.phone}</a> : null}
           </Row>

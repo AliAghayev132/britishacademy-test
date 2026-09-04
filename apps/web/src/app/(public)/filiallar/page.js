@@ -9,6 +9,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 // Utils / SEO
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { getT, getLocale } from "@/lib/i18n/serverT";
+import { addressLine, metroLabel, districtAdds } from "@/utils/branch";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
@@ -25,17 +26,21 @@ const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];
 
 // ── Subcomponents ──
 
-function BranchCard({ branch, accent, tr }) {
+function BranchCard({ branch, accent, tr, locale }) {
   const b = branch;
   const cc = accent;
   return (
     <div className="ba-pricecard" style={{ "--c": cc }}>
       <div className="ba-pricecard-head">
         <span className="ba-pricecard-name" style={{ fontSize: 19 }}>{b.name} {b.isMain && <span style={{ fontSize: 11, fontWeight: 800, color: cc, background: `${cc}1a`, padding: "3px 9px", borderRadius: 99, verticalAlign: "middle", marginLeft: 6 }}>{tr("branch.main")}</span>}</span>
-        <span className="ba-pricecard-addr">📍 {b.address}{b.metro ? ` · ${b.metro}` : ""}</span>
+        {/* Metro AYRICA sətirdədir: əvvəl ünvana «·» ilə yapışdırılırdı və
+            «Əhmədli, Babək pr. 88 · Əhmədli» ünvanın davamı kimi oxunurdu. */}
+        <span className="ba-pricecard-addr">📍 {b.address}</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14.5, color: "#4a4a55" }}>
-        {b.district && <span>🏙 {b.district}</span>}
+        {b.metro && <span>🚇 {metroLabel(b.metro, locale)}</span>}
+        {/* Rayon yalnız ünvanda olmayanda göstərilir — təkrar məlumat deyil. */}
+        {districtAdds(b.address, b.district) && <span>🏙 {b.district}</span>}
         {b.phone && <span>☎ {b.phone}</span>}
         {(b.workingHours || []).map((w, j) => <span key={j}>🕐 {w.days} {w.from}–{w.to}</span>)}
       </div>
@@ -87,7 +92,7 @@ export default async function BranchesPage() {
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-2 ba-pricegrid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 18 }}>
-          {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} tr={tr} />)}
+          {branches.map((b, i) => <BranchCard key={b._id} branch={b} accent={CC[i % CC.length]} tr={tr} locale={locale} />)}
         </div>
         <BranchMapSwitcher branches={branches} />
       </section>
