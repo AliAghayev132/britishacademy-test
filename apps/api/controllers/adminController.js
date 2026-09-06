@@ -99,6 +99,39 @@ function canSeeLead(user, lead) {
 }
 
 /**
+ * Yazma nəticəsində müraciət istifadəçinin ÖZ görmə sahəsindən çıxırmı?
+ *
+ * NƏ ÜÇÜN: sərhəd oxumada qorunurdu, yazmada isə yox. Yalnız «müraciətlər»
+ * icazəsi olan adam gördüyü müraciətin maraq növünü «Xaricdə təhsil»ə
+ * dəyişəndə sənəd onun siyahısından YOX OLURDU — özü də baxa bilmədiyi
+ * bölməyə düşürdü. Səlahiyyət artımı deyil, amma müraciəti cavabsız
+ * qoymağın səssiz yoludur; eyni hal ölkə və filial əhatəsində də var.
+ *
+ * Qayda: istifadəçi müraciəti YALNIZ özünün girişi olan bölməyə/əhatəyə
+ * köçürə bilər. Hər ikisinə icazəsi olan (və ya məhdudiyyətsiz) adam
+ * sərbəstdir — yəni düzəliş işi bloklanmır, sadəcə məsul şəxsə qalır.
+ *
+ * @returns {string|null} çıxarılan sahənin adı, yoxsa null
+ */
+export function movesLeadOutOfReach(user, patch) {
+  if (patch.interest !== undefined && !canSeeLead(user, patch)) return "maraq növü";
+
+  const dScope = destinationScope(user);
+  if (dScope && patch.destinations !== undefined) {
+    const ids = (Array.isArray(patch.destinations) ? patch.destinations : []).map(String);
+    // Ölkəsiz müraciət əhatədən kənar sayılmır (bax applyLeadScope) — ona
+    // görə yalnız DOLU siyahı yoxlanılır.
+    if (ids.length && !ids.some((d) => dScope.includes(d))) return "ölkə";
+  }
+
+  const bScope = branchScope(user);
+  if (bScope && patch.branch) {
+    if (!bScope.includes(String(patch.branch))) return "filial";
+  }
+  return null;
+}
+
+/**
  * İstifadəçinin ölkə əhatəsini sorğuya tətbiq edir.
  *
  * YALNIZ `leads` resursuna aiddir. Məhdudiyyət SERVERDƏ qoyulur — filtri
@@ -274,6 +307,17 @@ const create = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
   if (denySection(req, res, req.params.resource)) return;
+  // Müraciəti YALNIZ öz bölməsinə/əhatəsinə yaratmaq olar — əks halda
+  // istifadəçi baxa bilmədiyi yerə sənəd ata bilərdi.
+  if (req.params.resource === "leads") {
+    const out = movesLeadOutOfReach(req.user, req.body || {});
+    if (out) {
+      return res.status(403).json({
+        success: false,
+        message: `Bu ${out} üzrə müraciət yaratmağa icazəniz yoxdur`,
+      });
+    }
+  }
   // Slug/defaults are handled by each model's pre-save hook.
   const item = await entry.model.create(req.body);
   await logAction(req, { action: "create", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yaradıldı: ${labelOf(item)}` });
@@ -297,6 +341,16 @@ const update = asyncHandler(async (req, res) => {
   delete body._id;
   delete body.createdAt;
   delete body.updatedAt;
+  // Müraciəti öz görmə sahəsindən ÇIXARMAQ olmaz.
+  if (req.params.resource === "leads") {
+    const out = movesLeadOutOfReach(req.user, body);
+    if (out) {
+      return res.status(403).json({
+        success: false,
+        message: `Müraciəti başqa ${out} altına köçürməyə icazəniz yoxdur`,
+      });
+    }
+  }
   Object.assign(item, body);
   await item.save(); // runs pre-save hooks (slug, timeSlot, ...)
   await logAction(req, { action: "update", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yeniləndi: ${labelOf(item)}` });
