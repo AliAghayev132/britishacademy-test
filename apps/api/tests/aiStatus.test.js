@@ -15,8 +15,16 @@ const ROUTES = fs.readFileSync(path.join(ROOT, "routes/aiRoutes.js"), "utf8");
  * səhv mesajından öyrənirdi.
  */
 describe("GET /api/ai/status", () => {
-  it("marşrut qeydiyyatdadır və auth tələb edir", () => {
-    expect(ROUTES).toMatch(/AIRouter\.get\("\/status",\s*authenticate/);
+  it("marşrut qeydiyyatdadır", () => {
+    expect(ROUTES).toMatch(/AIRouter\.get\("\/status"/);
+  });
+
+  it("bütün AI marşrutları auth + PANEL ROLU tələb edir", () => {
+    // Qoruma marşrut sətirindən router səviyyəsinə köçürüldü.
+    // Əvvəl yalnız `authenticate` vardı — yəni panel rolu olmayan istənilən
+    // autentifikasiya olunmuş hesab ödənişli OpenRouter sorğusu göndərə
+    // bilərdi. İndi `adminRoles` də tələb olunur.
+    expect(ROUTES).toMatch(/AIRouter\.use\(authenticate,\s*requireRole\(adminRoles\)\)/);
   });
 
   it("kontroller status ixrac edir", () => {

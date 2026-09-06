@@ -44,10 +44,21 @@ AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
 // Course composer — select lists + atomic course-with-timetable create/edit.
 // Must precede the generic /:resource matcher (otherwise "lookups"/"full"
 // would be read as resource names).
+// Seçim siyahıları — ad/id cütlərindən ibarətdir və hamısı onsuz da public
+// saytda görünür (kurs, müəllim, filial, ölkə adları). Bölmə yoxlaması YOXDUR,
+// çünki bu siyahılar demək olar bütün formalarda və müraciət filtrlərində
+// lazımdır. Ölkə və filial ƏHATƏSİ isə tətbiq olunur (bax getLookups).
 AdminRouter.get("/lookups", courseComposer.getLookups);
-AdminRouter.get("/courses/full/:id", courseComposer.getCourseFull);
-AdminRouter.post("/courses/full", writeRateLimiter, courseComposer.createCourseFull);
-AdminRouter.put("/courses/full/:id", writeRateLimiter, courseComposer.updateCourseFull);
+
+// KURS KOMPOZİTORU — «courses» bölməsi tələb olunur.
+//
+// Bu üç marşrut generic /:resource matcher-indən ƏVVƏL qeydiyyatdan keçir,
+// yəni oradakı yoxlamadan yan keçirdi. Nəticədə yalnız «müraciətlər» icazəsi
+// olan admin kursu OXUYA, YARADA və DƏYİŞDİRƏ bilirdi — audit zamanı
+// təsdiqləndi (POST 201, PUT 200).
+AdminRouter.get("/courses/full/:id", requireSection("courses"), courseComposer.getCourseFull);
+AdminRouter.post("/courses/full", requireSection("courses"), writeRateLimiter, courseComposer.createCourseFull);
+AdminRouter.put("/courses/full/:id", requireSection("courses"), writeRateLimiter, courseComposer.updateCourseFull);
 
 // ── Developer alətləri ──
 // YALNIZ `developer` rolu. Bu əməliyyatlar məzmunu kütləvi dəyişir

@@ -83,6 +83,7 @@ export const canAssignRole = (actorRole, targetRole) =>
  */
 const ROUTE_SECTIONS = [
   ["/dashboard/resurslar/courses", "courses"],
+  ["/dashboard/resurslar/course-categories", "courses"],
   ["/dashboard/resurslar/teachers", "teachers"],
   ["/dashboard/resurslar/branches", "branches"],
   ["/dashboard/resurslar/course-groups", "course-groups"],

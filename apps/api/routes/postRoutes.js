@@ -1,11 +1,11 @@
 // Constants
-import { Router } from "#constants";
+import { Router, adminRoles } from "#constants";
 
 // Controllers
 import { postController } from "#controllers";
 
 // Middlewares
-import { authenticate, writeRateLimiter } from "#middlewares";
+import { authenticate, requireRole, writeRateLimiter } from "#middlewares";
 
 const PostRouter = Router();
 
@@ -16,11 +16,16 @@ PostRouter.get("/slug/:slug", postController.getPostBySlug);
 PostRouter.get("/:id", postController.getPost);
 
 // Protected (write operations)
-PostRouter.post("/", authenticate, writeRateLimiter, postController.createPost);
-PostRouter.put("/:id", authenticate, writeRateLimiter, postController.updatePost);
+PostRouter.post("/", authenticate,
+  requireRole(adminRoles),
+  writeRateLimiter, postController.createPost);
+PostRouter.put("/:id", authenticate,
+  requireRole(adminRoles),
+  writeRateLimiter, postController.updatePost);
 PostRouter.delete(
   "/:id",
   authenticate,
+  requireRole(adminRoles),
   writeRateLimiter,
   postController.deletePost,
 );

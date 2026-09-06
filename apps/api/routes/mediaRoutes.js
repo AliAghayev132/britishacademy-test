@@ -1,5 +1,5 @@
 // Config / constants
-import { Router } from "#constants";
+import { Router, adminRoles } from "#constants";
 import { config } from "#config";
 
 // Controllers
@@ -9,7 +9,7 @@ import { mediaController } from "#controllers";
 import { SiteSetting } from "#models";
 
 // Middlewares
-import { authenticate, uploadLimit } from "#middlewares";
+import { authenticate, requireRole, uploadLimit } from "#middlewares";
 
 /**
  * Şəkil limiti admin panelindən idarə olunur (Tənzimləmələr → SEO/Texniki →
@@ -28,26 +28,30 @@ const resolveImageLimit = async () => {
 
 const MediaRouter = Router();
 
-// Qalereya qovluqları (UI filtri üçün) — yükləmə marşrutlarından əvvəl.
-MediaRouter.get("/folders", authenticate, mediaController.folders);
+// ROL YOXLAMASI BÜTÜN MARŞRUTLARA.
+// Əvvəl yalnız `authenticate` vardı — yəni panel rolu olmayan istənilən
+// autentifikasiya olunmuş hesab qalereyanı oxuya və SERVERƏ FAYL YÜKLƏYƏ
+// bilərdi. Qalereya bütün formalarda (kurs, müəllim, bloq) işlədilir, ona
+// görə bölmə səviyyəsində deyil, ROL səviyyəsində qorunur.
+MediaRouter.use(authenticate, requireRole(adminRoles));
 
-// Editor media uploads (auth required). Each route enforces its own size limit
-// via uploadLimit before the file is persisted by FileService.
+// Qalereya qovluqları (UI filtri üçün) — yükləmə marşrutlarından əvvəl.
+MediaRouter.get("/folders", mediaController.folders);
+
+// Yükləmələr — hər marşrut öz ölçü limitini `uploadLimit` ilə tətbiq edir
+// (fayl FileService-ə çatmazdan əvvəl).
 MediaRouter.post(
   "/upload-image",
-  authenticate,
   uploadLimit(resolveImageLimit),
   mediaController.uploadImage,
 );
 MediaRouter.post(
   "/upload-video",
-  authenticate,
   uploadLimit(config.upload.maxVideoSize),
   mediaController.uploadVideo,
 );
 MediaRouter.post(
   "/upload-document",
-  authenticate,
   uploadLimit(config.upload.maxDocSize),
   mediaController.uploadDocument,
 );

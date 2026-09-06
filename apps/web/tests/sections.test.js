@@ -74,3 +74,31 @@ describe("canSee", () => {
     expect(canSee({ role: "developer", permissions: [] }, "developer")).toBe(true);
   });
 });
+
+describe("sidebar ↔ marşrut uyğunluğu", () => {
+  /**
+   * Hər sidebar bəndinin `section`-u ilə `sectionForPath(href)` EYNİ olmalıdır.
+   *
+   * TAPILMIŞ NASAZLIQ: «Kurs kateqoriyaları» sidebar-da `courses` bölməsinə
+   * aid idi, marşrut xəritəsində isə `/dashboard/resurslar` prefiksinə düşüb
+   * `resources` sayılırdı. Nəticədə yalnız «Kurslar» icazəsi olan admin bəndi
+   * GÖRÜRDÜ, amma kliklədikdə «icazəniz yoxdur» alırdı.
+   *
+   * İki siyahı ayrı fayllardadır (biri ikonlarla, biri icazə məntiqi ilə) —
+   * bu test onları bir-birinə bağlayır.
+   */
+  const items = [...sidebar.matchAll(/href:\s*'([^']+)'[^}]*?section:\s*'([a-z-]+)'/g)]
+    .map((m) => ({ href: m[1], section: m[2] }));
+
+  it("sidebar bəndləri tapılır", () => {
+    expect(items.length).toBeGreaterThan(15);
+  });
+
+  it("hər bəndin marşrutu öz bölməsinə həll olunur", () => {
+    const bad = items
+      .map((i) => ({ ...i, resolved: sectionForPath(i.href) }))
+      .filter((i) => i.resolved !== i.section)
+      .map((i) => `${i.href}: sidebar «${i.section}» ↔ marşrut «${i.resolved}»`);
+    expect(bad, `uyğunsuzluq:\n${bad.join("\n")}`).toEqual([]);
+  });
+});
