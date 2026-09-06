@@ -377,6 +377,16 @@ body.ba-home .ba-hero > div:nth-of-type(7) [data-chip] { background:rgba(122,192
 body.ba-home .ba-hero > div:nth-of-type(8) [data-chip] { background:rgba(196,152,255,.30) !important; border-color:rgba(220,190,255,.52) !important; }
 body.ba-home .ba-hero > div:nth-of-type(9) [data-chip] { background:rgba(186,255,148,.24) !important; border-color:rgba(215,255,185,.5) !important; }
 
+/* Üzən sözlər dar ekranda GİZLƏNİR.
+   Hero məzmunu mərkəzləşdirilib (maxWidth 1000) — ekran daraldıqca mətn
+   kənarlara yaxınlaşır və sözlər onun üstünə düşür. Ölçüldü (başlıq
+   hərflərinin həqiqi sərhədləri ilə): 900px-də 2, 768px-də 3, 480px-də 5,
+   390px-də ALTISI da kəsişirdi. 1024px və yuxarıda kəsişmə yoxdur.
+   Sözlər tamamilə dekorativdir — dar ekranda yer yoxdur, ona görə atılır. */
+@media (max-width: 1023px) {
+  .ba-hero-chip { display: none !important; }
+}
+
 /* -- Staggered "framer" reveal: containers tagged .ba-sg -- */
 body.ba-home.ba-fx .ba-sg:not(.is-in) > * { opacity: 0; }
 body.ba-home.ba-fx .ba-sg.is-in > * {

@@ -184,7 +184,10 @@ export function Hero({ hero, stats = [] }) {
       ]
         .filter((c) => c.label)
         .map((c) => (
-          <div key={`${c.side}${c.idx}`} style={{ position: "absolute", ...c.pos, transform: `rotate(${c.rot}deg)`, pointerEvents: "none" }}>
+          // `ba-hero-chip` — dar ekranda gizlədilir (globals.css). Sinif
+          // SARĞIDADIR, çünki rəng çalarları `nth-of-type(4..9)` ilə seçilir:
+          // element sırası pozulmamalıdır, ona görə silmək yox, gizlətmək.
+          <div key={`${c.side}${c.idx}`} className="ba-hero-chip" style={{ position: "absolute", ...c.pos, transform: `rotate(${c.rot}deg)`, pointerEvents: "none" }}>
             <span data-chip style={{ ...CHIP_STYLE, fontWeight: c.weight, animation: reduced ? "none" : c.anim }}>
               {c.label}
             </span>
