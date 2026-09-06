@@ -78,7 +78,7 @@ export function MediaPicker({ onClose, onSelect, defaultFolder = "", fit = "cove
       fd.append("image", file);
       // Aktiv qovluq varsa yeni fayl da ora düşsün.
       if (folder) fd.append("folder", folder);
-      const res = await uploadWithProgress(`${API_URL}/api/media/upload-image`, fd, setPct);
+      const res = await uploadWithProgress(`${API_URL}/media/upload-image`, fd, setPct);
       const url = res?.data?.url;
       if (!url) throw new Error("Server URL qaytarmadı");
       notify.success("Yükləndi və qalereyaya əlavə olundu");

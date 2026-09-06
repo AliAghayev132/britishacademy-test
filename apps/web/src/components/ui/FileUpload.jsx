@@ -36,7 +36,11 @@ export function FileUpload({ value, onChange, kind = "image", spec, folder }) {
   const [picking, setPicking] = useState(false);  // qalereya modalı
 
   const isVideo = kind === "video";
-  const endpoint = isVideo ? "/api/media/upload-video" : "/api/media/upload-image";
+  // DİQQƏT: `API_URL` (lib/variables) ARTIQ `/api` ilə bitir — yola ikinci
+  // dəfə yazmaq olmaz. Əvvəl belə idi və ünvan `/api/api/media/upload-image`
+  // çıxırdı: server 404 «Endpoint not found» qaytarırdı, panel isə yalnız
+  // «yüklənmədi» yazırdı.
+  const endpoint = isVideo ? "/media/upload-video" : "/media/upload-image";
   const fieldName = isVideo ? "video" : "image";
   const uploading = pct !== null;
   const canCrop = !isVideo && Boolean(spec);
