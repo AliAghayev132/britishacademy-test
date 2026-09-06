@@ -15,6 +15,8 @@ export { importBranchData } from "./BranchImportService.js";
 export { migrateCourseSlugs, SLUG_RENAMES } from "./SlugMigrationService.js";
 export { importHeaderMenu } from "./MenuImportService.js";
 export { importContactI18n } from "./ContactI18nService.js";
+export { waLog, listWaLogs, waLogSummary, clearWaLogs } from "./WhatsAppLogService.js";
+export { LibVersion, isNewer, installedVersion } from "./LibVersionService.js";
 export { recordClick, parseUA, parseSource } from "./LinkTrackingService.js";
 export { importQuizzes } from "./QuizImportService.js";
 export { registerMedia, listFolders } from "./MediaLibraryService.js";

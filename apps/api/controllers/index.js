@@ -16,3 +16,4 @@ export * as bulkController from "./bulkController.js";
 export * as statsController from "./statsController.js";
 export * as linkController from "./linkController.js";
 export * as quizController from "./quizController.js";
+export * as searchController from "./searchController.js";

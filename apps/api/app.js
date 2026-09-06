@@ -6,7 +6,7 @@ import { config, corsConfig, securityConfig } from "#config";
 
 // Services
 import {
-  MailService, WhatsAppService,
+  MailService, WhatsAppService, LibVersion,
   socketService,
   mongoDBService,
   bootstrapAdmin,
@@ -258,6 +258,10 @@ const initializeServices = async () => {
   // WhatsApp: saxlanmış sessiya varsa QR-siz avtomatik bərpa et.
   // (Sessiya yoxdursa heç nə etmir — Chromium boş yerə açılmır.)
   WhatsAppService.resumeIfSession().catch(() => {});
+  // Kitabxananın yeni versiyasını yoxla (arxa fonda, gündə bir dəfə).
+  // WhatsApp Web protokolu tez-tez dəyişir; kitabxana geri qalanda bağlantı
+  // səbəbsiz görünən şəkildə sınır və panel bunu izah edə bilmirdi.
+  LibVersion.start();
 };
 
 /**

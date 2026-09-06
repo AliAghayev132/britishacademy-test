@@ -20,6 +20,7 @@ export { Partner } from "./partner.model.js";
 export { Advantage } from "./advantage.model.js";
 export { Media } from "./media.model.js";
 export { WhatsAppMessage } from "./whatsappMessage.model.js";
+export { WhatsAppLog, WA_LOG_TYPES } from "./whatsappLog.model.js";
 export { Faq } from "./faq.model.js";
 export { QuizCategory } from "./quizCategory.model.js";
 export { Project } from "./project.model.js";

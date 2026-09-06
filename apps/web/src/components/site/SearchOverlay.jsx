@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n/useT";
 import { LocaleLink as Link } from "./LocaleLink";
 import { useLocale } from "./LocaleProvider";
@@ -8,34 +8,54 @@ import { useLocale } from "./LocaleProvider";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
- * Full-screen search overlay mirroring the static site's #ba-search-overlay.
- * Loads the public course list once (on first open) via the shared api helper,
- * then does a simple client-side substring filter over title/excerpt/category
- * and links matches to /kurslar/<slug>. Escape or backdrop click closes it.
+ * Tam ekran axtarış pəncərəsi.
+ *
+ * ƏVVƏL: yalnız KURSLAR tapılırdı və o da client tərəfdə — bütün kurs siyahısı
+ * yüklənib brauzerdə süzülürdü. Ziyarətçi bloq yazısını, layihəni və ya testi
+ * axtaranda «tapılmadı» alırdı.
+ *
+ * İNDİ: `/api/search` səkkiz mənbəni bir sorğuda axtarır (kurslar, bloq,
+ * layihələr, testlər, xaricdə təhsil, müəllimlər, filiallar, səhifələr) və
+ * nəticələr növə görə qruplaşdırılmış gəlir. Axtarış SERVERDƏDİR: hər
+ * kolleksiyanı brauzerə yükləmək meqabaytlarla trafik olardı.
+ *
+ * Yazı yazıldıqca sorğu göndərilmir — 250 ms fasilə gözlənilir (debounce),
+ * əks halda hər hərf ayrıca sorğu yaradardı.
  */
 export function SearchOverlay({ open, onClose }) {
   const t = useT();
   const locale = useLocale();
-  const [courses, setCourses] = useState(null); // null = not yet loaded
   const [q, setQ] = useState("");
+  // Nəticə HANSI sorğuya aid olduğu ilə birlikdə saxlanılır. «Yüklənir» halı
+  // bundan HESABLANIR — ayrıca bayraq saxlasaydıq, effektin içində sinxron
+  // setState olardı (qısa sorğuda sıfırlamaq üçün).
+  const [result, setResult] = useState({ term: "", groups: null });
   const inputRef = useRef(null);
-  const loadedRef = useRef(false);
 
-  // Fetch the course list once, lazily on first open (cari dildə).
+  const term = q.trim();
+  const ready = result.term === term;
+  const groups = ready ? result.groups : null;
+  const loading = term.length >= 2 && !ready;
+
+  // Serverdə axtar — 250 ms fasilə ilə (hər hərfə sorğu getməsin).
   useEffect(() => {
-    if (!open || loadedRef.current) return;
-    loadedRef.current = true;
+    if (!open || term.length < 2) return undefined;
     let alive = true;
-    fetch(`${API_URL}/api/courses?lang=${locale}`, { headers: { Accept: "application/json" } })
-      .then((r) => r.json())
-      .then((j) => {
-        if (alive) setCourses(Array.isArray(j?.data?.courses) ? j.data.courses : []);
+    const id = setTimeout(() => {
+      fetch(`${API_URL}/api/search?q=${encodeURIComponent(term)}&lang=${locale}`, {
+        headers: { Accept: "application/json" },
       })
-      .catch(() => alive && setCourses([]));
+        .then((r) => r.json())
+        .then((j) => {
+          if (alive) setResult({ term, groups: Array.isArray(j?.data?.groups) ? j.data.groups : [] });
+        })
+        .catch(() => alive && setResult({ term, groups: [] }));
+    }, 250);
     return () => {
       alive = false;
+      clearTimeout(id);
     };
-  }, [open, locale]);
+  }, [open, term, locale]);
 
   // Focus the input and wire Escape-to-close while open.
   useEffect(() => {
@@ -51,21 +71,10 @@ export function SearchOverlay({ open, onClose }) {
     };
   }, [open, onClose]);
 
-  const term = q.trim();
-  const results = useMemo(() => {
-    const needle = term.toLowerCase();
-    if (!needle || !courses) return [];
-    return courses
-      .filter((c) => {
-        const hay = `${c.title || ""} ${c.excerpt || ""} ${c.category?.name || ""}`.toLowerCase();
-        return hay.includes(needle);
-      })
-      .slice(0, 30);
-  }, [term, courses]);
-
   if (!open) return null;
 
-  const showEmpty = term && courses && results.length === 0;
+  const total = (groups || []).reduce((n, g) => n + g.items.length, 0);
+  const showEmpty = term.length >= 2 && !loading && groups !== null && total === 0;
 
   return (
     <div
@@ -113,20 +122,42 @@ export function SearchOverlay({ open, onClose }) {
           />
         </div>
 
-        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-          {results.map((c, i) => (
-            <Link
-              key={c._id || c.slug}
-              href={`/kurslar/${c.slug}`}
-              onClick={onClose}
-              className="ba-sr-item"
-              style={{ display: "flex", flexDirection: "column", gap: 2, textDecoration: "none", border: "1px solid #ECEDF2", borderRadius: 14, padding: "14px 16px", background: "#fff", color: "#14141C", animationDelay: `${Math.min(i, 12) * 35}ms` }}
-            >
-              <span style={{ fontWeight: 700, fontSize: 16 }}>{c.title}</span>
-              {c.category?.name && <span style={{ fontSize: 13, color: "#8A8A96" }}>{c.category.name}</span>}
-            </Link>
+        {/* Nəticələr növə görə qruplaşdırılır — ziyarətçi tapdığı şeyin
+            kurs, bloq yazısı, yoxsa test olduğunu dərhal görsün. */}
+        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 22 }}>
+          {(groups || []).map((g) => (
+            <div key={g.key}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: ".05em", textTransform: "uppercase", color: "#8A8A96", marginBottom: 8 }}>
+                {g.label}
+                <span style={{ marginLeft: 8, fontWeight: 700, color: "#B4B4BE" }}>{g.items.length}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {g.items.map((it, i) => (
+                  <Link
+                    key={it._id || it.href}
+                    href={it.href}
+                    onClick={onClose}
+                    className="ba-sr-item"
+                    style={{ display: "flex", flexDirection: "column", gap: 2, textDecoration: "none", border: "1px solid #ECEDF2", borderRadius: 14, padding: "13px 16px", background: "#fff", color: "#14141C", animationDelay: `${Math.min(i, 12) * 30}ms` }}
+                  >
+                    <span style={{ fontWeight: 700, fontSize: 16 }}>{it.title}</span>
+                    {it.sub && (
+                      <span style={{ fontSize: 13, color: "#8A8A96", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {it.sub}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
+
+        {loading && term.length >= 2 && (
+          <div style={{ textAlign: "center", color: "#8A8A96", padding: 24, fontSize: 15 }}>
+            {t("common.loading")}…
+          </div>
+        )}
 
         {showEmpty && (
           <div style={{ textAlign: "center", color: "#63636E", padding: 28, fontSize: 16 }}>{t("search.empty")}</div>

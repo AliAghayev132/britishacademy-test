@@ -94,6 +94,10 @@ AdminRouter.use("/bulk", requireSection("whatsapp"));
 AdminRouter.get("/whatsapp/status", whatsappController.getStatus);
 AdminRouter.get("/whatsapp/check", whatsappController.checkNumber);
 AdminRouter.get("/whatsapp/messages", whatsappController.listMessages);
+// Bağlantının HADİSƏ jurnalı — mesaj tarixçəsindən ayrıdır.
+AdminRouter.get("/whatsapp/logs", whatsappController.getLogs);
+AdminRouter.delete("/whatsapp/logs", whatsappController.removeLogs);
+AdminRouter.post("/whatsapp/version/check", whatsappController.checkVersion);
 AdminRouter.post("/whatsapp/init", whatsappController.init);
 AdminRouter.post("/whatsapp/send", writeRateLimiter, whatsappController.send);
 AdminRouter.post("/whatsapp/send-media", writeRateLimiter, whatsappController.sendMedia);

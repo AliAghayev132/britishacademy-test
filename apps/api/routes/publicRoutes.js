@@ -5,7 +5,7 @@ import { Router } from "#constants";
 import {
   publicController,
   leadController, linkController, quizController,
-  seoController,
+  seoController, searchController,
 } from "#controllers";
 
 // Middlewares
@@ -81,6 +81,10 @@ PublicRouter.post("/track/:code", linkController.track);
 
 // Testlər. Düzgün cavablar getQuiz cavabında GETMİR — qiymətləndirmə
 // serverdədir (bax quizController).
+// Sayt üzrə ümumi axtarış — kurslar, bloq, layihələr, testlər, ölkələr,
+// müəllimlər, filiallar və səhifələr bir sorğuda.
+PublicRouter.get("/search", searchController.search);
+
 PublicRouter.get("/quizzes", quizController.listQuizzes);
 PublicRouter.get("/quizzes/:slug", quizController.getQuiz);
 PublicRouter.post("/quizzes/:slug/submit", quizController.submitQuiz);

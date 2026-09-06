@@ -5,7 +5,7 @@
 import { WhatsAppMessage, Lead } from "#models";
 
 // Services
-import { WhatsAppService, WhatsAppQueue, renderTemplate, logAction } from "#services";
+import { WhatsAppService, WhatsAppQueue, renderTemplate, logAction, listWaLogs, waLogSummary, clearWaLogs, waLog, LibVersion } from "#services";
 
 // Utils
 import { asyncHandler, hasRole } from "#utils";
@@ -26,10 +26,49 @@ async function requireLib(res) {
 /** GET /api/admin/whatsapp/status */
 const getStatus = asyncHandler(async (_req, res) => {
   await WhatsAppService._load();
+  // Versiya vəziyyəti ilə birlikdə — panel «yeni versiya var» xəbərdarlığını
+  // buradan alır. `check` keşlidir (gündə bir dəfə şəbəkəyə çıxır).
+  const [version, summary] = await Promise.all([
+    LibVersion.check().catch(() => LibVersion.getState()),
+    waLogSummary().catch(() => null),
+  ]);
   res.json({
     success: true,
-    data: { ...WhatsAppService.getStatus(), queue: WhatsAppQueue.getState() },
+    data: {
+      ...WhatsAppService.getStatus(),
+      queue: WhatsAppQueue.getState(),
+      version,
+      logSummary: summary,
+    },
   });
+});
+
+/** GET /api/admin/whatsapp/logs — hadisə jurnalı (səhifələnmiş). */
+const getLogs = asyncHandler(async (req, res) => {
+  const data = await listWaLogs({
+    page: req.query.page,
+    limit: req.query.limit,
+    type: req.query.type,
+    level: req.query.level,
+  });
+  res.json({ success: true, data });
+});
+
+/** DELETE /api/admin/whatsapp/logs — jurnalı təmizlə. */
+const removeLogs = asyncHandler(async (req, res) => {
+  if (!hasRole(req.user, "admin")) {
+    return res.status(403).json({ success: false, message: "Jurnalı yalnız admin təmizləyə bilər" });
+  }
+  const n = await clearWaLogs();
+  waLog("session", `Jurnal təmizləndi (${n} sətir)`, { level: "warn", actor: req.user });
+  await logAction(req, { action: "settings", resource: "whatsapp", summary: `WhatsApp jurnalı təmizləndi: ${n} sətir` });
+  res.json({ success: true, message: `${n} sətir silindi` });
+});
+
+/** POST /api/admin/whatsapp/version/check — versiyanı İNDİ yoxla. */
+const checkVersion = asyncHandler(async (_req, res) => {
+  const data = await LibVersion.check({ force: true });
+  res.json({ success: true, data });
 });
 
 /**
@@ -246,5 +285,4 @@ const logout = asyncHandler(async (req, res) => {
 
 export {
   getStatus, init, checkNumber, send, sendMedia,
-  bulk, cancelBulk, listMessages, disconnect, logout,
-};
+  bulk, cancelBulk, listMessages, disconnect, logout, getLogs, removeLogs, checkVersion };

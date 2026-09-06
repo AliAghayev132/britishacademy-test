@@ -17,7 +17,7 @@ import { confirmDialog, notify } from "@/components/ui/feedback";
 import { QueryState } from "@/components/ui/QueryState";
 import {
   Send, RefreshCw, CheckCircle, XCircle, Loader2, AlertCircle,
-  Smartphone, LogOut, PowerOff, Users, History,
+  Smartphone, LogOut, PowerOff, Users, History, ScrollText, Package, ArrowUpCircle,
 } from "lucide-react";
 // Data
 import {
@@ -28,6 +28,7 @@ import {
   useWhatsappLogoutMutation,
   useBulkStatusQuery,
   useBulkCancelMutation,
+  useWhatsappCheckVersionMutation,
 } from "@/store/api/adminApi";
 // Real-time
 import { useSocket } from "@/store/context/SocketContext";
@@ -35,13 +36,29 @@ import { useSocket } from "@/store/context/SocketContext";
 import { ConnectTab } from "./_components/ConnectTab";
 import { BulkTab } from "./_components/BulkTab";
 import { HistoryTab } from "./_components/HistoryTab";
+import { LogsTab } from "./_components/LogsTab";
 import { SendModal } from "./_components/SendModal";
 
 const TABS = [
   { id: "connect", label: "Qoşulma", icon: Smartphone },
   { id: "bulk", label: "Toplu göndəriş", icon: Users },
   { id: "history", label: "Tarixçə", icon: History },
+  // Mesaj tarixçəsindən AYRI: bağlantının öz hadisələri (QR, kəsilmə,
+  // Chrome xətaları, sağlamlıq yoxlaması).
+  { id: "logs", label: "Jurnal", icon: ScrollText },
 ];
+
+/** Saniyəni oxunaqlı müddətə çevir: 90 → «1 dəq», 7400 → «2 saat 3 dəq». */
+function fmtUptime(sec) {
+  const n = Math.max(0, Math.round(Number(sec) || 0));
+  if (n < 60) return `${n} san`;
+  const m = Math.floor(n / 60);
+  if (m < 60) return `${m} dəq`;
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (d > 0) return `${d} gün ${h % 24} saat`;
+  return `${h} saat ${m % 60} dəq`;
+}
 
 /** Status nişanı — vəziyyətə görə ikon + rəng. */
 function StatusBadge({ isLoading, installed, isReady, isInitializing, waiting }) {
@@ -79,6 +96,7 @@ export default function WhatsAppPage() {
   const [init, { isLoading: initing }] = useWhatsappInitMutation();
   const [send, { isLoading: sending }] = useWhatsappSendMutation();
   const [cancelBulk] = useBulkCancelMutation();
+  const [checkVersion, { isLoading: checkingVersion }] = useWhatsappCheckVersionMutation();
   const [disconnect, { isLoading: disconnecting }] = useWhatsappDisconnectMutation();
   const [logout, { isLoading: loggingOut }] = useWhatsappLogoutMutation();
 
@@ -243,17 +261,101 @@ export default function WhatsAppPage() {
             waiting={Boolean(qrDataUrl || pairingCode)}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-          {s.libVersion && <span>kitabxana <b className="font-mono text-gray-700">v{s.libVersion}</b></span>}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+          {s.libVersion && (
+            <span>
+              kitabxana <b className="font-mono text-gray-700">v{s.libVersion}</b>
+              {s.version?.outdated && (
+                <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                  köhnə
+                </span>
+              )}
+            </span>
+          )}
           {s.state && <span>vəziyyət: <b className="text-gray-700">{s.state}</b></span>}
           {isReady && (
             <>
               <span>hesab: <b className="text-gray-700">{s.connectedAs || "—"}</b></span>
               <span className="font-mono">{s.phoneNumber ? `+${s.phoneNumber}` : ""}</span>
+              {s.uptimeSec > 0 && <span>açıqdır: <b className="text-gray-700">{fmtUptime(s.uptimeSec)}</b></span>}
             </>
           )}
         </div>
       </div>
+
+      {/* Kitabxananın yeni versiyası — WhatsApp Web protokolu tez-tez dəyişir
+          və paket geri qalanda bağlantı SƏBƏBSİZ görünən şəkildə sınır
+          («QR skan olundu, sonra qoşulma gecikdi»). Bunu bilmək üçün əvvəl
+          npm-ə əl ilə baxmaq lazım idi. */}
+      {s.version?.outdated && (
+        <div className="flex flex-wrap items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <ArrowUpCircle className="mt-0.5 h-5 w-5 flex-none text-amber-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-amber-900">
+              whatsapp-web.js yeniləməsi var: v{s.version.latest}
+              <span className="ml-2 font-normal text-amber-700">(quraşdırılıb v{s.version.installed})</span>
+            </p>
+            <p className="mt-1 text-sm text-amber-800">
+              WhatsApp Web protokolu tez-tez dəyişir. Kitabxana geri qalanda qoşulma
+              səbəbsiz görünən şəkildə sınır — QR skan olunur, sonra «qoşulma gecikdi» yazır.
+            </p>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-white/70 p-2.5 font-mono text-xs text-amber-900">{s.version.command}</pre>
+            <p className="mt-1.5 text-xs text-amber-700">Quraşdırdıqdan sonra API-ni yenidən başladın.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Diaqnostika — bağlantı kəsiləndə ilk verilən suallar. */}
+      {installed && (
+        <details className="rounded-xl border border-gray-200 bg-white px-5 py-3">
+          <summary className="cursor-pointer text-sm font-semibold text-gray-700">
+            Diaqnostika
+            {s.logSummary?.errors > 0 && (
+              <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                24 saatda {s.logSummary.errors} xəta
+              </span>
+            )}
+            {s.logSummary?.disconnects > 0 && (
+              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                {s.logSummary.disconnects} kəsilmə
+              </span>
+            )}
+          </summary>
+          <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["Sessiya faylı", s.hasSession ? "var" : "yoxdur"],
+              ["Chrome", s.chromePath || "sistem defoltu"],
+              ["Sağlamlıq nəzarəti", s.healthWatch ? "işləyir" : "dayanıb"],
+              ["QR cəhdi", String(s.qrCount ?? 0)],
+              ["Cihaz", s.deviceManufacturer || "—"],
+              ["Platforma", s.platform || "—"],
+              ["WhatsApp versiyası", s.waVersion || "—"],
+              ["Server açıqdır", fmtUptime(s.serverUptimeSec || 0)],
+              ["Versiya yoxlanıb", s.version?.checkedAt ? new Date(s.version.checkedAt).toLocaleString("az-AZ") : "—"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex gap-2">
+                <dt className="flex-none text-gray-500">{k}:</dt>
+                <dd className="min-w-0 truncate font-medium text-gray-800" title={String(v)}>{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={() => run(checkVersion, undefined, "Yoxlanıldı")}
+              disabled={checkingVersion}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+            >
+              <Package className="h-3.5 w-3.5" /> Versiyanı indi yoxla
+            </button>
+            {s.version?.error && <span className="self-center text-xs text-gray-400">{s.version.error}</span>}
+            {s.sessionDir && (
+              <span className="self-center font-mono text-xs text-gray-400" title={s.sessionDir}>
+                {s.sessionDir}
+              </span>
+            )}
+          </div>
+        </details>
+      )}
 
       {/* Status sorğusu uğursuzdursa — səbəb + yenidən cəhd */}
       {isError && (
@@ -320,6 +422,7 @@ npm i whatsapp-web.js@^1.34.7 qrcode@^1.5.4
               />
             )}
             {tab === "history" && <HistoryTab page={page} onPage={setPage} />}
+            {tab === "logs" && <LogsTab />}
           </div>
         </>
       )}

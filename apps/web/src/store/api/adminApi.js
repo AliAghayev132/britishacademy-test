@@ -103,6 +103,19 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/admin/whatsapp/messages", params }),
       providesTags: [{ type: "Site", id: "whatsapp-messages" }],
     }),
+    // Bağlantının HADİSƏ jurnalı — mesaj tarixçəsindən ayrıdır.
+    whatsappLogs: builder.query({
+      query: (params) => ({ url: "/admin/whatsapp/logs", params }),
+      providesTags: [{ type: "Site", id: "whatsapp-logs" }],
+    }),
+    whatsappClearLogs: builder.mutation({
+      query: () => ({ url: "/admin/whatsapp/logs", method: "DELETE" }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp-logs" }],
+    }),
+    whatsappCheckVersion: builder.mutation({
+      query: () => ({ url: "/admin/whatsapp/version/check", method: "POST" }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
     whatsappSendMedia: builder.mutation({
       query: (body) => ({ url: "/admin/whatsapp/send-media", method: "POST", body }),
       invalidatesTags: [{ type: "Site", id: "whatsapp-messages" }],
@@ -316,6 +329,9 @@ export const {
   useWhatsappSendMediaMutation,
   useWhatsappCheckQuery,
   useWhatsappMessagesQuery,
+  useWhatsappLogsQuery,
+  useWhatsappClearLogsMutation,
+  useWhatsappCheckVersionMutation,
   useWhatsappBulkMutation,
   useWhatsappBulkCancelMutation,
   useWhatsappDisconnectMutation,
