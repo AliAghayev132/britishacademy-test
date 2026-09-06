@@ -54,6 +54,19 @@ export function getImageUrl(imagePath) {
     return stripped;
   }
 
+  // `/assets/…` NEXT-in `public` qovluğundadır, API-də DEYİL.
+  //
+  // Şəkil hostu ona əlavə olunanda dev mühitində ünvan API portuna (:5000)
+  // gedir və 404 qaytarır. Bu, İKİ dəfə üzə çıxdı: QR studiyasında brend
+  // logosu və «Haqqımızda» səhifəsindəki foto — hər ikisində şəkil səssizcə
+  // görünmürdü.
+  //
+  // Sərhəd birmənalıdır: yüklənən fayllar `/uploads/…` altındadır (API onları
+  // `express.static` ilə verir), paketlə gələnlər isə `/assets/…`.
+  if (stripped.startsWith("/assets/")) {
+    return stripped;
+  }
+
   // Relative path - API URL əlavə et
   // Path "/" ilə başlayırsa, birbaşa əlavə et
   // Əks halda "/" əlavə et

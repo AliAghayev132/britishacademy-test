@@ -26,6 +26,8 @@ import {
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
 import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { IMAGE_SPECS } from "@/lib/imageSpecs";
 
 const emptyBlock = { heading: "", body: "" };
 
@@ -41,6 +43,9 @@ export function PageForm({ item, onClose }) {
   const [h1, setH1] = useState(toLoc(item?.h1));
   const [lead, setLead] = useState(toLoc(item?.lead));
   const [contentHtml, setContentHtml] = useState(toLoc(item?.contentHtml));
+  // Sahə modeldə çoxdan vardı, amma formada göstərilmirdi — «Haqqımızda»
+  // səhifəsindəki foto ona görə boş plaseholder qalmışdı.
+  const [cover, setCover] = useState(item?.cover || "");
 
   const [blocks, setBlocks] = useState(
     Array.isArray(item?.content) && item.content.length
@@ -104,6 +109,7 @@ export function PageForm({ item, onClose }) {
     }
 
     const data = {
+      cover: cover.trim(),
       title: trimLoc(title),
       h1: trimLoc(h1),
       lead: trimLoc(lead),
@@ -185,6 +191,13 @@ export function PageForm({ item, onClose }) {
           </Field>
           <Field label="Giriş mətni (lead)" info="3 dildə" className="sm:col-span-2">
             <LocalizedInput value={lead} onChange={setLead} multiline rows={3} />
+          </Field>
+          <Field
+            label="Səhifə şəkli"
+            info="«Haqqımızda» səhifəsində mətnin yanında görünür"
+            className="sm:col-span-2"
+          >
+            <FileUpload value={cover} onChange={setCover} kind="image" spec={IMAGE_SPECS.pageCover} />
           </Field>
         </div>
       </section>

@@ -11,6 +11,7 @@ import { PageBanner } from "@/components/site/PageBanner";
 // Utils / SEO
 import { metaFromApi } from "@/lib/seo";
 import { getT } from "@/lib/i18n/serverT";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 export async function generateMetadata() {
   const { data } = await apiGetStatus("/pages/haqqimizda");
@@ -103,8 +104,20 @@ export default async function AboutPage() {
               {tr("about.missionP2")}
             </p>
           </div>
+          {/* Foto admin panelindən gəlir (Səhifələr → Haqqımızda → «Səhifə şəkli»).
+              Sahə modeldə çoxdan vardı, amma nə formada göstərilirdi, nə də
+              burada oxunurdu — ona görə həmişə boş plaseholder görünürdü. */}
           <div style={{ position: "relative", aspectRatio: "4 / 3", borderRadius: 24, overflow: "hidden", border: "1px solid #ECEDF2" }}>
-            <div className="img-slot" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}><span>{tr("about.centerPhoto")}</span></div>
+            {p.cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={getImageUrl(p.cover)}
+                alt={p.h1 || p.title || tr("about.centerPhoto")}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <div className="img-slot" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}><span>{tr("about.centerPhoto")}</span></div>
+            )}
           </div>
         </div>
       </section>

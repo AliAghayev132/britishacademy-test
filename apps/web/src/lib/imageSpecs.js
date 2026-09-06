@@ -44,6 +44,14 @@ export const IMAGE_SPECS = {
     w: 1200, h: 750, fit: "cover",
   },
 
+  // ── Səhifələr ──
+  pageCover: {
+    label: "Səhifə şəkli",
+    where: "«Haqqımızda» səhifəsindəki mətnin yanındakı foto",
+    w: 1200, h: 900, fit: "cover",
+    note: "4:3 nisbətdə kəsilir — əsas obyekt mərkəzdə olsun.",
+  },
+
   // ── İnsanlar ──
   teacherPhoto: {
     label: "Müəllim şəkli",
