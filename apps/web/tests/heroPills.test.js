@@ -56,3 +56,28 @@ describe("kurs kartlarının rəngi", () => {
     expect(cards).not.toMatch(/index % /);
   });
 });
+
+describe("düymələrin sırası", () => {
+  const admin = fs.readFileSync("src/app/(protected)/dashboard/ana-sehife/page.js", "utf8");
+
+  it("paneldə sıra dəyişdirmə var", () => {
+    // Sıra saytda görünən ardıcıllıqdır. Onsuz ən çox satılan kursu əvvələ
+    // çəkmək üçün düyməni silib yenidən yazmaq lazım gəlirdi.
+    expect(admin).toMatch(/const movePill = \(index, dir\)/);
+    expect(admin).toMatch(/movePill\(i, -1\)/);
+    expect(admin).toMatch(/movePill\(i, 1\)/);
+  });
+
+  it("sərhəddəki oxlar söndürülür", () => {
+    // Birinci sətirdə «yuxarı», sonuncuda «aşağı» işləməməlidir.
+    expect(admin).toMatch(/disabled=\{i === 0\}/);
+    expect(admin).toMatch(/disabled=\{i === \(form\.hero\.pillLinks \|\| \[\]\)\.length - 1\}/);
+  });
+
+  it("sayt massiv sırasını olduğu kimi göstərir", () => {
+    // Hero-da çeşidləmə OLMAMALIDIR — əks halda paneldəki sıra saytda
+    // görünməzdi və dəyişdirmənin mənası qalmazdı.
+    expect(hero).toMatch(/linked\.map\(/);
+    expect(hero).not.toMatch(/linked\.(sort|reverse)\(/);
+  });
+});

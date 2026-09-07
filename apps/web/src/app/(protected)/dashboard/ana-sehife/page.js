@@ -121,6 +121,21 @@ export default function HomeAdminPage() {
     setDirty(true);
   };
 
+  /**
+   * Hero düyməsinin sırasını dəyiş.
+   *
+   * Sıra SAYTDA GÖRÜNƏN ardıcıllıqdır — ən çox satılan kursu əvvələ çəkmək
+   * üçün düyməni silib yenidən yazmaq lazım gəlmirdi. `move` (bölmələr üçün)
+   * ilə eyni məntiq, amma o, ayrıca `rows` vəziyyəti üzərində işləyir.
+   */
+  const movePill = (index, dir) => {
+    const list = [...(form.hero.pillLinks || [])];
+    const target = index + dir;
+    if (target < 0 || target >= list.length) return;
+    [list[index], list[target]] = [list[target], list[index]];
+    set("hero.pillLinks", list);
+  };
+
   const save = async () => {
     try {
       await update({
@@ -344,8 +359,9 @@ export default function HomeAdminPage() {
               </button>
             </div>
             <p className="mb-3 text-xs text-gray-400">
-              Hər düymənin öz ünvanı olur. Əvvəl hamısı kurslar bölməsinə
-              sürüşdürürdü. Ünvan boş qalsa həmin düymə köhnə kimi kurslara aparır.
+              Hər düymənin öz ünvanı olur. Ünvan boş qalsa həmin düymə kurslar
+              bölməsinə sürüşdürür. Sıra saytda göründüyü ardıcıllıqdır — ox
+              düymələri ilə dəyişdirin.
             </p>
 
             {(form.hero.pillLinks || []).length === 0 && (
@@ -354,6 +370,28 @@ export default function HomeAdminPage() {
             <div className="space-y-3">
               {(form.hero.pillLinks || []).map((row, i) => (
                 <div key={i} className="flex items-start gap-3">
+                  {/* Sıra — saytda göründüyü ardıcıllıq */}
+                  <div className="mt-6 flex flex-none flex-col">
+                    <button
+                      onClick={() => movePill(i, -1)}
+                      disabled={i === 0}
+                      aria-label="Yuxarı"
+                      className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => movePill(i, 1)}
+                      disabled={i === (form.hero.pillLinks || []).length - 1}
+                      aria-label="Aşağı"
+                      className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <span className="mt-7 grid h-6 w-6 flex-none place-items-center rounded-md bg-gray-100 text-xs font-bold text-gray-500">
+                    {i + 1}
+                  </span>
                   <div className="flex-1">
                     <label className={label}>Yazı (3 dildə)</label>
                     <LocalizedInput
