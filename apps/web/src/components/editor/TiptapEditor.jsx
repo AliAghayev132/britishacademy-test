@@ -90,7 +90,14 @@ export default function TiptapEditor({
     content: content || '',
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[300px] px-6 py-4',
+        // `flex-1` — YAZI SAHƏSİ QUTUNU TAM DOLDURSUN.
+        //
+        // Əvvəl burada `min-h-[300px]` yazılı idi, xarici qutu isə 500px
+        // (`minHeight`). Yəni qutunun ALT 200 PİKSELİ ölü zona idi: orada
+        // kliklənəndə redaktor deyil, boş sarğı elementi tutulurdu və kursor
+        // qoyulmurdu. Aşağıya klikləmək ən təbii hərəkətdir — mətn oraya
+        // yazılacaq kimi görünür.
+        class: 'focus:outline-none flex-1 px-6 py-4',
         // Brauzerin yazma-təklifi/format popup-unu söndür (kliklədikdə narahat edirdi).
         spellcheck: 'false',
       },
@@ -454,9 +461,11 @@ export default function TiptapEditor({
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(editor.getHTML()) }}
           />
         ) : (
+          /* `flex flex-col` — içindəki `.ProseMirror` (flex-1) bütün
+             hündürlüyü tutsun; bax `editorProps.attributes.class`. */
           <EditorContent
             editor={editor}
-            className="min-h-full"
+            className="min-h-full flex flex-col"
             style={{ minHeight: isFullscreen ? '100%' : minHeight }}
           />
         )}

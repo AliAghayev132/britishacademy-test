@@ -35,6 +35,17 @@ export const adminApi = baseApi.injectEndpoints({
       query: ({ resource, id }) => ({ url: `/admin/${resource}/${id}`, method: "DELETE" }),
       invalidatesTags: (r, e, { resource }) => [{ type: "Resource", id: resource }],
     }),
+    /**
+     * Siyahının sırasını yaz. `ids` — CARİ SƏHİFƏNİN elementləri istənilən
+     * sırada; `start` — həmin səhifənin qlobal sürüşməsi ((səhifə-1) × limit),
+     * onsuz 2-ci səhifə də 0-dan nömrələnib 1-ci ilə toqquşardı.
+     */
+    adminReorder: builder.mutation({
+      query: ({ resource, ids, start = 0 }) => ({
+        url: `/admin/${resource}/reorder`, method: "PATCH", body: { ids, start },
+      }),
+      invalidatesTags: (r, e, { resource }) => [{ type: "Resource", id: resource }],
+    }),
     adminLeadStatus: builder.mutation({
       query: ({ id, status, note }) => ({ url: `/admin/leads/${id}/status`, method: "PATCH", body: { status, note } }),
       // Also refresh the dashboard home (stats + latestLeads) after a status change.
@@ -292,6 +303,7 @@ export const {
   useAdminCreateMutation,
   useAdminUpdateMutation,
   useAdminDeleteMutation,
+  useAdminReorderMutation,
   useAdminLeadStatusMutation,
   useAdminStatsQuery,
   useAdminContentStatsQuery,

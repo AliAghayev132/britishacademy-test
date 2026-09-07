@@ -159,7 +159,7 @@ export function ProjectForm({ item, onClose }) {
 
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Ətraflı məzmun" info="3 dildə">
+        <Field as="div" label="Ətraflı məzmun" info="3 dildə">
           <LocalizedEditor value={contentHtml} onChange={setContentHtml} />
         </Field>
       </section>

@@ -12,6 +12,7 @@ import {
   useAdminUpdateMutation,
   useAdminDeleteMutation,
   useAdminLookupsQuery,
+  useAdminReorderMutation,
 } from "@/store/api/adminApi";
 // UI / kit
 import { confirmDialog, notify } from "@/components/ui/feedback";
@@ -21,10 +22,10 @@ import { NativeSelect } from "../../_forms/kit";
 // Local
 import { BESPOKE_FORMS } from "../../_forms";
 // Utils
-import { ADMIN_RESOURCES, field, RESOURCE_FILTERS, pickAz, thumbOf, isImagePath } from "@/lib/adminResources";
+import { ADMIN_RESOURCES, ORDERABLE, field, RESOURCE_FILTERS, pickAz, thumbOf, isImagePath } from "@/lib/adminResources";
 import { getImageUrl } from "@/utils/getImageUrl";
 // Icons
-import { Plus, Pencil, Trash2, Search, CalendarClock, X, FileVideo } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, CalendarClock, X, FileVideo, ArrowUp, ArrowDown } from "lucide-react";
 
 /**
  * Generic admin resource browser.
@@ -33,6 +34,9 @@ import { Plus, Pencil, Trash2, Search, CalendarClock, X, FileVideo } from "lucid
  * editable JSON. Bespoke per-resource forms can replace this screen gradually —
  * the API contract stays the same.
  */
+/** Bir səhifədəki element sayı — sıralamanın sürüşməsi də bundan hesablanır. */
+const PAGE_SIZE = 20;
+
 export default function ResourceBrowserPage({ params }) {
   const { resource } = use(params);
   const cfg = ADMIN_RESOURCES[resource];
@@ -63,12 +67,13 @@ export default function ResourceBrowserPage({ params }) {
   }, [lookups]);
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
-  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({ resource, search: search || undefined, page, limit: 20, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({ resource, search: search || undefined, page, limit: PAGE_SIZE, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
   const [createItem] = useAdminCreateMutation();
   const [updateItem] = useAdminUpdateMutation();
   const [deleteItem] = useAdminDeleteMutation();
+  const [reorderItems] = useAdminReorderMutation();
 
   const [editing, setEditing] = useState(null); // null | {} (new) | item
   const [jsonText, setJsonText] = useState("");
@@ -162,6 +167,31 @@ export default function ResourceBrowserPage({ params }) {
     } catch { /* cədvəl yenidən yüklənəndə həqiqi vəziyyət görünür */ }
   };
 
+  // ── Sıralama ──
+  //
+  // Əvvəl sıranı dəyişmək üçün hər elementi tək-tək açıb «Sıra» xanasına
+  // rəqəm yazmaq lazım idi — hamısı defolt 0 olduğuna görə praktikada bütün
+  // siyahını əl ilə nömrələmək demək idi.
+  //
+  // AXTARIŞ/SÜZGƏC AKTİV OLANDA OXLAR GİZLƏNİR: ekranda siyahının yalnız bir
+  // HİSSƏSİ var, server isə gələn id-lərə ardıcıl nömrə yazır — görünməyən
+  // elementlərin sırası səssizcə pozulardı.
+  const filtersOn = Boolean(search) || Object.keys(activeFilters).length > 0;
+  const canReorder = ORDERABLE.has(resource) && !filtersOn;
+
+  const move = async (index, dir) => {
+    const target = index + dir;
+    if (target < 0 || target >= items.length) return;
+    const ids = items.map((i) => i._id);
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    try {
+      // `start` — səhifə sürüşməsi; onsuz 2-ci səhifə də 0-dan nömrələnərdi.
+      await reorderItems({ resource, ids, start: (page - 1) * PAGE_SIZE }).unwrap();
+    } catch (err) {
+      notify.error(err?.data?.message || "Sıra dəyişmədi");
+    }
+  };
+
   const title = cfg?.name || resource;
   const hasActive = useMemo(() => items.some((i) => "isActive" in i), [items]);
   const hasFeatured = useMemo(() => items.some((i) => "isFeatured" in i), [items]);
@@ -201,6 +231,15 @@ export default function ResourceBrowserPage({ params }) {
           <Plus className="h-4 w-4" /> Yeni
         </button>
       </div>
+
+      {/* Oxlar süzgəc altında gizlənir — səbəbi görünsün ki, düymələr
+          «yoxa çıxıb» kimi qalmasın. */}
+      {ORDERABLE.has(resource) && filtersOn && (
+        <div className="mb-3 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          Sıra oxları yalnız <b>tam siyahıda</b> işləyir — axtarışı və filtrləri
+          təmizləyin.
+        </div>
+      )}
 
       {/* Ana səhifə seçimi — limiti gizli saxlamamaq üçün açıq göstərilir.
           Seçilmişlərin sayı limitdən çoxdursa artıqları görünməyəcək. */}
@@ -244,6 +283,7 @@ export default function ResourceBrowserPage({ params }) {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                 <tr>
+                  {canReorder && <th className="w-24 px-4 py-3">Sıra</th>}
                   {showThumb && <th className="w-16 px-4 py-3">Önizləmə</th>}
                   <th className="px-4 py-3">Ad</th>
                   <th className="hidden px-4 py-3 md:table-cell">Detal</th>
@@ -253,8 +293,28 @@ export default function ResourceBrowserPage({ params }) {
                 </tr>
               </thead>
               <tbody className={isFetching ? "opacity-60" : ""}>
-                {items.map((item) => (
+                {items.map((item, i) => (
                   <tr key={item._id} className="border-t border-gray-100 hover:bg-gray-50">
+                    {canReorder && (
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <div className="flex flex-col">
+                            <MoveBtn
+                              dir="up"
+                              onClick={() => move(i, -1)}
+                              // Səhifənin ilk/son elementi: qonşu yoxdur.
+                              // Səhifələr arası köçürmə üçün elementi açıb
+                              // «Sıra» rəqəmini yazmaq lazımdır.
+                              disabled={i === 0 || isFetching}
+                            />
+                            <MoveBtn dir="down" onClick={() => move(i, 1)} disabled={i === items.length - 1 || isFetching} />
+                          </div>
+                          <span className="text-xs font-semibold text-gray-400">
+                            {(page - 1) * PAGE_SIZE + i + 1}
+                          </span>
+                        </div>
+                      </td>
+                    )}
                     {showThumb && (
                       <td className="px-4 py-3">
                         <Thumb src={thumbOf(item)} />
@@ -354,6 +414,23 @@ export default function ResourceBrowserPage({ params }) {
  * Cədvəldəki kiçik önizləmə. Şəkil deyilsə (video/sənəd) ikon göstərilir,
  * yüklənmə uğursuz olarsa sınıq şəkil əvəzinə boş çərçivə qalır.
  */
+/** Sıra oxu — siyahıda qonşu elementlə yerini dəyişir. */
+function MoveBtn({ dir, onClick, disabled }) {
+  const Icon = dir === "up" ? ArrowUp : ArrowDown;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={dir === "up" ? "Yuxarı" : "Aşağı"}
+      aria-label={dir === "up" ? "Yuxarı köçür" : "Aşağı köçür"}
+      className="rounded p-0.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:pointer-events-none disabled:opacity-25"
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </button>
+  );
+}
+
 function Thumb({ src }) {
   if (!src) {
     return <div className="h-10 w-10 rounded-lg border border-dashed border-gray-200" />;

@@ -134,16 +134,32 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
   );
 }
 
-export function Field({ label, hint, required, info, children, className }) {
+/**
+ * @param {"label"|"div"} [as]
+ *   Sahə adətən `<label>`-dir — başlığa vurmaq içindəki input-u fokuslayır.
+ *
+ *   AMMA `<label>`-in içində CONTENTEDITABLE (TipTap redaktoru) işləmir:
+ *   Chrome label-ə düşən `mousedown`-u «bağlı idarəetməni fokusla» əməliyyatı
+ *   kimi tutub susdurur, contenteditable div isə label-ə bağlana bilən element
+ *   deyil — nəticədə klik heç yerə getmir, kursor qoyulmur. İstifadəçi
+ *   yazmağa çalışır, 4-5 klikdən sonra (ikiqat/üçqat klik mətn seçməsi ilə)
+ *   təsadüfən alınır. BÜTÜN 6 formada — bloq, kurs, ölkə, səhifə, layihə,
+ *   müəllim — eyni nasazlıq var idi.
+ *
+ *   Belə sahələr üçün `as="div"` verilir; itirilən yeganə şey başlığa
+ *   klikləmə rahatlığıdır, redaktorda onsuz da mənasızdır.
+ */
+export function Field({ label, hint, required, info, children, className, as = "label" }) {
+  const Tag = as;
   return (
-    <label className={`block ${className || ""}`}>
+    <Tag className={`block ${className || ""}`}>
       <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
         {label}{required && <span className="text-red-500">*</span>}
         {info && <InfoTip text={info} />}
       </span>
       {children}
       {hint && <span className="mt-1 block text-xs text-gray-400">{hint}</span>}
-    </label>
+    </Tag>
   );
 }
 

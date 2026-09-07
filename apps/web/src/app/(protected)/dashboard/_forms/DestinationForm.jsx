@@ -252,7 +252,7 @@ export function DestinationForm({ item, onClose }) {
       {/* ── Məzmun ── */}
       <section className="space-y-4">
         <SectionTitle>Məzmun</SectionTitle>
-        <Field label="Məzmun" info="3 dildə">
+        <Field as="div" label="Məzmun" info="3 dildə">
           <LocalizedEditor value={contentHtml} onChange={setContentHtml} />
         </Field>
       </section>

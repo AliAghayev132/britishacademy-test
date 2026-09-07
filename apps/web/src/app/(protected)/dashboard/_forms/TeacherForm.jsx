@@ -293,7 +293,7 @@ export function TeacherForm({ item, onClose }) {
             spec={IMAGE_SPECS.teacherPhoto}
           />
         </Field>
-        <Field label="Bio" info="3 dildə">
+        <Field as="div" label="Bio" info="3 dildə">
           <LocalizedEditor value={bio} onChange={setBio} />
         </Field>
       </div>

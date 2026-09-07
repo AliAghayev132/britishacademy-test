@@ -1,5 +1,8 @@
 // Generic admin CRUD over the resource registry.
 
+// Lib
+import { mongoose } from "#lib";
+
 // Models
 import { SiteSetting, Lead } from "#models";
 
@@ -378,16 +381,43 @@ const remove = asyncHandler(async (req, res) => {
 });
 
 /**
- * Bulk reorder: PATCH /api/admin/:resource/reorder  body: { ids: [id, ...] }
- * Writes the array index back to each doc's `order` field.
+ * Toplu sıralama: PATCH /api/admin/:resource/reorder
+ * body: { ids: [id, ...], start?: number }
+ *
+ * `ids` — elementlərin İSTƏNİLƏN sırası; hər birinin `order` sahəsinə massivdəki
+ * mövqeyi yazılır.
+ *
+ * `start` — SƏHİFƏ SÜRÜŞMƏSİ. Panel yalnız CARİ SƏHİFƏNİN id-lərini göndərir.
+ * Sürüşmə olmasa 2-ci səhifə də 0-dan nömrələnər və 1-ci səhifə ilə tam
+ * toqquşardı — siyahı gözlə görünən şəkildə qarışardı.
  */
 const reorder = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
   if (!entry) return;
   if (denySection(req, res, req.params.resource)) return;
-  const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
-  await Promise.all(
-    ids.map((id, index) => entry.model.findByIdAndUpdate(id, { order: index })),
+
+  // Sırası olmayan modeldə (müraciətlər, media…) `order` yazmaq sxemə yad
+  // sahə əlavə etmək və heç nəyə təsir etməmək demək idi.
+  if (!entry.model.schema.path("order")) {
+    return res.status(400).json({ success: false, message: "Bu bölmədə sıralama yoxdur" });
+  }
+
+  const raw = Array.isArray(req.body?.ids) ? req.body.ids : [];
+  // Yararsız id `findByIdAndUpdate`-i CastError ilə çökdürürdü (500).
+  const ids = [...new Set(raw.map(String))].filter((id) => mongoose.isValidObjectId(id));
+  if (!ids.length) {
+    return res.status(400).json({ success: false, message: "Sıralanacaq element göndərilməyib" });
+  }
+  if (ids.length > 200) {
+    return res.status(400).json({ success: false, message: "Bir dəfəyə ən çox 200 element" });
+  }
+
+  const start = Math.max(0, parseInt(req.body?.start, 10) || 0);
+
+  await entry.model.bulkWrite(
+    ids.map((id, i) => ({
+      updateOne: { filter: { _id: id }, update: { $set: { order: start + i } } },
+    })),
   );
   res.json({ success: true, message: "Sıralama yeniləndi" });
 });

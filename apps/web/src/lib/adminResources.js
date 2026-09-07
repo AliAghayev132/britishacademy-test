@@ -28,6 +28,26 @@ export const ADMIN_RESOURCES = {
   leads: { name: "Müraciətlər", title: "name", sub: "phone" },
 };
 
+/**
+ * SIRASI DƏYİŞDİRİLƏ BİLƏN bölmələr — siyahıda yuxarı/aşağı oxları çıxır.
+ *
+ * Şərt: serverin həmin resurs üçün sıralaması `order` ilə BAŞLAMALIDIR
+ * (controllers/resourceRegistry.js). Əks halda oxlar `order`-i yazardı, siyahı
+ * isə başqa sahəyə görə düzülərdi — düymə sanki heç nə etmirmiş kimi görünərdi.
+ *
+ * Qəsdən KƏNARDA qalanlar:
+ *  - `menu-items`  → sıralama `{ location, order }`-dir; bir səhifədə müxtəlif
+ *    yerlərin (header/footer) elementləri qarışıq gəlir, qonşu dəyişmək
+ *    qrupları pozardı.
+ *  - `blog-posts`, `leads`, `media`, `short-links`, `course-groups` → tarixə,
+ *    kliklərə və ya başlanğıc tarixinə görə düzülür.
+ */
+export const ORDERABLE = new Set([
+  "branches", "teachers", "course-categories", "courses", "testimonials",
+  "destinations", "blog-categories", "pages", "partners", "advantages",
+  "projects", "quiz-categories", "faqs",
+]);
+
 // Çoxdilli { az,en,ru } dəyəri admin siyahısında AZ variantı ilə göstər.
 export const pickAz = (v) =>
   v && typeof v === "object" && !Array.isArray(v) && ("az" in v || "en" in v || "ru" in v)
