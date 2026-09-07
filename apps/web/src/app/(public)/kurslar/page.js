@@ -37,7 +37,7 @@ function CourseCategorySection({ category, courses, tr }) {
         <Link href={`/kurslar/${category.slug}`} style={{ color: "var(--accent)", fontWeight: 700, fontSize: 14.5 }}>{tr("nav.all")}</Link>
       </div>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-        {courses.slice(0, 6).map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
+        {courses.slice(0, 6).map((c) => <CourseCard key={c._id} course={c} />)}
       </div>
     </section>
   );

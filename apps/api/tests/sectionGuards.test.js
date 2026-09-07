@@ -58,3 +58,29 @@ describe("müraciətlərin iki bölməyə ayrılması", () => {
     expect(ABROAD_INTEREST).toBe("Xaricdə təhsil");
   });
 });
+
+describe("hero düymələrinin linkləri", () => {
+  it("etiket çoxdilli sahələr siyahısındadır", async () => {
+    // Olmasaydı `localizeResponse` etiketi düzləşdirməzdi və saytda
+    // { az, en, ru } obyekti «[object Object]» kimi görünərdi.
+    const { LOCALIZED_FIELDS } = await import("#utils");
+    expect(LOCALIZED_FIELDS.SiteSetting).toContain("hero.pillLinks.$.label");
+  });
+
+  it("ünvan ÇOXDİLLİ DEYİL — ortaqdır", async () => {
+    // Link kanonik yoldur; `LocaleLink` onu cari dilin slug-ına özü çevirir.
+    // Dil üzrə saxlansaydı admin onu üç dəfə yazmalı olardı.
+    const { LOCALIZED_FIELDS } = await import("#utils");
+    expect(LOCALIZED_FIELDS.SiteSetting).not.toContain("hero.pillLinks.$.href");
+  });
+
+  it("sxem etiket + ünvan cütünü qəbul edir", async () => {
+    const { SiteSetting } = await import("#models");
+    const d = new SiteSetting({
+      key: "t",
+      hero: { pillLinks: [{ label: { az: "IELTS", en: "IELTS", ru: "IELTS" }, href: "/kurslar/ielts" }] },
+    });
+    expect(d.validateSync()).toBeUndefined();
+    expect(d.hero.pillLinks[0].href).toBe("/kurslar/ielts");
+  });
+});

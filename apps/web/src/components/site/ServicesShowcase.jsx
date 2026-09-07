@@ -55,9 +55,9 @@ export default function ServicesShowcase({
         }}
         style={{ padding: "6px 4px 8px" }}
       >
-        {courses.map((c, i) => (
+        {courses.map((c) => (
           <SwiperSlide key={c._id} style={{ height: "auto" }}>
-            <CourseCard course={c} index={i} />
+            <CourseCard course={c} />
           </SwiperSlide>
         ))}
       </Swiper>

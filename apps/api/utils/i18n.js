@@ -86,7 +86,8 @@ export const LOCALIZED_FIELDS = {
   SiteSetting: [
     "contact.address", "contact.hours",
     "hero.titlePrefix", "hero.subtitle", "hero.words", "hero.chipsLeft",
-    "hero.chipsRight", "hero.pills", "marquee", "stats.$.label", "stats.$.value",
+    "hero.chipsRight", "hero.pills", "hero.pillLinks.$.label",
+    "marquee", "stats.$.label", "stats.$.value",
     "seo.defaultTitle", "seo.defaultDescription", "seo.keywords",
   ],
 };

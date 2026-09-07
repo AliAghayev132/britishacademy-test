@@ -14,6 +14,7 @@ import {
   GlobalAiBar,
   toLoc,
   trimLoc,
+  locAz,
 } from "../_forms/Localized";
 import { resolveSections } from "@/lib/homeSections";
 import { FeaturedPicker } from "./FeaturedPicker";
@@ -79,6 +80,10 @@ export default function HomeAdminPage() {
         chipsLeft: toLoc(s.hero?.chipsLeft),
         chipsRight: toLoc(s.hero?.chipsRight),
         pills: toLoc(s.hero?.pills),
+        pillLinks: (s.hero?.pillLinks || []).map((x) => ({
+          label: toLoc(x.label),
+          href: x.href || "",
+        })),
         colors: (s.hero?.colors || []).join(", "),
       },
       marquee: toLoc(Array.isArray(s.marquee) ? s.marquee.join(", ") : s.marquee),
@@ -127,6 +132,11 @@ export default function HomeAdminPage() {
           chipsLeft: trimLoc(form.hero.chipsLeft),
           chipsRight: trimLoc(form.hero.chipsRight),
           pills: trimLoc(form.hero.pills),
+          // Etiketi boş olan sətir atılır — səhvən əlavə edilmiş boş düymə
+          // saytda görünməsin.
+          pillLinks: (form.hero.pillLinks || [])
+            .filter((x) => locAz(x.label).trim())
+            .map((x) => ({ label: trimLoc(x.label), href: (x.href || "").trim() })),
           colors: form.hero.colors.split(",").map((x) => x.trim()).filter(Boolean),
         },
         marquee: trimLoc(form.marquee),
@@ -315,9 +325,67 @@ export default function HomeAdminPage() {
               placeholder="İngilis dili, IELTS, Duolingo, Rus dili"
             />
             <p className="mt-1 text-xs text-gray-400">
-              Hero-nun altında görünən kateqoriya sırası. Təsadüfi qarışdırılmır —
-              yazdığınız ardıcıllıqla göstərilir.
+              Aşağıdakı «linkli düymələr» siyahısı doldurulubsa BU sahə
+              işlədilmir — yalnız köhnə (linksiz) davranış üçün qalıb.
             </p>
+          </div>
+
+          {/* Linkli düymələr */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 sm:col-span-2">
+            <div className="mb-1 flex items-center justify-between">
+              <label className={label}>Hero düymələri — link ilə</label>
+              <button
+                onClick={() =>
+                  set("hero.pillLinks", [...(form.hero.pillLinks || []), { label: toLoc(""), href: "" }])
+                }
+                className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
+              >
+                + Düymə
+              </button>
+            </div>
+            <p className="mb-3 text-xs text-gray-400">
+              Hər düymənin öz ünvanı olur. Əvvəl hamısı kurslar bölməsinə
+              sürüşdürürdü. Ünvan boş qalsa həmin düymə köhnə kimi kurslara aparır.
+            </p>
+
+            {(form.hero.pillLinks || []).length === 0 && (
+              <p className="text-sm text-gray-400">Düymə əlavə edilməyib — yuxarıdakı mətn siyahısı işlənəcək.</p>
+            )}
+            <div className="space-y-3">
+              {(form.hero.pillLinks || []).map((row, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <label className={label}>Yazı (3 dildə)</label>
+                    <LocalizedInput
+                      value={row.label}
+                      onChange={(v) => set(`hero.pillLinks.${i}.label`, v)}
+                      placeholder="IELTS"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className={label}>Ünvan</label>
+                    <input
+                      className={input}
+                      value={row.href}
+                      onChange={(e) => set(`hero.pillLinks.${i}.href`, e.target.value)}
+                      placeholder="/kurslar/ielts-kurslari"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">
+                      Saytdaxili yol («/kurslar/…»), lövbər («#kurslar») və ya tam link.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      set("hero.pillLinks", form.hero.pillLinks.filter((_, j) => j !== i))
+                    }
+                    className="mt-6 rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50"
+                    aria-label="Sil"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

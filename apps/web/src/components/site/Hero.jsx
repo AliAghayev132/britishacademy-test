@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toList } from "@/utils/toList";
 import { ApplyButton } from "./ApplyButton";
 import { useT } from "@/lib/i18n/useT";
+import { LocaleLink } from "./LocaleLink";
 
 /** Floating glass chips — direct children divs of the hero so the per-position
  *  colour tints in globals.css (body.ba-home .ba-hero > div:nth-of-type(4..9)
@@ -48,6 +49,33 @@ const CHIP_STYLE = {
   whiteSpace: "nowrap",
   backdropFilter: "blur(3px)",
 };
+
+/**
+ * Bir hero düyməsi.
+ *
+ * Ünvanın növünə görə element seçilir:
+ *  • lövbər (`#…`) və xarici link → adi `<a>`;
+ *  • daxili yol (`/…`) → `LocaleLink`, yəni /en və /ru-da düzgün slug-a gedir;
+ *  • ünvan boşdursa → köhnə davranış (kurslar bölməsi).
+ */
+function HeroPill({ label, href }) {
+  const to = String(href || "").trim();
+  if (!to) return <a href="#kurslar" className="ba-pill-cat" style={PILL_BASE}>{label}</a>;
+  if (to.startsWith("/")) {
+    return <LocaleLink href={to} className="ba-pill-cat" style={PILL_BASE}>{label}</LocaleLink>;
+  }
+  const external = /^https?:///i.test(to);
+  return (
+    <a
+      href={to}
+      className="ba-pill-cat"
+      style={PILL_BASE}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {label}
+    </a>
+  );
+}
 
 const PILL_BASE = {
   display: "inline-flex",
@@ -123,6 +151,14 @@ export function Hero({ hero, stats = [] }) {
   // Boş olanda cari dilin defolt siyahısı işlənir.
   const poolL = leftPool.length ? leftPool : toList(t("hero.defaultChipsLeft"));
   const poolR = rightPool.length ? rightPool : toList(t("hero.defaultChipsRight"));
+  /**
+   * Hero düymələri.
+   *
+   * ÜSTÜNLÜK: admin paneldə `pillLinks` doldurulubsa o işlənir — hər
+   * düymənin ÖZ ünvanı olur. Boşdursa köhnə davranış qalır: yalnız etiketlər
+   * və hamısı kurslar bölməsinə sürüşdürür.
+   */
+  const linked = Array.isArray(hero?.pillLinks) ? hero.pillLinks.filter((x) => x?.label) : [];
   const pillList = pills.length ? pills : toList(t("hero.defaultPills"));
 
   /**
@@ -236,13 +272,16 @@ export function Hero({ hero, stats = [] }) {
           </div>
         )}
 
-        {/* category pills */}
+        {/* Hero düymələri — paneldən idarə olunan ünvanlarla */}
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 52 }}>
-          {pillList.map((p) => (
-            <a key={p} href="#kurslar" className="ba-pill-cat" style={PILL_BASE}>
-              {p}
-            </a>
-          ))}
+          {linked.length
+            ? linked.map((p, i) => <HeroPill key={`${p.href}-${i}`} label={p.label} href={p.href} />)
+            : pillList.map((p) => (
+                // Köhnə davranış: ünvan yoxdur, kurslar bölməsinə sürüşdürür.
+                <a key={p} href="#kurslar" className="ba-pill-cat" style={PILL_BASE}>
+                  {p}
+                </a>
+              ))}
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, marginTop: 44 }}>

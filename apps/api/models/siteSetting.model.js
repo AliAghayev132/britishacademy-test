@@ -62,7 +62,32 @@ const siteSettingSchema = new Schema(
       chipsRight: localizedField(),
       // «Ödənişsiz sınaq dərsi» həbindən əvvəlki kateqoriya həbləri.
       // AYRI siyahıdır — təsadüfi qarışdırılmır, sıra qorunur.
+      // KÖHNƏ sahə — yalnız etiketlər (vergüllə ayrılmış mətn). Hamısı
+      // `#kurslar` lövbərinə gedirdi, yəni linki dəyişmək mümkün deyildi.
+      // Aşağıdakı `pillLinks` doldurulubsa BU sahə işlədilmir; boş qalanda
+      // köhnə davranış qorunur (geriyə uyğunluq).
       pills: localizedField(),
+      /**
+       * Hero düymələri — etiket + ünvan.
+       *
+       * Etiket 3 dildədir, ünvan isə ORTAQDIR: link kanonik yoldur
+       * («/kurslar/ielts-kurslari»), dilə görə dəyişmir — `LocaleLink` onu
+       * cari dilin slug-ına özü çevirir. Ünvanı hər dildə təkrar yazmaq
+       * səhvə açıq olardı.
+       */
+      pillLinks: {
+        type: [
+          new Schema(
+            {
+              label: localizedField(),
+              // Daxili yol («/kurslar/…»), lövbər («#kurslar») və ya tam link.
+              href: { type: String, trim: true, default: "" },
+            },
+            { _id: false },
+          ),
+        ],
+        default: [],
+      },
     },
 
     /**

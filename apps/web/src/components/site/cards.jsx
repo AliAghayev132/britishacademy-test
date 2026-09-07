@@ -5,18 +5,26 @@ import { useT } from "@/lib/i18n/useT";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { getImageUrl } from "@/utils/getImageUrl";
 
-const CAT_COLORS = ["#2E6BE6", "#F5A524", "#7C4DFF", "#E0533D", "#12B5A5", "#FF3D8B", "#0EA5E9", "#22B07D"];
+/**
+ * Kurs kartları BRENDİN öz mavisindədir.
+ *
+ * Əvvəl səkkiz rəngli palitra vardı və kartlar sıraya görə növbə ilə sarı,
+ * bənövşəyi, qırmızı, çəhrayı olurdu. Ana səhifədə yan-yana duranda bölmə
+ * rəngarəng görünürdü və brend rəngi itirdi. İndi vurğu tək rəngdir, fərqi
+ * ağ fon və boşluq yaradır.
+ */
+const ACCENT = "#00157A";
+const ACCENT_SOFT = "#00157A14"; // eyni rəng, ~8% şəffaflıq
 
 /** Course card — used on the homepage and category hubs. */
-export function CourseCard({ course, index = 0 }) {
+export function CourseCard({ course }) {
   const t = useT();
-  const accent = CAT_COLORS[index % CAT_COLORS.length];
   const from = course.priceFrom;
   return (
     <Link
       href={`/kurslar/${course.slug}`}
       className="ba-course"
-      style={{ display: "flex", flexDirection: "column", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, "--accent": accent, "--accent-soft": `${accent}1f` }}
+      style={{ display: "flex", flexDirection: "column", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, "--accent": ACCENT, "--accent-soft": ACCENT_SOFT }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: "#63636E", letterSpacing: ".05em", textTransform: "uppercase" }}>{course.category?.name || t("card.course")}</span>
