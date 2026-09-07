@@ -411,23 +411,52 @@ body.ba-home.ba-fx .ba-sg.is-in > * {
 .ba-svcband {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #001452 0%, #001B6E 46%, #000F46 100%);
+  border-radius: 32px;
+  background: linear-gradient(180deg, #001452 0%, #001B6E 48%, #000F46 100%);
+  /* Üstdəki nazik açıq xətt panelə kənar verir — tünd fonda haşiyə çəkmək
+     kobud görünür, işıq əksi isə təbii oxunur. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .10),
+    0 26px 60px rgba(0, 12, 60, .26);
 }
 .ba-svcband-glow {
-  content: "";
   position: absolute;
-  /* Kənardan daha geniş — bulanmanın solğun kənarı lentin içində qalmasın. */
+  /* Kənardan daha geniş — bulanmanın solğun kənarı panelin içində qalmasın. */
   inset: -25% -12%;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(38% 44% at 12% 20%, rgba(56,110,255,.60), transparent 62%),
-    radial-gradient(30% 38% at 88% 8%, rgba(0,196,255,.26), transparent 66%),
-    radial-gradient(42% 50% at 74% 96%, rgba(88,64,224,.46), transparent 64%);
+    radial-gradient(38% 44% at 12% 20%, rgba(56,110,255,.55), transparent 62%),
+    radial-gradient(30% 38% at 88% 8%, rgba(0,196,255,.22), transparent 66%),
+    radial-gradient(42% 50% at 74% 96%, rgba(88,64,224,.42), transparent 64%);
   filter: blur(64px);
+}
+.ba-svcband-in { position: relative; z-index: 1; padding: 52px 40px 54px; }
+.ba-svcband-head {
+  display: flex;
+  /* `center` — başlıq iki sətir olanda düymə orta xətdə qalır; `flex-end`
+     onu alt başlığın kökünə yapışdırırdı və sıra əyri görünürdü. */
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 .ba-svcband-all { transition: transform .2s, box-shadow .2s; }
 .ba-svcband-all:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(0, 8, 40, .35); }
+
+/* Kartların altı DÜZ SIRADA bitsin: slaydlar ən hündürü qədər uzanır.
+   Onsuz kateqoriya adı iki sətrə düşən kart qonşularından hündür qalır və
+   sıra pilləkən kimi görünürdü — tünd fonda daha da gözə dəyirdi. */
+.ba-svcband .swiper-wrapper { align-items: stretch; }
+.ba-svcband .swiper-slide { display: flex; }
+.ba-svcband .swiper-slide > .ba-course { width: 100%; }
+
+@media (max-width: 640px) {
+  .ba-svcband { border-radius: 24px; }
+  .ba-svcband-in { padding: 34px 20px 36px; }
+  .ba-svcband-head { margin-bottom: 22px; }
+}
 
 /* -- Course cards: colored wash + shine sweep (per-card --accent) -- */
 body.ba-home #kurslar .ba-course { position: relative; overflow: hidden; }
