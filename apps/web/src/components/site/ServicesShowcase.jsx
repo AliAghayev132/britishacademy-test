@@ -26,16 +26,25 @@ export default function ServicesShowcase({
   allLabel = allLabel || t("svc.all");
 
   return (
-    <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+    // Tam enli mavi lent — `wrap` içəridəki sarğıya keçir ki, fon kənardan
+    // kənara getsin, məzmun isə 1240px-də qalsın.
+    <section className="ba-svcband">
+      {/* Bulanıq işıq ləkələri. Ayrıca elementdədir, çünki `filter: blur()`
+          valideynə verilsə İÇİNDƏKİ kartlar və mətn də bulanardı. */}
+      <span className="ba-svcband-glow" aria-hidden="true" />
+
+      <div className="ba-reveal" style={{ ...wrap, position: "relative", zIndex: 1, padding: "84px 28px 92px" }}>
       {/* Başlıq + "Bütün xidmətlər" düyməsi (sağ yuxarı) */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 34 }}>
         <div>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,44px)", letterSpacing: "-.02em", margin: 0, lineHeight: 1.08, color: "#14141C" }}>{title}</h2>
-          {sub && <div style={{ color: "#7C7D8C", fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(20px,3vw,30px)", lineHeight: 1.1 }}>{sub}</div>}
+          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,44px)", letterSpacing: "-.02em", margin: 0, lineHeight: 1.08, color: "#fff" }}>{title}</h2>
+          {sub && <div style={{ color: "rgba(255,255,255,.62)", fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(20px,3vw,30px)", lineHeight: 1.1 }}>{sub}</div>}
         </div>
+        {/* Mavi fonda mavi düymə itərdi — ağ fon, mavi yazı. */}
         <Link
           href={allHref}
-          style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#fff", fontWeight: 700, fontSize: 14.5, padding: "12px 20px", borderRadius: 99, whiteSpace: "nowrap" }}
+          className="ba-svcband-all"
+          style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: 8, background: "#fff", color: "var(--accent)", fontWeight: 700, fontSize: 14.5, padding: "12px 20px", borderRadius: 99, whiteSpace: "nowrap" }}
         >
           {allLabel} →
         </Link>
@@ -61,6 +70,7 @@ export default function ServicesShowcase({
           </SwiperSlide>
         ))}
       </Swiper>
+      </div>
     </section>
   );
 }
