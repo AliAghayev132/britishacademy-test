@@ -8,6 +8,7 @@ import {
 import { toList } from "@/utils/toList";
 import { getLocale } from "@/lib/i18n/serverT";
 import { CodeInjection } from "@/components/site/CodeInjection";
+import { GtmScript, GtmNoScript } from "@/components/site/GoogleTagManager";
 
 const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
@@ -93,8 +94,13 @@ export default async function RootLayout({ children }) {
           rel="stylesheet"
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+        {/* GTM — paneldəki ID boşdursa heç nə render olunmur. */}
+        <GtmScript id={inject.gtmId} />
       </head>
       <body>
+        {/* GTM-in `<noscript>` hissəsi MƏHZ burada, `<body>`-nin əvvəlində
+            olmalıdır — Google-un tələb etdiyi yer budur. */}
+        <GtmNoScript id={inject.gtmId} />
         <Providers>{children}</Providers>
         {/* Admin panelindən əlavə edilən analytics/pixel kodu */}
         <CodeInjection head={inject.head} bodyEnd={inject.bodyEnd} />

@@ -134,6 +134,23 @@ const siteSettingSchema = new Schema(
     codeInjection: {
       head: { type: String, default: "" },
       bodyEnd: { type: String, default: "" },
+
+      // Google Tag Manager konteyner ID-si (məs. GTM-XXXXXXX).
+      //
+      // NİYƏ AYRICA SAHƏ, `head`-ə yapışdırmaq əvəzinə: `head` kodu brauzerdə,
+      // səhifə yükləndikdən SONRA əlavə olunur. GTM-in isə erkən qalxması
+      // lazımdır, üstəlik onun `<noscript>` hissəsi belə üsulla ÜMUMİYYƏTLƏ
+      // işləmir (JavaScript ilə əlavə olunan noscript mənasızdır — o, məhz
+      // JavaScript sönülü olanlar üçündür). Ona görə ID buradan oxunur və
+      // `layout.js` onu düzgün yerdə, server tərəfdə render edir.
+      //
+      // NİYƏ `seo` blokunda DEYİL: GTM konteyneri sayta ixtiyari JS yükləyir,
+      // yəni `codeInjection` qədər həssasdır. `codeInjection` yalnız `admin`
+      // rolu üçün açıqdır (ADMIN_ONLY_SETTING_FIELDS), `seo` isə editor üçün
+      // də — orada saxlasaydıq editor saytı öz konteynerinə bağlaya bilərdi.
+      //
+      // Boş qalsa GTM ümumiyyətlə yüklənmir.
+      gtmId: { type: String, default: "", trim: true },
     },
     // Served verbatim at /robots.txt
     robotsTxt: { type: String, default: "" },

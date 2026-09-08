@@ -46,10 +46,22 @@ export const DEFAULT_IMAGE = "/assets/og-cover.png";
 
 const abs = (img) => (!img ? `${SITE_URL}${DEFAULT_IMAGE}` : img.startsWith("http") ? img : `${SITE_URL}${img}`);
 
-/** Fetch the SiteSetting singleton (cached) for admin-driven SEO defaults. */
+/**
+ * Fetch the SiteSetting singleton (cached) for admin-driven SEO defaults.
+ *
+ * KEŞ MÜDDƏTİ 60 SANİYƏDİR — əvvəl 3600 (bir saat) idi və bu, iki problem
+ * yaradırdı:
+ *
+ *  1. EYNİ ünvan `(public)/layout.js`-də 60 saniyə ilə çəkilirdi. Bir URL üçün
+ *     iki fərqli müddət vermək səliqəsizdir və hansının qalib gəldiyi Next-in
+ *     daxili qaydasından asılı qalırdı.
+ *  2. `app/layout.js` buradan Google Tag Manager ID-sini oxuyur. Bir saatlıq
+ *     keşlə admin ID-ni yazandan sonra izləmənin başlaması bir saat çəkirdi —
+ *     istifadəçi üçün «işləmədi» kimi görünürdü.
+ */
 export async function getSiteSettings() {
   try {
-    const data = await apiGet("/site", { revalidate: 3600 });
+    const data = await apiGet("/site", { revalidate: 60 });
     return data?.settings || null;
   } catch {
     return null;

@@ -99,7 +99,11 @@ export default function SettingsPage() {
           apiKey: "", // yalnız-yazma; boş = köhnəni saxla
           hasKey: Boolean(s.ai?.hasKey),
         },
-        codeInjection: { head: s.codeInjection?.head || "", bodyEnd: s.codeInjection?.bodyEnd || "" },
+        codeInjection: {
+          head: s.codeInjection?.head || "",
+          bodyEnd: s.codeInjection?.bodyEnd || "",
+          gtmId: s.codeInjection?.gtmId || "",
+        },
         robotsTxt: s.robotsTxt || "",
         maxImageSizeKb: s.maxImageSizeKb || 500,
         seo: {
@@ -351,6 +355,20 @@ export default function SettingsPage() {
           </Section>
 
           <Section title="SEO / Texniki (PDF tələbləri)">
+            <div className="sm:col-span-2">
+              <label className={label}>Google Tag Manager ID</label>
+              <input
+                className={`${input} font-mono`}
+                placeholder="GTM-XXXXXXX"
+                value={form.codeInjection.gtmId}
+                onChange={(e) => set("codeInjection.gtmId", e.target.value)}
+              />
+              <p className="mt-1.5 text-xs text-gray-400">
+                Yalnız ID yazın — kodun özünü yapışdırmaq lazım deyil. Boş qalsa GTM
+                ümumiyyətlə yüklənmir. GTM-in <b>hər iki</b> hissəsi (skript və
+                noscript) düzgün yerdə avtomatik qoyulur.
+              </p>
+            </div>
             <div className="sm:col-span-2">
               <label className={label}>&lt;head&gt; kodu (analytics, pixel və s.)</label>
               <textarea rows={4} spellCheck={false} className={`${input} font-mono text-xs`} value={form.codeInjection.head} onChange={(e) => set("codeInjection.head", e.target.value)} />
