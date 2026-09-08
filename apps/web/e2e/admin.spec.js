@@ -8,10 +8,32 @@ import { test, expect } from "@playwright/test";
  * siyahının yenilənməsi), modal formalar, icazə qapıları. Bunları yalnız real
  * brauzer tutur.
  *
- * Bu testlər İŞLƏYƏN API və seed olunmuş baza tələb edir.
+ * Bu testlər İŞLƏYƏN API və seed olunmuş baza tələb edir — giriş etmədən
+ * heç biri işləmir.
+ *
+ * ONA GÖRƏ API YOXLANILIR: CI-də yalnız Next serveri qalxır (bax
+ * playwright.config.js — «API əlçatmaz olsa da testlər keçməlidir»), baza
+ * da yoxdur. Belə mühitdə bu 8 test hamısı `login()`-də sınırdı və
+ * nəticədə CI həmişə qırmızı qalırdı — yəni SINAQ ETMƏK istədiyimiz
+ * nasazlıqlar deyil, sadəcə mühitin olmaması göstərilirdi. Qırmızı CI-ya
+ * öyrəşmək isə ondan da pisdir: həqiqi sınıqlıq gözdən qaçır.
+ *
+ * İndi API əlçatmazdırsa testlər AÇIQ SƏBƏBLƏ ötürülür. Lokalda
+ * (`bash start-dev.sh` ilə) hamısı əvvəlki kimi işləyir.
  */
 
 const DEV = { email: "developer@britishacademy.az", password: "Developer123!" };
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+
+/** API cavab verirmi? Bir dəfə yoxlanılır, nəticə saxlanılır. */
+let apiProbe;
+const apiUp = () => {
+  apiProbe ??= fetch(`${API}/api/site`, { signal: AbortSignal.timeout(5000) })
+    .then((r) => r.ok)
+    .catch(() => false);
+  return apiProbe;
+};
 
 async function login(page) {
   await page.goto("/login");
@@ -25,6 +47,10 @@ async function login(page) {
 
 test.describe("admin panel", () => {
   test.beforeEach(async ({ page }) => {
+    test.skip(
+      !(await apiUp()),
+      `API əlçatmazdır (${API}) — admin testləri işləyən API və seed olunmuş baza tələb edir`,
+    );
     await login(page);
   });
 
