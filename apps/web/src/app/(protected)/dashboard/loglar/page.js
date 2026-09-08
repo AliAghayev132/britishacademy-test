@@ -185,9 +185,12 @@ export default function LogsPage() {
           options={[{ value: "ok", label: "Uğurlu" }, { value: "fail", label: "Uğursuz" }]}
         />
         {/* Layihənin öz təqvimi — brauzerin `input[type=date]` görünüşü
-            əməliyyat sistemindən asılıdır və panelin qalanına oxşamırdı. */}
+            əməliyyat sistemindən asılıdır və panelin qalanına oxşamırdı.
+            EN: iki tarix yan-yanadır, hər birində ikon + «15.09.2026» +
+            təmizləmə düyməsi var — 224px-də hər yarıya 101px düşürdü və
+            dolu tarix sıxılırdı. */}
         <DateRangePicker
-          className="w-full sm:w-56"
+          className="w-full sm:w-80"
           from={f.from}
           to={f.to}
           onFrom={(v) => put("from", v)}

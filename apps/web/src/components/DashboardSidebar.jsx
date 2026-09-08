@@ -18,8 +18,8 @@ import { canSee } from '@/lib/permissions'
 // Icons
 import {
   LogOut,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
   ChevronDown,
   Search,
   X,
@@ -255,19 +255,6 @@ export const DashboardSidebar = ({ children }) => {
         className="bg-white border-r border-gray-100 flex flex-col relative shadow-sm overflow-hidden transition-[width] duration-200 ease-in-out sticky top-0 h-screen flex-none"
         style={{ width: sidebarOpen ? 260 : 76 }}
       >
-        {/* Toggle */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shadow-sm z-10"
-          aria-label="Toggle sidebar"
-        >
-          {sidebarOpen ? (
-            <ChevronLeft className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
-          )}
-        </button>
-
         {/* Brand */}
         <div className="h-16 flex items-center px-4 border-b border-gray-100">
           <Link
@@ -456,9 +443,29 @@ export const DashboardSidebar = ({ children }) => {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-10">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {currentTitle}
-          </h2>
+          <div className="flex min-w-0 items-center gap-3">
+            {/* Sidebar açarı.
+                Əvvəl sidebar-ın SAĞ KƏNARINDA, yarısı kənardan çıxan kiçik
+                dairə idi — sidebar `overflow-hidden` olduğuna görə asılı
+                vəziyyətdə dayanırdı və gözə dəymirdi. İndi başlığın solunda,
+                barmaqla da rahat tutulan ölçüdədir. */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              title={sidebarOpen ? 'Menyunu yığ' : 'Menyunu aç'}
+              aria-label={sidebarOpen ? 'Menyunu yığ' : 'Menyunu aç'}
+              aria-expanded={sidebarOpen}
+              className="grid h-9 w-9 flex-none place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-[#00157A]"
+            >
+              {sidebarOpen ? (
+                <PanelLeftClose className="h-4.5 w-4.5" />
+              ) : (
+                <PanelLeftOpen className="h-4.5 w-4.5" />
+              )}
+            </button>
+            <h2 className="truncate text-lg font-semibold text-gray-800">
+              {currentTitle}
+            </h2>
+          </div>
           <Link
             href="/dashboard/profile"
             className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
