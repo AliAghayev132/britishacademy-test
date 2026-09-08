@@ -29,8 +29,13 @@ function show(v) {
     // Çoxdilli sahə { az, en, ru } — AZ variantı göstərilir.
     if ("az" in v || "en" in v || "ru" in v) return show(v.az || v.en || v.ru);
     if (v._id) return String(v._id);
-    const s = JSON.stringify(v);
-    return s.length > MAX_LEN ? s.slice(0, MAX_LEN) + "…" : s;
+    // Obyektin İÇİ SƏTİRƏ YAZILMIR — yalnız hansı açarların olduğu.
+    // Əvvəl bura xam JSON düşürdü və siyahı sənəd dumpına çevrilirdi;
+    // dəyərlərin özü paneldəki «Detallar» modalındadır.
+    const keys = Object.keys(v);
+    if (!keys.length) return "boş";
+    const head = keys.slice(0, 6).join(", ");
+    return `{ ${head}${keys.length > 6 ? `, … +${keys.length - 6}` : ""} }`;
   }
   const s = String(v);
   return s.length > MAX_LEN ? s.slice(0, MAX_LEN) + "…" : s;
@@ -71,6 +76,52 @@ export function diffDocs(before = {}, after = {}) {
   return out;
 }
 
+/** Jurnala yazılan XAM məlumatın maksimum ölçüsü (JSON, simvol). */
+const MAX_DETAIL = 24_000;
+
+/**
+ * Xam sənədi jurnala yazmağa hazırla: sirləri maskala, ölçünü məhdudlaşdır.
+ *
+ * NİYƏ ÖLÇÜ MƏHDUDU: kurs məzmunu (TipTap HTML) yüz kilobaytlarla ola bilər.
+ * Onu hər dəyişiklikdə jurnala yazsaq baza jurnalla dolar və siyahı ağırlaşar.
+ * Böyük sahə kəsilir və bunu göstərən nişan qoyulur — istifadəçi «burada
+ * daha çox məlumat var idi» olduğunu bilir.
+ */
+export function redact(value, depth = 0) {
+  if (value === null || value === undefined) return value;
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value !== "object") {
+    if (typeof value === "string" && value.length > MAX_DETAIL) {
+      return value.slice(0, MAX_DETAIL) + `\n… (${value.length - MAX_DETAIL} simvol kəsildi)`;
+    }
+    return value;
+  }
+  // Çox dərin iç-içə sənəd — jurnal üçün mənasızdır.
+  if (depth > 6) return "…";
+  if (Array.isArray(value)) {
+    const cut = value.slice(0, 100);
+    const out = cut.map((v) => redact(v, depth + 1));
+    if (value.length > cut.length) out.push(`… daha ${value.length - cut.length} element`);
+    return out;
+  }
+  if (value._bsontype || value instanceof Object.getPrototypeOf(Buffer.from("")).constructor) {
+    return String(value);
+  }
+  const src = value.toObject ? value.toObject() : value;
+  const out = {};
+  for (const [k, v] of Object.entries(src)) {
+    if (k === "__v") continue;
+    out[k] = SECRET.test(k) ? "•••" : redact(v, depth + 1);
+  }
+  return out;
+}
+
+/** Yalnız verilən sahələri götür (dəyişməyənləri jurnala yazmırıq). */
+export const pickFields = (doc, fields) => {
+  const src = doc?.toObject ? doc.toObject() : doc || {};
+  return Object.fromEntries((fields || []).map((f) => [f, redact(src[f])]));
+};
+
 /** Sorğudan IP çıxar (proxy arxasında `x-forwarded-for` birincidir). */
 const ipOf = (req) =>
   (req?.headers?.["x-forwarded-for"] || req?.ip || "")
@@ -91,10 +142,11 @@ const ipOf = (req) =>
  * @param {"ok"|"fail"} [entry.status]
  * @param {string} [entry.reason]
  * @param {object} [entry.actor]  `req.user` olmayanda (məs. uğursuz giriş)
+ * @param {{before?:object, after?:object}} [entry.details]  paneldəki modal üçün xam məlumat
  */
 export async function logAction(
   req,
-  { action, resource, resourceId, summary, changes, status, reason, actor } = {},
+  { action, resource, resourceId, summary, changes, status, reason, actor, details } = {},
 ) {
   try {
     const u = actor || req?.user || {};
@@ -108,6 +160,9 @@ export async function logAction(
       resourceId: resourceId != null ? String(resourceId) : undefined,
       summary,
       changes: Array.isArray(changes) && changes.length ? changes.slice(0, 40) : [],
+      details: details && (details.before !== undefined || details.after !== undefined)
+        ? { before: redact(details.before), after: redact(details.after) }
+        : undefined,
       status: status || "ok",
       reason,
       ip: ipOf(req),

@@ -5,7 +5,7 @@ export { AuthTokenService } from "./AuthTokenService.js";
 export { EncryptionService } from "./EncryptionService.js";
 export { SlugService } from "./SlugService.js";
 export { buildGraph, validateGraph, seedDatabase } from "./SeedService.js";
-export { logAction, diffDocs } from "./LogService.js";
+export { logAction, diffDocs, redact, pickFields } from "./LogService.js";
 export { bootstrapAdmin, bootstrapDeveloper } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";

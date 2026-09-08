@@ -47,8 +47,25 @@ const auditLogSchema = new Schema(
     resourceId: { type: String, trim: true },
     // İnsan üçün qısa cümlə.
     summary: { type: String, trim: true },
-    // Dəyişən sahələr — «nə idi → nə oldu».
+    // Dəyişən sahələr — «nə idi → nə oldu» (QISA sətir kimi, siyahıda göstərmək üçün).
     changes: { type: [changeSchema], default: [] },
+
+    /**
+     * TAM məlumat — paneldəki «Detallar» modalı üçün.
+     *
+     * NİYƏ AYRICA: `changes` sətirdir və qısaldılır — massiv «5 element»
+     * kimi yığılır, uzun mətn kəsilir. Yəni siyahı oxunaqlı qalır, amma
+     * «tam olaraq nə dəyişdi» sualına cavab vermir. Burada dəyişən
+     * sahələrin XAM dəyəri saxlanılır: yaradılanda `after`, siləndə
+     * `before`, yeniləndə hər ikisi.
+     *
+     * `Mixed` — sxemi əvvəlcədən bilinmir (istənilən resurs ola bilər).
+     * Ölçü `LogService`-də məhdudlaşdırılır, sirlər isə maskalanır.
+     */
+    details: {
+      before: { type: Schema.Types.Mixed },
+      after: { type: Schema.Types.Mixed },
+    },
 
     // Uğursuz cəhdlər də yazılır (məs. səhv parol) — yalnız uğurlu
     // əməliyyatları saxlamaq təhlükəsizlik jurnalını mənasız edir.

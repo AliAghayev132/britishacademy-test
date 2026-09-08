@@ -3,13 +3,12 @@
 // ── Əməliyyat jurnalı ──
 //
 // ƏVVƏL NECƏ İDİ: hər sətir bir cümlə idi — «courses yeniləndi: IELTS».
-// Yəni hansı sahənin dəyişdiyi, əvvəlki dəyərin nə olduğu bilinmirdi;
-// girişlər ümumiyyətlə yazılmırdı; süzgəc yalnız əməliyyat növü və
-// axtarışdan ibarət idi.
+// Hansı sahənin dəyişdiyi, əvvəlki dəyərin nə olduğu bilinmirdi; girişlər
+// yazılmırdı; yaradılan/silinən sənədin məzmunu heç yerdə qalmırdı.
 //
-// İNDİ: hər qeydin altında «nə idi → nə oldu» sətirləri var, girişlər
-// (uğurlu və UĞURSUZ) düşür, süzgəc isə istifadəçi, əməliyyat, resurs,
-// nəticə və tarix aralığı üzrədir.
+// İNDİ: sətirdə QISA xülasə var, tam məzmun isə «Detallar» düyməsi ilə
+// modalda açılır. Bu, qəsdəndir — sənədin özünü sətirə yazsaq siyahı
+// oxunmaz olardı (çoxdilli obyektlər, massivlər, uzun mətnlər).
 
 // React
 import { useState } from "react";
@@ -17,10 +16,12 @@ import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { NativeSelect } from "../_forms/kit";
 import { QueryState } from "@/components/ui/QueryState";
+import { Modal } from "@/components/ui/Modal";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
 // Data (RTK Query)
 import { useAdminLogsQuery, useAdminLogFiltersQuery } from "@/store/api/adminApi";
 // Icons
-import { X, ArrowRight, ShieldAlert } from "lucide-react";
+import { X, ArrowRight, ShieldAlert, FileSearch } from "lucide-react";
 
 /** Əməliyyat → AZ etiket + rozetka rəngi. */
 const ACTIONS = {
@@ -42,15 +43,99 @@ const fmt = (d) =>
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 
+/**
+ * Xam dəyəri modalda göstərmək üçün mətnə çevir.
+ *
+ * Sadə dəyər olduğu kimi, mürəkkəb dəyər isə səliqəli JSON kimi verilir —
+ * çoxdilli sahə və massivlər məhz burada tam görünür.
+ */
+const pretty = (v) => {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "object") return JSON.stringify(v, null, 2);
+  return String(v);
+};
+
+/**
+ * Modalda bir sahənin əvvəl/sonra görünüşü.
+ *
+ * «Əvvəl / Sonra» etiketləri YALNIZ hər iki tərəf olanda göstərilir:
+ * yaradılanda və siləndə tək tərəf var, etiket isə hər sahədə təkrarlanıb
+ * gözü yorurdu (başlıq onsuz da «yaradıldı»/«silindi» yazır).
+ */
+function FieldBlock({ name, before, after }) {
+  const has = (v) => v !== undefined;
+  const both = has(before) && has(after);
+  const cell = (label, v, tone) => (
+    <div className="bg-white p-3">
+      {both && (
+        <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">{label}</div>
+      )}
+      <pre className={`max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs ${tone}`}>
+        {pretty(v)}
+      </pre>
+    </div>
+  );
+  return (
+    <div className="rounded-lg border border-gray-200">
+      <div className="border-b border-gray-100 bg-gray-50 px-3 py-1.5 font-mono text-xs font-bold text-gray-700">
+        {name}
+      </div>
+      <div className={`grid gap-px bg-gray-100 ${both ? "sm:grid-cols-2" : ""}`}>
+        {has(before) && cell("Əvvəl", before, "text-gray-600")}
+        {has(after) && cell("Sonra", after, "text-gray-900")}
+      </div>
+    </div>
+  );
+}
+
+/** «Detallar» modalı — sənədin tam məzmunu. */
+function DetailsModal({ log, onClose }) {
+  if (!log) return null;
+  const d = log.details || {};
+  // Hər iki tərəfin sahələri birləşdirilir: yaradılanda yalnız `after`,
+  // siləndə yalnız `before` olur.
+  const fields = [...new Set([...Object.keys(d.before || {}), ...Object.keys(d.after || {})])];
+
+  return (
+    <Modal isOpen onClose={onClose} size="xl" title={log.summary || "Detallar"}>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+          <span><b className="text-gray-700">{log.actor?.name || "—"}</b>{log.actor?.role ? ` · ${log.actor.role}` : ""}</span>
+          <span>{fmt(log.createdAt)}</span>
+          {log.resource && <span>{log.resource}</span>}
+          {log.ip && <span>IP {log.ip}</span>}
+          {log.method && <span className="font-mono">{log.method} {log.path}</span>}
+        </div>
+
+        {fields.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-400">Bu qeyd üçün saxlanılmış məlumat yoxdur.</p>
+        ) : (
+          <div className="space-y-2">
+            {fields.map((f) => (
+              <FieldBlock key={f} name={f} before={d.before?.[f]} after={d.after?.[f]} />
+            ))}
+          </div>
+        )}
+
+        {log.userAgent && (
+          <p className="break-words text-[11px] text-gray-400">{log.userAgent}</p>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 const input =
-  "rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500";
+  "rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500";
 
 export default function LogsPage() {
   const [page, setPage] = useState(1);
   // Bütün süzgəclər tək obyektdə — sıfırlamaq bir sətirdir.
   const [f, setF] = useState({ action: "", resource: "", actor: "", status: "", from: "", to: "", search: "" });
+  const [open, setOpen] = useState(null); // modalda göstərilən qeyd
 
-  const set = (k) => (e) => { setF((prev) => ({ ...prev, [k]: e.target.value })); setPage(1); };
+  const put = (k, v) => { setF((prev) => ({ ...prev, [k]: v })); setPage(1); };
+  const set = (k) => (e) => put(k, e.target.value);
   const reset = () => { setF({ action: "", resource: "", actor: "", status: "", from: "", to: "", search: "" }); setPage(1); };
   const active = Object.values(f).filter(Boolean).length;
 
@@ -65,62 +150,60 @@ export default function LogsPage() {
 
   return (
     <div>
-      <p className="mb-4 text-sm text-gray-500">
-        Kim nə etdi — dəyişikliklər sahə-sahə, girişlər də daxil olmaqla.
-      </p>
-
-      {/* ── Süzgəclər ── */}
-      <div className="mb-4 space-y-2 rounded-xl border border-gray-200 bg-white p-3">
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <NativeSelect
-            placeholder="Bütün istifadəçilər"
-            value={f.actor}
-            onChange={set("actor")}
-            options={o.actors.map((a) => ({ value: a.id, label: `${a.name} (${a.count})` }))}
-          />
-          <NativeSelect
-            placeholder="Bütün əməliyyatlar"
-            value={f.action}
-            onChange={set("action")}
-            options={o.actions.map((a) => ({ value: a, label: actionOf(a).label }))}
-          />
-          <NativeSelect
-            placeholder="Bütün bölmələr"
-            value={f.resource}
-            onChange={set("resource")}
-            options={o.resources.map((r) => ({ value: r, label: r }))}
-          />
-          <NativeSelect
-            placeholder="Bütün nəticələr"
-            value={f.status}
-            onChange={set("status")}
-            options={[{ value: "ok", label: "Uğurlu" }, { value: "fail", label: "Uğursuz" }]}
-          />
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="whitespace-nowrap">Tarixdən</span>
-            <input type="date" value={f.from} onChange={set("from")} className={`${input} w-full`} />
-          </label>
-          <label className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="whitespace-nowrap">Tarixə</span>
-            <input type="date" value={f.to} onChange={set("to")} className={`${input} w-full`} />
-          </label>
-          <input
-            value={f.search}
-            onChange={set("search")}
-            placeholder="Təfərrüat, istifadəçi, sahə, IP…"
-            className={`${input} w-full lg:col-span-2`}
-          />
-        </div>
-
+      {/* ── Süzgəclər: TƏK SIRA ──
+          Əvvəl iki sıra idi və hər sahə tam enində yer tuturdu. Geniş
+          ekranda hamısı bir sıraya sığır, dar ekranda öz-özünə qatlanır. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <NativeSelect
+          className="w-full sm:w-40"
+          placeholder="İstifadəçi"
+          value={f.actor}
+          onChange={set("actor")}
+          options={o.actors.map((a) => ({ value: a.id, label: `${a.name} (${a.count})` }))}
+        />
+        <NativeSelect
+          className="w-full sm:w-36"
+          placeholder="Əməliyyat"
+          value={f.action}
+          onChange={set("action")}
+          options={o.actions.map((a) => ({ value: a, label: actionOf(a).label }))}
+        />
+        <NativeSelect
+          className="w-full sm:w-36"
+          placeholder="Bölmə"
+          value={f.resource}
+          onChange={set("resource")}
+          options={o.resources.map((r) => ({ value: r, label: r }))}
+        />
+        <NativeSelect
+          className="w-full sm:w-32"
+          placeholder="Nəticə"
+          value={f.status}
+          onChange={set("status")}
+          options={[{ value: "ok", label: "Uğurlu" }, { value: "fail", label: "Uğursuz" }]}
+        />
+        {/* Layihənin öz təqvimi — brauzerin `input[type=date]` görünüşü
+            əməliyyat sistemindən asılıdır və panelin qalanına oxşamırdı. */}
+        <DateRangePicker
+          className="w-full sm:w-56"
+          from={f.from}
+          to={f.to}
+          onFrom={(v) => put("from", v)}
+          onTo={(v) => put("to", v)}
+        />
+        <input
+          value={f.search}
+          onChange={set("search")}
+          placeholder="Axtar…"
+          className={`${input} min-w-[140px] flex-1`}
+        />
         {active > 0 && (
           <button
             onClick={reset}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 transition hover:text-[#00157A]"
+            title="Süzgəcləri təmizlə"
+            className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-2 text-xs font-semibold text-gray-500 transition hover:bg-gray-50 hover:text-[#00157A]"
           >
-            <X className="h-3.5 w-3.5" /> Süzgəcləri təmizlə ({active})
+            <X className="h-3.5 w-3.5" /> {active}
           </button>
         )}
       </div>
@@ -140,42 +223,57 @@ export default function LogsPage() {
             {items.map((log) => {
               const a = actionOf(log.action);
               const failed = log.status === "fail";
+              const hasDetails =
+                Boolean(log.details?.before) || Boolean(log.details?.after);
               return (
-                <li key={log._id} className={`px-4 py-3 ${failed ? "bg-red-50/40" : ""}`}>
-                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${a.cls}`}>
-                      {a.label}
-                    </span>
-                    {failed && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
-                        <ShieldAlert className="h-3 w-3" /> Uğursuz
+                <li key={log._id} className={`flex gap-3 px-4 py-3 ${failed ? "bg-red-50/40" : ""}`}>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${a.cls}`}>
+                        {a.label}
                       </span>
+                      {failed && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                          <ShieldAlert className="h-3 w-3" /> Uğursuz
+                        </span>
+                      )}
+                      <span className="text-sm font-semibold text-gray-900">{log.summary || "—"}</span>
+                      {log.reason && <span className="text-xs text-red-600">· {log.reason}</span>}
+                    </div>
+
+                    {/* Sətirdə YALNIZ qısa xülasə — tam məzmun modaldadır. */}
+                    {(log.changes || []).length > 0 && (
+                      <ul className="mt-2 space-y-1 rounded-lg bg-gray-50 px-3 py-2">
+                        {log.changes.map((c, i) => (
+                          <li key={i} className="flex flex-wrap items-center gap-1.5 text-xs">
+                            <span className="font-mono font-semibold text-gray-700">{c.field}</span>
+                            <span className="truncate text-gray-400 line-through">{c.from}</span>
+                            <ArrowRight className="h-3 w-3 flex-none text-gray-400" />
+                            <span className="truncate font-semibold text-gray-900">{c.to}</span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                    <span className="text-sm font-semibold text-gray-900">{log.summary || "—"}</span>
-                    {log.reason && <span className="text-xs text-red-600">· {log.reason}</span>}
-                    <span className="ml-auto whitespace-nowrap text-xs text-gray-400">{fmt(log.createdAt)}</span>
+
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400">
+                      <span className="font-medium text-gray-600">{log.actor?.name || "—"}</span>
+                      {log.actor?.role && <span>{log.actor.role}</span>}
+                      {log.resource && <span>· {log.resource}</span>}
+                      {log.ip && <span>· {log.ip}</span>}
+                    </div>
                   </div>
 
-                  {/* «Nə idi → nə oldu» — jurnalın əsas dəyəri budur. */}
-                  {(log.changes || []).length > 0 && (
-                    <ul className="mt-2 space-y-1 rounded-lg bg-gray-50 px-3 py-2">
-                      {log.changes.map((c, i) => (
-                        <li key={i} className="flex flex-wrap items-center gap-1.5 text-xs">
-                          <span className="font-mono font-semibold text-gray-700">{c.field}</span>
-                          <span className="text-gray-400 line-through">{c.from}</span>
-                          <ArrowRight className="h-3 w-3 text-gray-400" />
-                          <span className="font-semibold text-gray-900">{c.to}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400">
-                    <span className="font-medium text-gray-600">{log.actor?.name || "—"}</span>
-                    {log.actor?.role && <span>{log.actor.role}</span>}
-                    {log.resource && <span>· {log.resource}</span>}
-                    {log.ip && <span>· {log.ip}</span>}
-                    {log.method && <span className="font-mono">· {log.method} {log.path}</span>}
+                  {/* Sağ sütun: vaxt + «Detallar» */}
+                  <div className="flex flex-none flex-col items-end gap-1.5">
+                    <span className="whitespace-nowrap text-xs text-gray-400">{fmt(log.createdAt)}</span>
+                    {hasDetails && (
+                      <button
+                        onClick={() => setOpen(log)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 transition hover:border-[#00157A] hover:text-[#00157A]"
+                      >
+                        <FileSearch className="h-3.5 w-3.5" /> Detallar
+                      </button>
+                    )}
                   </div>
                 </li>
               );
@@ -190,6 +288,8 @@ export default function LogsPage() {
         total={pagination?.total}
         onChange={setPage}
       />
+
+      <DetailsModal log={open} onClose={() => setOpen(null)} />
     </div>
   );
 }

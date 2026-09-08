@@ -10,7 +10,7 @@ import { SiteSetting, Lead } from "#models";
 import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAccessSection } from "#utils";
 
 // Services
-import { logAction, diffDocs } from "#services";
+import { logAction, diffDocs, redact, pickFields } from "#services";
 
 // Local
 import { RESOURCES, RESOURCE_SECTION } from "./resourceRegistry.js";
@@ -333,7 +333,13 @@ const create = asyncHandler(async (req, res) => {
   }
   // Slug/defaults are handled by each model's pre-save hook.
   const item = await entry.model.create(req.body);
-  await logAction(req, { action: "create", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yaradıldı: ${labelOf(item)}` });
+  await logAction(req, {
+    action: "create", resource: req.params.resource, resourceId: item._id,
+    summary: `${req.params.resource} yaradıldı: ${labelOf(item)}`,
+    // Yaradılan sənədin ÖZÜ — əvvəl yalnız «yaradıldı» yazılırdı, nə ilə
+    // yaradıldığı heç yerdə qalmırdı.
+    details: { after: redact(item) },
+  });
   res.status(201).json({ success: true, message: "Yaradıldı", data: { item } });
 });
 
@@ -377,10 +383,16 @@ const update = asyncHandler(async (req, res) => {
   const changes = diffDocs(before, Object.fromEntries(
     Object.keys(body).map((k) => [k, item[k]]),
   ));
+  const touched = changes.map((c) => c.field);
   await logAction(req, {
     action: "update", resource: req.params.resource, resourceId: item._id,
     summary: `${req.params.resource} yeniləndi: ${labelOf(item)}`,
     changes,
+    // Yalnız DƏYİŞƏN sahələr — bütöv sənədi yazmaq jurnalı şişirdərdi,
+    // modalda isə oxumaq çətinləşərdi.
+    details: touched.length
+      ? { before: pickFields(before, touched), after: pickFields(item, touched) }
+      : undefined,
   });
   res.json({ success: true, message: "Yeniləndi", data: { item } });
 });
@@ -408,6 +420,8 @@ const remove = asyncHandler(async (req, res) => {
   await logAction(req, {
     action: "delete", resource: req.params.resource, resourceId: req.params.id,
     summary: `${req.params.resource} silindi${doomed ? `: ${labelOf(doomed)}` : ""}`,
+    // Silinən sənəd tam saxlanılır — bərpa lazım gələrsə istinad buradır.
+    details: doomed ? { before: redact(doomed) } : undefined,
   });
   res.json({ success: true, message: "Silindi" });
 });
@@ -531,9 +545,27 @@ const updateSettings = asyncHandler(async (req, res) => {
   if (body.ai && !body.ai.apiKey) {
     body.ai = { ...body.ai, apiKey: settings.ai?.apiKey || "" };
   }
+  // Tənzimləmələrdə də «nə idi → nə oldu» saxlanılır. Əvvəl yalnız
+  // «yeniləndi» yazılırdı — hansı blokun (SMTP? SEO? əlaqə?) dəyişdiyi
+  // bilinmirdi, halbuki bura saytın ən həssas ayarlarıdır.
+  const keys = Object.keys(body);
+  const beforeSettings = pickFields(settings, keys);
+
   Object.assign(settings, body);
   await settings.save();
-  await logAction(req, { action: "settings", resource: "settings", summary: "Sayt tənzimləmələri yeniləndi" });
+
+  const settingChanges = diffDocs(beforeSettings, pickFields(settings, keys));
+  const touchedKeys = settingChanges.map((c) => c.field);
+  await logAction(req, {
+    action: "settings", resource: "settings",
+    summary: touchedKeys.length
+      ? `Tənzimləmələr yeniləndi: ${touchedKeys.join(", ")}`
+      : "Sayt tənzimləmələri yeniləndi",
+    changes: settingChanges,
+    details: touchedKeys.length
+      ? { before: pickFields(beforeSettings, touchedKeys), after: pickFields(settings, touchedKeys) }
+      : undefined,
+  });
   // Cavabda da maskala — əks halda parol/açar admin panelə geri qayıdırdı.
   res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings: maskSettings(settings) } });
 });

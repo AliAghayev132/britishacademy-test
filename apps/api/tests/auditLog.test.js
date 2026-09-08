@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
-import { diffDocs } from "../services/LogService.js";
+import { diffDocs, redact, pickFields } from "../services/LogService.js";
 import { AuditLog } from "../models/auditLog.model.js";
 
 /**
@@ -58,6 +58,15 @@ describe("diffDocs — sahə-sahə fərq", () => {
     expect(diffDocs({ x: false }, { x: true })[0]).toEqual({ field: "x", from: "xeyr", to: "bəli" });
     expect(diffDocs({ x: "" }, { x: "var" })[0].from).toBe("—");
     expect(diffDocs({ x: [] }, { x: [1, 2, 3] })[0]).toEqual({ field: "x", from: "boş", to: "3 element" });
+  });
+
+  it("obyektin İÇİ sətirə yazılmır — yalnız açar adları", () => {
+    // Əvvəl bura xam JSON düşürdü və siyahı sənəd dumpına çevrilirdi.
+    // Dəyərlərin özü paneldəki «Detallar» modalındadır.
+    const d = diffDocs({ socials: { instagram: "a" } }, { socials: { instagram: "b", tiktok: "c" } });
+    expect(d[0].from).toBe("{ instagram }");
+    expect(d[0].to).toBe("{ instagram, tiktok }");
+    expect(JSON.stringify(d)).not.toContain("tiktok.com");
   });
 
   it("uzun dəyər qısaldılır", () => {
@@ -178,5 +187,69 @@ describe("süzgəclər", () => {
     // onun izi jurnalda qalır), yeni əməliyyat növü isə görünməzdi.
     expect(users).toMatch(/const logFilters = asyncHandler/);
     expect(users).toMatch(/AuditLog\.distinct\("action"\)/);
+  });
+});
+
+describe("tam məlumat (modal üçün)", () => {
+  const admin = fs.readFileSync("controllers/adminController.js", "utf8");
+
+  it("yaradılan sənəd saxlanılır", () => {
+    // Əvvəl yalnız «yaradıldı» yazılırdı — nə ilə yaradıldığı heç yerdə
+    // qalmırdı.
+    expect(admin).toMatch(/details: \{ after: redact\(item\) \}/);
+  });
+
+  it("silinən sənəd saxlanılır", () => {
+    // Bərpa lazım gələrsə istinad buradır.
+    expect(admin).toMatch(/details: doomed \? \{ before: redact\(doomed\) \}/);
+  });
+
+  it("yeniləmədə yalnız DƏYİŞƏN sahələr saxlanılır", () => {
+    // Bütöv sənəd jurnalı şişirdərdi və modalda oxumaq çətinləşərdi.
+    expect(admin).toMatch(/const touched = changes\.map\(\(c\) => c\.field\)/);
+    expect(admin).toMatch(/before: pickFields\(before, touched\), after: pickFields\(item, touched\)/);
+  });
+
+  it("tənzimləmə dəyişiklikləri də yazılır", () => {
+    // Bura saytın ən həssas ayarlarıdır (SMTP, SEO, kod inyeksiyası) —
+    // əvvəl yalnız «yeniləndi» yazılırdı.
+    expect(admin).toMatch(/const settingChanges = diffDocs\(/);
+    expect(admin).toMatch(/Tənzimləmələr yeniləndi: \$\{touchedKeys\.join/);
+  });
+});
+
+describe("redact — jurnala yazılan xam məlumat", () => {
+  it("sirləri maskalayır", () => {
+    const r = redact({ smtp: { host: "mail.x", pass: "gizli-parol", apiKey: "sk-123" } });
+    expect(r.smtp.host).toBe("mail.x");
+    expect(r.smtp.pass).toBe("•••");
+    expect(r.smtp.apiKey).toBe("•••");
+    expect(JSON.stringify(r)).not.toContain("gizli-parol");
+  });
+
+  it("çox uzun mətni kəsir", () => {
+    // Kurs məzmunu (TipTap HTML) yüz kilobaytlarla ola bilər — hər
+    // dəyişiklikdə tam yazsaq baza jurnalla dolardı.
+    const r = redact({ html: "x".repeat(60_000) });
+    expect(r.html.length).toBeLessThan(25_000);
+    expect(r.html).toContain("kəsildi");
+  });
+
+  it("nəhəng massivi məhdudlaşdırır", () => {
+    const r = redact(Array.from({ length: 300 }, (_, i) => i));
+    expect(r.length).toBeLessThanOrEqual(101);
+    expect(String(r[r.length - 1])).toContain("daha");
+  });
+
+  it("çox dərin iç-içə sənəddə dayanır", () => {
+    let deep = { v: 1 };
+    for (let i = 0; i < 20; i += 1) deep = { nested: deep };
+    expect(() => redact(deep)).not.toThrow();
+    expect(JSON.stringify(redact(deep))).toContain('"…"');
+  });
+
+  it("pickFields yalnız verilən sahələri götürür", () => {
+    const r = pickFields({ a: 1, b: 2, c: 3 }, ["a", "c"]);
+    expect(Object.keys(r)).toEqual(["a", "c"]);
   });
 });
