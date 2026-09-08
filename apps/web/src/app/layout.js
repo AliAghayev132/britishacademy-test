@@ -87,12 +87,8 @@ export default async function RootLayout({ children }) {
     // ekran oxuyucular və axtarış sistemləri səhv dil görürdü.
     <html lang={locale || "az"}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        {/* Şriftlər YERLİDİR (public/fonts + styles/fonts.css) — əvvəl hər
+            ziyarətçi üçün Google-a 40-a yaxın sorğu gedirdi. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
         {/* GTM — paneldəki ID boşdursa heç nə render olunmur. */}
         <GtmScript id={inject.gtmId} />

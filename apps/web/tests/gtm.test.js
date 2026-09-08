@@ -1,112 +1,72 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
-import { gtmIdOf } from "@/lib/gtm";
 
 /**
  * GOOGLE TAG MANAGER.
  *
- * NİYƏ KODDA, «kod yerləşdirmə» sahəsində DEYİL: `CodeInjection` kodu
- * brauzerdə, səhifə yükləndikdən sonra əlavə edir. GTM üçün bunun iki
- * nəticəsi var —
- *
+ * NİYƏ «kod yerləşdirmə» sahəsindən İSTİFADƏ EDİLMƏDİ: paneldəki `head`
+ * kodu brauzerdə, səhifə yükləndikdən SONRA əlavə olunur (CodeInjection.jsx).
+ * GTM üçün bu iki səbəbdən yaramır —
  *   1. konteyner gec qalxır;
- *   2. GTM-in `<noscript>` hissəsi ÜMUMİYYƏTLƏ işləmir: o, məhz JavaScript
- *      sönülü olanlar üçündür, `CodeInjection` isə onu JavaScript ilə əlavə
- *      edir. JS sönülüdürsə heç nə əlavə olunmur, JS açıqdırsa brauzer
- *      `<noscript>` içindəkinə baxmır. Yəni hər iki halda faydasız.
- *
- * Ona görə ID paneldən oxunur, markup isə SERVER tərəfdə düzgün yerdə
- * render olunur.
+ *   2. `<noscript>` hissəsi belə üsulla HEÇ VAXT işləmir: o, məhz JavaScript
+ *      sönülü olanlar üçündür, JavaScript ilə əlavə olunan noscript isə
+ *      mənasızdır.
+ * Ona görə hər ikisi server tərəfdə, `layout.js`-in içində render olunur.
  */
 
+const gtm = fs.readFileSync("src/components/site/GoogleTagManager.jsx", "utf8");
 const layout = fs.readFileSync("src/app/layout.js", "utf8");
-const gtmComp = fs.readFileSync("src/components/site/GoogleTagManager.jsx", "utf8");
-const seoLib = fs.readFileSync("src/lib/seo.js", "utf8");
 
-describe("konteyner ID-sinin yoxlanışı", () => {
-  it("düzgün ID qəbul olunur", () => {
-    expect(gtmIdOf("GTM-5S6LVZ62")).toBe("GTM-5S6LVZ62");
-    expect(gtmIdOf("GTM-ABCD1234")).toBe("GTM-ABCD1234");
-  });
-
-  it("boşluq və kiçik hərf düzəldilir", () => {
-    // Admin ID-ni kopyalayanda ətrafında boşluq qalır.
-    expect(gtmIdOf("  gtm-5s6lvz62  ")).toBe("GTM-5S6LVZ62");
-  });
-
-  it("boş dəyər GTM-i tamamilə söndürür", () => {
-    for (const v of ["", "   ", null, undefined]) expect(gtmIdOf(v)).toBe("");
-  });
-
-  it("uyğun gəlməyən dəyər nəzərə alınmır", () => {
-    // «Səssiz sınıq skript» yerinə «heç nə» — sayt sınmır.
-    for (const v of ["GTM", "UA-12345", "G-R3BFKCT5WX", "salam", "GTM-"]) {
-      expect(gtmIdOf(v), `${v} qəbul olunmamalıdır`).toBe("");
-    }
-  });
-
-  it("skriptə kod yeritmək mümkün deyil", () => {
-    // ID inline skriptin İÇİNƏ yazılır. Yoxlanış olmasaydı bunlar sayta
-    // ixtiyari JS əlavə edərdi.
-    const attacks = [
-      "GTM-X');alert(1);//",
-      "GTM-X'+alert(1)+'",
-      "GTM-X</script><script>alert(1)</script>",
-      "GTM-X\"; fetch('//evil')",
-    ];
-    for (const a of attacks) expect(gtmIdOf(a), `${a} keçdi!`).toBe("");
-  });
-});
-
-describe("markup-un yeri", () => {
-  it("`<noscript>` `<body>`-nin ƏVVƏLİNDƏDİR", () => {
-    // Google-un tələb etdiyi yer budur. Sonda olsa da işləyərdi, amma
-    // sıralamanı qəsdən qoruyuruq.
-    const bodyAt = layout.indexOf("<body>");
-    const nsAt = layout.indexOf("<GtmNoScript");
-    const kidsAt = layout.indexOf("<Providers>");
-    expect(bodyAt).toBeGreaterThan(0);
-    expect(nsAt, "GtmNoScript <body> içində deyil").toBeGreaterThan(bodyAt);
-    expect(nsAt, "GtmNoScript məzmundan sonra qalıb").toBeLessThan(kidsAt);
-  });
-
-  it("skript `<head>`dədir", () => {
-    const headEnd = layout.indexOf("</head>");
-    expect(layout.indexOf("<GtmScript")).toBeLessThan(headEnd);
-  });
-
-  it("ID `codeInjection`-dan oxunur", () => {
-    // `seo` blokunda saxlamaq olmazdı — ora `editor` rolu da yaza bilir,
-    // GTM konteyneri isə sayta ixtiyari JS yükləyir.
-    expect(layout).toMatch(/inject\.gtmId/);
-    expect(layout).toMatch(/codeInjection/);
+describe("GTM komponenti", () => {
+  it("ID formatı yoxlanılır", () => {
+    // ID sətir kimi skriptin İÇİNƏ yazılır — yoxlanmasa səhv dəyər skripti
+    // sındırar və ya ixtiyari JS-ə çevrilər.
+    expect(gtm).toMatch(/const VALID = \/\^GTM-/);
+    expect(gtm).toMatch(/VALID\.test/);
   });
 
   it("ID boşdursa heç nə render olunmur", () => {
-    // Sınaq mühitində təsadüfən statistika toplanmasın.
-    expect(gtmComp).toMatch(/if \(!gtm\) return null/);
-    expect((gtmComp.match(/if \(!gtm\) return null/g) || []).length).toBe(2);
+    // Test/dev mühitində təsadüfən statistika toplanmasın.
+    const nulls = gtm.match(/if \(!gtm\) return null;/g) || [];
+    expect(nulls.length, "hər iki komponentdə qapı olmalıdır").toBe(2);
   });
 
-  it("skript `next/script` ilə yüklənir", () => {
-    expect(gtmComp).toMatch(/from "next\/script"/);
-    expect(gtmComp).toMatch(/strategy="afterInteractive"/);
+  it("hər iki hissə ixrac olunur", () => {
+    expect(gtm).toMatch(/export function GtmScript/);
+    expect(gtm).toMatch(/export function GtmNoScript/);
+  });
+
+  it("klient komponenti DEYİL", () => {
+    // `"use client"` olsaydı yenə hidratasiyadan sonra işləyərdi — yəni
+    // paneldəki üsulun eyni qüsuru qayıdardı.
+    expect(gtm).not.toMatch(/^["']use client["']/m);
   });
 });
 
-describe("tənzimləmələrin keşi", () => {
-  it("`/site` 60 saniyəlik keşdədir", () => {
-    // 3600 (bir saat) idi. `app/layout.js` GTM ID-sini məhz buradan oxuyur —
-    // admin ID-ni yazandan sonra izləmənin başlaması bir saat çəkirdi və
-    // «işləmədi» kimi görünürdü.
-    expect(seoLib).toMatch(/apiGet\("\/site", \{ revalidate: 60 \}\)/);
+describe("layout-dakı yerləşmə", () => {
+  it("skript `<head>` içindədir", () => {
+    const head = layout.slice(layout.indexOf("<head>"), layout.indexOf("</head>"));
+    expect(head).toContain("<GtmScript");
   });
 
-  it("eyni ünvan hər yerdə eyni müddətlədir", () => {
-    // Bir URL üçün iki fərqli müddət vermək səliqəsizdir və hansının qalib
-    // gəldiyi Next-in daxili qaydasından asılı qalır.
-    const pub = fs.readFileSync("src/app/(public)/layout.js", "utf8");
-    const withWindow = [...pub.matchAll(/apiGet\("\/site",\s*\{\s*revalidate:\s*(\d+)/g)].map((m) => m[1]);
-    for (const w of withWindow) expect(w).toBe("60");
+  it("noscript `<body>`-nin ƏVVƏLİNDƏDİR", () => {
+    // Google-un tələb etdiyi yer budur.
+    const body = layout.slice(layout.indexOf("<body>"));
+    const ns = body.indexOf("<GtmNoScript");
+    const providers = body.indexOf("<Providers");
+    expect(ns).toBeGreaterThan(0);
+    expect(ns, "noscript səhifə məzmunundan ƏVVƏL olmalıdır").toBeLessThan(providers);
+  });
+
+  it("ID paneldən oxunur, koda yazılmır", () => {
+    // Dəyişmək/söndürmək üçün deploy lazım gəlməsin.
+    expect(layout).toMatch(/inject\.gtmId/);
+
+    // Şərhlər çıxarılır: sənəd blokundakı `GTM-XXXXXXX` NÜMUNƏSİ real ID
+    // deyil, amma xam mətndə axtarsaq yalançı uyğunluq verir.
+    const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+    for (const [name, src] of [["layout.js", layout], ["GoogleTagManager.jsx", gtm]]) {
+      expect(strip(src), `${name}: ID koda sabit yazılıb`).not.toMatch(/GTM-[A-Z0-9]{6,}/);
+    }
   });
 });

@@ -1,43 +1,57 @@
 // ── Google Tag Manager ──
 //
 // NİYƏ AYRICA KOMPONENT, «kod yerləşdirmə» sahəsinə yapışdırmaq əvəzinə:
+// paneldəki `codeInjection.head` kodu brauzerdə, səhifə yükləndikdən SONRA
+// əlavə olunur (bax: CodeInjection.jsx). GTM üçün bunun iki qüsuru var —
 //
-//  1. `CodeInjection` kodu BRAUZERDƏ, səhifə yükləndikdən sonra əlavə edir.
-//     GTM-in isə mümkün qədər erkən qalxması lazımdır.
-//  2. GTM-in `<noscript>` hissəsi o üsulla ÜMUMİYYƏTLƏ işləmir: o, məhz
-//     JavaScript SÖNÜLÜ olanlar üçündür, `CodeInjection` isə onu JavaScript
-//     ilə əlavə edir. JS sönülüdürsə heç nə əlavə olunmur; JS açıqdırsa
-//     brauzer `<noscript>` içindəkinə onsuz da baxmır. Yəni hər iki halda
-//     faydasızdır.
+//   1. GTM gec qalxır, ilk səhifə baxışının vaxtı sürüşür;
+//   2. GTM-in `<noscript>` hissəsi belə üsulla ÜMUMİYYƏTLƏ işləmir. O, məhz
+//      JavaScript SÖNÜLÜ olanlar üçündür; JavaScript ilə əlavə olunan
+//      `<noscript>` isə mənasızdır (JS sönülüdürsə heç nə əlavə olunmur,
+//      açıqdırsa brauzer onun içinə onsuz da baxmır).
 //
-// Burada snippet SERVER tərəfdə HTML-ə düşür: `<noscript>` real olaraq
-// `<body>`-nin əvvəlindədir, skript isə `next/script` ilə `afterInteractive`
-// strategiyası ilə qalxır (Next-in GTM üçün tövsiyə etdiyi yol).
+// Burada isə hər ikisi SERVER tərəfdə, ilk HTML-in içinə düşür — Google-un
+// göstərdiyi yerlərə: skript `<head>`-in başına, iframe `<body>`-nin əvvəlinə.
+//
+// ID paneldən gəlir (Tənzimləmələr → SEO / Texniki). Boşdursa heç nə render
+// olunmur — yəni test mühitində təsadüfən statistika toplanmır.
 
-import Script from "next/script";
+/**
+ * Konteyner ID-si `GTM-XXXXXXX` formasındadır.
+ *
+ * Yoxlama VACİBDİR: ID aşağıda sətir kimi skriptin İÇİNƏ yazılır. Yoxlanmasa
+ * sahəyə dırnaq/nöqtəli vergül düşən dəyər skripti sındırar (və ya ixtiyari
+ * JS-ə çevrilər). Panel yalnız `admin` roluna açıqdır, amma səhv yazı da
+ * bunu edə bilər.
+ */
+const VALID = /^GTM-[A-Z0-9]{4,}$/;
 
-// ID yoxlanışı ayrıca modulda — o, təhlükəsizlik sərhədidir (ID inline
-// skriptin içinə yazılır) və öz testi var.
-import { gtmIdOf } from "@/lib/gtm";
+const clean = (id) => {
+  const v = String(id || "").trim().toUpperCase();
+  return VALID.test(v) ? v : null;
+};
 
-/** `<head>` üçün: konteyneri yükləyən skript. */
+/** `<head>`-ə düşən əsas GTM skripti. */
 export function GtmScript({ id }) {
-  const gtm = gtmIdOf(id);
+  const gtm = clean(id);
   if (!gtm) return null;
   return (
-    <Script id="gtm-init" strategy="afterInteractive">
-      {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    <script
+      // Google-un öz parçası, yalnız ID yerinə qoyulub.
+      dangerouslySetInnerHTML={{
+        __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${gtm}');`}
-    </Script>
+})(window,document,'script','dataLayer','${gtm}');`,
+      }}
+    />
   );
 }
 
-/** `<body>`-nin ƏVVƏLİ üçün: JavaScript sönülü ziyarətçilər. */
+/** `<body>`-nin ƏVVƏLİNƏ düşən ehtiyat iframe (JavaScript sönülü olanlar üçün). */
 export function GtmNoScript({ id }) {
-  const gtm = gtmIdOf(id);
+  const gtm = clean(id);
   if (!gtm) return null;
   return (
     <noscript>

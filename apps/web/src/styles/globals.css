@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Yerli şriftlər — Google-a sorğu getmir (bax: fonts.css). */
+@import "./fonts.css";
 
 /* ============================================================
    Admin brend palitrası (Tailwind v4 @theme override)
@@ -37,8 +39,9 @@
    British Academy — global styles.
    Tailwind v4 (above) powers admin/UI primitives; the block below is the
    approved public-site design system ported from the legacy static build.
-   Fonts (Poppins + Nunito Sans) are loaded via <link> in the root layout,
-   so the 'Poppins' / 'Nunito Sans' family names below resolve directly.
+   Şriftlər (Poppins + Nunito Sans) YERLİDİR — yuxarıdakı `fonts.css`
+   `public/fonts/` qovluğundakı fayllara `@font-face` verir, ona görə
+   aşağıdakı 'Poppins' / 'Nunito Sans' adları birbaşa həll olunur.
    ============================================================ */
 :root {
   --accent: #00157A;
