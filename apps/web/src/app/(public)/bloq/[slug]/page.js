@@ -24,7 +24,11 @@ export async function generateMetadata({ params }) {
   const { data } = await apiGetStatus(`/blog/${slug}`);
   const p = data?.post;
   if (!p) return {};
-  const meta = metaFromApi(p.seo, {
+  // `await` VACİBDİR: `metaFromApi` async-dır. Onsuz aşağıdakı `...meta`
+  // Promise-i yayırdı və nəticə BOŞ obyekt olurdu — yəni hər bloq yazısı
+  // başlığını, təsvirini və kanonik ünvanını itirib saytın defolt metası
+  // ilə çıxırdı. Bloqun bütün SEO dəyəri məhz burada itirdi.
+  const meta = await metaFromApi(p.seo, {
     title: p.title,
     description: p.excerpt,
     path: `/bloq/${slug}`,

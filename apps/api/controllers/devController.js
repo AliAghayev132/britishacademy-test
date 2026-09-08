@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, MailService, importHeaderMenu, importContactI18n } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, importBlog, MailService, importHeaderMenu, importContactI18n } from "#services";
 import { HEADER_MENU } from "../services/SeedService.js";
 import { tri } from "../data/translations.mjs";
 
@@ -273,6 +273,38 @@ const runImportQuizzes = asyncHandler(async (req, res) => {
 });
 
 /**
+ * POST /api/admin/dev/import-blog
+ *
+ * SEO bloq yazılarını yükləyir. Auditdə çıxan boşluğu doldurmaq üçündür:
+ * saytda 0 bloq yazısı var idi və kurs/ölkə səhifələrinin böyük hissəsi
+ * mətnsiz idi, yəni axtarış sistemləri üçün göstəriləcək məzmun yox idi.
+ *
+ * Yazılar QARALAMA kimi yüklənir — mətn yoxlanmadan saytda dərc olunmur.
+ * `publish: true` verilsə dərhal dərc edilir.
+ */
+const runImportBlog = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const overwrite = Boolean(req.body?.overwrite);
+  const publish = Boolean(req.body?.publish);
+  const { report, summary } = await importBlog({ dryRun, overwrite, publish });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Bloq: ${summary.created} yazı yaradıldı, ${summary.replaced} əvəz olundu`,
+    });
+  }
+  res.json({
+    success: true,
+    message: `${summary.created} yaradıldı, ${summary.replaced} əvəz olundu, ${summary.skipped} toxunulmadı`,
+    data: { report, summary },
+  });
+});
+
+/**
  * POST /api/admin/dev/import-menu
  *
  * Başlıq menyusunu yenidən qurur. Menyu quruluşu dəyişəndə tam seed
@@ -329,4 +361,4 @@ const runImportContact = asyncHandler(async (req, res) => {
   });
 });
 
-export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu };
+export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu, runImportBlog };

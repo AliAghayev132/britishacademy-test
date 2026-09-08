@@ -193,6 +193,12 @@ export const adminApi = baseApi.injectEndpoints({
     // Səviyyə testlərini yüklə (mövcud test toxunulmur).
     importQuizzes: builder.mutation({
       query: (body) => ({ url: "/admin/dev/import-quizzes", method: "POST", body: body || {} }),
+      invalidatesTags: [{ type: "Resource", id: "quizzes" }],
+    }),
+    /** SEO bloq yazılarını yükləyir — qaralama kimi. */
+    importBlog: builder.mutation({
+      query: (body) => ({ url: "/admin/dev/import-blog", method: "POST", body: body || {} }),
+      invalidatesTags: [{ type: "Resource", id: "blog-posts" }, { type: "Resource", id: "blog-categories" }],
       invalidatesTags: ["Resource", "Site"],
     }),
     // Bütün məzmunu silib yenidən qurur — YALNIZ developer.
@@ -335,6 +341,7 @@ export const {
   useImportContactMutation,
   useImportMenuMutation,
   useImportQuizzesMutation,
+  useImportBlogMutation,
   useAdminSeedMutation,
   useBulkStatusQuery,
   useBulkPreviewMutation,

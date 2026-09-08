@@ -11,7 +11,7 @@
 import { useState } from "react";
 // UI
 import { confirmDialog, notify } from "@/components/ui/feedback";
-import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList, Menu as MenuIcon } from "lucide-react";
+import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList, FileText, Menu as MenuIcon } from "lucide-react";
 // Data
 import {
   useAdminMigrateI18nMutation,
@@ -24,6 +24,7 @@ import {
   useImportMenuMutation,
   useImportContactMutation,
   useImportQuizzesMutation,
+  useImportBlogMutation,
   useAdminSeedMutation,
 } from "@/store/api/adminApi";
 
@@ -47,6 +48,8 @@ export default function DeveloperPage() {
   const [migrateSlugs, { isLoading: slugging }] = useMigrateSlugsMutation();
   const [slugReport, setSlugReport] = useState(null);
   const [importQuizzes, { isLoading: quizzing }] = useImportQuizzesMutation();
+  const [importBlog, { isLoading: blogging }] = useImportBlogMutation();
+  const [blogReport, setBlogReport] = useState(null);
   const [quizReport, setQuizReport] = useState(null);
   const [seed, { isLoading: seeding }] = useAdminSeedMutation();
   const [seedConfirm, setSeedConfirm] = useState("");
@@ -122,6 +125,27 @@ export default function DeveloperPage() {
       notify.success(res.message || "Hazırdır");
     } catch (e) {
       notify.error(e?.data?.message || "Miqrasiya alınmadı");
+    }
+  };
+
+  // SEO bloq yazılarını yükləyir. Yazılar QARALAMA kimi düşür — mətn
+  // yoxlanmadan saytda dərc olunmur.
+  const runImportBlog = async (overwrite) => {
+    const ok = await confirmDialog({
+      tone: overwrite ? "error" : undefined,
+      title: overwrite ? "Bloq yazıları əvəz olunsun?" : "Bloq yazıları yüklənsin?",
+      text: overwrite
+        ? "Mövcud yazıların <b>mətni tamamilə əvəz olunur</b>. Paneldə etdiyin redaktələr itir."
+        : "SEO bloq yazıları <b>qaralama</b> kimi yaradılır — saytda dərhal görünmür. <b>Mövcud yazı toxunulmur.</b>",
+      confirmText: overwrite ? "Bəli, əvəz et" : "Yüklə",
+    });
+    if (!ok) return;
+    try {
+      const res = await importBlog({ overwrite }).unwrap();
+      setBlogReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "İmport alınmadı");
     }
   };
 
@@ -652,6 +676,62 @@ export default function DeveloperPage() {
         </div>
       </div>
 
+
+      {/* SEO bloq yazıları */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+            <FileText className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">SEO bloq yazılarını yüklə</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Saytda <b>heç bir bloq yazısı yox idi</b>, kurs və ölkə səhifələrinin
+              böyük hissəsi isə mətnsizdir — yəni axtarış sistemləri üçün göstəriləcək
+              məzmun yoxdur. Bu dəst 4 kateqoriya və 10 yazı yaradır: xaricdə təhsil,
+              beynəlxalq imtahanlar, dil öyrənmə və karyera.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Yazılar <b>qaralama</b> kimi yüklənir — saytda dərhal görünmür.
+                Mətni oxuyub, faktları yoxlayıb özün dərc edirsən.
+                Mətn <b>yalnız azərbaycancadır</b>; EN/RU üçün yuxarıdakı
+                «AI ilə tərcümə» işlədilir.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportBlog(false)}
+                disabled={blogging}
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              >
+                <FileText className="h-4 w-4" />
+                {blogging ? "Yüklənir…" : "Bloq yazılarını yüklə"}
+              </button>
+              <button
+                onClick={() => runImportBlog(true)}
+                disabled={blogging}
+                className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+              >
+                Üzərinə yaz
+              </button>
+            </div>
+
+            {blogReport && (
+              <ul className="mt-6 space-y-1 text-sm">
+                {blogReport.report.posts.map((r) => (
+                  <li key={r.slug} className="font-mono text-xs text-gray-600">
+                    {r.slug} — {r.status}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Kurs slug miqrasiyası */}
       <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

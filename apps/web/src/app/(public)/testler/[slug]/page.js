@@ -27,8 +27,13 @@ export async function generateMetadata({ params }) {
   const quiz = res?.data;
   if (!quiz) return buildMetadata({ path: `/testler/${slug}` });
 
-  return buildMetadata({
-    ...metaFromApi(quiz.seo, { title: quiz.title, description: quiz.lead }),
+  // İKİ QAT EMAL OLMAMALIDIR: `metaFromApi` artıq HAZIR metadata qaytarır.
+  // Əvvəl onun nəticəsi yenidən `buildMetadata`-ya verilirdi, yəni artıq
+  // formalaşmış başlıq obyekti xam arqument kimi işlənirdi və səhifədə
+  // «[object Object]» çıxırdı. Yol da elə buradan ötürülür.
+  return metaFromApi(quiz.seo, {
+    title: quiz.title,
+    description: quiz.lead,
     path: `/testler/${slug}`,
   });
 }

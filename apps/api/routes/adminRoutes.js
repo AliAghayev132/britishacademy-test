@@ -84,6 +84,7 @@ AdminRouter.post("/dev/import-menu", devOnly, writeRateLimiter, devController.ru
 AdminRouter.post("/dev/import-contact", devOnly, writeRateLimiter, devController.runImportContact);
 // Səviyyə testlərini yüklə (köhnə saytın ən çox girilən iki səhifəsi).
 AdminRouter.post("/dev/import-quizzes", devOnly, writeRateLimiter, devController.runImportQuizzes);
+AdminRouter.post("/dev/import-blog", devOnly, writeRateLimiter, devController.runImportBlog);
 
 // WhatsApp (whatsapp-web.js) — QR ilə qoşulma + mesaj göndərmə.
 // Fixed paths — generic /:resource matcher-dən əvvəl olmalıdır.
