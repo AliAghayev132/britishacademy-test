@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import fs from "node:fs";
 import { SECTIONS, sectionForPath, canSee } from "@/lib/permissions";
+import { NAV_TOP, NAV_GROUPS, NAV_BOTTOM } from "@/lib/adminNav";
 
 /**
  * Panelin bölmə siyahısının bütövlüyü.
@@ -15,8 +15,12 @@ import { SECTIONS, sectionForPath, canSee } from "@/lib/permissions";
  */
 
 const KEYS = SECTIONS.map((s) => s.key);
-const sidebar = fs.readFileSync("src/components/DashboardSidebar.jsx", "utf8");
-const usedInSidebar = [...new Set([...sidebar.matchAll(/section:\s*'([a-z-]+)'/g)].map((m) => m[1]))];
+// Naviqasiya siyahısı `lib/adminNav.js`-dədir. Əvvəl sidebar komponentinin
+// İÇİNDƏ idi və bu test onu mətn kimi skan edirdi; siyahı modula köçəndə skan
+// boş qaldı — aşağıdakı «bəndlər tapılır» yoxlaması bunu tutdu. İndi birbaşa
+// idxal edilir, yəni yerdəyişmə testi bir daha kor qoya bilməz.
+const NAV = [...NAV_TOP, ...NAV_GROUPS.flatMap((g) => g.items), ...NAV_BOTTOM];
+const usedInSidebar = [...new Set(NAV.map((i) => i.section).filter(Boolean))];
 
 describe("bölmə siyahısı", () => {
   it("açarlar təkrarlanmır", () => {
@@ -87,8 +91,7 @@ describe("sidebar ↔ marşrut uyğunluğu", () => {
    * İki siyahı ayrı fayllardadır (biri ikonlarla, biri icazə məntiqi ilə) —
    * bu test onları bir-birinə bağlayır.
    */
-  const items = [...sidebar.matchAll(/href:\s*'([^']+)'[^}]*?section:\s*'([a-z-]+)'/g)]
-    .map((m) => ({ href: m[1], section: m[2] }));
+  const items = NAV.filter((i) => i.section).map((i) => ({ href: i.href, section: i.section }));
 
   it("sidebar bəndləri tapılır", () => {
     expect(items.length).toBeGreaterThan(15);

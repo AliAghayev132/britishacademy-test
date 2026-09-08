@@ -88,6 +88,8 @@ export default function SettingsPage() {
           user: s.smtp?.user || "",
           fromName: s.smtp?.fromName || "",
           fromEmail: s.smtp?.fromEmail || "",
+          notifyLeads: s.smtp?.notifyLeads !== false,
+          notifyEmail: s.smtp?.notifyEmail || "",
           pass: "", // yalnız-yazma; boş = köhnəni saxla
           hasPass: Boolean(s.smtp?.hasPass),
         },
@@ -169,6 +171,8 @@ export default function SettingsPage() {
           user: form.smtp.user.trim(),
           fromName: form.smtp.fromName.trim(),
           fromEmail: form.smtp.fromEmail.trim(),
+          notifyLeads: Boolean(form.smtp.notifyLeads),
+          notifyEmail: form.smtp.notifyEmail.trim(),
           pass: form.smtp.pass, // boşdursa backend köhnəni saxlayır
         },
         ai: {
@@ -402,6 +406,20 @@ export default function SettingsPage() {
             <label className={label}>Göndərən email (from)</label>
             <input className={input} placeholder="info@britishacademy.az" value={form.smtp.fromEmail} onChange={(e) => set("smtp.fromEmail", e.target.value)} />
           </div>
+          {/* ── Müraciət bildirişi ── */}
+          <div className="sm:col-span-2 flex items-center gap-2 border-t border-gray-100 pt-4">
+            <input id="smtp-notify" type="checkbox" checked={form.smtp.notifyLeads} onChange={(e) => set("smtp.notifyLeads", e.target.checked)} className="h-4 w-4" />
+            <label htmlFor="smtp-notify" className="text-sm font-medium text-gray-700">Yeni müraciət gələndə mənə məktub göndər</label>
+          </div>
+          <div className="sm:col-span-2">
+            <label className={label}>Bildiriş ünvanı</label>
+            <input className={input} placeholder={form.smtp.fromEmail || form.smtp.user || "boş = SMTP-nin öz ünvanı"} value={form.smtp.notifyEmail} onChange={(e) => set("smtp.notifyEmail", e.target.value)} />
+            <p className="mt-1.5 text-xs text-gray-400">
+              Boş buraxsanız bildiriş SMTP hesabının <b>öz ünvanına</b> gedir (yuxarıdakı «Göndərən email»).
+              Bir neçə ünvan üçün vergüllə ayırın.
+            </p>
+          </div>
+
           <div className="sm:col-span-2 rounded-lg bg-gray-50 p-3">
             <label className={label}>Test məktubu göndər</label>
             <div className="flex flex-wrap items-center gap-2">

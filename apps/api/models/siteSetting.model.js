@@ -154,6 +154,15 @@ const siteSettingSchema = new Schema(
       pass: { type: String, default: "" },
       fromName: { type: String, default: "", trim: true },
       fromEmail: { type: String, default: "", trim: true },
+
+      // Yeni müraciət gələndə bildiriş məktubu göndərilsin.
+      //
+      // Əvvəl müraciət yalnız bazaya düşürdü — kimsə admin paneli açmayana
+      // qədər onun gəldiyi bilinmirdi. İndi SMTP hesabı ÖZÜNƏ məktub atır.
+      notifyLeads: { type: Boolean, default: true },
+      // Boş qalsa bildiriş SMTP-nin öz ünvanına (fromEmail / user) gedir.
+      // Vergüllə bir neçə ünvan yazmaq olar.
+      notifyEmail: { type: String, default: "", trim: true },
     },
 
     // AI (OpenRouter) — admin panelindəki tərcümə/səliqə köməkçisi üçün.

@@ -1,6 +1,7 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
 import { asyncHandler, isObjectId, cleanIds, canAccessSection } from "#utils";
 import { Lead } from "#models";
+import { MailService } from "#services";
 
 /**
  * POST /api/leads — public. Rate-limited at the route.
@@ -41,6 +42,20 @@ const createLead = asyncHandler(async (req, res) => {
     message: "Müraciətin qəbul edildi! Tezliklə səninlə əlaqə saxlayacağıq.",
     data: { id: lead._id },
   });
+
+  // ── Bildiriş məktubu ──
+  //
+  // CAVABDAN SONRA və «tut-unut» şəklində: SMTP yavaş olsa (və ya ümumiyyətlə
+  // cavab verməsə) ziyarətçi formanın göndərildiyini bilməmiş gözləməməlidir.
+  // Poçtun uğursuzluğu müraciətin itməsi demək deyil — o, artıq bazadadır.
+  Lead.findById(lead._id)
+    .populate("course", "title")
+    .populate("branch", "name")
+    .populate("project", "title")
+    .populate("destinations", "country")
+    .lean()
+    .then((full) => MailService.sendLeadNotice(full || lead))
+    .catch((err) => console.error("Lead notice failed:", err.message));
 });
 
 /** PATCH /api/admin/leads/:id/status — admin marks a lead handled. */

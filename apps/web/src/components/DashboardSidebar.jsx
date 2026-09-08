@@ -1,7 +1,7 @@
 'use client'
 
 // React
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Next
 import Link from 'next/link'
@@ -17,128 +17,23 @@ import { canSee } from '@/lib/permissions'
 
 // Icons
 import {
-  FileText,
   LogOut,
-  User,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard,
-  Inbox,
-  GraduationCap,
-  Users,
-  Building2,
-  CalendarClock,
-  MessageSquareQuote,
-  MessageCircle,
-  Globe2,
-  Boxes,
-  Settings,
-  Database,
-  ShieldCheck,
-  ScrollText,
   ChevronDown,
-  BarChart3,
-  Home,
-  Tags,
-  HelpCircle,
-  Sparkles,
-  Handshake,
-  Menu as MenuIcon,
-  Image as ImageIcon,
-  FileStack,
-Link2, ClipboardList, Rocket } from 'lucide-react'
+  Search,
+  X,
+  CornerDownLeft,
+} from 'lucide-react'
 
 // Utils
 import { logout } from '@/store/slices/authSlice'
 import { useLogoutMutation } from '@/store/api'
 import { useAdminStatsQuery } from '@/store/api/adminApi'
 import { ADMIN_RESOURCES } from '@/lib/adminResources'
+import { NAV_TOP, NAV_GROUPS, NAV_BOTTOM, searchNav } from '@/lib/adminNav'
 
-// British Academy admin navigation. Resource pages use the generic browser
-// at /dashboard/resurslar/<resource> (see resourceRegistry on the server).
-// `section` icazə açarıdır — serverdəki adminSections ilə eyni.
-// Profil hər kəsə açıqdır, ona görə onun bölməsi yoxdur.
-/**
- * Naviqasiya QRUPLARA bölünüb.
- *
- * Əvvəl 16 element bir siyahıda idi və «Digər resurslar» adlı ümumi düymə
- * altında 8 bölmə gizlənirdi — istifadəçi nə olduğunu görmək üçün ora girib
- * axtarmalı olurdu. İndi hər bölmənin öz sətri var, oxşarlar isə açılan
- * qrupda toplanıb.
- *
- * `section` icazə açarıdır (serverdəki adminSections ilə eyni). Alt-resurslar
- * məntiqi valideynlərinin icazəsini paylaşır: kurs kateqoriyaları «courses»,
- * bloq kateqoriyaları «blog», qalanı isə «resources».
- */
-const NAV_TOP = [
-  { name: 'İdarə paneli', href: '/dashboard', icon: LayoutDashboard, exact: true, section: 'dashboard' },
-  { name: 'Ana səhifə', href: '/dashboard/ana-sehife', icon: Home, section: 'home' },
-]
 
-const NAV_GROUPS = [
-  // Müraciətlər ayrıca qrupdur: iki bənd var (ümumi və xaricdə təhsil) və
-  // onların axını fərqlidir. Qrup ən yuxarıdadır — gündəlik ən çox açılan
-  // bölmədir.
-  {
-    key: 'muracietler',
-    label: 'Müraciətlər',
-    icon: Inbox,
-    items: [
-      // `exact` vacibdir: alt bənd açılanda startsWith yoxlaması ikisini
-      // birdən aktiv göstərərdi.
-      { name: 'Bütün müraciətlər', href: '/dashboard/muracietler', icon: Inbox, exact: true, section: 'leads' },
-      { name: 'Xaricdə təhsil', href: '/dashboard/muracietler/xaricde-tehsil', icon: Globe2, section: 'leads-abroad' },
-    ],
-  },
-  {
-    key: 'tedris',
-    label: 'Tədris',
-    icon: GraduationCap,
-    items: [
-      { name: 'Kurslar', href: '/dashboard/resurslar/courses', icon: GraduationCap, section: 'courses' },
-      { name: 'Kurs kateqoriyaları', href: '/dashboard/resurslar/course-categories', icon: Tags, section: 'courses' },
-      { name: 'Dərs qrafiki', href: '/dashboard/resurslar/course-groups', icon: CalendarClock, section: 'course-groups' },
-      { name: 'Müəllimlər', href: '/dashboard/resurslar/teachers', icon: Users, section: 'teachers' },
-      { name: 'Filiallar', href: '/dashboard/resurslar/branches', icon: Building2, section: 'branches' },
-      { name: 'Testlər', href: '/dashboard/testler', icon: ClipboardList, section: 'quizzes' },
-      { name: 'Test kateqoriyaları', href: '/dashboard/resurslar/quiz-categories', icon: Tags, section: 'quizzes' },
-    ],
-  },
-  {
-    key: 'mezmun',
-    label: 'Məzmun',
-    icon: FileText,
-    items: [
-      { name: 'Bloq yazıları', href: '/dashboard/resurslar/blog-posts', icon: FileText, section: 'blog' },
-      { name: 'Bloq kateqoriyaları', href: '/dashboard/resurslar/blog-categories', icon: Tags, section: 'blog' },
-      { name: 'Rəylər', href: '/dashboard/resurslar/testimonials', icon: MessageSquareQuote, section: 'testimonials' },
-      { name: 'Xaricdə təhsil', href: '/dashboard/resurslar/destinations', icon: Globe2, section: 'destinations' },
-        { name: 'Layihələr', href: '/dashboard/resurslar/projects', icon: Rocket, section: 'projects' },
-      { name: 'Səhifələr', href: '/dashboard/resurslar/pages', icon: FileStack, section: 'resources' },
-      { name: 'FAQ', href: '/dashboard/resurslar/faqs', icon: HelpCircle, section: 'resources' },
-      { name: 'Üstünlüklər', href: '/dashboard/resurslar/advantages', icon: Sparkles, section: 'resources' },
-      { name: 'Tərəfdaşlar', href: '/dashboard/resurslar/partners', icon: Handshake, section: 'resources' },
-      { name: 'Menyu', href: '/dashboard/resurslar/menu-items', icon: MenuIcon, section: 'resources' },
-      { name: 'Media', href: '/dashboard/resurslar/media', icon: ImageIcon, section: 'resources' },
-    ],
-  },
-  {
-    key: 'sistem',
-    label: 'Sistem',
-    icon: Settings,
-    items: [
-      { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: MessageCircle, section: 'whatsapp' },
-      { name: 'İstifadəçilər', href: '/dashboard/istifadeciler', icon: ShieldCheck, section: 'users' },
-      { name: 'Statistika', href: '/dashboard/statistika', icon: BarChart3, section: 'stats' },
-      { name: 'İzlənilən linklər', href: '/dashboard/linkler', icon: Link2, section: 'links' },
-      { name: 'Loglar', href: '/dashboard/loglar', icon: ScrollText, section: 'logs' },
-      { name: 'Tənzimləmələr', href: '/dashboard/tenzimlemeler', icon: Settings, section: 'settings' },
-      { name: 'Developer', href: '/dashboard/developer', icon: Database, section: 'developer' },
-    ],
-  },
-]
-
-const NAV_BOTTOM = [{ name: 'Profil', href: '/dashboard/profile', icon: User }]
 
 /**
  * Sidebar-ın tək naviqasiya sətri.
@@ -226,6 +121,58 @@ export const DashboardSidebar = ({ children }) => {
 
   // Başlıq axtarışı üçün düz siyahı.
   const flatNav = [...topNav, ...groups.flatMap((g) => g.items), ...bottomNav]
+
+  // ── Naviqasiya axtarışı ──
+  //
+  // 25-ə yaxın bölmə var və onlar dörd açılan qrupa paylanıb. «Telefon
+  // nömrəsini haradan dəyişim?» kimi sual üçün istifadəçi qrupları bir-bir
+  // açıb gözü ilə axtarmalı olurdu. İndi yazmaq kifayətdir — uyğunluq həm
+  // bölmə adına, həm də ETİKETLƏRƏ görə tapılır (bax lib/adminNav.js).
+  //
+  // Sorğu CARİ ÜNVANLA birlikdə saxlanılır: səhifə dəyişəndə köhnə sorğu
+  // render zamanı atılır. Ayrıca sıfırlama effekti yazsaydıq, effektin içində
+  // sinxron setState olardı (react-hooks/set-state-in-effect) — layihədə
+  // «WhatsApp jurnalı» tabında da eyni naxış işlədilir.
+  const [search, setSearch] = useState({ path: pathname, q: '', cursor: 0 })
+  const s = search.path === pathname ? search : { path: pathname, q: '', cursor: 0 }
+  const query = s.q
+  const searchRef = useRef(null)
+
+  const searching = query.trim().length > 0
+  const results = searching ? searchNav(query, groups, [...topNav, ...bottomNav]) : []
+  // Siyahı qısalanda köhnə mövqe kənarda qala bilər — sıxılır.
+  const activeIdx = results.length ? Math.min(s.cursor, results.length - 1) : 0
+
+  const setQuery = (q) => setSearch({ path: pathname, q, cursor: 0 })
+  const setCursor = (i) => setSearch({ path: pathname, q: query, cursor: i })
+  const closeSearch = () => setSearch({ path: pathname, q: '', cursor: 0 })
+
+  const onSearchKey = (e) => {
+    if (e.key === 'Escape') { closeSearch(); searchRef.current?.blur(); return }
+    if (!results.length) return
+    if (e.key === 'ArrowDown') { e.preventDefault(); setCursor(Math.min(activeIdx + 1, results.length - 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setCursor(Math.max(activeIdx - 1, 0)) }
+    else if (e.key === 'Enter') {
+      e.preventDefault()
+      router.push(results[activeIdx].href)
+      closeSearch()
+    }
+  }
+
+  // Ctrl/⌘+K — hər yerdən axtarışa keç. Sidebar yığılıbsa əvvəl açılır,
+  // yoxsa fokus görünməyən sahəyə düşərdi.
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSidebarOpen(true)
+        // Sidebar-ın en keçidi bitəndən sonra fokus ver.
+        setTimeout(() => searchRef.current?.focus(), 60)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // Qruplar AÇIQ başlayır. Bağlı başlasaydı, silinən «Digər resurslar»
   // düyməsinin problemini təkrarlayardıq: bölmələr yenə gizli qalardı.
@@ -337,7 +284,86 @@ export const DashboardSidebar = ({ children }) => {
           </Link>
         </div>
 
-        {/* Navigation — qruplu */}
+        {/* Axtarış */}
+        <div className="border-b border-gray-100 px-3 py-2.5">
+          {sidebarOpen ? (
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onSearchKey}
+                placeholder="Bölmə axtar…"
+                aria-label="Bölmə axtar"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-16 text-sm font-medium text-gray-700 outline-none transition focus:border-[#00157A] focus:bg-white"
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={closeSearch}
+                  aria-label="Təmizlə"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-gray-400 transition hover:bg-gray-200 hover:text-gray-700"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-bold text-gray-400">
+                  Ctrl K
+                </kbd>
+              )}
+            </div>
+          ) : (
+            // Yığılmış sidebar-da sahə sığmır — ikon onu açıb fokus verir.
+            <button
+              type="button"
+              onClick={() => { setSidebarOpen(true); setTimeout(() => searchRef.current?.focus(), 60) }}
+              title="Bölmə axtar (Ctrl+K)"
+              aria-label="Bölmə axtar"
+              className="flex w-full items-center justify-center rounded-xl py-2 text-gray-500 transition hover:bg-gray-100 hover:text-[#00157A]"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        {/* Axtarış nəticələri — sorğu varkən adi naviqasiyanı əvəz edir */}
+        {searching && sidebarOpen ? (
+          <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
+            {results.length === 0 ? (
+              <p className="px-3 py-6 text-center text-sm text-gray-400">
+                Heç nə tapılmadı.
+                <span className="mt-1 block text-xs">Başqa söz sınayın — məsələn «telefon», «qr», «icazə».</span>
+              </p>
+            ) : (
+              results.map((r, i) => (
+                <Link
+                  key={r.href}
+                  href={r.href}
+                  onMouseEnter={() => setCursor(i)}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                    i === activeIdx ? 'bg-[#00157A] text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <r.icon className={`h-5 w-5 shrink-0 ${i === activeIdx ? 'text-white' : 'text-gray-400'}`} />
+                  <span className="min-w-0 flex-1">
+                    {/* Rəng AÇIQ verilir: seçilmiş sətirdə miras qalan rəng
+                        tünd gəlirdi və ad mavi fonda oxunmurdu. */}
+                    <span className={`block truncate text-[15px] font-bold ${i === activeIdx ? 'text-white' : 'text-gray-800'}`}>{r.name}</span>
+                    {/* Uyğunluq ETİKETDƏN gəlibsə onu göstəririk — istifadəçi
+                        «niyə bu çıxdı?» sualına dərhal cavab görür. */}
+                    <span className={`block truncate text-[11px] ${i === activeIdx ? 'text-white/70' : 'text-gray-400'}`}>
+                      {r.matchedTag ? `${r.groupLabel ? r.groupLabel + ' · ' : ''}${r.matchedTag}` : r.groupLabel || 'Naviqasiya'}
+                    </span>
+                  </span>
+                  {i === activeIdx && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-white/70" />}
+                </Link>
+              ))
+            )}
+          </nav>
+        ) : (
+
+        /* Navigation — qruplu */
         <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
           {topNav.map((item) => (
             <NavLink
@@ -398,6 +424,7 @@ export const DashboardSidebar = ({ children }) => {
             </div>
           )}
         </nav>
+        )}
 
         {/* Logout */}
         <div className="p-3 border-t border-gray-100">

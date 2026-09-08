@@ -15,20 +15,9 @@
 //     onun metro adı olduğu bilinmirdi. Suffiksi admindən tələb etmək əvəzinə
 //     göstərilən anda tamamlanır.
 
-/**
- * Müqayisə üçün normallaşdırma: böyük/kiçik hərf və Azərbaycan diakritikləri
- * nəzərə alınmır. «Əhmədli» ilə «əhmədli» eyni sayılmalıdır.
- *
- * ə və ı Unicode-da parçalanmır (NFD onlara toxunmur), ona görə açıq şəkildə
- * əvəzlənir.
- */
-const fold = (s) =>
-  String(s ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/ı/g, "i")
-    .replace(/ə/g, "e");
+// Müqayisə üçün normallaşdırma (böyük/kiçik hərf + AZ diakritikləri) ortaq
+// modula köçürüldü — eyni məntiq admin panelin naviqasiya axtarışında da lazımdır.
+import { fold } from "./fold";
 
 /** Dil üzrə metro affiksi: mövcudluq yoxlaması + tamamlama. */
 const METRO_AFFIX = {
