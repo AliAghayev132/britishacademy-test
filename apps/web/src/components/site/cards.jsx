@@ -6,28 +6,76 @@ import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { getImageUrl } from "@/utils/getImageUrl";
 
 /**
- * Kurs kartları BRENDİN öz mavisindədir.
+ * Kurs kartlarının vurğu rəngi.
  *
- * Əvvəl səkkiz rəngli palitra vardı və kartlar sıraya görə növbə ilə sarı,
- * bənövşəyi, qırmızı, çəhrayı olurdu. Ana səhifədə yan-yana duranda bölmə
- * rəngarəng görünürdü və brend rəngi itirdi. İndi vurğu tək rəngdir, fərqi
- * ağ fon və boşluq yaradır.
+ * TARİXÇƏ: əvvəl səkkiz rəngli palitra vardı və kart rəngini SIRA NÖMRƏSİ
+ * seçirdi. İki problemi vardı — kartlar tam rəngli olduğuna görə bölmə
+ * rəngarəng görünüb brend rəngini itirirdi, həm də karusel fırlananda sıra
+ * dəyişdiyi üçün EYNİ kurs hər dövrədə başqa rəngə düşürdü.
+ *
+ * İNDİ: rəng kursun öz slug-ından TÖRƏDİLİR — yəni sabitdir, karusel neçə
+ * dəfə fırlansa da «IELTS» həmişə eyni rəngdədir. Rəng kartı doldurmur:
+ * fon ağa yaxın qalır, rəng yalnız üst zolaq, kateqoriya yazısı, haşiyə və
+ * «Kursa bax» linkindədir — mavi lentin üstündə ağ ilə rəngli arasında.
+ *
+ * Palitranın hamısı ağ fonda AA (≥4.5:1) keçir — kateqoriya yazısı bu
+ * rənglərlə yazılır.
  */
-const ACCENT = "#00157A";
-const ACCENT_SOFT = "#00157A14"; // eyni rəng, ~8% şəffaflıq
+const CARD_COLORS = [
+  "#00157A", // brend mavisi
+  "#0F6E64", // firuzəyi
+  "#B3352F", // qırmızı
+  "#6D3BAF", // bənövşəyi
+  "#A85B00", // narıncı-qəhvəyi
+  "#0B63A8", // göy
+];
+
+/**
+ * Kartın vurğu rəngi.
+ *
+ * `index` VERİLİBSƏ sıraya görə paylanır — yan-yana duran kartların rəngi
+ * TƏMİNATLI şəkildə fərqli olur. Bu vacibdir: rəng heç bir məlumat daşımır
+ * (kateqoriya ilə bağlı deyil), məqsəd sadəcə görüntüdür, ona görə ekranda
+ * müxtəliflik sabitlikdən üstündür.
+ *
+ * `index` yoxdursa slug-dan törədilir. Xam qarışdırma ilə paylanma sınandı:
+ * bütün 27 kursda altı rəngin hamısı işlənir, amma ana səhifədəki altı
+ * SEÇİLMİŞ kurs təsadüfən üç soyuq tona düşürdü — məhz buna görə siyahılarda
+ * sıra üstünlük təşkil edir.
+ */
+function accentFor(key, index) {
+  if (Number.isInteger(index)) return CARD_COLORS[index % CARD_COLORS.length];
+  const s = String(key || "");
+  let h = 0;
+  for (let i = 0; i < s.length; i += 1) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return CARD_COLORS[h % CARD_COLORS.length];
+}
 
 /** Course card — used on the homepage and category hubs. */
-export function CourseCard({ course }) {
+export function CourseCard({ course, index }) {
   const t = useT();
   const from = course.priceFrom;
+  const accent = accentFor(course.slug || course._id, index);
   return (
     <Link
       href={`/kurslar/${course.slug}`}
       className="ba-course"
-      style={{ display: "flex", flexDirection: "column", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, padding: 26, "--accent": ACCENT, "--accent-soft": ACCENT_SOFT }}
+      style={{
+        display: "flex", flexDirection: "column", borderRadius: 20, padding: 26,
+        // Fon ağdır, yalnız yuxarı kənarda çox zəif çalar var — kart «rəngli»
+        // yox, «rəng vurğulu» oxunur.
+        //
+        // Çalar QƏSDƏN zəifdir (6%): ana səhifədə `#kurslar .ba-course::before`
+        // onsuz da sağ-üst küncə radial yuyulma qoyur, ikisi üst-üstə düşəndə
+        // kartın yuxarısı bulanıq görünürdü.
+        background: `linear-gradient(180deg, ${accent}0A, #fff 34%)`,
+        border: `1px solid ${accent}2E`,
+        "--accent": accent,
+        "--accent-soft": `${accent}14`,
+      }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#63636E", letterSpacing: ".05em", textTransform: "uppercase" }}>{course.category?.name || t("card.course")}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)", letterSpacing: ".05em", textTransform: "uppercase" }}>{course.category?.name || t("card.course")}</span>
         {course.isFeatured && <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--accent)", background: "var(--accent-soft)", padding: "4px 9px", borderRadius: 99 }}>{t("card.popular")}</span>}
       </div>
       <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, lineHeight: 1.25, margin: "14px 0 0", letterSpacing: "-.01em", color: "#17171F", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: "2.5em" }}>{course.title}</h3>

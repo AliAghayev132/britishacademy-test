@@ -7,8 +7,11 @@ import fs from "node:fs";
  * İKİ DƏYİŞİKLİK:
  *  1. Düymələrin hamısı `#kurslar` lövbərinə bağlı idi — ünvanı dəyişmək
  *     üçün deploy lazım gəlirdi. İndi paneldən `hero.pillLinks` ilə verilir.
- *  2. Kurs kartları səkkiz rəngli palitradan növbə ilə rəng alırdı və bölmə
- *     rəngarəng görünürdü. İndi tək brend mavisidir.
+ *  2. Kurs kartlarının rəngi. Əvvəl səkkiz rəngli palitra vardı və kartlar
+ *     TAM rəngli idi — bölmə rəngarəng görünüb brend rəngini itirirdi. Bir
+ *     müddət tək brend mavisi işlədildi, sonra qərar dəqiqləşdi: kart AĞ
+ *     qalır, rəng yalnız vurğudur (üst zolaq, kateqoriya yazısı, haşiyə,
+ *     «Kursa bax»). Yəni «ağ ilə rəngli arasında».
  */
 
 const hero = fs.readFileSync("src/components/site/Hero.jsx", "utf8");
@@ -38,22 +41,55 @@ describe("hero düymələri", () => {
 });
 
 describe("kurs kartlarının rəngi", () => {
-  it("rəngarəng palitra qalmayıb", () => {
-    expect(cards).not.toMatch(/CAT_COLORS/);
-    // Palitradakı rənglər birbaşa da qalmamalıdır.
-    for (const c of ["#F5A524", "#7C4DFF", "#E0533D", "#FF3D8B", "#22B07D"]) {
-      expect(cards, `${c} hələ işlədilir`).not.toContain(c);
+  const palette = [...(cards.match(/const CARD_COLORS = \[[\s\S]*?\]/) || [""])[0]
+    .matchAll(/"(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]);
+
+  it("palitra oxunur", () => {
+    expect(palette.length, "CARD_COLORS tapılmadı — ad dəyişib?").toBeGreaterThanOrEqual(4);
+    expect(palette).toContain("#00157A"); // brend rəngi palitrada qalır
+  });
+
+  it("hər rəng ağ fonda oxunaqlıdır (AA ≥ 4.5)", () => {
+    // Kateqoriya yazısı MƏHZ bu rənglərlə yazılır. Yoxlama həm də «neon
+    // rəng qoyulmasın» qoruyucusudur: parlaq ton ağ fonda AA-nı keçmir.
+    const lin = (c) => (c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    const lum = (h) => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+      return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    };
+    const weak = palette.filter((c) => (1.05 / (lum(c) + 0.05)) < 4.5);
+    expect(weak, `ağ fonda zəif: ${weak.join(", ")}`).toEqual([]);
+  });
+
+  it("kart AĞ qalır — rəng yalnız vurğudur", () => {
+    // İstək «ağ ilə rəngli arasında» idi. Fon rəngi ilə DOLDURULSAYDI kartlar
+    // mavi lentin üstündə ağır görünərdi; ona görə çalar çox zəif alfa ilədir.
+    const bg = cards.match(/background: `linear-gradient\(180deg, \$\{accent\}([0-9A-Fa-f]{2})/);
+    expect(bg, "kart fonu tapılmadı").toBeTruthy();
+    expect(parseInt(bg[1], 16), "fon çaları çox güclüdür").toBeLessThanOrEqual(0x1a); // ≤10%
+    expect(cards).toMatch(/#fff \d+%\)`/); // qalan hissə ağdır
+  });
+
+  it("rəng kartın sırasından gəlir", () => {
+    // Sıra verilməsə hash-ə düşür və yan-yana kartlar eyni rəngə düşə bilir —
+    // ana səhifədəki altı kurs məhz belə üç soyuq tona yığılmışdı.
+    expect(cards).toMatch(/CARD_COLORS\[index % CARD_COLORS\.length\]/);
+  });
+
+  it("HƏR siyahı sıranı ötürür", () => {
+    const files = [
+      "src/components/site/ServicesShowcase.jsx",
+      "src/app/(public)/kurslar/page.js",
+      "src/app/(public)/kurslar/[slug]/page.js",
+    ];
+    const bad = [];
+    for (const f of files) {
+      const src = fs.readFileSync(f, "utf8");
+      for (const m of src.matchAll(/<CourseCard\b[^/]*\/>/g)) {
+        if (!/index=\{/.test(m[0])) bad.push(`${f}: ${m[0].slice(0, 60)}`);
+      }
     }
-  });
-
-  it("brend mavisi işlədilir", () => {
-    expect(cards).toMatch(/const ACCENT = "#00157A"/);
-    expect(cards).toMatch(/"--accent": ACCENT/);
-  });
-
-  it("sıraya görə rəng seçimi yoxdur", () => {
-    // `index % …` naxışı rəngi növbələşdirirdi.
-    expect(cards).not.toMatch(/index % /);
+    expect(bad, `sıra ötürülmür:\n${bad.join("\n")}`).toEqual([]);
   });
 });
 

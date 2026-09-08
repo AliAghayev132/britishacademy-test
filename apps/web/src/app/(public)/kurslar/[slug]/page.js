@@ -76,7 +76,7 @@ async function CategoryHub({ cat }) {
       />
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-          {courses.map((c) => <CourseCard key={c._id} course={c} />)}
+          {courses.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
         </div>
         {!courses.length && <p style={{ color: "#63636F" }}>{tr("course.emptyCat")}</p>}
       </section>
@@ -146,7 +146,7 @@ function RelatedCourses({ related, tr }) {
     <section style={{ ...wrap, padding: "56px 28px 0" }}>
       <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 26px" }}>{tr("course.related")}</h2>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-        {related.map((c) => <CourseCard key={c._id} course={c} />)}
+        {related.map((c, i) => <CourseCard key={c._id} course={c} index={i} />)}
       </div>
     </section>
   );

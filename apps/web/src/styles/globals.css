@@ -475,18 +475,10 @@ body.ba-home #kurslar .ba-course::after {
 body.ba-home #kurslar .ba-course:hover::after { left: 130%; }
 
 /* Mavi lentin üstündə: ağ kart «yapışıq» görünməsin deyə kölgə ilə qaldırılır.
-   Sərhəd rəngi işə yaramır — nə açıq boz, nə də mavi haşiyə tünd fonda
-   seçilmir; ona görə haşiyə tamamilə götürülür.
-   BU BLOK YUXARIDAKI `:hover` QAYDASINDAN SONRA GƏLMƏLİDİR — hər ikisi
-   `!important` və eyni xüsusiyyətdədir, sonuncu qalib gəlir. */
-body.ba-home #kurslar .ba-course {
-  border-color: transparent !important;
-  box-shadow: 0 18px 40px rgba(0, 8, 40, .34);
-}
-body.ba-home #kurslar .ba-course:hover {
-  border-color: transparent !important;
-  box-shadow: 0 26px 56px rgba(0, 8, 40, .46);
-}
+   Haşiyə rəngi kartın ÖZ vurğu rəngindən gəlir (inline, `cards.jsx`), ona görə
+   burada ona toxunulmur — əvvəl boz haşiyə tünd fonda ölü görünürdü. */
+body.ba-home #kurslar .ba-course { box-shadow: 0 18px 40px rgba(0, 8, 40, .34); }
+body.ba-home #kurslar .ba-course:hover { box-shadow: 0 26px 56px rgba(0, 8, 40, .46); }
 
 /* -- Advantages: hover fills with a darkened card color (AA contrast for white text) -- */
 body.ba-home .ba-adv2:hover { background: color-mix(in srgb, var(--accent) 58%, #14141C) !important; }

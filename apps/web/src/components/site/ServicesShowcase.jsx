@@ -65,12 +65,12 @@ export default function ServicesShowcase({
             }}
             style={{ padding: "4px 4px 6px" }}
           >
-            {courses.map((c) => (
+            {courses.map((c, i) => (
               // `height: auto` + CSS-dəki `stretch` — kartlar ƏN HÜNDÜRÜ qədər
               // uzanır, altları düz sırada bitir. Onsuz kateqoriya adı iki sətrə
               // düşən kart qonşularından hündür qalırdı.
               <SwiperSlide key={c._id} style={{ height: "auto" }}>
-                <CourseCard course={c} />
+                <CourseCard course={c} index={i} />
               </SwiperSlide>
             ))}
           </Swiper>
