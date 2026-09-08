@@ -188,3 +188,40 @@ export const RESOURCE_SECTION = {
 
   "short-links": "links",
 };
+
+/**
+ * Resursun AZERBAYCANCA adı — audit jurnalının xülasələri üçün.
+ *
+ * Əvvəl jurnalda xam açar yazılırdı: «faqs yaradıldı», «course-groups
+ * silindi». Panel istifadəçisi bu adları heç yerdə görmür — onun üçün
+ * bölmələr «FAQ», «Dərs qrafiki»dir.
+ *
+ * ⚠️ Panel tərəfdəki `lib/adminResources.js` ilə uyğun qalmalıdır;
+ * `tests/resourceLabels.test.js` hər açarın orada da olduğunu yoxlayır.
+ */
+export const RESOURCE_LABELS = {
+  courses: "Kurslar",
+  "course-categories": "Kurs kateqoriyaları",
+  "course-groups": "Dərs qrafiki",
+  teachers: "Müəllimlər",
+  branches: "Filiallar",
+  quizzes: "Testlər",
+  "quiz-categories": "Test kateqoriyaları",
+  "blog-posts": "Bloq yazıları",
+  "blog-categories": "Bloq kateqoriyaları",
+  testimonials: "Rəylər",
+  destinations: "Xaricdə təhsil",
+  projects: "Layihələr",
+  pages: "Səhifələr",
+  faqs: "FAQ",
+  advantages: "Üstünlüklər",
+  partners: "Tərəfdaşlar",
+  "menu-items": "Menyu",
+  media: "Media",
+  "short-links": "İzlənilən linklər",
+  leads: "Müraciətlər",
+  users: "İstifadəçilər",
+};
+
+/** Resursun oxunaqlı adı (tanınmasa açarın özü). */
+export const labelForResource = (key) => RESOURCE_LABELS[key] || key || "";

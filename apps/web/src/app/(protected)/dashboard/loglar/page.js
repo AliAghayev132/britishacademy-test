@@ -20,6 +20,8 @@ import { Modal } from "@/components/ui/Modal";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
 // Data (RTK Query)
 import { useAdminLogsQuery, useAdminLogFiltersQuery } from "@/store/api/adminApi";
+// Utils
+import { resourceLabel } from "@/lib/adminResources";
 // Icons
 import { X, ArrowRight, ShieldAlert, FileSearch } from "lucide-react";
 
@@ -102,7 +104,7 @@ function DetailsModal({ log, onClose }) {
         <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
           <span><b className="text-gray-700">{log.actor?.name || "—"}</b>{log.actor?.role ? ` · ${log.actor.role}` : ""}</span>
           <span>{fmt(log.createdAt)}</span>
-          {log.resource && <span>{log.resource}</span>}
+          {log.resource && <span>{resourceLabel(log.resource)}</span>}
           {log.ip && <span>IP {log.ip}</span>}
           {log.method && <span className="font-mono">{log.method} {log.path}</span>}
         </div>
@@ -173,7 +175,7 @@ export default function LogsPage() {
           placeholder="Bölmə"
           value={f.resource}
           onChange={set("resource")}
-          options={o.resources.map((r) => ({ value: r, label: r }))}
+          options={o.resources.map((r) => ({ value: r, label: resourceLabel(r) }))}
         />
         <NativeSelect
           className="w-full sm:w-32"
@@ -258,7 +260,7 @@ export default function LogsPage() {
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400">
                       <span className="font-medium text-gray-600">{log.actor?.name || "—"}</span>
                       {log.actor?.role && <span>{log.actor.role}</span>}
-                      {log.resource && <span>· {log.resource}</span>}
+                      {log.resource && <span>· {resourceLabel(log.resource)}</span>}
                       {log.ip && <span>· {log.ip}</span>}
                     </div>
                   </div>

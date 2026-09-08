@@ -116,8 +116,13 @@ export function DatePicker({
 
   const shift = (n) => setView((v) => new Date(v.getFullYear(), v.getMonth() + n, 1));
 
+  // RƏQƏMLƏ: «01.09.2026». Əvvəl ay adı yazılırdı («8 sentyabr 2026») və
+  // süzgəc sətrində iki tarix yan-yana duranda sahəyə sığmırdı — mətn
+  // sıxılıb kəsilirdi. Rəqəm forması sabit enlidir (10 simvol), ona görə
+  // aralıq həmişə eyni yer tutur.
+  const pad = (n) => String(n).padStart(2, "0");
   const label = selected
-    ? `${selected.getDate()} ${MONTHS[selected.getMonth()]} ${selected.getFullYear()}`
+    ? `${pad(selected.getDate())}.${pad(selected.getMonth() + 1)}.${selected.getFullYear()}`
     : placeholder;
 
   return (

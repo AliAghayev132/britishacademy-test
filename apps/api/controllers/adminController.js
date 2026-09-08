@@ -13,7 +13,7 @@ import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAc
 import { logAction, diffDocs, redact, pickFields } from "#services";
 
 // Local
-import { RESOURCES, RESOURCE_SECTION } from "./resourceRegistry.js";
+import { RESOURCES, RESOURCE_SECTION, labelForResource } from "./resourceRegistry.js";
 
 /**
  * Sənədin oxunaqlı adı (audit jurnalı üçün).
@@ -335,7 +335,7 @@ const create = asyncHandler(async (req, res) => {
   const item = await entry.model.create(req.body);
   await logAction(req, {
     action: "create", resource: req.params.resource, resourceId: item._id,
-    summary: `${req.params.resource} yaradıldı: ${labelOf(item)}`,
+    summary: `${labelForResource(req.params.resource)} yaradıldı: ${labelOf(item)}`,
     // Yaradılan sənədin ÖZÜ — əvvəl yalnız «yaradıldı» yazılırdı, nə ilə
     // yaradıldığı heç yerdə qalmırdı.
     details: { after: redact(item) },
@@ -386,7 +386,7 @@ const update = asyncHandler(async (req, res) => {
   const touched = changes.map((c) => c.field);
   await logAction(req, {
     action: "update", resource: req.params.resource, resourceId: item._id,
-    summary: `${req.params.resource} yeniləndi: ${labelOf(item)}`,
+    summary: `${labelForResource(req.params.resource)} yeniləndi: ${labelOf(item)}`,
     changes,
     // Yalnız DƏYİŞƏN sahələr — bütöv sənədi yazmaq jurnalı şişirdərdi,
     // modalda isə oxumaq çətinləşərdi.
@@ -419,7 +419,7 @@ const remove = asyncHandler(async (req, res) => {
   }
   await logAction(req, {
     action: "delete", resource: req.params.resource, resourceId: req.params.id,
-    summary: `${req.params.resource} silindi${doomed ? `: ${labelOf(doomed)}` : ""}`,
+    summary: `${labelForResource(req.params.resource)} silindi${doomed ? `: ${labelOf(doomed)}` : ""}`,
     // Silinən sənəd tam saxlanılır — bərpa lazım gələrsə istinad buradır.
     details: doomed ? { before: redact(doomed) } : undefined,
   });
@@ -467,7 +467,7 @@ const reorder = asyncHandler(async (req, res) => {
   );
   await logAction(req, {
     action: "reorder", resource: req.params.resource,
-    summary: `${req.params.resource}: ${ids.length} elementin sırası dəyişdi`,
+    summary: `${labelForResource(req.params.resource)}: ${ids.length} elementin sırası dəyişdi`,
   });
   res.json({ success: true, message: "Sıralama yeniləndi" });
 });

@@ -244,9 +244,15 @@ export const DashboardSidebar = ({ children }) => {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       {/* En dəyişikliyi CSS keçidi ilə — framer-motion əvəzinə.
-          overflow-hidden yığılanda mətnlərin kənara daşmasının qarşısını alır. */}
+          overflow-hidden yığılanda mətnlərin kənara daşmasının qarşısını alır.
+
+          `sticky top-0 h-screen` — sidebar EKRANDA QALIR, öz daxili scroll-u
+          olur. Əvvəl hündürlüyü açıq idi: uzun səhifədə (loglar, müraciətlər)
+          sidebar məzmunla birlikdə uzanırdı, `nav`-ın `overflow-y-auto`-su
+          isə heç vaxt işə düşmürdü — aşağı sürüşəndə naviqasiya yuxarıda
+          qalıb gözdən itirdi. */}
       <aside
-        className="bg-white border-r border-gray-100 flex flex-col relative shadow-sm overflow-hidden transition-[width] duration-200 ease-in-out"
+        className="bg-white border-r border-gray-100 flex flex-col relative shadow-sm overflow-hidden transition-[width] duration-200 ease-in-out sticky top-0 h-screen flex-none"
         style={{ width: sidebarOpen ? 260 : 76 }}
       >
         {/* Toggle */}

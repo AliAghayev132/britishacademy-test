@@ -48,6 +48,30 @@ export const ORDERABLE = new Set([
   "projects", "quiz-categories", "faqs",
 ]);
 
+/**
+ * Jurnalda görünən, amma `ADMIN_RESOURCES`-də olmayan bölmələr.
+ *
+ * `ADMIN_RESOURCES` yalnız ümumi resurs brauzerinin idarə etdiyi
+ * kolleksiyalardır. Əməliyyat jurnalına isə öz səhifəsi olan bölmələr də
+ * düşür (tənzimləmələr, WhatsApp, developer alətləri) — onlar orada
+ * xam açar kimi («settings», «dev») görünürdü.
+ */
+const EXTRA_LABELS = {
+  settings: "Tənzimləmələr",
+  users: "İstifadəçilər",
+  whatsapp: "WhatsApp",
+  bulk: "Toplu göndəriş",
+  quizzes: "Testlər",
+  "short-links": "İzlənilən linklər",
+  dev: "Developer alətləri",
+  logs: "Loglar",
+  home: "Ana səhifə",
+};
+
+/** Resurs açarının azərbaycanca adı (tapılmasa açarın özü). */
+export const resourceLabel = (key) =>
+  ADMIN_RESOURCES[key]?.name || EXTRA_LABELS[key] || key || "—";
+
 // Çoxdilli { az,en,ru } dəyəri admin siyahısında AZ variantı ilə göstər.
 export const pickAz = (v) =>
   v && typeof v === "object" && !Array.isArray(v) && ("az" in v || "en" in v || "ru" in v)
