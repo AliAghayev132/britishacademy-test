@@ -7,6 +7,7 @@ import {
   HashService,
   MailService,
   AuthTokenService,
+  logAction,
 } from "#services";
 
 // Utils
@@ -223,6 +224,14 @@ const login = asyncHandler(async (req, res) => {
   }).select("+password");
 
   if (!user) {
+    // UĞURSUZ CƏHDLƏR DƏ YAZILIR: yalnız uğurlu girişləri saxlamaq
+    // təhlükəsizlik jurnalını mənasız edir — hesabın seçilib-seçilmədiyi
+    // məhz uğursuz cəhdlərdən görünür.
+    await logAction(req, {
+      action: "login", status: "fail", reason: "Belə istifadəçi yoxdur",
+      summary: `Uğursuz giriş: ${email}`,
+      actor: { email: String(email).toLowerCase() },
+    });
     return res.status(401).json({
       success: false,
       message: "Invalid email or password",
@@ -231,6 +240,11 @@ const login = asyncHandler(async (req, res) => {
 
   const isMatch = await HashService.comparePassword(password, user.password);
   if (!isMatch) {
+    await logAction(req, {
+      action: "login", status: "fail", reason: "Şifrə yanlışdır",
+      summary: `Uğursuz giriş: ${user.email}`,
+      actor: user,
+    });
     return res.status(401).json({
       success: false,
       message: "Invalid email or password",
@@ -238,6 +252,11 @@ const login = asyncHandler(async (req, res) => {
   }
 
   if (user.status !== "active") {
+    await logAction(req, {
+      action: "login", status: "fail", reason: `Hesab aktiv deyil (${user.status})`,
+      summary: `Uğursuz giriş: ${user.email}`,
+      actor: user,
+    });
     return res.status(403).json({
       success: false,
       message: "Your account is not active",
@@ -246,6 +265,8 @@ const login = asyncHandler(async (req, res) => {
 
   user.lastLogin = new Date();
   await user.save();
+
+  await logAction(req, { action: "login", summary: `Giriş: ${user.email}`, actor: user });
 
   const tokens = issueTokens(res, user, !!rememberMe);
 
@@ -288,6 +309,8 @@ const logout = asyncHandler(async (req, res) => {
 
   res.clearCookie(config.accessCookieName, config.cookie);
   res.clearCookie(config.refreshCookieName, config.cookie);
+
+  await logAction(req, { action: "logout", summary: `Çıxış: ${user.email}` });
 
   res.json({ success: true, message: "Logout successful" });
 });

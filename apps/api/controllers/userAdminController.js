@@ -4,10 +4,10 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler, fuzzyRegex, hasRole, cleanIds } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, cleanIds, isObjectId } from "#utils";
 import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
-import { HashService, logAction } from "#services";
+import { HashService, logAction, diffDocs } from "#services";
 import { adminRoles, adminSections } from "#constants";
 
 /**
@@ -124,6 +124,15 @@ const updateUser = asyncHandler(async (req, res) => {
   if (!canAssignRole(req.user?.role, user.role)) {
     return res.status(403).json({ success: false, message: "Bu istifadəçini dəyişməyə icazəniz yoxdur" });
   }
+  // Dəyişiklikdən ƏVVƏLKİ dəyərlər — jurnalda «nə idi → nə oldu» üçün.
+  const before = {
+    firstName: user.firstName, lastName: user.lastName, phone: user.phone,
+    role: user.role, status: user.status,
+    permissions: user.permissions, allowedDestinations: user.allowedDestinations,
+    allowedBranches: user.allowedBranches,
+    ...(password ? { password: "köhnə" } : {}),
+  };
+
   if (firstName != null) user.firstName = firstName;
   if (lastName != null) user.lastName = lastName;
   if (phone != null) user.phone = phone;
@@ -153,7 +162,21 @@ const updateUser = asyncHandler(async (req, res) => {
     user.tokenVersion += 1; // force re-login everywhere on password change
   }
   await user.save();
-  await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi yeniləndi: ${user.email}` });
+  // Rol və icazə dəyişikliyi jurnalın ƏN VACİB hissəsidir — kimin nə vaxt
+  // hansı səlahiyyəti aldığı buradan görünür. Parol dəyişikliyi də qeydə
+  // düşür, amma DƏYƏRİ yox (diffDocs onu maskalayır).
+  const changes = diffDocs(before, {
+    firstName: user.firstName, lastName: user.lastName, phone: user.phone,
+    role: user.role, status: user.status,
+    permissions: user.permissions, allowedDestinations: user.allowedDestinations,
+    allowedBranches: user.allowedBranches,
+    ...(password ? { password: "yeni" } : {}),
+  });
+  await logAction(req, {
+    action: "user", resource: "users", resourceId: user._id,
+    summary: `İstifadəçi yeniləndi: ${user.email}`,
+    changes,
+  });
   res.json({ success: true, message: "Yeniləndi", data: { item: publicUser(user) } });
 });
 
@@ -188,22 +211,83 @@ const removeUser = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Silindi" });
 });
 
-// ── GET /api/admin/logs ──
+/**
+ * GET /api/admin/logs
+ *
+ * Süzgəclər: `action`, `resource`, `actor` (istifadəçi id), `status`,
+ * `from`/`to` (tarix), `search`.
+ *
+ * Əvvəl yalnız `action` və `search` vardı — «bu adam bu həftə nə etdi?»
+ * sualına cavab vermək üçün bütün siyahını əl ilə gəzmək lazım gəlirdi.
+ */
 const listLogs = asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 30, 1), 100);
+
   const filter = {};
   if (req.query.action) filter.action = req.query.action;
   if (req.query.resource) filter.resource = req.query.resource;
+  if (req.query.status) filter.status = req.query.status;
+  if (isObjectId(req.query.actor)) filter["actor.id"] = req.query.actor;
+
+  // Tarix aralığı. `to` GÜNÜN SONUNA qədər götürülür — əks halda «1-dən
+  // 5-ə qədər» seçəndə 5-i günü ümumiyyətlə düşmürdü.
+  const range = {};
+  if (req.query.from) {
+    const d = new Date(req.query.from);
+    if (!Number.isNaN(d.getTime())) range.$gte = d;
+  }
+  if (req.query.to) {
+    const d = new Date(req.query.to);
+    if (!Number.isNaN(d.getTime())) range.$lte = new Date(d.setHours(23, 59, 59, 999));
+  }
+  if (Object.keys(range).length) filter.createdAt = range;
+
   if (req.query.search) {
     const rx = fuzzyRegex(req.query.search, 80);
-    filter.$or = [{ summary: rx }, { "actor.name": rx }, { "actor.email": rx }];
+    filter.$or = [
+      { summary: rx }, { "actor.name": rx }, { "actor.email": rx },
+      { resourceId: rx }, { ip: rx },
+      // Dəyişən sahənin adı və dəyərləri də axtarışa düşür — «qiymət»
+      // yazıb qiymət dəyişikliklərini tapmaq üçün.
+      { "changes.field": rx }, { "changes.from": rx }, { "changes.to": rx },
+    ];
   }
+
   const [items, total] = await Promise.all([
-    AuditLog.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+    AuditLog.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
     AuditLog.countDocuments(filter),
   ]);
   res.json({ success: true, data: { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } } });
 });
 
-export { listUsers, createUser, updateUser, removeUser, listLogs };
+/**
+ * GET /api/admin/logs/filters — süzgəc siyahılarının məzmunu.
+ *
+ * Aktyorlar/əməliyyatlar/resurslar JURNALIN ÖZÜNDƏN gəlir, sabit siyahıdan
+ * yox: silinmiş istifadəçi də seçimdə qalır (onun izi jurnalda var), yeni
+ * əməliyyat növü isə koda əl vurmadan görünür.
+ */
+const logFilters = asyncHandler(async (_req, res) => {
+  const [actors, actions, resources] = await Promise.all([
+    AuditLog.aggregate([
+      { $match: { "actor.id": { $ne: null } } },
+      { $group: { _id: "$actor.id", name: { $last: "$actor.name" }, email: { $last: "$actor.email" }, count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 100 },
+    ]),
+    AuditLog.distinct("action"),
+    AuditLog.distinct("resource"),
+  ]);
+
+  res.json({
+    success: true,
+    data: {
+      actors: actors.map((a) => ({ id: String(a._id), name: a.name, email: a.email, count: a.count })),
+      actions: actions.filter(Boolean).sort(),
+      resources: resources.filter(Boolean).sort(),
+    },
+  });
+});
+
+export { listUsers, createUser, updateUser, removeUser, listLogs, logFilters };

@@ -1,7 +1,7 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
 import { asyncHandler, isObjectId, cleanIds, canAccessSection } from "#utils";
 import { Lead } from "#models";
-import { MailService } from "#services";
+import { MailService, logAction, diffDocs } from "#services";
 
 /**
  * POST /api/leads — public. Rate-limited at the route.
@@ -71,11 +71,25 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
   if (!canAccessSection(req.user, section)) {
     return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
   }
+  // Müraciətə TOXUNAN hər şey jurnala düşməlidir. Bu endpoint generic
+  // CRUD-dan yan keçir, ona görə əvvəl heç bir iz qoymurdu: kimin hansı
+  // müraciəti hansı statusa keçirdiyi (və qeydi dəyişdiyi) görünmürdü.
+  const before = { status: lead.status, note: lead.note };
+
   if (status) lead.status = status;
   if (note !== undefined) lead.note = note;
   lead.handledBy = req.user._id;
   lead.handledAt = new Date();
   await lead.save();
+
+  await logAction(req, {
+    action: "status",
+    resource: "leads",
+    resourceId: lead._id,
+    summary: `Müraciət yeniləndi: ${lead.name}`,
+    changes: diffDocs(before, { status: lead.status, note: lead.note }),
+  });
+
   res.json({ success: true, message: "Yeniləndi", data: { lead } });
 });
 

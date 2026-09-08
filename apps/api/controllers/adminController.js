@@ -10,14 +10,24 @@ import { SiteSetting, Lead } from "#models";
 import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAccessSection } from "#utils";
 
 // Services
-import { logAction } from "#services";
+import { logAction, diffDocs } from "#services";
 
 // Local
 import { RESOURCES, RESOURCE_SECTION } from "./resourceRegistry.js";
 
-/** Human-readable label for a document (for audit summaries). */
+/**
+ * Sənədin oxunaqlı adı (audit jurnalı üçün).
+ *
+ * ÇOXDİLLİ SAHƏLƏR DÜZLƏŞDİRİLİR: `title` artıq `{ az, en, ru }` obyektidir,
+ * ona görə jurnala «courses yeniləndi: [object Object]» düşürdü — yəni hansı
+ * kursun dəyişdiyi görünmürdü.
+ */
+const az = (v) =>
+  v && typeof v === "object" && !Array.isArray(v) ? v.az || v.en || v.ru || "" : v;
+
 const labelOf = (doc) =>
-  doc?.title || doc?.name || doc?.fullName || doc?.question || doc?.label || doc?.country || String(doc?._id || "");
+  az(doc?.title) || az(doc?.name) || az(doc?.fullName) || az(doc?.question)
+  || az(doc?.label) || az(doc?.country) || String(doc?._id || "");
 
 /**
  * «Xaricdə təhsil» müraciətinin əlaməti.
@@ -354,9 +364,24 @@ const update = asyncHandler(async (req, res) => {
       });
     }
   }
+  // Dəyişiklikdən ƏVVƏLKİ nüsxə — jurnalda «nə idi → nə oldu» üçün.
+  // Surət `Object.assign`-dan əvvəl götürülməlidir, sonra gec olur.
+  const before = item.toObject();
+
   Object.assign(item, body);
   await item.save(); // runs pre-save hooks (slug, timeSlot, ...)
-  await logAction(req, { action: "update", resource: req.params.resource, resourceId: item._id, summary: `${req.params.resource} yeniləndi: ${labelOf(item)}` });
+
+  // Yalnız GÖNDƏRİLƏN sahələr müqayisə olunur — PUT sənədin bir hissəsini
+  // göndərir, tam sənədlə tutuşdursaq göndərilməyən hər sahə «dəyişdi»
+  // kimi görünərdi.
+  const changes = diffDocs(before, Object.fromEntries(
+    Object.keys(body).map((k) => [k, item[k]]),
+  ));
+  await logAction(req, {
+    action: "update", resource: req.params.resource, resourceId: item._id,
+    summary: `${req.params.resource} yeniləndi: ${labelOf(item)}`,
+    changes,
+  });
   res.json({ success: true, message: "Yeniləndi", data: { item } });
 });
 
@@ -371,12 +396,19 @@ const remove = asyncHandler(async (req, res) => {
       return res.status(404).json({ success: false, message: "Not found" });
     }
   }
+  // Silinməzdən əvvəl adını götür — sonra sənəd tapılmır və jurnalda
+  // yalnız id qalırdı, yəni «nə silindi» sualına cavab yox idi.
+  const doomed = await entry.model.findById(req.params.id).lean();
+
   if (entry.softDelete === false) {
     await entry.model.findByIdAndDelete(req.params.id);
   } else {
     await entry.model.findByIdAndUpdate(req.params.id, { isDeleted: true });
   }
-  await logAction(req, { action: "delete", resource: req.params.resource, resourceId: req.params.id, summary: `${req.params.resource} silindi` });
+  await logAction(req, {
+    action: "delete", resource: req.params.resource, resourceId: req.params.id,
+    summary: `${req.params.resource} silindi${doomed ? `: ${labelOf(doomed)}` : ""}`,
+  });
   res.json({ success: true, message: "Silindi" });
 });
 
@@ -419,6 +451,10 @@ const reorder = asyncHandler(async (req, res) => {
       updateOne: { filter: { _id: id }, update: { $set: { order: start + i } } },
     })),
   );
+  await logAction(req, {
+    action: "reorder", resource: req.params.resource,
+    summary: `${req.params.resource}: ${ids.length} elementin sırası dəyişdi`,
+  });
   res.json({ success: true, message: "Sıralama yeniləndi" });
 });
 

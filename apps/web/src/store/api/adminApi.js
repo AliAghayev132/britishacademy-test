@@ -269,6 +269,11 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/admin/logs", params }),
       providesTags: [{ type: "Resource", id: "logs" }],
     }),
+    /** Süzgəc siyahıları — aktyorlar/əməliyyatlar/resurslar jurnalın özündən. */
+    adminLogFilters: builder.query({
+      query: () => "/admin/logs/filters",
+      providesTags: [{ type: "Resource", id: "logs" }],
+    }),
     // İzlənilən linkin detallı hesabatı (klik dinamikası, cihaz, mənbə, saat).
     linkStats: builder.query({
       query: ({ id, days = 30 }) => ({ url: `/admin/links/${id}/stats`, params: { days } }),
@@ -353,4 +358,5 @@ export const {
   useAdminUpdateUserMutation,
   useAdminDeleteUserMutation,
   useAdminLogsQuery,
+  useAdminLogFiltersQuery,
 } = adminApi;

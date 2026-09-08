@@ -124,6 +124,8 @@ AdminRouter.post("/users", userAdmin, writeRateLimiter, userAdminController.crea
 AdminRouter.put("/users/:id", userAdmin, writeRateLimiter, userAdminController.updateUser);
 AdminRouter.delete("/users/:id", userAdmin, writeRateLimiter, userAdminController.removeUser);
 AdminRouter.get("/logs", requireSection("logs"), userAdminController.listLogs);
+// Süzgəc siyahıları — `/logs/:id` matcher-i olmadığı üçün sıra vacib deyil.
+AdminRouter.get("/logs/filters", requireSection("logs"), userAdminController.logFilters);
 
 // Generic CRUD over the resource registry.
 AdminRouter.get("/:resource", adminController.list);
