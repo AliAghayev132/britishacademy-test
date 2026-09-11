@@ -23,7 +23,9 @@ export async function generateMetadata({ params }) {
   const d = data?.destination;
   if (!d) return {};
   return metaFromApi(d.seo, {
-    title: d.isScholarship ? d.country : `${d.country}-də təhsil`,
+    // Ehtiyat başlıq: "${country}-də" şəkilçisi ahəngə tabe deyildi
+    // ("Almaniya-də"). Neytral forma — hər ölkə adı ilə düzgün oxunur.
+    title: d.isScholarship ? d.country : `Xaricdə təhsil: ${d.country}`,
     description: d.lead || `${d.country} — British Academy xaricdə təhsil dəstəyi.`,
     path: `/xaricde-tehsil/${slug}`,
   });

@@ -205,15 +205,33 @@ export default async function HomePage() {
       )}
 
       {/* Blog / news */}
+      {/* Yazı varsa son 3 yazı, yoxdursa bloqa keçid zolağı — ana səhifədən
+          bloqa keçid hər halda qalır. */}
       {on("blog") && posts.length > 0 && (
         <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 40 }}>
             <SectionHead title={t("home.blog.title")} sub={t("home.blog.sub")} />
-            <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("nav.all")}</Link>
+            <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.blog.all")}</Link>
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
             {posts.map((p) => <NewsCard key={p._id} post={p} />)}
           </div>
+        </section>
+      )}
+      {on("blog") && posts.length === 0 && (
+        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+          <Link
+            href="/bloq"
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", padding: "28px 32px", borderRadius: 24, background: "#00157A", color: "#fff" }}
+          >
+            <div style={{ minWidth: 0, flex: "1 1 280px" }}>
+              <div style={{ fontSize: 26, fontWeight: 800 }}>{t("home.blog.title")}</div>
+              <div style={{ marginTop: 6, fontSize: 15, opacity: 0.85, lineHeight: 1.5 }}>{t("home.blog.cta")}</div>
+            </div>
+            <span style={{ flex: "none", padding: "12px 22px", borderRadius: 999, background: "#fff", color: "#00157A", fontWeight: 700, fontSize: 15 }}>
+              {t("home.blog.ctaBtn")}
+            </span>
+          </Link>
         </section>
       )}
 

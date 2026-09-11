@@ -2,7 +2,7 @@
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, importBlog, MailService, importHeaderMenu, importContactI18n } from "#services";
+import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, importBlog, importPageContent, MailService, importHeaderMenu, importContactI18n } from "#services";
 import { HEADER_MENU } from "../services/SeedService.js";
 import { tri } from "../data/translations.mjs";
 
@@ -361,4 +361,32 @@ const runImportContact = asyncHandler(async (req, res) => {
   });
 });
 
-export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu, runImportBlog };
+/**
+ * POST /api/admin/dev/import-page-content
+ *
+ * Kurs və ölkə SƏHİFƏLƏRİNİN mətnini, FAQ-ını, qısa məlumatını və SEO-sunu
+ * doldurur. Hər sahə ayrıca yoxlanılır və YALNIZ BOŞDURSA yazılır — admin
+ * paneldə yazılmış mətn qorunur. `overwrite: true` hər şeyi əvəz edir.
+ */
+const runImportPageContent = asyncHandler(async (req, res) => {
+  if (req.user?.role !== "developer") {
+    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+  }
+  const dryRun = Boolean(req.body?.dryRun);
+  const overwrite = Boolean(req.body?.overwrite);
+  const { report, summary } = await importPageContent({ dryRun, overwrite });
+  if (!dryRun) {
+    await logAction(req, {
+      action: "settings",
+      resource: "dev",
+      summary: `Səhifə məzmunu: ${summary.filled} səhifə dolduruldu${overwrite ? " (üzərinə yazılaraq)" : ""}`,
+    });
+  }
+  res.json({
+    success: true,
+    message: `${summary.filled} səhifə ${dryRun ? "doldurulacaq" : "dolduruldu"}, ${summary.untouched} artıq dolu idi${summary.missing ? `, ${summary.missing} tapılmadı` : ""}`,
+    data: { report, summary },
+  });
+});
+
+export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu, runImportBlog, runImportPageContent };

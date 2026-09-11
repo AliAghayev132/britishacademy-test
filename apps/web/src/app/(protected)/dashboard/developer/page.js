@@ -25,6 +25,7 @@ import {
   useImportContactMutation,
   useImportQuizzesMutation,
   useImportBlogMutation,
+  useImportPageContentMutation,
   useAdminSeedMutation,
 } from "@/store/api/adminApi";
 
@@ -50,6 +51,8 @@ export default function DeveloperPage() {
   const [importQuizzes, { isLoading: quizzing }] = useImportQuizzesMutation();
   const [importBlog, { isLoading: blogging }] = useImportBlogMutation();
   const [blogReport, setBlogReport] = useState(null);
+  const [importPages, { isLoading: paging }] = useImportPageContentMutation();
+  const [pageReport, setPageReport] = useState(null);
   const [quizReport, setQuizReport] = useState(null);
   const [seed, { isLoading: seeding }] = useAdminSeedMutation();
   const [seedConfirm, setSeedConfirm] = useState("");
@@ -143,6 +146,29 @@ export default function DeveloperPage() {
     try {
       const res = await importBlog({ overwrite }).unwrap();
       setBlogReport(res.data);
+      notify.success(res.message || "Hazırdır");
+    } catch (e) {
+      notify.error(e?.data?.message || "İmport alınmadı");
+    }
+  };
+
+  // Kurs və ölkə səhifələrinin boş sahələrini doldurur. `dryRun` — yalnız
+  // nəyin dolacağını göstərir; `overwrite` — paneldə yazılanı da əvəz edir.
+  const runImportPages = async ({ dryRun = false, overwrite = false } = {}) => {
+    if (!dryRun) {
+      const ok = await confirmDialog({
+        tone: overwrite ? "error" : undefined,
+        title: overwrite ? "Səhifə mətnləri əvəz olunsun?" : "Səhifələr doldurulsun?",
+        text: overwrite
+          ? "27 kurs və 12 ölkə səhifəsinin <b>mətni, FAQ-ı, qısa məlumatı və SEO-su tamamilə əvəz olunur</b>. Paneldə etdiyin redaktələr itir."
+          : "Yalnız <b>boş sahələr</b> doldurulur — paneldə yazdığın mətn, FAQ və SEO toxunulmur. Qiymət, şəkil və cədvəl dəyişmir.",
+        confirmText: overwrite ? "Bəli, əvəz et" : "Doldur",
+      });
+      if (!ok) return;
+    }
+    try {
+      const res = await importPages({ dryRun, overwrite }).unwrap();
+      setPageReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
       notify.error(e?.data?.message || "İmport alınmadı");
@@ -676,6 +702,68 @@ export default function DeveloperPage() {
         </div>
       </div>
 
+
+      {/* Kurs və ölkə səhifələrinin məzmunu */}
+      <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 flex-none place-items-center rounded-xl bg-sky-50 text-sky-700">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-base font-bold text-gray-900">Kurs və ölkə səhifələrini doldur</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Saytdakı <b>27 kurs</b> və <b>12 «Xaricdə təhsil»</b> səhifəsi üçün mətn,
+              qısa məlumat cədvəli, FAQ və SEO (meta başlıq, təsvir, açar sözlər).
+              Hər sahə ayrıca yoxlanılır və <b>yalnız boşdursa</b> doldurulur.
+            </p>
+
+            <div className="mt-4 flex items-start gap-2 rounded-lg bg-sky-50 p-3 text-sm text-sky-900">
+              <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
+              <span>
+                Qiymət, müəllim, şəkil, cədvəl və aktivliyə toxunulmur. Mətn
+                <b> yalnız azərbaycancadır</b>; EN/RU üçün «AI ilə tərcümə» işlədilir.
+                Əvvəlcə «Yoxla» ilə nəyin dolacağına bax.
+              </span>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={() => runImportPages({ dryRun: true })}
+                disabled={paging}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              >
+                Yoxla
+              </button>
+              <button
+                onClick={() => runImportPages()}
+                disabled={paging}
+                className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:opacity-60"
+              >
+                <BookOpen className="h-4 w-4" />
+                {paging ? "Doldurulur…" : "Boş sahələri doldur"}
+              </button>
+              <button
+                onClick={() => runImportPages({ overwrite: true })}
+                disabled={paging}
+                className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+              >
+                Üzərinə yaz
+              </button>
+            </div>
+
+            {pageReport && (
+              <ul className="mt-6 space-y-1 text-sm">
+                {pageReport.report.map((r) => (
+                  <li key={`${r.kind}-${r.slug}`} className="font-mono text-xs text-gray-600">
+                    {r.kind === "course" ? "kurs" : "ölkə"} · {r.slug} — {r.status}
+                    {r.fields.length > 0 && <span className="text-gray-400"> ({r.fields.join(", ")})</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* SEO bloq yazıları */}
       <div className="mt-5 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">

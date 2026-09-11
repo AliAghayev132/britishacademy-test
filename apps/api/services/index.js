@@ -20,6 +20,7 @@ export { LibVersion, isNewer, installedVersion } from "./LibVersionService.js";
 export { recordClick, parseUA, parseSource } from "./LinkTrackingService.js";
 export { importQuizzes } from "./QuizImportService.js";
 export { importBlog } from "./BlogImportService.js";
+export { importPageContent } from "./PageContentImportService.js";
 export { registerMedia, listFolders } from "./MediaLibraryService.js";
 export { importFlags } from "./FlagImportService.js";
 export { WhatsAppService } from "./WhatsAppService.js";
