@@ -21,9 +21,13 @@ export async function Footer({ site }) {
   return (
     <footer style={{ position: "relative", background: "#00103D", color: "#C4C5D6", overflow: "visible", marginTop: 70 }}>
       <div style={{ height: 5, background: "var(--accent)" }} />
-      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 104, height: 104, borderRadius: "50%", background: "#fff", border: "7px solid #00103D", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden" }}>
+      {/* Mərkəzi emblem. Əvvəl 104px dairədə şəkil cəmi 74px enində idi və
+          balaca görünürdü. İndi dairə bir az böyüdü, şəkil isə daxili sahəni
+          `contain` ilə doldurur — emblem dairəvi olduğu üçün kəsilmir, nisbət
+          də pozulmur (admin başqa ölçüdə şəkil yükləsə belə). */}
+      <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 120, height: 120, borderRadius: "50%", background: "#fff", border: "7px solid #00103D", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden", padding: 5 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={s.brand?.badge || "/assets/badge11.png"} alt={t("common.badgeAlt")} style={{ width: 74, height: "auto" }} />
+        <img src={s.brand?.badge || "/assets/badge11.png"} alt={t("common.badgeAlt")} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
       </div>
       <div className="footer-grid" style={{ position: "relative", zIndex: 2, maxWidth: 1240, margin: "0 auto", padding: "64px 28px 20px", display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 36 }}>
         <div>

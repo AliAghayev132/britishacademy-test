@@ -48,6 +48,48 @@ describe("məzmunun bütövlüyü", () => {
   });
 });
 
+describe("əhatə — hər kurs və ölkə səhifəsinin yazısı var", () => {
+  // Canlı saytdakı slug-lar (2026-09). Yeni kurs/ölkə əlavə olunanda bu
+  // siyahıya da əlavə edilməlidir — test yazısız qalan səhifəni göstərir.
+  const COURSES = [
+    "ingilis-dili-kurslari", "biznes-ingilis-dili-kursu", "huquqsunaslar-ingilis-dili-kursu",
+    "otel-turizm-ingilis-dili-kursu", "alman-dili-kursu", "beynelxalq-sertifikatli-alman-dili-kursu",
+    "rus-dili-kursu", "ispan-dili-kursu", "italyan-dili-kursu", "fransiz-dili-kursu",
+    "conversation-club", "workshop", "ielts-kurslari", "toefl", "oet", "toeic", "sat-kurslari",
+    "duolingo", "toles", "tefl-kurslari", "ms-office", "pesekar-excel-kursu",
+    "muhasibatliq-1c-kursu", "hr-karguzarliq-kursu", "usaq-ingilis-dili", "usaq-rus-dili", "usaq-mentiq",
+  ];
+  const DESTINATIONS = [
+    "almaniya", "turkiye", "ingiltere", "kanada", "polsa", "latviya", "macaristan",
+    "litva", "rusiya", "gurcustan", "estoniya", "teqaud-proqramlari",
+  ];
+  const all = BLOG_POSTS.map((p) => p.content.az).join("\n");
+
+  it("hər kurs səhifəsinə ən azı bir yazıdan link var", () => {
+    const missing = COURSES.filter((s) => !all.includes(`href="/kurslar/${s}"`));
+    expect(missing, `yazısız kurs: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  it("hər ölkə səhifəsinə ən azı bir yazıdan link var", () => {
+    const missing = DESTINATIONS.filter((s) => !all.includes(`href="/xaricde-tehsil/${s}"`));
+    expect(missing, `yazısız ölkə: ${missing.join(", ")}`).toEqual([]);
+  });
+
+  it("daxili linklər YALNIZ mövcud kurs/ölkə slug-larına gedir", () => {
+    // Səhv yazılmış slug ziyarətçini 404-ə aparır.
+    const bad = [];
+    for (const m of all.matchAll(/href="\/kurslar\/([^"?#]+)"/g)) if (!COURSES.includes(m[1])) bad.push(`/kurslar/${m[1]}`);
+    for (const m of all.matchAll(/href="\/xaricde-tehsil\/([^"?#]+)"/g)) if (!DESTINATIONS.includes(m[1])) bad.push(`/xaricde-tehsil/${m[1]}`);
+    expect([...new Set(bad)], `mövcud olmayan səhifə: ${[...new Set(bad)].join(", ")}`).toEqual([]);
+  });
+
+  it("bloqdaxili linklər mövcud yazılara gedir", () => {
+    const slugs = new Set(BLOG_POSTS.map((p) => p.slug));
+    const bad = [...all.matchAll(/href="\/bloq\/([^"?#]+)"/g)].map((m) => m[1]).filter((s) => !slugs.has(s));
+    expect(bad, `mövcud olmayan yazı: ${bad.join(", ")}`).toEqual([]);
+  });
+});
+
 describe("sxemə uyğunluq — səssiz itki olmasın", () => {
   it("`seo` sahələri SXEMİN gözlədiyi adlardadır", () => {
     // Bu, real tapılmış nasazlıqdır: `title`/`description` yazılmışdı,

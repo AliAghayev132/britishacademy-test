@@ -688,8 +688,9 @@ export default function DeveloperPage() {
             <p className="mt-1 text-sm text-gray-600">
               Saytda <b>heç bir bloq yazısı yox idi</b>, kurs və ölkə səhifələrinin
               böyük hissəsi isə mətnsizdir — yəni axtarış sistemləri üçün göstəriləcək
-              məzmun yoxdur. Bu dəst 4 kateqoriya və 10 yazı yaradır: xaricdə təhsil,
-              beynəlxalq imtahanlar, dil öyrənmə və karyera.
+              məzmun yoxdur. Bu dəst saytdakı <b>hər kurs və hər ölkə</b> üçün yazı
+              yaradır — 5 kateqoriya, 40 yazı: xaricdə təhsil, beynəlxalq imtahanlar,
+              dil öyrənmə, karyera və uşaq proqramları.
             </p>
 
             <div className="mt-4 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">

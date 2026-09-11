@@ -38,13 +38,23 @@ export const BLOG_CATEGORIES = [
   { slug: "imtahanlar", name: az("Beynəlxalq imtahanlar"), color: "#B3352F", order: 2 },
   { slug: "dil-oyrenme", name: az("Dil öyrənmə"), color: "#0F6E64", order: 3 },
   { slug: "karyera", name: az("Karyera və bacarıqlar"), color: "#6D3BAF", order: 4 },
+  { slug: "usaq-proqramlari", name: az("Uşaq proqramları"), color: "#8F4E00", order: 5 },
 ];
+
+// Kurs və ölkə səhifələrinin HƏR BİRİ üçün ayrıca yazı — mövzuya görə
+// ayrı fayllardadır ki, bu fayl oxunmaz uzunluğa çatmasın. Hamısı aşağıda
+// `BLOG_POSTS`-a birləşir; import servisi yalnız o siyahını görür.
+import { LANGUAGE_POSTS_A } from "./blog/languagesA.mjs";
+import { LANGUAGE_POSTS_B } from "./blog/languagesB.mjs";
+import { EXAM_POSTS } from "./blog/exams.mjs";
+import { CAREER_KIDS_POSTS } from "./blog/careerKids.mjs";
+import { DESTINATION_POSTS } from "./blog/destinations.mjs";
 
 /**
  * Yazının gövdəsi TipTap-ın qəbul etdiyi HTML-dir (h2/h3, p, ul, ol, a).
  * `editor-content.css` bu teqləri onsuz da stilləşdirir.
  */
-export const BLOG_POSTS = [
+const CORE_POSTS = [
   // ───────────────────────── XARİCDƏ TƏHSİL ─────────────────────────
   {
     slug: "almaniyada-tehsil-sertler-ve-senedler",
@@ -573,4 +583,20 @@ export const BLOG_POSTS = [
 <p><a href="/kurslar/pesekar-excel-kursu">Peşəkar Excel kursumuz</a> məhz praktik məsələlər üzərində qurulub. Ofis proqramlarının hamısını əhatə edən <a href="/kurslar/ms-office">MS Office proqramları</a> kursu isə daha geniş başlanğıcdır.</p>
 `),
   },
+];
+
+/**
+ * İmport servisinin gördüyü YEGANƏ siyahı.
+ *
+ * Əhatə: saytdakı hər kurs və hər ölkə səhifəsinin ən azı bir yazısı var.
+ * `tests/blogSeed.test.js` bunu canlı slug siyahısı ilə yoxlayır — yeni kurs
+ * əlavə olunub yazısız qalsa test xəbər verir.
+ */
+export const BLOG_POSTS = [
+  ...CORE_POSTS,
+  ...LANGUAGE_POSTS_A,
+  ...LANGUAGE_POSTS_B,
+  ...EXAM_POSTS,
+  ...CAREER_KIDS_POSTS,
+  ...DESTINATION_POSTS,
 ];
