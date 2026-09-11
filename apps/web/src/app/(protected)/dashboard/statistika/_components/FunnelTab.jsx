@@ -8,7 +8,7 @@ import { QueryState } from "@/components/ui/QueryState";
 import { Users, MousePointerClick, Send, TrendingUp, Globe2, Smartphone, FileText, Info } from "lucide-react";
 
 /**
- * «Müraciət hunisi» tabı: sayta giriş → forma açıldı → müraciət göndərildi.
+ * «Konversiya» tabı: sayta giriş → forma açıldı → müraciət göndərildi.
  *
  * Bütün göstəricilər UNİKAL SESSİYA sayıdır — bir nəfər formanı üç dəfə
  * açsa huni üç nəfər göstərmir (ümumi açılış sayı ayrıca yazılır).
@@ -177,7 +177,7 @@ export default function FunnelTab({ days }) {
       </div>
 
       <div className="mb-4 grid gap-4 lg:grid-cols-2">
-        <Card title="Müraciət hunisi" icon={TrendingUp} hint={`Son ${d.days} gün · hər addımda neçə nəfər (sessiya) qalır`}>
+        <Card title="Ziyarətdən müraciətə" icon={TrendingUp} hint={`Son ${d.days} gün · hər addımda neçə nəfər (sessiya) qalır`}>
           <FunnelSteps totals={t} />
         </Card>
         <Card title="Gündəlik dinamika" icon={TrendingUp} hint="Hər göstərici öz miqyası ilə — sütunun üstünə gəl, dəyəri gör">

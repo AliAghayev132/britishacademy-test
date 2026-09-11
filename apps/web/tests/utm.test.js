@@ -5,7 +5,7 @@ import { withUtm } from "@/lib/utm";
 /**
  * QISA LİNK → UTM.
  * Əvvəl /r/<kod> hədəfə UTM-siz yönləndirirdi: GA ziyarəti kampaniyaya
- * bağlaya bilmirdi, «Müraciət hunisi» klikdən sonrakı müraciəti görmürdü.
+ * bağlaya bilmirdi, «Konversiya» klikdən sonrakı müraciəti görmürdü.
  */
 
 describe("withUtm", () => {

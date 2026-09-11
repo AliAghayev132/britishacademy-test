@@ -50,7 +50,7 @@ export async function GET(request, { params }) {
       },
     });
     const json = await res.json();
-    // UTM — GA və «Müraciət hunisi» ziyarəti bu linkə bağlasın (bax lib/utm).
+    // UTM — GA və «Konversiya» ziyarəti bu linkə bağlasın (bax lib/utm).
     // API tapılmayan kod üçün də `target: "/"` qaytarır — `found` yoxlanmasa
     // səhv yazılmış kod statistikada kampaniya kimi görünərdi.
     if (json?.data?.found && json.data.target) target = withUtm(json.data.target, code);

@@ -298,13 +298,13 @@ function ContentTab({ days }) {
 
 const TABS = [
   { key: "content", label: "Məzmun" },
-  { key: "funnel", label: "Müraciət hunisi" },
+  { key: "funnel", label: "Konversiya" },
 ];
 
 /**
  * Statistika — iki tab:
  *   • Məzmun — nəyə baxılır, müraciətlər haradan gəlir (əvvəlki səhifə)
- *   • Müraciət hunisi — sayta giriş → forma açıldı → müraciət göndərildi
+ *   • Konversiya — sayta giriş → forma açıldı → müraciət göndərildi
  * Dövr seçimi hər iki tab üçün ortaqdır.
  */
 export default function StatsPage() {

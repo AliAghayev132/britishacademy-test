@@ -1,8 +1,8 @@
 /**
- * Müraciət hunisinin izlənməsi — iki yerə eyni anda:
+ * Konversiyanın izlənməsi (ziyarət → forma → müraciət) — iki yerə eyni anda:
  *
  *   1) SAYTIN ÖZ BAZASI (/api/events) — admin paneldə «Statistika →
- *      Müraciət hunisi» tabı. Google-dan asılı deyil, reklam bloklayıcısı
+ *      Konversiya» tabı. Google-dan asılı deyil, reklam bloklayıcısı
  *      GTM-i kəsəndə də işləyir.
  *   2) GOOGLE TAG MANAGER (dataLayer) — GA4 / Google Ads üçün:
  *        apply_modal_open   — forma açıldı

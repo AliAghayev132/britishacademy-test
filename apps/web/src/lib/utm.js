@@ -5,7 +5,7 @@
  * Əvvəl /r/<kod> hədəfə UTM-siz yönləndirirdi. Nəticədə:
  *   • Google Analytics həmin ziyarəti kampaniyaya bağlaya bilmirdi —
  *     «instagram.com / referral» və ya «(direct)» kimi görünürdü;
- *   • admin paneldəki «Müraciət hunisi» klikdən sonra müraciət olub-olmadığını
+ *   • admin paneldəki «Konversiya» klikdən sonra müraciət olub-olmadığını
  *     göstərə bilmirdi.
  * İndi GA-da: source = <kod>, medium = qisa-link, campaign = <kod>.
  *
