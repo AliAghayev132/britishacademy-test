@@ -1,9 +1,10 @@
 "use client";
 
 // React
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 // Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
+import { playSfx } from "@/lib/sfx";
 // Local
 import { SiteSelect } from "./SiteSelect";
 import { useT } from "@/lib/i18n/useT";
@@ -41,7 +42,7 @@ const field = {
 const ModalHeader = memo(function ModalHeader({ onClose }) {
   const t = useT();
   return (
-    <div style={{ position: "relative", background: "var(--accent)", padding: "34px 34px 40px", overflow: "hidden" }}>
+    <div className="ba-am-head" style={{ position: "relative", background: "var(--accent)", padding: "34px 34px 40px", overflow: "hidden" }}>
       <button onClick={onClose} className="ba-modal-close" style={{ position: "absolute", top: 20, right: 20, width: 38, height: 38, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.22)", color: "#fff", cursor: "pointer", fontSize: 15 }}>✕</button>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 12, padding: "9px 14px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -59,8 +60,8 @@ const ModalHeader = memo(function ModalHeader({ onClose }) {
 const SuccessCard = memo(function SuccessCard({ onClose }) {
   const t = useT();
   return (
-    <div style={{ padding: "40px 34px", textAlign: "center" }}>
-      <div style={{ fontSize: 46 }}>🎉</div>
+    <div className="ba-am-success" style={{ padding: "40px 34px", textAlign: "center" }}>
+      <div className="ba-am-emoji" style={{ fontSize: 46 }}>🎉</div>
       <h4 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>{t("apply.successTitle")}</h4>
       <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>{t("apply.successText")}</p>
       <button onClick={onClose} className="ba-apply-btn" style={{ marginTop: 22, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13, cursor: "pointer" }}>{t("apply.close")}</button>
@@ -128,7 +129,7 @@ const DestinationPicker = memo(function DestinationPicker({ destinations, select
 const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch, setBranch, branches, destinations, picked, onTogglePick, error, isLoading, onChange, onSubmit }) {
   const t = useT();
   return (
-    <form onSubmit={onSubmit} style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
+    <form onSubmit={onSubmit} className="ba-am-form" style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
       <input className="ba-field" name="name" required placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
@@ -166,6 +167,26 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
   const [picked, setPicked] = useState([]);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  // Bağlanış animasiyası: modal dərhal yox olmur — ~220ms «is-closing»
+  // vəziyyətində qalır (kart aşağı enib solur), sonra valideynə onClose
+  // ötürülür. Əvvəl `open=false` olan kimi `return null` idi, animasiyaya
+  // vaxt qalmırdı.
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef(null);
+
+  /** Bütün bağlanma yolları (✕, Escape, fon, «Bağla») buradan keçir. */
+  const requestClose = useCallback(() => {
+    if (closeTimer.current) return; // artıq bağlanır
+    playSfx("close");
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      setClosing(false);
+      onClose();
+    }, 220);
+  }, [onClose]);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   // ── Effects ──
   useEffect(() => {
@@ -180,10 +201,10 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
   }, [open, preset]);
 
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (e) => e.key === "Escape" && requestClose();
     if (open) document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, requestClose]);
 
   // ── Handlers ──
   const change = useCallback((e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value })), []);
@@ -216,14 +237,15 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
       setDone(true);
+      playSfx("success");
     } catch (err) {
       setError(err?.data?.message || t("apply.error"));
     }
   }, [createLead, form, interest, branch, picked, project, t]);
 
   const onOverlayClick = useCallback((e) => {
-    if (e.target === e.currentTarget) onClose();
-  }, [onClose]);
+    if (e.target === e.currentTarget) requestClose();
+  }, [requestClose]);
 
   if (!open) return null;
 
@@ -231,13 +253,14 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
   return (
     <div
       onClick={onOverlayClick}
+      className={`ba-am-overlay${closing ? " is-closing" : ""}`}
       style={{ display: "flex", position: "fixed", inset: 0, zIndex: 150, background: "rgba(12,13,26,.55)", backdropFilter: "blur(4px)", alignItems: "center", justifyContent: "center", padding: 24 }}
     >
-      <div style={{ width: "100%", maxWidth: 540, background: "#fff", borderRadius: 26, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
-        <ModalHeader onClose={onClose} />
+      <div role="dialog" aria-modal="true" className="ba-am-card" style={{ width: "100%", maxWidth: 540, background: "#fff", borderRadius: 26, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
+        <ModalHeader onClose={requestClose} />
 
         {done ? (
-          <SuccessCard onClose={onClose} />
+          <SuccessCard onClose={requestClose} />
         ) : (
           <ApplyForm
             form={form}

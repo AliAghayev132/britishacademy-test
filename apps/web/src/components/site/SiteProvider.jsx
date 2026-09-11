@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import { ApplyModal } from "./ApplyModal";
 import { WhatsAppWidget } from "./WhatsAppWidget";
+import { SoundToggle } from "./SoundToggle";
+import { playSfx } from "@/lib/sfx";
 
 const ApplyCtx = createContext(null);
 
@@ -26,6 +28,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
     setPreset(interest || null);
     setPresetProject(extra?.project || null);
     setApplyOpen(true);
+    playSfx("open");
   }, []);
   const close = useCallback(() => setApplyOpen(false), []);
 
@@ -41,6 +44,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
         destinations={destinations}
       />
       <WhatsAppWidget branches={branches} />
+      <SoundToggle />
     </ApplyCtx.Provider>
   );
 }

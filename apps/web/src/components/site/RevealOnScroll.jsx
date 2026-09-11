@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { playSfx } from "@/lib/sfx";
 
 /**
  * Drives the homepage scroll reveals. The reveal CSS already lives in
@@ -26,12 +27,20 @@ export default function RevealOnScroll() {
       return () => document.body.classList.remove("ba-fx");
     }
 
+    // Səs yalnız İSTİFADƏÇİ scroll edəndə — səhifə açılanda ekranda olan
+    // bölmələr üçün çalınmır. Hər yeni bölmə pentatonik pillədə növbəti not.
+    let scrolled = false;
+    let n = 0;
+    const onScroll = () => { scrolled = true; };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
             show(e.target);
             io.unobserve(e.target);
+            if (scrolled) playSfx("reveal", n++);
           }
         });
       },
@@ -41,6 +50,7 @@ export default function RevealOnScroll() {
     els.forEach((el) => io.observe(el));
 
     return () => {
+      window.removeEventListener("scroll", onScroll);
       io.disconnect();
       document.body.classList.remove("ba-fx");
     };
