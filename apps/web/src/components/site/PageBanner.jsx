@@ -1,21 +1,33 @@
+import fs from "node:fs";
+import path from "node:path";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 
 /**
- * Per-page mascot slot. Filenames map to /public/assets/mascot/<name>.png.
- * A missing file simply shows nothing (CSS background) — no broken-image icon.
- * Sizes for the client: transparent PNG ~800×800, < 500 KB.
+ * Per-page mascot slot → /public/assets/mascot/<ad>.png.
+ * Fayl adı = səhifə açarı (README ilə eyni: courses.png, blog.png, …);
+ * yalnız ana səhifə istisnadır (hero.png).
+ *
+ * ── NASAZLIQ ──
+ * Əvvəl xəritə README-də olmayan adlara aparırdı (courses → study,
+ * blog → read, about → hello …). Qovluqdakı fayllar isə səhifə adı ilə
+ * idi — nəticədə HƏR daxili səhifənin banneri 404 alırdı (konsolda
+ * «GET /assets/mascot/read.png 404»). Şəkil CSS fonu olduğu üçün səhifədə
+ * görünmürdü, amma sorğu gedirdi.
+ *
+ * İndi fayl serverdə yoxlanılır: yoxdursa sorğu ümumiyyətlə göndərilmir.
+ * Qovluğa yeni fayl atılanda kod dəyişmədən görünür.
  */
-export const MASCOTS = {
-  home: "hero", // welcoming / thumbs-up
-  courses: "study", // holding a book
-  filiallar: "map", // pointing at a map
-  teachers: "teach", // with a pointer/board
-  students: "grad", // graduate cap
-  destinations: "travel", // holding a placard / suitcase
-  blog: "read", // reading
-  contact: "call", // headset / waving
-  about: "hello", // waving hello
-};
+export const MASCOTS = { home: "hero" };
+
+const MASCOT_DIR = path.join(process.cwd(), "public", "assets", "mascot");
+
+/** Açar → mövcud fayl adı, fayl yoxdursa null. */
+export function mascotFileFor(key) {
+  if (!key) return null;
+  const file = MASCOTS[key] || key;
+  if (!/^[a-z0-9-]+$/.test(file)) return null; // yol keçidinə qarşı
+  return fs.existsSync(path.join(MASCOT_DIR, `${file}.png`)) ? file : null;
+}
 
 /**
  * Brand-gradient inner-page hero with breadcrumb, title, subtitle, an optional
@@ -29,7 +41,7 @@ export function PageBanner({
   mascot,
   children,
 }) {
-  const mascotFile = mascot && (MASCOTS[mascot] || mascot);
+  const mascotFile = mascotFileFor(mascot);
   return (
     <section className="ba-banner">
       <div
