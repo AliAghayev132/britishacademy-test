@@ -15,16 +15,17 @@ export const Modal = ({
   size = 'md',
   showCloseButton = true,
 }) => {
+  // Açıq ikən səhifə sürüşmür; Escape ilə bağlanır.
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
+    if (!isOpen) return undefined
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => e.key === 'Escape' && onClose?.()
+    document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = 'unset'
+      document.removeEventListener('keydown', onKey)
     }
-  }, [isOpen])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -33,6 +34,7 @@ export const Modal = ({
     md: 'max-w-lg',
     lg: 'max-w-2xl',
     xl: 'max-w-4xl',
+    '2xl': 'max-w-6xl',
     full: 'max-w-full mx-4',
   }
 

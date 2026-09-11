@@ -14,11 +14,12 @@ import {
 // UI
 import { QueryState } from "@/components/ui/QueryState";
 import { QrStudio } from "@/components/ui/QrStudio";
+import { Modal } from "@/components/ui/Modal";
 import { confirmDialog, notify } from "@/components/ui/feedback";
 // Icons
 import {
   Link2, Plus, Copy, Check, Trash2, BarChart3, Power, QrCode,
-  Smartphone, Monitor, Globe, Clock, Users, MousePointerClick, X,
+  Smartphone, Monitor, Globe, Clock, Users, MousePointerClick,
 } from "lucide-react";
 
 /**
@@ -170,8 +171,8 @@ function HourChart({ hours }) {
   );
 }
 
-/** Bir linkin detallı hesabatı. */
-function LinkStats({ id, onClose }) {
+/** Bir linkin detallı hesabatı — modalın içində göstərilir. */
+function LinkStats({ id }) {
   const [days, setDays] = useState(30);
   const { data, isLoading, isError, error, refetch } = useLinkStatsQuery({ id, days });
   const [resetClicks] = useResetLinkClicksMutation();
@@ -207,16 +208,11 @@ function LinkStats({ id, onClose }) {
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-5">
+    <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="truncate text-base font-bold text-gray-900">
-            {d.link?.title || d.link?.code}
-          </h2>
-          <p className="truncate font-mono text-xs text-gray-500">
-            /r/{d.link?.code} → {d.link?.target}
-          </p>
-        </div>
+        <p className="min-w-0 truncate font-mono text-xs text-gray-500">
+          /r/{d.link?.code} → {d.link?.target}
+        </p>
         <div className="flex items-center gap-2">
           {WINDOWS.map((w) => (
             <button
@@ -231,12 +227,6 @@ function LinkStats({ id, onClose }) {
               {w.label}
             </button>
           ))}
-          <button
-            onClick={onClose}
-            className="rounded-lg border border-gray-200 bg-white p-1.5 text-gray-500 transition hover:bg-gray-50"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
       </div>
 
@@ -301,7 +291,7 @@ export default function LinksPage() {
   const [remove] = useAdminDeleteMutation();
 
   const [form, setForm] = useState({ code: "", target: "", title: "", note: "" });
-  const [openId, setOpenId] = useState(null);
+  const [openLink, setOpenLink] = useState(null);
   const [copied, setCopied] = useState(null);
   const [qrLink, setQrLink] = useState(null);
 
@@ -363,7 +353,7 @@ export default function LinksPage() {
     if (!ok) return;
     try {
       await remove({ resource: "short-links", id: link._id }).unwrap();
-      if (openId === link._id) setOpenId(null);
+      if (openLink?._id === link._id) setOpenLink(null);
       notify.success("Silindi");
     } catch (e) {
       notify.error(e?.data?.message || "Silinə bilmədi");
@@ -512,13 +502,9 @@ export default function LinksPage() {
                         <QrCode className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => setOpenId(openId === l._id ? null : l._id)}
+                        onClick={() => setOpenLink(l)}
                         title="Hesabat"
-                        className={`rounded-lg border p-1.5 transition ${
-                          openId === l._id
-                            ? "border-[#00157A] bg-[#00157A] text-white"
-                            : "border-gray-200 text-gray-500 hover:bg-gray-50"
-                        }`}
+                        className="rounded-lg border border-gray-200 p-1.5 text-gray-500 transition hover:bg-gray-50"
                       >
                         <BarChart3 className="h-4 w-4" />
                       </button>
@@ -549,7 +535,16 @@ export default function LinksPage() {
         </div>
       </div>
 
-      {openId && <LinkStats id={openId} onClose={() => setOpenId(null)} />}
+      {/* Hesabat modalda — əvvəl cədvəlin ALTINDA açılırdı: uzun siyahıda
+          görünmürdü, aşağı sürüşdürüb axtarmaq lazım gəlirdi. */}
+      <Modal
+        isOpen={Boolean(openLink)}
+        onClose={() => setOpenLink(null)}
+        title={openLink ? openLink.title || `/r/${openLink.code}` : ""}
+        size="2xl"
+      >
+        {openLink && <LinkStats id={openLink._id} />}
+      </Modal>
 
       {qrLink && (
         <QrStudio
