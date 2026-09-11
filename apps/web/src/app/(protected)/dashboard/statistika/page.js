@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAdminContentStatsQuery } from "@/store/api/adminApi";
 // UI
 import { QueryState } from "@/components/ui/QueryState";
+import FunnelTab from "./_components/FunnelTab";
 // Icons
 import { Eye, Inbox, FileText, GraduationCap, Users, Globe2, Building2, TrendingUp } from "lucide-react";
 
@@ -145,8 +146,8 @@ function DailyChart({ series }) {
   );
 }
 
-export default function StatsPage() {
-  const [days, setDays] = useState(30);
+/** Birinci tab — əvvəlki statistika səhifəsi, dəyişməyib. */
+function ContentTab({ days }) {
   const { data, isLoading, isError, error, refetch, isFetching } = useAdminContentStatsQuery({ days });
 
   if (isLoading || isError) {
@@ -163,24 +164,6 @@ export default function StatsPage() {
 
   return (
     <div className={isFetching ? "opacity-60 transition-opacity" : "transition-opacity"}>
-      {/* Dövr seçimi */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Dövr</span>
-        {WINDOWS.map((w) => (
-          <button
-            key={w.days}
-            onClick={() => setDays(w.days)}
-            className={`rounded-lg border px-3.5 py-1.5 text-sm font-semibold transition ${
-              days === w.days
-                ? "border-[#00157A] bg-[#00157A] text-white"
-                : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-            }`}
-          >
-            {w.label}
-          </button>
-        ))}
-      </div>
-
       {/* Ümumi göstəricilər */}
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Inbox} label="Ümumi müraciət" value={t.leads || 0} tone="blue" />
@@ -308,6 +291,66 @@ export default function StatsPage() {
             </>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+const TABS = [
+  { key: "content", label: "Məzmun" },
+  { key: "funnel", label: "Müraciət hunisi" },
+];
+
+/**
+ * Statistika — iki tab:
+ *   • Məzmun — nəyə baxılır, müraciətlər haradan gəlir (əvvəlki səhifə)
+ *   • Müraciət hunisi — sayta giriş → forma açıldı → müraciət göndərildi
+ * Dövr seçimi hər iki tab üçün ortaqdır.
+ */
+export default function StatsPage() {
+  const [days, setDays] = useState(30);
+  const [tab, setTab] = useState("content");
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label="Statistika bölmələri" className="inline-flex rounded-xl border border-gray-200 bg-white p-1">
+          {TABS.map((x) => (
+            <button
+              key={x.key}
+              role="tab"
+              aria-selected={tab === x.key}
+              onClick={() => setTab(x.key)}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                tab === x.key ? "bg-[#00157A] text-white" : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {x.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Dövr seçimi */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Dövr</span>
+          {WINDOWS.map((w) => (
+            <button
+              key={w.days}
+              onClick={() => setDays(w.days)}
+              className={`rounded-lg border px-3.5 py-1.5 text-sm font-semibold transition ${
+                days === w.days
+                  ? "border-[#00157A] bg-[#00157A] text-white"
+                  : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+              }`}
+            >
+              {w.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div role="tabpanel">
+        {tab === "content" ? <ContentTab days={days} /> : <FunnelTab days={days} />}
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ export { importContactI18n } from "./ContactI18nService.js";
 export { waLog, listWaLogs, waLogSummary, clearWaLogs } from "./WhatsAppLogService.js";
 export { LibVersion, isNewer, installedVersion } from "./LibVersionService.js";
 export { recordClick, parseUA, parseSource } from "./LinkTrackingService.js";
+export { recordClientEvent, recordLeadSubmit, buildFunnel, resolveSource, cleanPath, bakuDay, BAKU_TZ } from "./SiteEventService.js";
 export { importQuizzes } from "./QuizImportService.js";
 export { importBlog } from "./BlogImportService.js";
 export { importPageContent } from "./PageContentImportService.js";

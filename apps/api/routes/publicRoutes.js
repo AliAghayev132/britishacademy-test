@@ -5,7 +5,7 @@ import { Router } from "#constants";
 import {
   publicController,
   leadController, linkController, quizController,
-  seoController, searchController,
+  seoController, searchController, eventController,
 } from "#controllers";
 
 // Middlewares
@@ -78,6 +78,11 @@ PublicRouter.post("/leads", writeRateLimiter, leadController.createLead);
 // yüzlərlə real ziyarətçi eyni IP-dən gəlir, limit onları bloklayardı.
 // Ümumi apiRateLimiter (dəqiqədə 100) onsuz da tətbiq olunur.
 PublicRouter.post("/track/:code", linkController.track);
+
+// «Müraciət hunisi» — sayta giriş və formanın açılması. Səbəb eynidir:
+// writeRateLimiter yoxdur (eyni IP-dən çox real ziyarətçi), ümumi limit var.
+// Müraciətin özü burada YAZILMIR — o, yalnız /leads-də yarananda sayılır.
+PublicRouter.post("/events", eventController.track);
 
 // Testlər. Düzgün cavablar getQuiz cavabında GETMİR — qiymətləndirmə
 // serverdədir (bax quizController).

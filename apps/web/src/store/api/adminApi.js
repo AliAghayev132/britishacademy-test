@@ -301,6 +301,11 @@ export const adminApi = baseApi.injectEndpoints({
       query: ({ days } = {}) => ({ url: "/admin/stats/content", params: { days } }),
       providesTags: [{ type: "Site", id: "content-stats" }],
     }),
+    /** Müraciət hunisi: sayta giriş → forma açıldı → müraciət göndərildi. */
+    adminFunnelStats: builder.query({
+      query: ({ days } = {}) => ({ url: "/admin/stats/funnel", params: { days } }),
+      providesTags: [{ type: "Site", id: "funnel-stats" }],
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -322,6 +327,7 @@ export const {
   useAdminLeadStatusMutation,
   useAdminStatsQuery,
   useAdminContentStatsQuery,
+  useAdminFunnelStatsQuery,
   useLinkStatsQuery,
   useResetLinkClicksMutation,
   useAdminGetSettingsQuery,

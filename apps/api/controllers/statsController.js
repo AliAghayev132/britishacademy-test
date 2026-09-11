@@ -7,7 +7,8 @@
 // yavaşlayardı.
 
 import { asyncHandler } from "#utils";
-import { Course, BlogPost, Teacher, Destination, Lead } from "#models";
+import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models";
+import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
 
 /** Lokallaşdırılmış dəyərdən AZ mətni götür (admin paneli AZ-dır). */
 const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v || "");
@@ -144,4 +145,47 @@ const contentStats = asyncHandler(async (req, res) => {
   });
 });
 
-export { contentStats };
+/**
+ * GET /api/admin/stats/funnel
+ *
+ * Sayta giriş → forma açıldı → müraciət göndərildi. Hər addım UNİKAL
+ * SESSİYA sayı ilə: əvvəl (type, sid) üzrə, sonra type üzrə qruplaşdırılır.
+ * `$addToSet` işlədilmir — ziyarət çox olanda sid massivi sənəd limitini
+ * (16 MB) keçərdi.
+ */
+const funnelStats = asyncHandler(async (req, res) => {
+  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 7), 365);
+  const now = new Date();
+  const since = new Date(`${bakuDay(new Date(now.getTime() - (days - 1) * 864e5))}T00:00:00${BAKU_TZ}`);
+  const match = { ts: { $gte: since } };
+  const sessionsBy = (key, extraMatch = {}) => [
+    { $match: { ...match, ...extraMatch } },
+    { $group: { _id: { k: key, type: "$type", sid: "$sid" } } },
+    { $group: { _id: { k: "$_id.k", type: "$_id.type" }, sessions: { $sum: 1 } } },
+  ];
+  const rename = (name) => (rows) => rows.map((r) => ({ ...r, _id: { [name]: r._id.k, type: r._id.type } }));
+
+  const [byType, daily, pages, sources, devices, first] = await Promise.all([
+    SiteEvent.aggregate([
+      { $match: match },
+      { $group: { _id: { type: "$type", sid: "$sid" }, n: { $sum: 1 } } },
+      { $group: { _id: "$_id.type", sessions: { $sum: 1 }, events: { $sum: "$n" } } },
+    ]),
+    SiteEvent.aggregate(sessionsBy({ $dateToString: { format: "%Y-%m-%d", date: "$ts", timezone: BAKU_TZ } })).then(rename("day")),
+    SiteEvent.aggregate(sessionsBy("$path", { type: { $in: ["modal_open", "lead_submit"] } })).then(rename("path")),
+    SiteEvent.aggregate(sessionsBy("$source")).then(rename("source")),
+    SiteEvent.aggregate([
+      { $match: { ...match, type: "visit" } },
+      { $group: { _id: "$device", sessions: { $sum: 1 } } },
+      { $sort: { sessions: -1 } },
+    ]),
+    SiteEvent.findOne().sort({ ts: 1 }).select("ts").lean(),
+  ]);
+
+  res.json({
+    success: true,
+    data: buildFunnel({ byType, daily, pages, sources, devices, firstTs: first?.ts || null }, { days, now }),
+  });
+});
+
+export { contentStats, funnelStats };

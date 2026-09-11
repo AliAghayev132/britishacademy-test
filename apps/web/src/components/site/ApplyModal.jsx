@@ -5,6 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 // Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
 import { playSfx } from "@/lib/sfx";
+import { getSid, trackLeadSuccess } from "@/lib/track";
 // Local
 import { SiteSelect } from "./SiteSelect";
 import { useT } from "@/lib/i18n/useT";
@@ -234,10 +235,14 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
         // Layihə səhifəsindən açılıbsa müraciət ona bağlanır.
         project: project || undefined,
         source: "apply-modal",
+        // Anonim sessiya kodu — server müraciəti hunidə həmin sessiyanın
+        // ziyarəti və mənbəyi ilə bağlayır.
+        sid: getSid(),
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
       setDone(true);
       playSfx("success");
+      trackLeadSuccess({ interest });
     } catch (err) {
       setError(err?.data?.message || t("apply.error"));
     }

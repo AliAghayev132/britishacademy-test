@@ -26,6 +26,7 @@ AdminRouter.use(authenticate, requireRole(adminRoles));
 AdminRouter.get("/stats", adminController.stats);
 // Məzmun statistikası — «Statistika» səhifəsi üçün. Ayrıca bölmə icazəsi var.
 AdminRouter.get("/stats/content", requireSection("stats"), statsController.contentStats);
+AdminRouter.get("/stats/funnel", requireSection("stats"), statsController.funnelStats);
 // İzlənilən linklərin hesabatı. CRUD generic /:resource ilə gedir,
 // bu iki marşrut isə ondan ƏVVƏL qeydiyyatdan keçməlidir.
 AdminRouter.get("/links/:id/stats", requireSection("links"), linkController.stats);

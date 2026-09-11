@@ -1,7 +1,7 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
 import { asyncHandler, isObjectId, cleanIds, canAccessSection } from "#utils";
 import { Lead } from "#models";
-import { MailService, logAction, diffDocs } from "#services";
+import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
 
 /**
  * POST /api/leads — public. Rate-limited at the route.
@@ -56,6 +56,13 @@ const createLead = asyncHandler(async (req, res) => {
     .lean()
     .then((full) => MailService.sendLeadNotice(full || lead))
     .catch((err) => console.error("Lead notice failed:", err.message));
+
+  // ── Müraciət hunisi ──
+  // «Göndərdi» addımı YALNIZ burada, müraciət bazada yarandıqdan sonra
+  // yazılır. Sayt `sid` (anonim sessiya kodu) göndərir ki, müraciət
+  // həmin sessiyanın ziyarəti və mənbəyi ilə bağlansın.
+  recordLeadSubmit(req.body?.sid, { path: pageUrl, form: source, ua: req.headers["user-agent"] })
+    .catch((err) => console.error("Lead funnel event failed:", err.message));
 });
 
 /** PATCH /api/admin/leads/:id/status — admin marks a lead handled. */

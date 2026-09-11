@@ -4,7 +4,9 @@ import { createContext, useCallback, useContext, useState } from "react";
 import { ApplyModal } from "./ApplyModal";
 import { WhatsAppWidget } from "./WhatsAppWidget";
 import { SoundToggle } from "./SoundToggle";
+import { SiteTracker } from "./SiteTracker";
 import { playSfx } from "@/lib/sfx";
+import { trackModalOpen } from "@/lib/track";
 
 const ApplyCtx = createContext(null);
 
@@ -29,6 +31,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
     setPresetProject(extra?.project || null);
     setApplyOpen(true);
     playSfx("open");
+    trackModalOpen({ interest });
   }, []);
   const close = useCallback(() => setApplyOpen(false), []);
 
@@ -45,6 +48,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
       />
       <WhatsAppWidget branches={branches} />
       <SoundToggle />
+      <SiteTracker />
     </ApplyCtx.Provider>
   );
 }

@@ -28,5 +28,6 @@ export { SiteSetting } from "./siteSetting.model.js";
 export { AuditLog } from "./auditLog.model.js";
 export { ShortLink } from "./shortLink.model.js";
 export { LinkClick } from "./linkClick.model.js";
+export { SiteEvent, SITE_EVENT_TYPES } from "./siteEvent.model.js";
 export { Quiz } from "./quiz.model.js";
 export { QuizAttempt } from "./quizAttempt.model.js";
