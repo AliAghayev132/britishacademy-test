@@ -45,20 +45,38 @@ export async function importBlog({ dryRun = false, overwrite = false, publish = 
   }
 
   // ── Yazılar ──
-  for (const p of BLOG_POSTS) {
+  // Dərc tarixi hər yazıya 1 dəqiqə fərqlə verilir — hamısı eyni anda dərc
+  // olunsa bloqdakı sıra təsadüfi olardı. Beləcə sıra data-dakı sıradır.
+  const base = Date.now();
+  for (const [i, p] of BLOG_POSTS.entries()) {
     const { category, ...rest } = p;
     const existing = await BlogPost.findOne({ slug: p.slug });
+    const publishedAt = new Date(base - i * 60_000);
 
     const doc = {
       ...rest,
       category: catId.get(category),
       status: publish ? "published" : "draft",
+      ...(publish ? { publishedAt } : {}),
       isDeleted: false,
     };
 
     if (!existing) {
       if (!dryRun) await BlogPost.create(doc);
       report.posts.push({ slug: p.slug, status: dryRun ? "yaradılacaq" : "yaradıldı" });
+      continue;
+    }
+
+    // `publish` + mövcud QARALAMA → yalnız status dəyişir, mətnə toxunulmur.
+    // Canlıda məhz belə oldu: yazılar qaralama kimi yükləndi, bloq boş qaldı,
+    // mövcud yazını dərc etməyin isə yolu yox idi.
+    if (publish && !overwrite && existing.status === "draft" && !existing.isDeleted) {
+      if (!dryRun) {
+        existing.status = "published";
+        existing.publishedAt = publishedAt;
+        await existing.save();
+      }
+      report.posts.push({ slug: p.slug, status: dryRun ? "dərc olunacaq" : "dərc olundu" });
       continue;
     }
 
@@ -85,6 +103,7 @@ export async function importBlog({ dryRun = false, overwrite = false, publish = 
       created,
       skipped,
       replaced: report.posts.filter((r) => r.status === "əvəz olundu").length,
+      published: report.posts.filter((r) => r.status.startsWith("dərc olun")).length,
     },
   };
 }

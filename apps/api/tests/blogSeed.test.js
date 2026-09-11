@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import fs from "node:fs";
 import { BLOG_CATEGORIES, BLOG_POSTS } from "../data/blogData.mjs";
+import { importBlog } from "../services/BlogImportService.js";
 import { BlogPost, BlogCategory } from "#models";
 
 /**
@@ -189,6 +190,38 @@ describe("import davranışı", () => {
   it("defolt olaraq QARALAMA yükləyir", () => {
     // Mətn yoxlanmadan saytda dərc olunmamalıdır.
     expect(src).toMatch(/status: publish \? "published" : "draft"/);
+  });
+
+  it("publish mövcud QARALAMANI dərc edir, mətnə toxunmur", async () => {
+    // Canlıdakı vəziyyət: yazılar qaralama kimi yüklənmişdi, bloq boş idi,
+    // `publish` isə mövcud yazını ötürürdü — dərc etməyin yolu yox idi.
+    const first = BLOG_POSTS[0];
+    const draft = new BlogPost({ ...first, category: undefined, status: "draft", content: { az: "<p>Admin redaktəsi</p>" } });
+    const saved = vi.spyOn(draft, "save").mockResolvedValue(draft);
+    const published = new BlogPost({ ...BLOG_POSTS[1], category: undefined, status: "published" });
+    const savedPub = vi.spyOn(published, "save").mockResolvedValue(published);
+    vi.spyOn(BlogCategory, "findOne").mockResolvedValue({ _id: "x" });
+    vi.spyOn(BlogPost, "findOne").mockImplementation(({ slug }) =>
+      Promise.resolve(slug === first.slug ? draft : slug === BLOG_POSTS[1].slug ? published : null));
+    const create = vi.spyOn(BlogPost, "create").mockResolvedValue({});
+
+    try {
+      const { summary, report } = await importBlog({ publish: true });
+
+      expect(draft.status).toBe("published");
+      expect(draft.publishedAt).toBeInstanceOf(Date);
+      expect(draft.content.az).toBe("<p>Admin redaktəsi</p>");
+      expect(saved).toHaveBeenCalledTimes(1);
+      expect(savedPub).not.toHaveBeenCalled(); // artıq dərc olunmuşa toxunulmur
+      expect(report.posts.find((r) => r.slug === first.slug).status).toBe("dərc olundu");
+      expect(summary.published).toBe(1);
+      expect(create).toHaveBeenCalledTimes(BLOG_POSTS.length - 2);
+      // Yeni yaradılanların dərc tarixi fərqlidir — sıra təsadüfi olmasın.
+      const dates = create.mock.calls.map(([d]) => +d.publishedAt);
+      expect(new Set(dates).size).toBe(dates.length);
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 
   it("quru sınaq rejimi var", () => {

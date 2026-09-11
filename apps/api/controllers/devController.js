@@ -294,12 +294,12 @@ const runImportBlog = asyncHandler(async (req, res) => {
     await logAction(req, {
       action: "settings",
       resource: "dev",
-      summary: `Bloq: ${summary.created} yazı yaradıldı, ${summary.replaced} əvəz olundu`,
+      summary: `Bloq: ${summary.created} yazı yaradıldı, ${summary.published} dərc olundu, ${summary.replaced} əvəz olundu`,
     });
   }
   res.json({
     success: true,
-    message: `${summary.created} yaradıldı, ${summary.replaced} əvəz olundu, ${summary.skipped} toxunulmadı`,
+    message: `${summary.created} yaradıldı, ${summary.published} dərc olundu, ${summary.replaced} əvəz olundu, ${summary.skipped} toxunulmadı`,
     data: { report, summary },
   });
 });

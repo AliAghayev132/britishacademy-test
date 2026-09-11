@@ -133,18 +133,22 @@ export default function DeveloperPage() {
 
   // SEO bloq yazılarını yükləyir. Yazılar QARALAMA kimi düşür — mətn
   // yoxlanmadan saytda dərc olunmur.
-  const runImportBlog = async (overwrite) => {
+  // `publish` — yazıları (yoxdursa yaradıb) saytda dərc edir. Mövcud
+  // qaralamaların yalnız statusu dəyişir, mətnə toxunulmur.
+  const runImportBlog = async ({ overwrite = false, publish = false } = {}) => {
     const ok = await confirmDialog({
       tone: overwrite ? "error" : undefined,
-      title: overwrite ? "Bloq yazıları əvəz olunsun?" : "Bloq yazıları yüklənsin?",
+      title: overwrite ? "Bloq yazıları əvəz olunsun?" : publish ? "Bloq yazıları dərc olunsun?" : "Bloq yazıları yüklənsin?",
       text: overwrite
         ? "Mövcud yazıların <b>mətni tamamilə əvəz olunur</b>. Paneldə etdiyin redaktələr itir."
-        : "SEO bloq yazıları <b>qaralama</b> kimi yaradılır — saytda dərhal görünmür. <b>Mövcud yazı toxunulmur.</b>",
-      confirmText: overwrite ? "Bəli, əvəz et" : "Yüklə",
+        : publish
+          ? "Seed-dəki bütün yazılar <b>saytda dərc olunur</b> (yoxdursa yaradılır). Qaralamaların <b>yalnız statusu</b> dəyişir — mətnə toxunulmur. Özün sonradan qaralamaya qaytardığın yazı da yenidən dərc olunar."
+          : "SEO bloq yazıları <b>qaralama</b> kimi yaradılır — saytda dərhal görünmür. <b>Mövcud yazı toxunulmur.</b>",
+      confirmText: overwrite ? "Bəli, əvəz et" : publish ? "Dərc et" : "Yüklə",
     });
     if (!ok) return;
     try {
-      const res = await importBlog({ overwrite }).unwrap();
+      const res = await importBlog({ overwrite, publish }).unwrap();
       setBlogReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
@@ -784,8 +788,9 @@ export default function DeveloperPage() {
             <div className="mt-4 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
               <TriangleAlert className="mt-0.5 h-4 w-4 flex-none" />
               <span>
-                Yazılar <b>qaralama</b> kimi yüklənir — saytda dərhal görünmür.
-                Mətni oxuyub, faktları yoxlayıb özün dərc edirsən.
+                «Qaralama kimi yüklə» — saytda görünmür, paneldə yoxlayıb özün
+                dərc edirsən. «Yüklə və dərc et» — hamısı dərhal saytda görünür;
+                artıq yüklənmiş qaralamaları da dərc edir (mətnə toxunmadan).
                 Mətn <b>yalnız azərbaycancadır</b>; EN/RU üçün yuxarıdakı
                 «AI ilə tərcümə» işlədilir.
               </span>
@@ -793,15 +798,23 @@ export default function DeveloperPage() {
 
             <div className="mt-5 flex flex-wrap gap-2">
               <button
-                onClick={() => runImportBlog(false)}
+                onClick={() => runImportBlog()}
+                disabled={blogging}
+                className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-60"
+              >
+                <FileText className="h-4 w-4" />
+                Qaralama kimi yüklə
+              </button>
+              <button
+                onClick={() => runImportBlog({ publish: true })}
                 disabled={blogging}
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
               >
                 <FileText className="h-4 w-4" />
-                {blogging ? "Yüklənir…" : "Bloq yazılarını yüklə"}
+                {blogging ? "Gözlə…" : "Yüklə və dərc et"}
               </button>
               <button
-                onClick={() => runImportBlog(true)}
+                onClick={() => runImportBlog({ overwrite: true })}
                 disabled={blogging}
                 className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
               >
