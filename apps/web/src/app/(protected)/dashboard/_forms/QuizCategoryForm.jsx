@@ -21,7 +21,6 @@ import {
   Field,
   TextInput,
   NumberInput,
-  Toggle,
   SectionTitle,
 } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -84,6 +83,8 @@ export function QuizCategoryForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Kateqoriyanı redaktə et" : "Yeni kateqoriya"}
       onClose={onClose}
@@ -116,9 +117,6 @@ export function QuizCategoryForm({ item, onClose }) {
           <Field label="Sıra">
             <NumberInput value={order} onChange={(e) => setOrder(e.target.value)} />
           </Field>
-        </div>
-        <div className="pt-1">
-          <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
         </div>
       </section>
     </Overlay>

@@ -195,6 +195,8 @@ export function BranchForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Filialı redaktə et" : "Yeni filial"}
       onClose={onClose}
@@ -379,9 +381,6 @@ export function BranchForm({ item, onClose }) {
               onChange={(e) => setOrder(e.target.value)}
             />
           </Field>
-          <div className="flex items-center">
-            <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
-          </div>
         </div>
       </section>
     </Overlay>

@@ -185,6 +185,8 @@ export function TestimonialForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Rəyi redaktə et" : "Yeni rəy"}
       onClose={onClose}
@@ -286,7 +288,6 @@ export function TestimonialForm({ item, onClose }) {
               onChange={setIsFeatured}
               label={isVideo ? "Ana səhifədə göstər" : "Seçilmiş"}
             />
-            <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
           </div>
         </div>
       </section>

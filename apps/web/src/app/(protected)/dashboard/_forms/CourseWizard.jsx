@@ -294,6 +294,8 @@ export function CourseWizard({ item, onClose }) {
 
   return (
     <Overlay
+      active={course.isActive}
+      onActiveChange={(v) => patchCourse({ isActive: v })}
       localized
       wide
       title={editingId ? "Kursu redaktə et" : "Yeni kurs"}
@@ -333,7 +335,6 @@ export function CourseWizard({ item, onClose }) {
             <Field label="Sıra (order)"><NumberInput value={course.order} onChange={(e) => patchCourse({ order: e.target.value })} /></Field>
             <div className="flex gap-8">
               <Toggle checked={course.isFeatured} onChange={(v) => patchCourse({ isFeatured: v })} label="Ana səhifədə göstər" />
-              <Toggle checked={course.isActive} onChange={(v) => patchCourse({ isActive: v })} label="Aktiv" />
             </div>
           </section>
 

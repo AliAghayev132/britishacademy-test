@@ -211,12 +211,39 @@ export function SectionTitle({ children, right }) {
   );
 }
 
+/**
+ * «Aktiv / Deaktiv» açarı — redaktə pəncərəsinin AŞAĞI panelində, «Yadda
+ * saxla»nın yanında. Əvvəl hər formada ayrı yerdə idi (bəzən formanın
+ * ortasında, SEO-dan sonra) və gözə dəymirdi; indi bütün pəncərələrdə eyni
+ * yerdədir. Yaşıl — saytda görünür, boz — gizlidir.
+ */
+function ActiveSwitch({ checked, onChange }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      title={checked ? "Saytda görünür — gizlətmək üçün kliklə" : "Saytda gizlidir — göstərmək üçün kliklə"}
+      className={`inline-flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+        checked ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-gray-50 text-gray-500"
+      }`}
+    >
+      <span className={`relative h-5 w-9 flex-none rounded-full transition ${checked ? "bg-emerald-500" : "bg-gray-300"}`}>
+        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${checked ? "left-[18px]" : "left-0.5"}`} />
+      </span>
+      {checked ? "Aktiv — saytda görünür" : "Deaktiv — saytda gizlidir"}
+    </button>
+  );
+}
+
 // ── Modal shell ──
 // `preview` (optional node) enables a "Test kimi göstər" toggle that flips the
 // body to a live preview before saving.
 // `localized` — çoxdilli sahələr olan formalarda başlıqda qlobal AZ/EN/RU dil
 // düyməsini göstərir; bütün LocalizedInput/Editor həmin aktiv dili paylaşır.
-export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, localized, children }) {
+// `active` + `onActiveChange` — verilsə aşağı paneldə «Aktiv / Deaktiv» açarı.
+export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, localized, active, onActiveChange, children }) {
   const [showPreview, setShowPreview] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -258,8 +285,19 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
             </div>
           )}
           <div className="flex-1 space-y-6 overflow-auto p-6" onInput={() => setDirty(true)} onChange={() => setDirty(true)}>{children}</div>
-          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {onActiveChange && (
+                <ActiveSwitch
+                  checked={Boolean(active)}
+                  // Açar düymədir — input/change hadisəsi yaratmır, ona görə
+                  // «yadda saxlanmayıb» işarəsi əl ilə qoyulur.
+                  onChange={(v) => {
+                    onActiveChange(v);
+                    setDirty(true);
+                  }}
+                />
+              )}
               {preview && (
                 <button
                   onClick={() => setShowPreview(true)}

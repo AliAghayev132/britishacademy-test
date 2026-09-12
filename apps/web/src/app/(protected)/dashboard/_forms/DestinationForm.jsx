@@ -181,6 +181,8 @@ export function DestinationForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "İstiqaməti redaktə et" : "Yeni istiqamət"}
       onClose={onClose}
@@ -353,7 +355,6 @@ export function DestinationForm({ item, onClose }) {
               label="Təqaüd"
             />
             <Toggle checked={isFeatured} onChange={setIsFeatured} label="Seçilmiş" />
-            <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
           </div>
         </div>
       </section>

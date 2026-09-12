@@ -242,6 +242,8 @@ export function TeacherForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Müəllimi redaktə et" : "Yeni müəllim"}
       onClose={onClose}
@@ -492,7 +494,6 @@ export function TeacherForm({ item, onClose }) {
               onChange={setIsFeatured}
               label="Seçilmiş"
             />
-            <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
           </div>
         </div>
       </div>

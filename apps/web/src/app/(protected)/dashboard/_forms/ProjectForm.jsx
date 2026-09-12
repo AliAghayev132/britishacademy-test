@@ -119,6 +119,8 @@ export function ProjectForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Layihəni redaktə et" : "Yeni layihə"}
       onClose={onClose}
@@ -216,7 +218,6 @@ export function ProjectForm({ item, onClose }) {
           </Field>
         </div>
         <Toggle checked={isFeatured} onChange={setIsFeatured} label="Ana səhifədə göstər" />
-        <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
       </section>
     </Overlay>
   );

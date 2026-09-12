@@ -23,7 +23,6 @@ import {
   NumberInput,
   TextArea,
   NativeSelect,
-  Toggle,
   SectionTitle,
   AddButton,
   RemoveButton,
@@ -191,6 +190,8 @@ export function CourseGroupForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       wide
       title={isEdit ? "Qrafiki redaktə et" : "Yeni qrup / qrafik"}
@@ -391,13 +392,6 @@ export function CourseGroupForm({ item, onClose }) {
         <Field label="Qeyd" info="3 dildə — qrup haqqında əlavə izah (məs. «yalnız həftə sonu»)">
           <LocalizedInput multiline rows={3} value={note} onChange={setNote} />
         </Field>
-        <div className="flex items-center">
-          <Toggle
-            checked={isActive}
-            onChange={setIsActive}
-            label="Aktiv (saytda göstərilsin)"
-          />
-        </div>
       </section>
     </Overlay>
   );

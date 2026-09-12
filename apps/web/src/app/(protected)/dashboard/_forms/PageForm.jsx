@@ -18,7 +18,6 @@ import {
   TextInput,
   NumberInput,
   TextArea,
-  Toggle,
   SectionTitle,
   AddButton,
   RemoveButton,
@@ -145,6 +144,8 @@ export function PageForm({ item, onClose }) {
 
   return (
     <Overlay
+      active={isActive}
+      onActiveChange={setIsActive}
       localized
       title={isEdit ? "Səhifəni redaktə et" : "Yeni səhifə"}
       subtitle={
@@ -251,16 +252,6 @@ export function PageForm({ item, onClose }) {
         onChange={setSeo}
         context={{ kind: "statik səhifə", title, body: [lead, contentHtml] }}
       />
-
-      {/* 4. Parametrlər */}
-      <section className="space-y-4">
-        <SectionTitle>Parametrlər</SectionTitle>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex items-center">
-            <Toggle checked={isActive} onChange={setIsActive} label="Aktiv" />
-          </div>
-        </div>
-      </section>
     </Overlay>
   );
 }
