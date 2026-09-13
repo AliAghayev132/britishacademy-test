@@ -1,5 +1,11 @@
 # Maskot şəkilləri
 
+> **Format: WebP, ~600 px, < 150 KB.** PNG də işləyir (WebP yoxdursa götürülür),
+> amma 1080 px PNG-lər 600–950 KB idi, saytda isə ≤300 px göstərilir. Yeni
+> maskotu çevirmək: `npx sharp-cli -i ad.png -o ad.webp resize 600 600 --fit inside`
+> və ya istənilən redaktorda WebP kimi saxlayın. Aşağıdakı cədvəldə adlar
+> `.png` ilə yazılıb — eyni ad `.webp` uzantısı ilə də keçərlidir.
+
 Bu qovluğa maskot PNG-lərini at — sayt avtomatik götürəcək.
 **Fayl yoxdursa heç nə sınmır**: yer boş qalır (qırıq şəkil ikonu görünmür), çünki
 maskotlar CSS `background-image` kimi qoyulub.

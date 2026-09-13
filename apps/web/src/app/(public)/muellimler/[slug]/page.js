@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
 
 // Data
 import { apiGetStatus, isMissing } from "@/lib/api";
@@ -15,7 +15,7 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { metaFromApi, SITE_URL, SITE_NAME } from "@/lib/seo";
+import { metaFromApi, SITE_URL, SITE_NAME, absUrl } from "@/lib/seo";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {
@@ -23,9 +23,10 @@ export async function generateMetadata({ params }) {
   const { data } = await apiGetStatus(`/teachers/${slug}`);
   const t = data?.teacher;
   if (!t) return {};
+  const tr = await getT();
   return metaFromApi(t.seo, {
-    title: `${t.fullName} — Müəllim`,
-    description: `${t.fullName} — ${t.title || "British Academy müəllimi"}.`,
+    title: `${t.fullName} — ${tr("meta.teacherSuffix")}`,
+    description: `${t.fullName} — ${t.title || tr("meta.teacherFallback")}.`,
     path: `/muellimler/${slug}`,
   });
 }
@@ -162,6 +163,7 @@ export default async function TeacherPage({ params }) {
   if (isMissing(res, "teacher")) notFound();
   const { teacher: t, groups = [] } = res.data;
   const tr = await getT();
+  const locale = await getLocale();
 
   // ── JSON-LD ── Person + Breadcrumb
   const abs = (u) => (u ? (u.startsWith("http") ? u : `${SITE_URL}${u}`) : undefined);
@@ -172,16 +174,16 @@ export default async function TeacherPage({ params }) {
       name: t.fullName,
       jobTitle: t.title || undefined,
       worksFor: { "@type": "Organization", name: SITE_NAME },
-      url: `${SITE_URL}/muellimler/${t.slug || slug}`,
+      url: absUrl(`/muellimler/${t.slug || slug}`, locale),
       image: abs(t.photo),
     },
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: tr("bc.teachers"), item: `${SITE_URL}/muellimler` },
-        { "@type": "ListItem", position: 3, name: t.fullName, item: `${SITE_URL}/muellimler/${t.slug || slug}` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: tr("bc.teachers"), item: absUrl("/muellimler", locale) },
+        { "@type": "ListItem", position: 3, name: t.fullName, item: absUrl(`/muellimler/${t.slug || slug}`, locale) },
       ],
     },
   ];

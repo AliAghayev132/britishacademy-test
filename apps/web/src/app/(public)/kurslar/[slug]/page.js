@@ -6,7 +6,7 @@ import { LocaleLink as Link } from "@/components/site/LocaleLink";
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
 
 // Data
 import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
@@ -20,7 +20,7 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
-import { metaFromApi, buildMetadata, SITE_URL } from "@/lib/seo";
+import { metaFromApi, buildMetadata, SITE_URL, absUrl } from "@/lib/seo";
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 
@@ -51,9 +51,10 @@ export async function generateMetadata({ params }) {
   }
   const cat = await findCategory(slug);
   if (cat) {
+    const tr = await getT();
     return buildMetadata({
       title: cat.name,
-      description: cat.lead || `${cat.name} — British Academy proqramları və qeydiyyat.`,
+      description: cat.lead || `${cat.name} — ${tr("meta.categoryDesc")}`,
       path: `/kurslar/${slug}`,
     });
   }
@@ -170,6 +171,7 @@ export default async function CoursePage({ params }) {
   }
 
   const tr = await getT();
+  const locale = await getLocale();
   const { course, teachersByBranch = [], related = [] } = res.data;
 
   // Qiymət varmı? Boşdursa bölmə ümumiyyətlə göstərilmir — əvvəl başlıq
@@ -198,7 +200,7 @@ export default async function CoursePage({ params }) {
       "@type": "Course",
       name: course.h1 || course.title,
       description: course.lead || course.excerpt,
-      url: `${SITE_URL}/kurslar/${course.slug || slug}`,
+      url: absUrl(`/kurslar/${course.slug || slug}`, locale),
       provider: { "@type": "EducationalOrganization", name: "British Academy", sameAs: SITE_URL },
       image: abs(course.image),
     },
@@ -206,9 +208,9 @@ export default async function CoursePage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: course.category?.name || "Kurslar", item: `${SITE_URL}/kurslar/${course.category?.slug || ""}` },
-        { "@type": "ListItem", position: 3, name: course.title, item: `${SITE_URL}/kurslar/${slug}` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: course.category?.name || tr("bc.courses"), item: absUrl(course.category?.slug ? `/kurslar/${course.category.slug}` : "/kurslar", locale) },
+        { "@type": "ListItem", position: 3, name: course.title, item: absUrl(`/kurslar/${slug}`, locale) },
       ],
     },
   ];

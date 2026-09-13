@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useDialogFocus } from "./useDialogFocus";
 import { useT } from "@/lib/i18n/useT";
 import { LocaleLink as Link } from "./LocaleLink";
 import { useLocale } from "./LocaleProvider";
@@ -57,19 +58,8 @@ export function SearchOverlay({ open, onClose }) {
     };
   }, [open, term, locale]);
 
-  // Focus the input and wire Escape-to-close while open.
-  useEffect(() => {
-    if (!open) return;
-    const t = setTimeout(() => inputRef.current?.focus(), 40);
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      clearTimeout(t);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
+  // Fokus sahəyə, Tab dialoqda qalır, Escape bağlayır, fokus geri qayıdır (audit #34).
+  const dialogRef = useDialogFocus(open, { initialFocus: inputRef, onEscape: onClose });
 
   if (!open) return null;
 
@@ -78,6 +68,7 @@ export function SearchOverlay({ open, onClose }) {
 
   return (
     <div
+      ref={dialogRef}
       className="ba-search-overlay"
       role="dialog"
       aria-modal="true"
@@ -117,6 +108,8 @@ export function SearchOverlay({ open, onClose }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("search.placeholder")}
+            aria-label={t("search.placeholder")}
+            type="search"
             autoComplete="off"
             style={{ border: "none", outline: "none", fontSize: 19, width: "100%", background: "transparent", color: "#14141C", fontFamily: "inherit" }}
           />

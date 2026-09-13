@@ -12,15 +12,14 @@ import { apiGetStatus, isMissing } from "@/lib/api";
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { metaFromApi, SITE_URL } from "@/lib/seo";
+import { metaFromApi, SITE_URL, absUrl } from "@/lib/seo";
+import { formatDate } from "@/lib/i18n/date";
 import { toList } from "@/utils/toList";
 import { getLocale } from "@/lib/i18n/serverT";
 
 // Mütləq URL (şəkil relativdirsə SITE_URL əlavə et).
 const abs = (u) => (!u ? undefined : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {
@@ -57,17 +56,17 @@ export async function generateMetadata({ params }) {
 
 // ── Subcomponents ──
 /** Banner: breadcrumb, title, meta row. */
-function BlogHero({ p, t }) {
+function BlogHero({ p, t, locale }) {
   return (
     <section className="ba-banner">
       <div className="ba-banner-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "36px 28px 56px" }}>
         <nav aria-label="Breadcrumb" style={{ fontSize: 13.5, color: "rgba(255,255,255,.8)" }}>
           <Link href="/bloq" style={{ color: "rgba(255,255,255,.8)" }}>Bloq</Link>
-          {p.category && (<><span style={{ opacity: 0.5 }}> / </span><Link href={`/bloq?kateqoriya=${p.category.slug}`} style={{ color: "rgba(255,255,255,.8)" }}>{p.category.name}</Link></>)}
+          {p.category && (<><span style={{ opacity: 0.5 }}> / </span><Link href={`/bloq?kateqoriya=${encodeURIComponent(p.category.slug)}`} style={{ color: "rgba(255,255,255,.8)" }}>{p.category.name}</Link></>)}
         </nav>
         <h1 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,44px)", letterSpacing: "-.02em", margin: "14px 0 0", lineHeight: 1.18, color: "#fff" }}>{p.title}</h1>
         <div style={{ display: "flex", gap: 16, marginTop: 16, fontSize: 14, color: "rgba(255,255,255,.85)", flexWrap: "wrap" }}>
-          <span>{fmtDate(p.publishedAt)}</span>
+          <span>{formatDate(p.publishedAt, locale)}</span>
           {p.readMinutes && <span>· {p.readMinutes} {t("blog.readMin")}</span>}
           {p.author && <span>· {`${p.author.firstName || ""} ${p.author.lastName || ""}`.trim()}</span>}
         </div>
@@ -99,7 +98,7 @@ export default async function BlogPostPage({ params }) {
   // TipTap emits HTML; sanitize before rendering.
   const html = sanitizeHtml(p.content || "");
 
-  const url = `${SITE_URL}/bloq/${slug}`;
+  const url = absUrl(`/bloq/${slug}`, locale);
   const authorName = p.author ? `${p.author.firstName || ""} ${p.author.lastName || ""}`.trim() : "";
 
   // ── JSON-LD ── BlogPosting + BreadcrumbList
@@ -131,10 +130,10 @@ export default async function BlogPostPage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: tr("common.home"), item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: tr("home.blog.title"), item: `${SITE_URL}/bloq` },
+        { "@type": "ListItem", position: 1, name: tr("common.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: tr("home.blog.title"), item: absUrl("/bloq", locale) },
         ...(p.category
-          ? [{ "@type": "ListItem", position: 3, name: p.category.name, item: `${SITE_URL}/bloq?kateqoriya=${p.category.slug}` }]
+          ? [{ "@type": "ListItem", position: 3, name: p.category.name, item: `${absUrl("/bloq", locale)}?kateqoriya=${encodeURIComponent(p.category.slug)}` }]
           : []),
         { "@type": "ListItem", position: p.category ? 4 : 3, name: p.title, item: url },
       ],
@@ -147,7 +146,7 @@ export default async function BlogPostPage({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       <ViewBeacon type="blog" slug={p.slug} />
 
-      <BlogHero p={p} t={tr} />
+      <BlogHero p={p} t={tr} locale={locale} />
 
       {p.cover && <CoverImage src={p.cover} alt={p.title} />}
 

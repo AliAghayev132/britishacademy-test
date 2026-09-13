@@ -9,9 +9,13 @@ import { useT } from "@/lib/i18n/useT";
  * between pages. Implemented WITHOUT a loading.js so it never introduces a
  * Suspense boundary that would turn notFound() into a soft-404.
  *
- * It intercepts internal <a> clicks (capture phase) to show instantly, then
- * hides once the pathname/search actually changes.
+ * GECİKMƏ İLƏ (audit #32): əvvəl hər keçiddə səhifə hazır olsa belə ən azı
+ * 550 ms pərdə göstərilir və klik bloklanırdı. İndi göstərici yalnız keçid
+ * DELAY_MS-dən uzun çəkəndə görünür; sürətli keçiddə heç görünmür, minimum
+ * müddət də yoxdur.
  */
+const DELAY_MS = 300;
+
 export function RouteLoader() {
   // ── State / derived ──
   const t = useT();
@@ -20,25 +24,19 @@ export function RouteLoader() {
   const [active, setActive] = useState(false);
   const key = pathname + "?" + search.toString();
   const current = useRef(key);
-  const shownAt = useRef(0);
+  const timer = useRef(null);
   const downPos = useRef(null); // son pointerdown mövqeyi (drag aşkarı üçün)
-  const MIN_MS = 550; // keep the loader up long enough to read (no flash-and-gone)
 
   // ── Effects ──
-  // Hide once the route changed — but honour a minimum on-screen time.
+  // Route dəyişdi — gözləyən göstərici ləğv olunur, görünən gizlənir.
   useEffect(() => {
     if (current.current === key) return;
     current.current = key;
-    const elapsed = Date.now() - shownAt.current;
-    if (elapsed >= MIN_MS) {
-      setActive(false);
-      return;
-    }
-    const t = setTimeout(() => setActive(false), MIN_MS - elapsed);
-    return () => clearTimeout(t);
+    clearTimeout(timer.current);
+    setActive(false);
   }, [key]);
 
-  // Show on same-origin link navigations.
+  // Show on same-origin link navigations (after DELAY_MS).
   useEffect(() => {
     // Sürüşdürmə (məs. Swiper) başladığı pointerdown mövqeyini yadda saxla.
     const onDown = (e) => { downPos.current = { x: e.clientX, y: e.clientY }; };
@@ -57,15 +55,19 @@ export function RouteLoader() {
       try { dest = new URL(href, window.location.href); } catch { return; }
       if (dest.origin !== window.location.origin) return;
       if (dest.pathname + dest.search === window.location.pathname + window.location.search) return;
-      shownAt.current = Date.now();
-      setActive(true);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setActive(true), DELAY_MS);
     };
     document.addEventListener("pointerdown", onDown, true);
     document.addEventListener("click", onClick, true);
     // Safety: also hide on back/forward and on full load.
-    const onHide = () => setActive(false);
+    const onHide = () => {
+      clearTimeout(timer.current);
+      setActive(false);
+    };
     window.addEventListener("pageshow", onHide);
     return () => {
+      clearTimeout(timer.current);
       document.removeEventListener("pointerdown", onDown, true);
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("pageshow", onHide);
@@ -75,8 +77,8 @@ export function RouteLoader() {
   // Never let the overlay get stuck if navigation is cancelled.
   useEffect(() => {
     if (!active) return;
-    const t = setTimeout(() => setActive(false), 8000);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setActive(false), 8000);
+    return () => clearTimeout(id);
   }, [active]);
 
   if (!active) return null;
@@ -85,7 +87,7 @@ export function RouteLoader() {
     <div className="ba-loader" role="status" aria-live="polite" aria-label={t("common.loader")}>
       <div className="ba-loader-inner">
         {/* The shield logo "walks" while the page loads. Swap the background to
-            /assets/mascot/walk.png here once a dedicated walking mascot exists. */}
+            /assets/mascot/walk.webp here once a dedicated walking mascot exists. */}
         <span
           className="ba-loader-mascot"
           style={{ backgroundImage: "url(/assets/shield.png)" }}

@@ -297,9 +297,17 @@ img { display: block; max-width: 100%; }
 .img-slot span { position: relative; z-index: 1; padding: 0 14px; }
 .img-slot.circle { border-radius: 50%; }
 
-/* ---------- Reveal on scroll ---------- */
-.ba-reveal { opacity: 0; transform: translateY(38px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
-.ba-reveal.is-visible { opacity: 1; transform: none; }
+/* ---------- Reveal on scroll ----------
+   Gizlətmə YALNIZ JS işə düşəndən sonra (body.ba-fx — RevealOnScroll qoyur).
+   Əvvəl .ba-reveal şərtsiz opacity:0 idi: JS gecikəndə və ya işləmədikdə
+   hero-dan aşağı bütün bölmələr görünmürdü, JS-siz botlar boş səhifə görürdü
+   (audit #33). */
+.ba-reveal { transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+body.ba-fx .ba-reveal:not(.is-visible) { opacity: 0; transform: translateY(38px); }
+@media (prefers-reduced-motion: reduce) {
+  .ba-reveal { transition: none; }
+  body.ba-fx .ba-reveal:not(.is-visible) { opacity: 1; transform: none; }
+}
 
 /* ============================================================
    Mega menu / navigation (shared by every page)
@@ -575,6 +583,7 @@ body.ba-home .ba-partners { background: linear-gradient(150deg, #F6F6FF 0%, #FFF
   transition: opacity .35s ease, filter .35s ease, transform .45s cubic-bezier(.2,.7,.2,1);
 }
 .ba-flag svg { width: 100%; height: 100%; display: block; }
+.ba-am-flag svg { width: 100%; height: 100%; display: block; }
 .ba-fdest:hover .ba-flag { opacity: .4; filter: blur(0) saturate(1.25); transform: scale(1.06) translateX(-3px); }
 .ba-fdest-body { position: relative; z-index: 1; }
 .ba-fdest-tag { font-size: 11.5px; color: var(--cc); font-weight: 800; letter-spacing: .05em; }

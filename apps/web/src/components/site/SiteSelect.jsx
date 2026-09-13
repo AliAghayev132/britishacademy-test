@@ -13,7 +13,7 @@ const optStyle = {
   fontSize: 15, fontFamily: "inherit", border: "none", cursor: "pointer",
 };
 
-export function SiteSelect({ value, onChange, options = [], placeholder, style }) {
+export function SiteSelect({ value, onChange, options = [], placeholder, style, ariaLabel }) {
   const t = useT();
   // Defolt parametrdə hook çağırmaq olmaz — burada həll edilir.
   const ph = placeholder || t("common.select");
@@ -52,7 +52,7 @@ export function SiteSelect({ value, onChange, options = [], placeholder, style }
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
-      <button ref={tRef} type="button" onClick={toggle} className="ba-field" style={{ ...style, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer", textAlign: "left" }}>
+      <button ref={tRef} type="button" onClick={toggle} aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} className="ba-field" style={{ ...style, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer", textAlign: "left" }}>
         <span style={{ color: sel ? "#14141C" : "#63636E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sel ? sel.label : ph}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#63636E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>

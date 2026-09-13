@@ -12,14 +12,22 @@ import { playSfx } from "@/lib/sfx";
  */
 export default function RevealOnScroll() {
   useEffect(() => {
-    document.body.classList.add("ba-fx");
-
     const els = document.querySelectorAll(".ba-reveal, .ba-sg");
 
     const show = (el) => {
       el.classList.add("is-visible");
       if (el.classList.contains("ba-sg")) el.classList.add("is-in");
     };
+
+    // Gizlətmə CSS-i `ba-fx` ilə işə düşür. Ondan ƏVVƏL artıq ekranda olan
+    // bölmələr görünən sayılır — yoxsa onlar bir anlıq yox olub yenidən
+    // çıxardı (server HTML-i görünən idi).
+    const vh = window.innerHeight;
+    els.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) show(el);
+    });
+    document.body.classList.add("ba-fx");
 
     // Graceful fallback: no IO → just reveal everything immediately.
     if (typeof IntersectionObserver === "undefined") {

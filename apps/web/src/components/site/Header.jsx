@@ -11,6 +11,7 @@ import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
 import { useT } from "@/lib/i18n/useT";
+import { useDialogFocus } from "./useDialogFocus";
 
 // ── Dillər ──
 // Ad öz dilində yazılır (endonim): rus dilli ziyarətçi «Rus dili» yox,
@@ -282,67 +283,9 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
   );
 });
 
-// First-load intro overlay: the logo "walks" (reuses the ba-walk keyframe) with
-// a short progress fill, then fades out ~1.2s in. Shows once per session so it
-// doesn't reappear on client navigation (RouteLoader covers those). Lightweight
-// and non-blocking after the fade.
-function IntroLoader() {
-  const [show, setShow] = useState(false);
-  const [hide, setHide] = useState(false);
-  const [bar, setBar] = useState(8);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (sessionStorage.getItem("ba-intro-shown")) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- giriş animasiyası yalnız brauzerdə, sessionStorage yoxlanışından sonra başlaya bilər
-    setShow(true);
-    const start = setTimeout(() => setBar(100), 60);
-    const fade = setTimeout(() => setHide(true), 1200);
-    const done = setTimeout(() => {
-      setShow(false);
-      sessionStorage.setItem("ba-intro-shown", "1");
-    }, 1780);
-    return () => {
-      clearTimeout(start);
-      clearTimeout(fade);
-      clearTimeout(done);
-    };
-  }, []);
-
-  if (!show) return null;
-
-  return (
-    <div
-      className="ba-loader"
-      aria-hidden="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "#00103D",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 26,
-        opacity: hide ? 0 : 1,
-        transition: "opacity .55s ease",
-        pointerEvents: hide ? "none" : "auto",
-      }}
-    >
-      <div
-        className="ba-loader-walk"
-        style={{ background: "#fff", borderRadius: 16, padding: "16px 22px", animation: "ba-walk 1.05s ease-in-out infinite", transformOrigin: "50% 90%" }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/assets/logo-stack.png" alt="British Academy" width={377} height={200} style={{ height: 88, width: "auto", display: "block" }} />
-      </div>
-      <div style={{ width: 210, height: 4, borderRadius: 99, background: "rgba(255,255,255,.14)", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${bar}%`, background: "var(--accent)", borderRadius: 99, transition: "width 1.1s cubic-bezier(.4,.1,.2,1)" }} />
-      </div>
-    </div>
-  );
-}
+// Giriş pərdəsi (IntroLoader) silindi (audit #32): sessiyanın ilk ziyarətində
+// 1.2–1.8 s qeyri-şəffaf pərdə məzmunu örtür və kliki bloklayırdı — reklamdan
+// gələn ziyarətçinin ilk təəssüratı gözləmə idi.
 
 export function Header({ site, nav = [], services = [], destinations = [] }) {
   // ── State / derived ──
@@ -351,10 +294,19 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
   const { open } = useApply();
   const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState(false);
-  const isActive = (href) => href && href !== "/" && pathname.startsWith(href);
+  // pathname lokallaşdırılmışdır (/en/courses), href isə kanonik AZ (/kurslar).
+  // Əvvəl birbaşa müqayisə olunurdu və EN/RU-da heç bir bənd işarələnmirdi (audit #54).
+  const canonical = stripLocale(pathname);
+  const isActive = (href) => {
+    if (!href || href === "/") return false;
+    const base = href.split(/[?#]/)[0];
+    return canonical === base || canonical.startsWith(`${base}/`);
+  };
 
   // ── Handlers ──
   const closeMobile = useCallback(() => setMobile(false), []);
+  // Açıq menyuda fokus içəridə qalır, Escape bağlayır, səhifə arxada sürüşmür.
+  const mobileRef = useDialogFocus(mobile, { onEscape: closeMobile });
   const openSearch = useCallback(() => setSearch(true), []);
   const closeSearch = useCallback(() => setSearch(false), []);
 
@@ -372,8 +324,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
   // ── Render ──
   return (
     <>
-    {/* first-load intro + site-wide scroll progress */}
-    <IntroLoader />
+    {/* site-wide scroll progress */}
     <ScrollProgress />
 
     <div className="ba-fixhead" style={{ position: "sticky", top: 0, zIndex: 60 }}>
@@ -441,7 +392,8 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
             <LanguageMenu />
             <button
               className={`ba-burger${mobile ? " is-open" : ""}`}
-              aria-label="Menyu"
+              aria-label={t("nav.menu")}
+              aria-controls="ba-mobile-nav"
               aria-expanded={mobile}
               onClick={() => setMobile((m) => !m)}
             >
@@ -452,8 +404,17 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
       </header>
 
       {/* mobile drawer */}
-      <div className={`ba-mnav${mobile ? " open" : ""}`} onClick={() => setMobile(false)}>
-        <div className="ba-mnav-inner" onClick={(e) => e.stopPropagation()}>
+      {/* Bağlı olanda `inert`: ekrandan kənardakı linklərə Tab ilə düşülmürdü (audit #34). */}
+      <div className={`ba-mnav${mobile ? " open" : ""}`} onClick={() => setMobile(false)} inert={!mobile}>
+        <div
+          ref={mobileRef}
+          id="ba-mobile-nav"
+          className="ba-mnav-inner"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("nav.menu")}
+          onClick={(e) => e.stopPropagation()}
+        >
           {nav.map((item) => (
             <MobileNavItem
               key={item.label}

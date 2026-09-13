@@ -2,6 +2,8 @@
 
 // React
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useDialogFocus } from "./useDialogFocus";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 // Data (RTK Query)
 import { useCreateLeadMutation } from "@/store/api/leadApi";
 import { playSfx } from "@/lib/sfx";
@@ -47,13 +49,13 @@ const ModalHeader = memo(function ModalHeader({ onClose }) {
   const t = useT();
   return (
     <div className="ba-am-head" style={{ position: "relative", background: "var(--accent)", padding: "34px 34px 40px", overflow: "hidden" }}>
-      <button onClick={onClose} className="ba-modal-close" style={{ position: "absolute", top: 20, right: 20, width: 38, height: 38, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.22)", color: "#fff", cursor: "pointer", fontSize: 15 }}>✕</button>
+      <button type="button" onClick={onClose} aria-label={t("apply.close")} className="ba-modal-close" style={{ position: "absolute", top: 20, right: 20, width: 38, height: 38, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.22)", color: "#fff", cursor: "pointer", fontSize: 15 }}>✕</button>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 12, padding: "9px 14px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/shield.png" alt="British Academy" style={{ height: 34, width: "auto" }} />
         <span style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16, color: "#00157A" }}>British Academy</span>
       </div>
-      <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 30, margin: "22px 0 0", color: "#fff" }}>{t("apply.title")}</h3>
+      <h3 id="ba-apply-title" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 30, margin: "22px 0 0", color: "#fff" }}>{t("apply.title")}</h3>
       <p style={{ fontSize: 15, color: "rgba(255,255,255,.92)", margin: "9px 0 0", lineHeight: 1.55, maxWidth: 370 }}>
         {t("apply.subtitle")}
       </p>
@@ -117,10 +119,20 @@ const DestinationPicker = memo(function DestinationPicker({ destinations, select
                 transition: "all .18s",
               }}
             >
-              {d.flag && (
+              {d.flag && (/^\s*<svg[\s>]/i.test(d.flag) ? (
+                // Bayraq çox vaxt inline SVG mətnidir (ölkə kartı da belə göstərir).
+                // Əvvəl həmişə <img src> kimi verilirdi — SVG mətni URL sayılır,
+                // qırıq sorğu gedir və bayraq görünmürdü (audit #54).
+                <span
+                  aria-hidden="true"
+                  className="ba-am-flag"
+                  style={{ width: 18, height: 13, borderRadius: 2, overflow: "hidden", display: "block", flex: "none" }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(d.flag) }}
+                />
+              ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={d.flag} alt="" width={18} height={13} style={{ borderRadius: 2, display: "block" }} />
-              )}
+              ))}
               {d.country}
             </button>
           );
@@ -136,12 +148,12 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
     <form onSubmit={onSubmit} className="ba-am-form" style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Honeypot: insan görmür və doldurmur; bot doldurursa server müraciəti yazmır. */}
       <input type="text" name="website" value={form.website} onChange={onChange} tabIndex={-1} autoComplete="off" aria-hidden="true" style={HONEYPOT} />
-      <input className="ba-field" name="name" required placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
+      <input className="ba-field" name="name" required aria-label={t("apply.name")} autoComplete="name" placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
-        <input className="ba-field" name="email" type="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
+        <input className="ba-field" name="phone" type="tel" required aria-label={t("apply.phone")} autoComplete="tel" placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
+        <input className="ba-field" name="email" type="email" aria-label={t("apply.email")} autoComplete="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
-      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} style={field} options={INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }))} />
+      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} ariaLabel={t("apply.interest")} style={field} options={INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }))} />
 
       {/* Ölkələr yalnız «Xaricdə təhsil» seçiləndə görünür — digər hallarda
           forma lüzumsuz uzanardı. */}
@@ -152,7 +164,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
       {/* Xaricdə təhsildə filialın mənası yoxdur — müraciət ölkə üzrədir,
           dərs filialda keçilmir. */}
       {interest !== ABROAD && branches.length > 0 && (
-        <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
+        <SiteSelect value={branch} onChange={setBranch} placeholder={t("apply.branch")} ariaLabel={t("apply.branch")} style={field} options={branches.map((b) => ({ value: b._id, label: b.name }))} />
       )}
       {error && <div style={{ color: "#E0533D", fontSize: 13.5, fontWeight: 600 }}>{error}</div>}
       <button type="submit" disabled={isLoading} className="ba-apply-btn" style={{ marginTop: 6, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: 16, borderRadius: 13, cursor: "pointer", opacity: isLoading ? 0.7 : 1 }}>
@@ -207,11 +219,8 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
     }
   }, [open, preset]);
 
-  useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && requestClose();
-    if (open) document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, requestClose]);
+  // Fokus tələsi, Escape, arxa fonun kilidi, fokusun qaytarılması (audit #34).
+  const dialogRef = useDialogFocus(open, { onEscape: requestClose });
 
   // ── Handlers ──
   const change = useCallback((e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value })), []);
@@ -267,7 +276,7 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
       className={`ba-am-overlay${closing ? " is-closing" : ""}`}
       style={{ display: "flex", position: "fixed", inset: 0, zIndex: 150, background: "rgba(12,13,26,.55)", backdropFilter: "blur(4px)", alignItems: "center", justifyContent: "center", padding: 24 }}
     >
-      <div role="dialog" aria-modal="true" className="ba-am-card" style={{ width: "100%", maxWidth: 540, background: "#fff", borderRadius: 26, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ba-apply-title" className="ba-am-card" style={{ width: "100%", maxWidth: 540, background: "#fff", borderRadius: 26, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
         <ModalHeader onClose={requestClose} />
 
         {done ? (

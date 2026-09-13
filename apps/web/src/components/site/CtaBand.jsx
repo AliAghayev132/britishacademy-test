@@ -18,7 +18,7 @@ export function CtaBand({ interest, title, text }) {
         <span
           aria-hidden="true"
           className="ba-cta-mascot"
-          style={{ position: "absolute", right: 22, bottom: 0, width: 150, height: "86%", maxHeight: 200, backgroundImage: "url(/assets/mascot/hero.png)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 16px 26px rgba(0,0,0,.42))", pointerEvents: "none" }}
+          style={{ position: "absolute", right: 22, bottom: 0, width: 150, height: "86%", maxHeight: 200, backgroundImage: "url(/assets/mascot/hero.webp)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 16px 26px rgba(0,0,0,.42))", pointerEvents: "none" }}
         />
         <style>{`@media(max-width:680px){.ba-cta-mascot{display:none}}`}</style>
         <div style={{ position: "relative" }}>

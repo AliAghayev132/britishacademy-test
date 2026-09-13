@@ -57,6 +57,9 @@ export const TeacherCard = memo(function TeacherCard({ t }) {
             className="mt-img"
             src={t.photo}
             alt={t.fullName}
+            // 39 müəllim şəkli bir səhifədə — ekrandan kənardakılar sonra yüklənir (audit #35).
+            loading="lazy"
+            decoding="async"
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transition: "transform .35s ease" }}
           />
         ) : (

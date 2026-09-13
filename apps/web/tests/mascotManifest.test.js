@@ -38,15 +38,16 @@ describe("maskot — mövcud olmayan fayla sorğu getmir", () => {
     expect(keys.length).toBeGreaterThan(5);
     for (const key of keys) {
       const file = mascotFileFor(key);
-      if (file) expect(fs.existsSync(path.join(MASCOT_DIR, `${file}.png`)), `${key} → ${file}.png`).toBe(true);
+      if (file) expect(fs.existsSync(path.join(MASCOT_DIR, file)), `${key} → ${file}`).toBe(true);
     }
   });
 
   it("fayl adı səhifə açarının özüdür (README ilə eyni)", async () => {
     const { mascotFileFor } = await import("@/components/site/PageBanner");
-    // courses.png qovluqda var — əvvəl xəritə onu «study.png»-ə aparırdı.
-    expect(mascotFileFor("courses")).toBe("courses");
-    expect(mascotFileFor("home")).toBe("hero");
+    // courses qovluqda var — əvvəl xəritə onu «study.png»-ə aparırdı.
+    // WebP üstündür (audit #35), uzantı ilə qaytarılır.
+    expect(mascotFileFor("courses")).toBe("courses.webp");
+    expect(mascotFileFor("home")).toBe("hero.webp");
   });
 
   it("faylı olmayan açar sorğu yaratmır", async () => {
@@ -60,6 +61,20 @@ describe("maskot — mövcud olmayan fayla sorğu getmir", () => {
     const readme = fs.readFileSync(path.join(MASCOT_DIR, "README.md"), "utf8");
     const missing = [...usedMascotKeys()].filter((k) => !readme.includes(`\`${k}.png\``));
     expect(missing, `README-də yoxdur: ${missing.join(", ")}`).toEqual([]);
+  });
+});
+
+describe("maskot şəkilləri yüngüldür (audit #35)", () => {
+  it("hər maskot WebP-dir və 150 KB-dan kiçikdir; kodda .png istinadı qalmayıb", () => {
+    const files = fs.readdirSync(MASCOT_DIR).filter((f) => /\.(png|webp)$/.test(f));
+    expect(files.length).toBeGreaterThan(3);
+    for (const f of files) {
+      expect(f, "PNG maskot WebP-yə çevrilməlidir").toMatch(/\.webp$/);
+      expect(fs.statSync(path.join(MASCOT_DIR, f)).size, f).toBeLessThan(150 * 1024);
+    }
+    for (const f of ["src/components/site/Hero.jsx", "src/components/site/CtaBand.jsx", "src/components/site/PageBanner.jsx"]) {
+      expect(fs.readFileSync(f, "utf8"), f).not.toMatch(/url\(\/assets\/mascot\/[^)]*\.png/);
+    }
   });
 });
 

@@ -9,7 +9,8 @@ import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
 import { buildMetadata } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
+import { formatDate } from "@/lib/i18n/date";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
@@ -22,8 +23,6 @@ export async function generateMetadata() {
   });
 }
 
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";
 
 // ── Subcomponents ──
 
@@ -33,7 +32,7 @@ function CategoryChip({ href, label, active }) {
   );
 }
 
-function BlogPostCard({ post }) {
+function BlogPostCard({ post, locale }) {
   return (
     <Link href={`/bloq/${post.slug}`} className="bl-post" style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, overflow: "hidden" }}>
       <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden", background: "#EEF0F6" }}>
@@ -41,7 +40,7 @@ function BlogPostCard({ post }) {
         {post.category && <span style={{ position: "absolute", top: 12, left: 12, background: post.category.color || "var(--accent)", color: "#fff", fontSize: 11.5, fontWeight: 700, padding: "5px 11px", borderRadius: 99, zIndex: 2 }}>{post.category.name}</span>}
       </div>
       <div style={{ padding: "22px 22px 26px" }}>
-        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
+        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{formatDate(post.publishedAt, locale)}</div>
         <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "8px 0 0", lineHeight: 1.3, color: "#17171F" }}>{post.title}</h3>
         {post.excerpt && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{post.excerpt}</p>}
       </div>
@@ -58,6 +57,7 @@ function PaginationLink({ page, currentPage, category }) {
 
 export default async function BlogPage({ searchParams }) {
   const tr = await getT();
+  const locale = await getLocale();
   // ── data fetching ──
   const sp = await searchParams;
   // Dəyərlər API sorğusuna encode olunaraq qoşulur: əvvəl ?kateqoriya=x%26limit=1000
@@ -94,7 +94,7 @@ export default async function BlogPage({ searchParams }) {
           <p style={{ color: "#63636F", padding: "40px 0" }}>{tr("blog.emptyCat")}</p>
         ) : (
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
-            {posts.map((p) => <BlogPostCard key={p._id} post={p} />)}
+            {posts.map((p) => <BlogPostCard key={p._id} post={p} locale={locale} />)}
           </div>
         )}
 

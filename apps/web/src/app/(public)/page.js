@@ -4,7 +4,8 @@ import { getImageUrl } from "@/utils/getImageUrl";
 
 // Data
 import { apiGet } from "@/lib/api";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
+import { formatDate } from "@/lib/i18n/date";
 
 // Components
 import { Hero } from "@/components/site/Hero";
@@ -33,8 +34,6 @@ const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 const ADV_ICONS = ["⚡", "🎯", "🎓", "🗣️", "📚", "🏆"];
 
 
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" }) : "";
 
 // ── Subcomponents ──
 
@@ -52,7 +51,7 @@ function AdvantageCard({ advantage, index }) {
   );
 }
 
-function NewsCard({ post }) {
+function NewsCard({ post, locale }) {
   return (
     <Link href={`/bloq/${post.slug}`} className="ba-news-card" style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, overflow: "hidden", "--accent": post.category?.color || "var(--accent)" }}>
       <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden", background: "#EEF0F6" }}>
@@ -60,7 +59,7 @@ function NewsCard({ post }) {
         {post.category && <span style={{ position: "absolute", top: 12, left: 12, background: post.category.color || "var(--accent)", color: "#fff", fontSize: 11.5, fontWeight: 700, padding: "5px 11px", borderRadius: 99, zIndex: 2 }}>{post.category.name}</span>}
       </div>
       <div style={{ padding: "22px 22px 26px" }}>
-        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{fmtDate(post.publishedAt)}</div>
+        <div style={{ fontSize: 13, color: "#63636E", fontWeight: 600 }}>{formatDate(post.publishedAt, locale)}</div>
         <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 19, margin: "8px 0 0", lineHeight: 1.3, color: "#17171F" }}>{post.title}</h3>
         {post.excerpt && <p style={{ fontSize: 14.5, color: "#63636F", margin: "10px 0 0", lineHeight: 1.55 }}>{post.excerpt}</p>}
       </div>
@@ -70,6 +69,7 @@ function NewsCard({ post }) {
 
 export default async function HomePage() {
   const t = await getT();
+  const locale = await getLocale();
   // ── data fetching ──
   const home = await apiGet("/home");
 
@@ -214,7 +214,7 @@ export default async function HomePage() {
             <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.blog.all")}</Link>
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
-            {posts.map((p) => <NewsCard key={p._id} post={p} />)}
+            {posts.map((p) => <NewsCard key={p._id} post={p} locale={locale} />)}
           </div>
         </section>
       )}

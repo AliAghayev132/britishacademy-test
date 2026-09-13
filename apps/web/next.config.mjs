@@ -24,6 +24,18 @@ const nextConfig = {
   // (e.g. a strict Content-Security-Policy tuned to your app).
   async headers() {
     return [
+      // public/ faylları Next defolt olaraq `max-age=0` ilə verir — 23 şrift və
+      // maskotlar hər baxışda yenidən yoxlanılırdı (audit #35). Adlarda heş
+      // yoxdur, ona görə «immutable» deyil: şriftlər 30 gün, şəkillər 7 gün,
+      // sonra fonda yenilənir. Şəkil dəyişəndə faylın adını dəyişin.
+      {
+        source: '/fonts/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=86400' }],
+      },
+      {
+        source: '/assets/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' }],
+      },
       {
         source: '/:path*',
         headers: [

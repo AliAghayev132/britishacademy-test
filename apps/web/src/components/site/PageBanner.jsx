@@ -21,12 +21,20 @@ export const MASCOTS = { home: "hero" };
 
 const MASCOT_DIR = path.join(process.cwd(), "public", "assets", "mascot");
 
-/** Açar → mövcud fayl adı, fayl yoxdursa null. */
+/**
+ * Açar → mövcud fayl adı (uzantı ilə), fayl yoxdursa null.
+ *
+ * WebP üstündür (audit #35): PNG-lər 1080 px və 600–950 KB idi, saytda isə
+ * ≤300 px göstərilir. Yeni maskot PNG kimi atılsa da işləyir.
+ */
 export function mascotFileFor(key) {
   if (!key) return null;
   const file = MASCOTS[key] || key;
   if (!/^[a-z0-9-]+$/.test(file)) return null; // yol keçidinə qarşı
-  return fs.existsSync(path.join(MASCOT_DIR, `${file}.png`)) ? file : null;
+  for (const ext of ["webp", "png"]) {
+    if (fs.existsSync(path.join(MASCOT_DIR, `${file}.${ext}`))) return `${file}.${ext}`;
+  }
+  return null;
 }
 
 /**
@@ -87,7 +95,7 @@ export function PageBanner({
         <span
           className="ba-banner-mascot"
           aria-hidden="true"
-          style={{ backgroundImage: `url(/assets/mascot/${mascotFile}.png)` }}
+          style={{ backgroundImage: `url(/assets/mascot/${mascotFile})` }}
         />
       )}
     </section>

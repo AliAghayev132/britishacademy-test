@@ -23,12 +23,13 @@ const config = {
   },
 
   // Site
-  siteName: "Starter",
+  // Məktubların göndərən adı (SMTP-də ad yazılmayıbsa), AI başlığı, başlanğıc logu.
+  siteName: "British Academy",
   domain,
   appUrl: process.env.APP_URL || "http://localhost:5000",
   clientUrl:
     process.env.CLIENT_URL ||
-    (isProduction ? `https://${domain}` : "http://localhost:5173"),
+    (isProduction ? `https://${domain}` : "http://localhost:3000"),
 
   // Auth secrets (override in production via env)
   accessSecretKey: process.env.ACCESS_SECRET_KEY || "starter_access_secret_key",

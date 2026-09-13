@@ -204,14 +204,23 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   // Baxış sayğacı burada DEYİL — bu GET keşlənir. Brauzerdən sayılır:
   // POST /api/views (eventController.view).
 
-  // Distinct teachers per branch, from the timetable.
-  const groups = await CourseGroup.find({
-    course: course._id,
-    isActive: true,
-    isDeleted: false,
-  })
-    .populate(live("teacher", "fullName slug title photo color"))
-    .populate(live("branch", "name slug"));
+  // Qruplar və əlaqəli kurslar bir-birini gözləmir (audit #51). Əlaqəli
+  // kurslar yalnız kart kimi göstərilir — ağır sahələr çəkilmir.
+  const [groups, related] = await Promise.all([
+    CourseGroup.find({
+      course: course._id,
+      isActive: true,
+      isDeleted: false,
+    })
+      .populate(live("teacher", "fullName slug title photo color"))
+      .populate(live("branch", "name slug")),
+    Course.findPublic({
+      category: course.category?._id,
+      _id: { $ne: course._id },
+    })
+      .limit(6)
+      .select(CARD_EXCLUDE),
+  ]);
 
   const teachersByBranch = {};
   for (const g of groups) {
@@ -222,12 +231,6 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
       teachersByBranch[key].teachers.push(g.teacher);
     }
   }
-
-  // Related courses in the same category.
-  const related = await Course.findPublic({
-    category: course.category?._id,
-    _id: { $ne: course._id },
-  }).limit(6);
 
   res.json({
     success: true,

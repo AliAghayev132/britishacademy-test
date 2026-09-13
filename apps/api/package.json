@@ -1,5 +1,5 @@
 {
-  "name": "starter-server",
+  "name": "britishacademy-server",
   "version": "1.0.0",
   "description": "Generic Express.js backend starter template (auth + OTP + example CRUD)",
   "type": "module",

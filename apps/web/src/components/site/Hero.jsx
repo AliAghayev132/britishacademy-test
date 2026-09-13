@@ -99,7 +99,9 @@ const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 function StatValue({ raw }) {
   const target = parseInt(String(raw).replace(/\D/g, ""), 10) || 0;
   const suffix = (String(raw).match(/[^\d\s]+$/) || [""])[0];
-  const [n, setN] = useState(0);
+  // Server son dəyəri render edir — JS-siz botlar və gecikən JS «0+» görmür
+  // (audit #33). Sayma animasiyası hidratasiyadan sonra başlayır.
+  const [n, setN] = useState(target);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -230,10 +232,10 @@ export function Hero({ hero, stats = [] }) {
           </div>
         ))}
 
-      {/* mascot — /public/assets/mascot/hero.png (shows nothing if absent) */}
+      {/* mascot — /public/assets/mascot/hero.webp (shows nothing if absent) */}
       <span
         aria-hidden="true"
-        style={{ position: "absolute", right: "3%", bottom: 0, width: 240, height: "84%", maxHeight: 300, backgroundImage: "url(/assets/mascot/hero.png)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 18px 30px rgba(0,0,0,.28))", pointerEvents: "none", zIndex: 0, animation: reduced ? "none" : "ba-mascot-bob 4.5s ease-in-out infinite", transformOrigin: "50% 100%" }}
+        style={{ position: "absolute", right: "3%", bottom: 0, width: 240, height: "84%", maxHeight: 300, backgroundImage: "url(/assets/mascot/hero.webp)", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "contain", filter: "drop-shadow(0 18px 30px rgba(0,0,0,.28))", pointerEvents: "none", zIndex: 0, animation: reduced ? "none" : "ba-mascot-bob 4.5s ease-in-out infinite", transformOrigin: "50% 100%" }}
         className="ba-hero-mascot"
       />
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getT } from "@/lib/i18n/serverT";
+import { getT, getLocale } from "@/lib/i18n/serverT";
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
@@ -18,7 +18,7 @@ import { ApplyButton } from "@/components/site/ApplyButton";
 import { PageBanner } from "@/components/site/PageBanner";
 
 // Utils / SEO
-import { metaFromApi, SITE_URL } from "@/lib/seo";
+import { metaFromApi, absUrl } from "@/lib/seo";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {
@@ -26,11 +26,12 @@ export async function generateMetadata({ params }) {
   const { data } = await apiGetStatus(`/destinations/${slug}`);
   const d = data?.destination;
   if (!d) return {};
+  const tr = await getT();
   return metaFromApi(d.seo, {
     // Ehtiyat başlıq: "${country}-də" şəkilçisi ahəngə tabe deyildi
     // ("Almaniya-də"). Neytral forma — hər ölkə adı ilə düzgün oxunur.
-    title: d.isScholarship ? d.country : `Xaricdə təhsil: ${d.country}`,
-    description: d.lead || `${d.country} — British Academy xaricdə təhsil dəstəyi.`,
+    title: d.isScholarship ? d.country : `${tr("meta.abroadPrefix")}: ${d.country}`,
+    description: d.lead || `${d.country} — ${tr("meta.abroadDesc")}`,
     path: `/xaricde-tehsil/${slug}`,
   });
 }
@@ -76,6 +77,7 @@ export default async function DestinationPage({ params }) {
   if (isMissing(res, "destination")) notFound();
   const d = res.data.destination;
   const tr = await getT();
+  const locale = await getLocale();
 
   // ── JSON-LD ── Breadcrumb (+ FAQPage when present)
   const ld = [
@@ -83,9 +85,9 @@ export default async function DestinationPage({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: tr("bc.abroad"), item: `${SITE_URL}/xaricde-tehsil` },
-        { "@type": "ListItem", position: 3, name: d.country, item: `${SITE_URL}/xaricde-tehsil/${d.slug || slug}` },
+        { "@type": "ListItem", position: 1, name: tr("bc.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: tr("bc.abroad"), item: absUrl("/xaricde-tehsil", locale) },
+        { "@type": "ListItem", position: 3, name: d.country, item: absUrl(`/xaricde-tehsil/${d.slug || slug}`, locale) },
       ],
     },
   ];

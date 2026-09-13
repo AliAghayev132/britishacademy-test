@@ -108,7 +108,8 @@ describe("müraciət modalı", () => {
   it("bütün bağlanma yolları animasiyadan keçir", () => {
     // Birbaşa onClose ötürülsə həmin yol animasiyasız, səssiz bağlanar.
     expect(src).not.toMatch(/onClose=\{onClose\}/);
-    expect(src).toMatch(/e\.key === "Escape" && requestClose\(\)/);
+    // Escape fokus hook-u vasitəsilə (audit #34).
+    expect(src).toMatch(/useDialogFocus\(open, \{ onEscape: requestClose \}\)/);
     expect(src).toMatch(/ModalHeader onClose=\{requestClose\}/);
     expect(src).toMatch(/SuccessCard onClose=\{requestClose\}/);
   });

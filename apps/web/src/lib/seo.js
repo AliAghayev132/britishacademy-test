@@ -44,6 +44,13 @@ export const DEFAULT_TITLE = DEFAULTS.az.title;
 export const DEFAULT_DESCRIPTION = DEFAULTS.az.description;
 export const DEFAULT_IMAGE = "/assets/og-cover.png";
 
+/**
+ * Kanonik AZ yol → cari dilin mütləq URL-i. JSON-LD və breadcrumb üçün:
+ * əvvəl EN/RU səhifələrin strukturlaşdırılmış datası AZ ünvanlara işarə
+ * edirdi (audit #31).
+ */
+export const absUrl = (canonPath, locale = "az") => `${SITE_URL}${buildPath(canonPath || "/", locale)}`;
+
 const abs = (img) => (!img ? `${SITE_URL}${DEFAULT_IMAGE}` : img.startsWith("http") ? img : `${SITE_URL}${img}`);
 
 /**
