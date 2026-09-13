@@ -226,6 +226,11 @@ INTERNAL_API_KEY=<client .env-dəki ilə EYNİ dəyər>
 
 API açar olmadan başlayanda logda `⚠️ INTERNAL_API_KEY təyin olunmayıb` yazır.
 
+Eyni açar admin dəyişikliyinin saytda **dərhal** görünməsi üçün də lazımdır:
+API yadda saxlayandan sonra `http://127.0.0.1:30001/internal/revalidate`-ə
+xəbər verir. Next başqa portdadırsa server `.env`-ə `WEB_INTERNAL_URL` yazın.
+Açar yoxdursa dəyişiklik 60 saniyəyə qədər gecikir.
+
 **nginx konfiqi yenilənib** (`/api/media/` bloku — 250 MB-a qədər video
 yükləmə). Faylı yenidən `scp` ilə göndərib `sudo nginx -t && sudo systemctl
 reload nginx` edin.
@@ -233,6 +238,24 @@ reload nginx` edin.
 ```bash
 pm2 restart 30002:britishacademy-server --update-env
 ```
+
+### Node 22-yə keçid
+
+Layihə `.nvmrc`-də Node 22 gözləyir (CI də onunla işləyir), server isə Node
+20-dədir. Deploy bunu logda `⚠️ Serverdə Node 20…` kimi göstərir, amma
+dayanmır. Keçid bir dəfə əl ilə edilir — PM2 və pnpm yeni Node altında
+yenidən quraşdırılmalıdır:
+
+```bash
+nvm install 22
+nvm alias default 22
+npm i -g pm2          # PM2 hər Node versiyasına ayrıca quraşdırılır
+pm2 update            # işləyən prosesləri yeni PM2-yə köçürür
+node -v && pm2 -v && pnpm -v
+```
+
+Sonra hər iki deploy workflow-unda `nvm use 20` sətrini `nvm use 22` edin.
+Qısa müddət hər iki prosesi (`pm2 ls`) yoxlayın.
 
 ### Ehtiyat nüsxə
 

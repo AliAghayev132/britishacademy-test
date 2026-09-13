@@ -21,6 +21,7 @@ import {
   securityHeaders,
   sanitizeInput,
   cacheHeaders,
+  revalidateOnWrite,
 } from "#middlewares";
 
 // Routes
@@ -139,6 +140,8 @@ const setupRoutes = (app) => {
   // ADMIN FIRST: every /api/admin/* route is authenticated + role-gated.
   // Mounting it before the public router guarantees no future public path can
   // ever shadow an admin one (PublicRouter is mounted on the bare /api prefix).
+  // Uğurlu admin yazmasından sonra saytın keşi dərhal təmizlənir (audit #37).
+  app.use("/api/admin", revalidateOnWrite);
   app.use("/api/admin", AdminRouter);
 
   // PUBLIC: read-only, no auth. The single write endpoint is POST /api/leads
@@ -302,15 +305,29 @@ const printBanner = (port) => {
 
 // ============ BOOTSTRAP APPLICATION ============
 
+let configured = false;
+
+/**
+ * Middleware və marşrutları qoş (bir dəfə). İnteqrasiya testləri serveri
+ * başlatmadan app-i buradan alır və öz portunda qaldırır (bax integration/).
+ */
+export const configureApp = () => {
+  if (!configured) {
+    setupSecurity(app);
+    setupMiddlewares(app);
+    setupRoutes(app);
+    setupErrorHandlers(app);
+    configured = true;
+  }
+  return app;
+};
+
 /**
  * Start the application
  */
 const startApp = async () => {
   try {
-    setupSecurity(app);
-    setupMiddlewares(app);
-    setupRoutes(app);
-    setupErrorHandlers(app);
+    configureApp();
 
     await initializeServices();
 
@@ -325,7 +342,12 @@ const startApp = async () => {
   }
 };
 
-startApp();
+// BA_NO_AUTOSTART=1 — yalnız inteqrasiya testləri qoyur: modul import olunur,
+// amma port, bootstrap, WhatsApp və socket işə düşmür. «Birbaşa işə salınıb?»
+// yoxlaması (argv) istifadə olunmur — PM2 cluster rejimində argv fərqlidir və
+// server production-da başlamazdı.
+const autostart = process.env.BA_NO_AUTOSTART !== "1";
+if (autostart) startApp();
 
 // ============ GRACEFUL SHUTDOWN ============
 //
@@ -375,5 +397,7 @@ const shutdown = async (signal) => {
   }
 };
 
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
+if (autostart) {
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+}

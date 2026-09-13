@@ -26,7 +26,8 @@ jobs:
           # pnpm 11.x Node >=22.13 tələb edir. Node 20 ilə setup-node-un
           # keş addımı (`pnpm store path`) ERR_UNKNOWN_BUILTIN_MODULE
           # (node:sqlite) ilə çökürdü.
-          node-version: 22
+          # Versiya .nvmrc-dən — lokal, CI və server eyni faylı oxuyur (audit #44).
+          node-version-file: .nvmrc
           cache: pnpm
 
       # --frozen-lockfile: lockfile package.json ilə uyğun deyilsə burada
@@ -40,3 +41,31 @@ jobs:
 
       - name: Testlər
         run: pnpm test
+
+  # Real MongoDB ilə HTTP səviyyəsində testlər (audit #49): giriş/cookie,
+  # müraciət formu, icazələr və filial əhatəsi. Deploy «CI»-nin bütün
+  # job-larını gözləyir, yəni bunlar yıxılsa da kod serverə getmir.
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Asılılıqlar
+        run: pnpm install --frozen-lockfile
+      - name: İnteqrasiya testləri
+        run: pnpm run test:int
+        env:
+          MONGODB_URI_TEST: mongodb://127.0.0.1:27017/ba_integration_test

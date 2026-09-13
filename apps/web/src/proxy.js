@@ -33,6 +33,9 @@ export function proxy(request) {
   if ((pathname === '/login' || pathname === '/register') && hasSession) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
+  // Daxili (server-server) marşrutlar dil məntiqindən keçmir.
+  if (pathname.startsWith('/internal/')) return NextResponse.next()
+
   // Admin sahəsi dil idarəçiliyindən kənardır.
   if (pathname.startsWith('/dashboard') || pathname === '/login' || pathname === '/register') {
     return NextResponse.next()

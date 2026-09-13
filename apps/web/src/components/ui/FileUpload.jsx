@@ -13,6 +13,7 @@
 
 // React
 import { useRef, useState } from "react";
+import { useMarkDirty } from "@/lib/formDirty";
 // UI
 import { ImageCropper } from "./ImageCropper";
 import { MediaPicker } from "./MediaPicker";
@@ -28,7 +29,13 @@ import { UploadCloud, X, Crop, Info, FolderOpen } from "lucide-react";
  * @param {object} p
  * @param {string} [p.folder] Qalereyada hansı qovluğa düşsün (məs. "bayraqlar")
  */
-export function FileUpload({ value, onChange, kind = "image", spec, folder }) {
+export function FileUpload({ value, onChange: setValue, kind = "image", spec, folder }) {
+  // Yükləmə, silmə və qalereyadan seçim formanı «dəyişib» kimi işarələyir (audit #29).
+  const markDirty = useMarkDirty();
+  const onChange = (next) => {
+    markDirty();
+    setValue(next);
+  };
   const inputRef = useRef(null);
   const [pct, setPct] = useState(null); // null = boşdayanma
   const [err, setErr] = useState("");

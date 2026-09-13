@@ -45,6 +45,13 @@ const config = {
    */
   internalApiKey: process.env.INTERNAL_API_KEY || "",
 
+  // Next serverinin DAXİLİ ünvanı — admin dəyişikliyindən sonra sayt keşini
+  // təmizləmək üçün (services/SiteCacheService.js). nginx-dən keçmir.
+  webInternalUrl: (
+    process.env.WEB_INTERNAL_URL ||
+    (isProduction ? "http://127.0.0.1:30001" : "http://localhost:3000")
+  ).replace(/\/$/, ""),
+
   // Default admin (created on first boot by BootstrapService)
   defaultAdmin: {
     email: process.env.DEFAULT_ADMIN_EMAIL || "admin@example.com",

@@ -6,7 +6,8 @@
 // a form library.
 
 // React
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FormDirtyContext, useMarkDirty } from "@/lib/formDirty";
 // UI / kit
 import { InfoTip } from "@/components/ui/InfoTip";
 import { confirmDialog } from "@/components/ui/feedback";
@@ -71,7 +72,12 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
     setQ("");
     setOpen(true);
   };
-  const choose = (v) => { onChange?.({ target: { value: v } }); setOpen(false); };
+  const markDirty = useMarkDirty();
+  const choose = (v) => {
+    if (String(v) !== String(value ?? "")) markDirty();
+    onChange?.({ target: { value: v } });
+    setOpen(false);
+  };
 
   const norm = (s) => String(s || "").toLowerCase();
   const filtered = searchable && q ? options.filter((o) => norm(o.label).includes(norm(q))) : options;
@@ -82,6 +88,8 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
         ref={triggerRef}
         type="button"
         disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         onClick={toggle}
         className={`${base} flex items-center justify-between gap-2 bg-white text-left ${disabled ? "opacity-60" : "cursor-pointer"}`}
       >
@@ -164,8 +172,9 @@ export function Field({ label, hint, required, info, children, className, as = "
 }
 
 export function Toggle({ checked, onChange, label }) {
+  const markDirty = useMarkDirty();
   return (
-    <button type="button" onClick={() => onChange(!checked)} className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+    <button type="button" onClick={() => { markDirty(); onChange(!checked); }} className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
       <span className={`relative h-6 w-11 rounded-full transition ${checked ? "bg-blue-900" : "bg-gray-300"}`}>
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
       </span>
@@ -176,10 +185,12 @@ export function Toggle({ checked, onChange, label }) {
 
 /** Multi-select rendered as toggleable chips. value = array of ids. */
 export function MultiSelectChips({ options = [], value = [], onChange, empty }) {
+  const markDirty = useMarkDirty();
   const set = new Set(value.map(String));
   const toggle = (id) => {
     const next = new Set(set);
     if (next.has(String(id))) next.delete(String(id)); else next.add(String(id));
+    markDirty();
     onChange([...next]);
   };
   if (!options.length) return <p className="text-sm text-gray-400">{empty || "Seçim yoxdur"}</p>;
@@ -246,6 +257,10 @@ function ActiveSwitch({ checked, onChange }) {
 export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide, preview, localized, active, onActiveChange, children }) {
   const [showPreview, setShowPreview] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const markDirty = useCallback(() => setDirty(true), []);
+  // Fonda bağlama yalnız basma da fonda BAŞLAYIBSA. Əvvəl sahədə mətn seçib
+  // siçanı fonda buraxmaq «klik» sayılır və pəncərə bağlanırdı (audit #29).
+  const downOnBackdrop = useRef(false);
 
   // Bağlamadan öncə — istifadəçi nəsə yazıbsa təsdiq istə (səhvən qırağa
   // kliklədikdə/sürüşdürdükdə işi itirməsin).
@@ -264,11 +279,21 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
   };
 
   return (
+    <FormDirtyContext.Provider value={markDirty}>
     <LocalizedFormProvider>
       {/* role/aria-modal — həm ekran oxuyucular, həm də testlər modalı
           səhifənin qalanından ayıra bilsin (əvvəl testdə səhifədəki axtarış
           qutusu modalın sahəsi kimi seçilirdi). */}
-      <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && requestClose()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        onMouseDown={(e) => { downOnBackdrop.current = e.target === e.currentTarget; }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget && downOnBackdrop.current) requestClose();
+          downOnBackdrop.current = false;
+        }}
+      >
         <div className={`flex max-h-[92vh] w-full ${wide ? "max-w-4xl" : "max-w-2xl"} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}>
           <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4">
             <div className="min-w-0">
@@ -294,7 +319,7 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
                   // «yadda saxlanmayıb» işarəsi əl ilə qoyulur.
                   onChange={(v) => {
                     onActiveChange(v);
-                    setDirty(true);
+                    markDirty();
                   }}
                 />
               )}
@@ -331,21 +356,24 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
         </div>
       )}
     </LocalizedFormProvider>
+    </FormDirtyContext.Provider>
   );
 }
 
 /** Small "+ add" / remove helpers for repeatable rows. */
 export function AddButton({ onClick, children }) {
+  const markDirty = useMarkDirty();
   return (
-    <button type="button" onClick={onClick} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700">
+    <button type="button" onClick={(e) => { markDirty(); onClick?.(e); }} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700">
       + {children}
     </button>
   );
 }
 
 export function RemoveButton({ onClick }) {
+  const markDirty = useMarkDirty();
   return (
-    <button type="button" onClick={onClick} className="rounded-lg border border-gray-200 p-1.5 text-red-500 hover:bg-red-50" aria-label="Sil">
+    <button type="button" onClick={(e) => { markDirty(); onClick?.(e); }} className="rounded-lg border border-gray-200 p-1.5 text-red-500 hover:bg-red-50" aria-label="Sil">
       <X className="h-4 w-4" />
     </button>
   );

@@ -26,7 +26,7 @@ jobs:
           # pnpm 11.x Node >=22.13 tələb edir. Node 20 ilə setup-node-un
           # keş addımı (`pnpm store path`) ERR_UNKNOWN_BUILTIN_MODULE
           # (node:sqlite) ilə çökürdü.
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       # --frozen-lockfile: lockfile package.json ilə uyğun deyilsə burada
@@ -66,7 +66,7 @@ jobs:
           # pnpm 11.x Node >=22.13 tələb edir. Node 20 ilə setup-node-un
           # keş addımı (`pnpm store path`) ERR_UNKNOWN_BUILTIN_MODULE
           # (node:sqlite) ilə çökürdü.
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Asılılıqlar

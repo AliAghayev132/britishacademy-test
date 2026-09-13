@@ -12,6 +12,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import { confirmDialog, notify } from "@/components/ui/feedback";
+import { useMarkDirty } from "@/lib/formDirty";
 import { useAiProcessMutation, useAiStatusQuery } from "@/store/api/adminApi";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { Languages, Wand2, Loader2 } from "lucide-react";
@@ -180,6 +181,7 @@ async function aiTransform(run, { action, v, locale, isHtml }) {
  *  - Aktiv dilin mətni doludursa → "Səliqəyə sal"
  */
 function AiBar({ v, onChange, isHtml }) {
+  const markDirty = useMarkDirty();
   const { locale } = useFormLocale();
   const [run] = useAiProcessMutation();
   const [busy, setBusy] = useState(null);
@@ -195,6 +197,7 @@ function AiBar({ v, onChange, isHtml }) {
     try {
       const text = await aiTransform(run, { action, v, locale, isHtml });
       if (text) {
+        markDirty();
         onChange({ ...v, [locale]: text });
         notify.success(action === "translate" ? "Tərcümə edildi" : "Səliqəyə salındı");
       } else {
@@ -230,6 +233,7 @@ function AiBar({ v, onChange, isHtml }) {
  *  - "Hamısını səliqələ": hər sahədə aktiv dilin mətni düzəldilir
  */
 export function GlobalAiBar() {
+  const markDirty = useMarkDirty();
   const ctx = useContext(FormLocaleContext);
   const [run] = useAiProcessMutation();
   const [busy, setBusy] = useState(null);
@@ -254,6 +258,7 @@ export function GlobalAiBar() {
       try {
         const text = await aiTransform(run, { action, v, locale, isHtml: e.isHtml });
         if (text) {
+          markDirty();
           e.onChange({ ...v, [locale]: text });
           done += 1;
         } else {
@@ -307,7 +312,13 @@ export function LocalizedEditor({ value, onChange, ...rest }) {
   const v = toLoc(value);
   const { locale } = useFormLocale();
   useRegisterField(v, onChange, true);
-  const set = (html) => onChange({ ...v, [locale]: html });
+  const markDirty = useMarkDirty();
+  // Redaktorun onUpdate-i yalnız istifadəçi dəyişikliyində gəlir (proqram
+  // təyinli məzmun onu tetikləmir) — düymə ilə formatlama da daxil.
+  const set = (html) => {
+    if (html !== v[locale]) markDirty();
+    onChange({ ...v, [locale]: html });
+  };
   return (
     <div>
       {/* key={locale} — dil dəyişəndə editor həmin dilin məzmunu ilə remount olur */}

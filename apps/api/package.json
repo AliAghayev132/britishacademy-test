@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Generic Express.js backend starter template (auth + OTP + example CRUD)",
   "type": "module",
+  "engines": {
+    "node": ">=20.9"
+  },
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:int": "vitest run --config vitest.integration.config.js",
     "test:watch": "vitest",
     "i18n:audit": "node scripts/i18nAudit.js"
   },

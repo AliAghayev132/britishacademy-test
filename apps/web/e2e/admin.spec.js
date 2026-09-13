@@ -115,6 +115,13 @@ test.describe("admin panel", () => {
 
     // Səhifə YENİLƏNMİR — element özü görünməlidir.
     await expect(page.getByText(name, { exact: false })).toBeVisible({ timeout: 15000 });
+
+    // Təmizlik: test elementi bazada qalmasın. Əvvəl hər işdə biri yığılırdı;
+    // sayı 20-ni keçəndə yeni element 2-ci səhifəyə düşür və test yıxılırdı.
+    const row = page.getByRole("row", { name: new RegExp(name) });
+    await row.getByRole("button", { name: "Sil", exact: true }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).last().click();
+    await expect(page.getByText(name, { exact: false })).toHaveCount(0, { timeout: 15000 });
   });
 
   test("müraciət filtrləri açılan paneldədir", async ({ page }) => {

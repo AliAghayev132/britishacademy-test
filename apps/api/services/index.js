@@ -28,4 +28,5 @@ export { WhatsAppService } from "./WhatsAppService.js";
 export { BulkQueue, normalizeRecipients, renderTemplate, DELAY_LIMITS, resolveDelaySec } from "./BulkQueueService.js";
 export { aiChat, translateFields, resolveAiConfig, tryParseJson, LANG_NAMES } from "./AiService.js";
 export { default as socketService } from "./SocketService.js";
+export { purgeSiteCache, flushSiteCache } from "./SiteCacheService.js";
 export { MongoDBService, mongoDBService } from "./MongoDBService.js";

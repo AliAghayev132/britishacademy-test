@@ -30,7 +30,7 @@ describe("ortaq pəncərə", () => {
   });
 
   it("açar dəyişəndə «yadda saxlanmayıb» işarəsi qoyulur", () => {
-    expect(kit).toMatch(/onActiveChange\(v\);\s*setDirty\(true\);/);
+    expect(kit).toMatch(/onActiveChange\(v\);\s*markDirty\(\);/);
   });
 });
 

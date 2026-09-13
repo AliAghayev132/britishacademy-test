@@ -93,6 +93,15 @@ jobs:
 
             echo "✅ Repository yeniləndi: $(git rev-parse --short HEAD)"
 
+            # Layihənin gözlədiyi Node (.nvmrc) ilə serverdəki fərqlidirsə xəbərdar et.
+            # Deploy DAYANMIR: PM2 Node 20 altında quraşdırılıb, avtomatik keçid
+            # onu itirərdi. Keçid addımları: deploy/README.md → «Node 22-yə keçid».
+            WANT_NODE="$(tr -d '[:space:]v' < .nvmrc 2>/dev/null || true)"
+            HAVE_NODE="$(node -v | sed 's/^v//; s/\..*//')"
+            if [ -n "$WANT_NODE" ] && [ "$HAVE_NODE" != "$WANT_NODE" ]; then
+              echo "⚠️ Serverdə Node $HAVE_NODE, layihə Node $WANT_NODE gözləyir (deploy/README.md → «Node 22-yə keçid»)"
+            fi
+
             # ========================================
             # 7. Dependencies quraşdır
             # ========================================
