@@ -102,6 +102,10 @@ const setupMiddlewares = (app) => {
   );
 
   // Body parsers
+  // İctimai yazma marşrutları üçün KİÇİK limit. Əvvəl hər yerdə 10 MB idi —
+  // müraciət formundan meqabaytlarla mətn göndərmək olurdu. Burada parse
+  // olunan body-ni aşağıdakı ümumi parser yenidən oxumur.
+  app.use(["/api/leads", "/api/events", "/api/views", "/api/auth"], express.json({ limit: "32kb" }));
   app.use(express.json({ limit: securityConfig.maxPayloadSize }));
   app.use(
     express.urlencoded({ extended: true, limit: securityConfig.maxPayloadSize }),

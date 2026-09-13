@@ -104,6 +104,9 @@ export function CourseWizard({ item, onClose }) {
           note: r.pricing?.note || "",
         },
         groups: (r.groups || []).map((g) => ({
+          // id və kod saxlanılır: server qrupu YENİLƏYİR, silib yaratmır —
+          // tarixlər, status, fərdi qiymət və aktivlik itmir.
+          _id: g._id || undefined, code: g.code || "",
           teacher: toId(g.teacher), level: g.level || "", format: g.format || "group",
           schedule: (g.schedule || []).map((s) => ({ weekday: s.weekday, from: s.from, to: s.to })),
           capacity: g.capacity ?? "",
@@ -181,6 +184,8 @@ export function CourseWizard({ item, onClose }) {
           note: r.pricing.note || undefined,
         },
         groups: r.groups.filter((g) => g.teacher).map((g) => ({
+          _id: g._id || undefined,
+          code: g.code || undefined,
           teacher: g.teacher,
           level: g.level || undefined,
           format: g.format || "group",

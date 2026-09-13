@@ -1,6 +1,9 @@
 // Next
 import { notFound } from "next/navigation";
-import DOMPurify from "isomorphic-dompurify";
+import { ViewBeacon } from "@/components/site/ViewBeacon";
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 // Data
 import { apiGetStatus, isMissing } from "@/lib/api";
@@ -77,6 +80,7 @@ export default async function ProjectPage({ params }) {
 
   return (
     <>
+      <ViewBeacon type="project" slug={p.slug} />
       <PageBanner title={p.title} subtitle={p.tagline || p.lead} />
 
       {p.applyEnabled !== false && (
@@ -115,7 +119,7 @@ export default async function ProjectPage({ params }) {
           {p.contentHtml ? (
             <article
               className="bz-body"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p.contentHtml) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(p.contentHtml) }}
             />
           ) : (
             <ContentBlocks blocks={p.content} />

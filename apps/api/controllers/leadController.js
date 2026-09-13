@@ -1,5 +1,6 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
-import { asyncHandler, isObjectId, cleanIds, canAccessSection } from "#utils";
+import { asyncHandler, isObjectId, cleanIds } from "#utils";
+import { leadInReach } from "./adminController.js";
 import { Lead } from "#models";
 import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
 
@@ -8,6 +9,12 @@ import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
  * Minimal validation; everything else is optional context.
  */
 const createLead = asyncHandler(async (req, res) => {
+  // Honeypot: `website` sahəsi formada gizlidir — insan onu doldurmur, botlar
+  // isə bütün sahələri doldurur. Bot uğur cavabı alır (yenidən cəhd etməsin),
+  // müraciət isə yazılmır və məktub getmir.
+  if (req.body?.website) {
+    return res.status(201).json({ success: true, message: "Müraciətin qəbul edildi!", data: {} });
+  }
   const { name, phone, email, course, branch, interest, message, source, pageUrl } =
     req.body;
 
@@ -74,8 +81,8 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
   }
   // Statusu dəyişmək müraciəti görmək deməkdir. Adi müraciətlərə baxan adam
   // xaricdə təhsil müraciətini id ilə tapıb işarələyə bilməməlidir.
-  const section = lead.interest === "Xaricdə təhsil" ? "leads-abroad" : "leads";
-  if (!canAccessSection(req.user, section)) {
+  // Bölmə VƏ filial/ölkə əhatəsi — oxuma ilə eyni qayda (bax leadInReach).
+  if (!leadInReach(req.user, lead)) {
     return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
   }
   // Müraciətə TOXUNAN hər şey jurnala düşməlidir. Bu endpoint generic

@@ -3,16 +3,15 @@
 import { Provider } from 'react-redux'
 
 import { store } from '@/store'
-import { SocketProvider } from '@/store/context/SocketContext'
 
 /**
- * Global client-side providers. Rendered from the root layout (a Server
- * Component) so the Redux store and socket connection live on the client only.
+ * Global client-side providers (Redux). Rendered from the root layout.
+ *
+ * Socket.IO BURADA DEYİL — (protected)/layout.js-də. Əvvəl kökdə idi və
+ * socket.io-client ictimai saytın hər səhifəsinə yüklənirdi, halbuki yalnız
+ * admin panelinin WhatsApp bölməsi üçündür (audit #16). Redux isə qalır:
+ * ictimai müraciət formları və müəllim siyahısı onu işlədir.
  */
 export function Providers({ children }) {
-  return (
-    <Provider store={store}>
-      <SocketProvider>{children}</SocketProvider>
-    </Provider>
-  )
+  return <Provider store={store}>{children}</Provider>
 }

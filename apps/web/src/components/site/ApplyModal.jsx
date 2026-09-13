@@ -39,6 +39,9 @@ const field = {
   color: "#14141C",
 };
 
+/** Gizli tələ sahəsinin üslubu — ekrandan kənarda, fokus almır. */
+const HONEYPOT = { position: "absolute", left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
+
 // ── Subcomponents ──
 const ModalHeader = memo(function ModalHeader({ onClose }) {
   const t = useT();
@@ -131,6 +134,8 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
   const t = useT();
   return (
     <form onSubmit={onSubmit} className="ba-am-form" style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
+      {/* Honeypot: insan görmür və doldurmur; bot doldurursa server müraciəti yazmır. */}
+      <input type="text" name="website" value={form.website} onChange={onChange} tabIndex={-1} autoComplete="off" aria-hidden="true" style={HONEYPOT} />
       <input className="ba-field" name="name" required placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
@@ -162,7 +167,8 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
   const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
-  const [form, setForm] = useState({ name: "", phone: "", email: "" });
+  // `website` — botlar üçün gizli tələ sahəsi (bax HONEYPOT, server onu yoxlayır).
+  const [form, setForm] = useState({ name: "", phone: "", email: "", website: "" });
   const [interest, setInterest] = useState("");
   const [branch, setBranch] = useState("");
   const [picked, setPicked] = useState([]);

@@ -1,5 +1,6 @@
 // Next
 import { notFound } from "next/navigation";
+import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import { getT } from "@/lib/i18n/serverT";
@@ -8,7 +9,9 @@ import { getT } from "@/lib/i18n/serverT";
 import { apiGetStatus, isMissing } from "@/lib/api";
 
 // Utils / SEO
-import DOMPurify from "isomorphic-dompurify";
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { metaFromApi, SITE_URL } from "@/lib/seo";
 import { toList } from "@/utils/toList";
 import { getLocale } from "@/lib/i18n/serverT";
@@ -94,7 +97,7 @@ export default async function BlogPostPage({ params }) {
   const locale = await getLocale();
 
   // TipTap emits HTML; sanitize before rendering.
-  const html = DOMPurify.sanitize(p.content || "");
+  const html = sanitizeHtml(p.content || "");
 
   const url = `${SITE_URL}/bloq/${slug}`;
   const authorName = p.author ? `${p.author.firstName || ""} ${p.author.lastName || ""}`.trim() : "";
@@ -142,6 +145,7 @@ export default async function BlogPostPage({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
+      <ViewBeacon type="blog" slug={p.slug} />
 
       <BlogHero p={p} t={tr} />
 

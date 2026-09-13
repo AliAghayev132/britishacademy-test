@@ -1,9 +1,12 @@
 // Next
 import { notFound } from "next/navigation";
+import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import { getT } from "@/lib/i18n/serverT";
-import DOMPurify from "isomorphic-dompurify";
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 // Data
 import { apiGetStatus, isMissing } from "@/lib/api";
@@ -98,6 +101,7 @@ export default async function DestinationPage({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
+      <ViewBeacon type="destination" slug={d.slug} />
 
       <PageBanner
         title={d.country}
@@ -115,7 +119,7 @@ export default async function DestinationPage({ params }) {
         <div className="split" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 36, alignItems: "start" }}>
           <div>
             {d.contentHtml ? (
-              <article className="bz-body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(d.contentHtml) }} />
+              <article className="bz-body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(d.contentHtml) }} />
             ) : d.content?.length ? (
               <ContentBlocks blocks={d.content} />
             ) : (

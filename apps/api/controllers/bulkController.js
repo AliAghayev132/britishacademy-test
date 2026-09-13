@@ -11,12 +11,17 @@ import { Lead } from "#models";
 import { BulkQueue, normalizeRecipients, logAction, resolveDelaySec, DELAY_LIMITS } from "#services";
 
 // Utils
-import { asyncHandler, hasRole } from "#utils";
+import { asyncHandler, hasRole, canAccessSection } from "#utils";
+import { applyLeadAccess, applyLeadScope } from "./adminController.js";
 
 /** Müraciətlərdən alıcı siyahısı qur. */
-async function fromLeads({ leadStatus, channel }) {
+async function fromLeads({ leadStatus, channel }, req) {
   const filter = { isDeleted: false };
   if (leadStatus && leadStatus !== "all") filter.status = leadStatus;
+  // Müraciətlər siyahısı ilə EYNİ sərhəd: bölmə və filial/ölkə əhatəsi.
+  // Əvvəl yalnız WhatsApp bölməsi olan adam hamının telefonunu görürdü.
+  applyLeadAccess(filter, req, "leads");
+  applyLeadScope(filter, req, "leads");
 
   const leads = await Lead.find(filter).select("name phone email").limit(2000).lean();
   return leads.map((l) => ({
@@ -34,9 +39,11 @@ async function fromLeads({ leadStatus, channel }) {
  * Alıcı siyahısını mənbəyə görə hazırla və doğrula.
  * Həm önizləmə, həm göndəriş eyni funksiyadan keçir — nəticə fərqli olmasın.
  */
-async function buildRecipients(body) {
+async function buildRecipients(body, req) {
   const { channel = "whatsapp", source = "leads", leadStatus, recipients = [] } = body || {};
-  const rows = source === "leads" ? await fromLeads({ leadStatus, channel }) : recipients;
+  // Müraciət bölməsi olmayan adam müraciətlərdən siyahı qura bilməz.
+  const canUseLeads = canAccessSection(req.user, "leads") || canAccessSection(req.user, "leads-abroad");
+  const rows = source === "leads" ? (canUseLeads ? await fromLeads({ leadStatus, channel }, req) : []) : recipients;
   return { channel, source, ...normalizeRecipients(rows, channel) };
 }
 
@@ -46,7 +53,7 @@ async function buildRecipients(body) {
  * təkrarlar və ilk 10 alıcı. İki mərhələli təsdiqin birinci addımıdır.
  */
 const preview = asyncHandler(async (req, res) => {
-  const { channel, source, valid, invalid, duplicates } = await buildRecipients(req.body);
+  const { channel, source, valid, invalid, duplicates } = await buildRecipients(req.body, req);
   // Fasilə burada da həll olunur ki, təsdiq dialoqu göndərişin NƏ QƏDƏR
   // çəkəcəyini göstərə bilsin: 500 alıcı × 6 saniyə = 50 dəqiqə. Admin bunu
   // başlamazdan ƏVVƏL bilməlidir.
@@ -91,7 +98,7 @@ const send = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "Mesaj mətni məcburidir" });
   }
 
-  const { channel, source, valid, invalid } = await buildRecipients(req.body);
+  const { channel, source, valid, invalid } = await buildRecipients(req.body, req);
   if (!valid.length) {
     return res.status(400).json({
       success: false,

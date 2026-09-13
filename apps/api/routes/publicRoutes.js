@@ -9,7 +9,7 @@ import {
 } from "#controllers";
 
 // Middlewares
-import { writeRateLimiter, localizeResponse } from "#middlewares";
+import { leadRateLimiter, localizeResponse } from "#middlewares";
 
 /**
  * PUBLIC API — mounted at /api. No authentication.
@@ -70,7 +70,7 @@ PublicRouter.get("/seo/robots", seoController.getRobots);
 PublicRouter.get("/seo/urls", seoController.getUrls);
 
 // Lead capture (public write — rate limited)
-PublicRouter.post("/leads", writeRateLimiter, leadController.createLead);
+PublicRouter.post("/leads", leadRateLimiter, leadController.createLead);
 
 // İzlənilən qısa link — klik qeydiyyatı.
 // Yönləndirmə Next tərəfindədir (/r/<kod>), burada yalnız klik yazılır.
@@ -83,6 +83,9 @@ PublicRouter.post("/track/:code", linkController.track);
 // writeRateLimiter yoxdur (eyni IP-dən çox real ziyarətçi), ümumi limit var.
 // Müraciətin özü burada YAZILMIR — o, yalnız /leads-də yarananda sayılır.
 PublicRouter.post("/events", eventController.track);
+
+// Detal səhifəsinin baxışı — brauzerdən (GET keşləndiyi üçün orada sayılmır).
+PublicRouter.post("/views", eventController.view);
 
 // Testlər. Düzgün cavablar getQuiz cavabında GETMİR — qiymətləndirmə
 // serverdədir (bax quizController).

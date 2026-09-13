@@ -34,6 +34,7 @@ function toGroups(courseId, branches) {
     (b.groups || []).forEach((g) => {
       if (!g?.teacher) return; // a group without a teacher is meaningless
       docs.push({
+        _id: g._id || undefined,
         course: courseId,
         branch: b.branch,
         teacher: g.teacher,
@@ -69,6 +70,48 @@ async function syncTeacherLinks(courseId, branches) {
       }),
     ),
   );
+}
+
+/** Sənədin _id-siz surəti (yeni qrup yaratmaq və yoxlamaq üçün). */
+const stripId = (d) => {
+  const copy = { ...d };
+  delete copy._id;
+  return copy;
+};
+
+/**
+ * Mövcud qrupları sihirbazdan gələnlərlə tutuşdur (saf funksiya).
+ *
+ * ── NİYƏ ──
+ * Əvvəl kursu redaktə edəndə bütün qruplar SİLİNİB yenidən yaradılırdı.
+ * Sihirbaz qrupun yalnız müəllim/səviyyə/format/qrafik/tutum/kodunu bilir —
+ * qalan sahələr (başlama və bitmə tarixi, status, qeydiyyat sayı, fərdi
+ * qiymət, aktivlik) İTİRDİ, deaktiv qruplar saytda yenidən görünürdü, id-lər
+ * dəyişirdi. İndi:
+ *   • id-si olan qrup YENİLƏNİR — yalnız göndərilən sahələr, qalanı qalır;
+ *   • id-siz qrup yaradılır;
+ *   • sihirbazdan silinən qrup soft-delete olunur (tarixçə qalır).
+ *
+ * @returns {{ updates: {doc, fields}[], creates: object[], removed: any[] }}
+ */
+export function planGroupSync(existing, incoming) {
+  const byId = new Map((existing || []).map((g) => [String(g._id), g]));
+  const kept = new Set();
+  const updates = [];
+  const creates = [];
+  for (const item of incoming || []) {
+    const fields = Object.fromEntries(Object.entries(stripId(item)).filter(([, v]) => v !== undefined));
+    const id = item._id ? String(item._id) : null;
+    const current = id && !kept.has(id) ? byId.get(id) : null;
+    if (current) {
+      updates.push({ doc: current, fields });
+      kept.add(id);
+    } else {
+      creates.push(fields);
+    }
+  }
+  const removed = (existing || []).filter((g) => !kept.has(String(g._id))).map((g) => g._id);
+  return { updates, creates, removed };
 }
 
 // ── GET /api/admin/lookups ──
@@ -126,6 +169,7 @@ const getCourseFull = asyncHandler(async (req, res) => {
       byBranch.set(bid, { branch: bid, pricing: { group: {}, individual: {}, note: "" }, groups: [] });
     }
     byBranch.get(bid).groups.push({
+      _id: String(g._id),
       teacher: String(g.teacher),
       level: g.level || "",
       format: g.format || "group",
@@ -158,7 +202,7 @@ const createCourseFull = asyncHandler(async (req, res) => {
     const groupDocs = toGroups(created._id, branches);
     if (groupDocs.length) {
       // create() (not insertMany) so each doc's pre-save hook runs (timeSlot…).
-      await Promise.all(groupDocs.map((d) => CourseGroup.create(d)));
+      await Promise.all(groupDocs.map((d) => CourseGroup.create(stripId(d))));
     }
     await syncTeacherLinks(created._id, branches);
   } catch (err) {
@@ -171,14 +215,19 @@ const createCourseFull = asyncHandler(async (req, res) => {
 });
 
 // ── PUT /api/admin/courses/full/:id ──
-// Updates the course + pricing, then rebuilds the timetable from the payload
-// (existing groups for this course are replaced).
+// Updates the course + pricing and syncs the timetable with the payload:
+// existing groups are updated in place, not recreated (see planGroupSync).
 const updateCourseFull = asyncHandler(async (req, res) => {
   const { course = {}, branches = [] } = req.body || {};
   const doc = await Course.findById(req.params.id);
   if (!doc || doc.isDeleted) {
     return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
   }
+
+  // Qruplar kurs yenilənməzdən ƏVVƏL yoxlanılır — bir səhv qrup yarımçıq
+  // yenilənmə yaratmasın (əvvəl köhnə qruplar silinir, sonra yaratma yıxılırdı).
+  const incoming = toGroups(doc._id, branches);
+  await Promise.all(incoming.map((d) => new CourseGroup(stripId(d)).validate()));
 
   const body = { ...course };
   delete body._id;
@@ -188,11 +237,17 @@ const updateCourseFull = asyncHandler(async (req, res) => {
   Object.assign(doc, body, { pricingMode: "branch", pricing: toPricing(branches) });
   await doc.save();
 
-  // Rebuild the timetable: drop old groups, recreate from the payload.
-  await CourseGroup.deleteMany({ course: doc._id });
-  const groupDocs = toGroups(doc._id, branches);
-  if (groupDocs.length) {
-    await Promise.all(groupDocs.map((d) => CourseGroup.create(d)));
+  // Qrafik: mövcud qruplar yerində yenilənir, yeniləri yaradılır, sihirbazdan
+  // silinənlər soft-delete olunur (bax planGroupSync).
+  const existing = await CourseGroup.find({ course: doc._id, isDeleted: false });
+  const plan = planGroupSync(existing, incoming);
+  for (const { doc: group, fields } of plan.updates) {
+    Object.assign(group, fields);
+    await group.save(); // pre-save (timeSlot) işləsin
+  }
+  await Promise.all(plan.creates.map((d) => CourseGroup.create(d)));
+  if (plan.removed.length) {
+    await CourseGroup.updateMany({ _id: { $in: plan.removed } }, { isDeleted: true, isActive: false });
   }
   await syncTeacherLinks(doc._id, branches);
 

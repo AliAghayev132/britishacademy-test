@@ -76,10 +76,10 @@ const getHome = asyncHandler(async (_req, res) => {
   const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo, featuredTeachers, featuredProjects] =
     await Promise.all([
       SiteSetting.get(),
-      Course.findFeatured(HOME_COURSE_COUNT).populate("category"),
+      Course.findFeatured(HOME_COURSE_COUNT).populate("category").select(CARD_EXCLUDE),
       Partner.findPublic(),
       Advantage.findPublic(),
-      Destination.findPublic({ isFeatured: true }).limit(8),
+      Destination.findPublic({ isFeatured: true }).limit(8).select(CARD_EXCLUDE),
       Faq.findPublic().limit(8),
       Testimonial.findPublic({ type: "text", isFeatured: true }).limit(6),
       Testimonial.findPublic({ type: "video", isFeatured: true }).limit(8),
@@ -88,7 +88,7 @@ const getHome = asyncHandler(async (_req, res) => {
       // uyğun gəlsin və hidratasiya uyğunsuzluğu yaranmasın.
       Teacher.findPublic({ isFeatured: true }).limit(12),
       // Ana səhifədəki layihə lenti.
-      Project.findPublic({ isFeatured: true }).limit(8),
+      Project.findPublic({ isFeatured: true }).limit(8).select(CARD_EXCLUDE),
     ]);
 
   // Seçilmiş kurslar 6-dan azdırsa qalanını sıraya görə digər aktiv
@@ -100,7 +100,8 @@ const getHome = asyncHandler(async (_req, res) => {
       _id: { $nin: courses.map((c) => c._id) },
     })
       .limit(HOME_COURSE_COUNT - courses.length)
-      .populate("category");
+      .populate("category")
+      .select(CARD_EXCLUDE);
     courses = [...courses, ...fill];
   }
 
@@ -145,7 +146,7 @@ const listCourses = asyncHandler(async (req, res) => {
     const cat = await CourseCategory.findOne({ slug: req.query.category });
     if (cat) filter.category = cat._id;
   }
-  const courses = await Course.findPublic(filter).populate("category");
+  const courses = await Course.findPublic(filter).populate("category").select(CARD_EXCLUDE);
   res.json({ success: true, data: { courses } });
 });
 
@@ -158,6 +159,17 @@ const findCourse = (slug) =>
   Course.findOne({ slug, isActive: true, isDeleted: false })
     .populate("category")
     .populate("pricing.branch");
+
+/**
+ * Siyahı və kart sorğularında QAYTARILMAYAN ağır sahələr.
+ *
+ * Kartlar bunları işlətmir; onlar yalnız detal endpoint-lərinə (/:slug)
+ * lazımdır. Əvvəl siyahılar tam sənəd qaytarırdı və Next onları klient
+ * komponentlərinə (ölkə kartları, kurs vitrini, menyu) ötürürdü — hər
+ * ölkənin mətni, FAQ-ı və SEO-su ana səhifə daxil HƏR səhifənin HTML-inə
+ * yazılırdı (audit #15).
+ */
+const CARD_EXCLUDE = "-contentHtml -content -faq -seo";
 
 const getCourseBySlug = asyncHandler(async (req, res) => {
   let course = await findCourse(req.params.slug);
@@ -172,9 +184,8 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   if (!course) {
     return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
   }
-  // Baxış sayğacı — statistika səhifəsi üçün. updateOne işlədilir ki,
-  // sənəd yenidən yazılmasın və versiya konflikti olmasın.
-  Course.updateOne({ _id: course._id }, { $inc: { views: 1 } }).catch(() => {});
+  // Baxış sayğacı burada DEYİL — bu GET keşlənir. Brauzerdən sayılır:
+  // POST /api/views (eventController.view).
 
   // Distinct teachers per branch, from the timetable.
   const groups = await CourseGroup.find({
@@ -277,7 +288,6 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
   if (!teacher) {
     return res.status(404).json({ success: false, message: "Müəllim tapılmadı" });
   }
-  Teacher.updateOne({ _id: teacher._id }, { $inc: { views: 1 } }).catch(() => {});
 
   // Vaxtlı qrafik yalnız təyinat DOLDURULMAYIB isə göstərilir — köhnə
   // məlumatlarda müəllimin dərsləri yalnız CourseGroup-da ola bilər, onda
@@ -310,7 +320,7 @@ const listTestimonials = asyncHandler(async (req, res) => {
 const listDestinations = asyncHandler(async (req, res) => {
   const filter = {};
   if (req.query.scholarship === "true") filter.isScholarship = true;
-  const destinations = await Destination.findPublic(filter);
+  const destinations = await Destination.findPublic(filter).select(CARD_EXCLUDE);
   res.json({ success: true, data: { destinations } });
 });
 
@@ -323,7 +333,6 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
   if (!destination) {
     return res.status(404).json({ success: false, message: "Ölkə tapılmadı" });
   }
-  Destination.updateOne({ _id: destination._id }, { $inc: { views: 1 } }).catch(() => {});
   res.json({ success: true, data: { destination } });
 });
 
@@ -331,7 +340,7 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
 
 /** GET /api/projects — aktiv layihələr. */
 const listProjects = asyncHandler(async (_req, res) => {
-  const projects = await Project.findPublic();
+  const projects = await Project.findPublic().select(CARD_EXCLUDE);
   res.json({ success: true, data: { projects } });
 });
 
@@ -346,7 +355,6 @@ const getProjectBySlug = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: "Layihə tapılmadı" });
   }
   // Baxış sayğacı — statistika səhifəsi üçün (Destination ilə eyni yanaşma).
-  Project.updateOne({ _id: project._id }, { $inc: { views: 1 } }).catch(() => {});
   res.json({ success: true, data: { project } });
 });
 
@@ -416,7 +424,6 @@ const getBlogBySlug = asyncHandler(async (req, res) => {
   if (!post) {
     return res.status(404).json({ success: false, message: "Yazı tapılmadı" });
   }
-  await BlogPost.updateOne({ _id: post._id }, { $inc: { views: 1 } });
   res.json({ success: true, data: { post } });
 });
 

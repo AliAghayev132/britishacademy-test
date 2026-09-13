@@ -36,7 +36,8 @@ export function ContactForm({ branches = [] }) {
   // ── Data / state ──
   const t = useT();
   const [createLead, { isLoading }] = useCreateLeadMutation();
-  const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
+  // `website` — botlar üçün gizli tələ sahəsi (server onu yoxlayır).
+  const [form, setForm] = useState({ name: "", phone: "", email: "", message: "", website: "" });
   const [branch, setBranch] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -68,6 +69,8 @@ export function ContactForm({ branches = [] }) {
   return (
     <form onSubmit={submit} style={{ border: "1px solid #ECEDF2", borderRadius: 22, padding: 30, background: "#FAFBFF", display: "flex", flexDirection: "column", gap: 14 }}>
       <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 24, color: "#14141C", margin: "0 0 6px" }}>{t("contact.write")}</h2>
+      {/* Honeypot: insan görmür və doldurmur; bot doldurursa server müraciəti yazmır. */}
+      <input type="text" name="website" value={form.website} onChange={change} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
       <input className="ba-field" name="name" required placeholder={t("apply.name")} value={form.name} onChange={change} style={field} />
       <input className="ba-field" name="phone" required placeholder={t("apply.phone")} value={form.phone} onChange={change} style={field} />
       <input className="ba-field" name="email" type="email" placeholder={t("apply.email")} value={form.email} onChange={change} style={field} />

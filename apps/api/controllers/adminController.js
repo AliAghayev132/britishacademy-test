@@ -92,7 +92,7 @@ function denySection(req, res, resource) {
  * Sərhəd serverdədir: arayüzdə bəndi gizlətmək kifayət deyil, sorğu əl ilə
  * dəyişdirilə bilər.
  */
-function applyLeadAccess(filter, req, resource) {
+export function applyLeadAccess(filter, req, resource) {
   if (resource !== "leads") return filter;
   const general = canAccessSection(req.user, "leads");
   const abroad = canAccessSection(req.user, "leads-abroad");
@@ -109,6 +109,25 @@ function applyLeadAccess(filter, req, resource) {
 function canSeeLead(user, lead) {
   const isAbroad = lead?.interest === ABROAD_INTEREST;
   return canAccessSection(user, isAbroad ? "leads-abroad" : "leads");
+}
+
+/**
+ * Müraciət istifadəçinin bölməsinə VƏ filial/ölkə əhatəsinə düşürmü?
+ *
+ * Əvvəl bu tam yoxlama yalnız oxumada (getOne) idi. Yeniləmə, silmə, status
+ * dəyişmə və idarə panelindəki son müraciətlər yalnız bölməyə baxırdı —
+ * filial meneceri başqa filialın müraciətini id ilə dəyişə, silə və cavabda
+ * tam şəxsi məlumatı ala bilirdi. İndi hamısı bu funksiyadan keçir.
+ */
+export function leadInReach(user, lead) {
+  if (!lead || !canSeeLead(user, lead)) return false;
+  const dScope = destinationScope(user);
+  const own = (lead.destinations || []).map((d) => String(d?._id || d));
+  if (dScope && own.length && !own.some((d) => dScope.includes(d))) return false;
+  const bScope = branchScope(user);
+  const b = lead.branch ? String(lead.branch._id || lead.branch) : null;
+  if (bScope && b && !bScope.includes(b)) return false;
+  return true;
 }
 
 /**
@@ -157,7 +176,7 @@ export function movesLeadOutOfReach(user, patch) {
  *     ölkə məhdudiyyətindən kənardır, əks halda məhdud admin adi
  *     müraciətləri də görməzdi.
  */
-function applyLeadScope(filter, req, resource) {
+export function applyLeadScope(filter, req, resource) {
   if (resource !== "leads") return filter;
   const and = [];
 
@@ -315,6 +334,26 @@ const getOne = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { item } });
 });
 
+/**
+ * Klientin YAZA BİLMƏYƏCƏYİ sistem sahələri.
+ *
+ * Əvvəl create/update req.body-ni olduğu kimi yazırdı: redaktor silinmiş
+ * elementi `isDeleted: false` ilə bərpa edə, `views`/`clicks` sayğaclarını,
+ * `createdBy`/`handledBy` kimi sahələri dəyişə bilirdi — audit log isə bu
+ * sahələri qeyd etmirdi.
+ */
+const SYSTEM_FIELDS = [
+  "_id", "__v", "createdAt", "updatedAt", "isDeleted",
+  "views", "clicks", "lastClickAt",
+  "createdBy", "uploadedBy", "handledBy", "handledAt", "tokenVersion",
+];
+
+export const stripSystemFields = (body = {}) => {
+  const out = { ...(body || {}) };
+  for (const f of SYSTEM_FIELDS) delete out[f];
+  return out;
+};
+
 /** POST /api/admin/:resource */
 const create = asyncHandler(async (req, res) => {
   const entry = resolve(req, res);
@@ -332,7 +371,10 @@ const create = asyncHandler(async (req, res) => {
     }
   }
   // Slug/defaults are handled by each model's pre-save hook.
-  const item = await entry.model.create(req.body);
+  const data = stripSystemFields(req.body);
+  // Yaradan serverdə qoyulur — klientin göndərdiyi dəyər qəbul edilmir.
+  if (entry.model.schema.path("createdBy")) data.createdBy = req.user?._id;
+  const item = await entry.model.create(data);
   await logAction(req, {
     action: "create", resource: req.params.resource, resourceId: item._id,
     summary: `${labelForResource(req.params.resource)} yaradıldı: ${labelOf(item)}`,
@@ -349,17 +391,16 @@ const update = asyncHandler(async (req, res) => {
   if (!entry) return;
   if (denySection(req, res, req.params.resource)) return;
   const item = await entry.model.findById(req.params.id);
-  if (!item) {
+  // Silinmiş sənəd redaktə olunmur — əvvəl `isDeleted: false` ilə bərpa olurdu.
+  if (!item || item.isDeleted) {
     return res.status(404).json({ success: false, message: "Not found" });
   }
-  if (req.params.resource === "leads" && !canSeeLead(req.user, item)) {
+  // Bölmə VƏ filial/ölkə əhatəsi — oxuma ilə eyni qayda (bax leadInReach).
+  if (req.params.resource === "leads" && !leadInReach(req.user, item)) {
     return res.status(404).json({ success: false, message: "Not found" });
   }
-  // Never let the client rewrite immutable/system fields.
-  const body = { ...req.body };
-  delete body._id;
-  delete body.createdAt;
-  delete body.updatedAt;
+  // Klient sistem sahələrini yaza bilməz (bax SYSTEM_FIELDS).
+  const body = stripSystemFields(req.body);
   // Müraciəti öz görmə sahəsindən ÇIXARMAQ olmaz.
   if (req.params.resource === "leads") {
     const out = movesLeadOutOfReach(req.user, body);
@@ -403,8 +444,8 @@ const remove = asyncHandler(async (req, res) => {
   if (!entry) return;
   if (denySection(req, res, req.params.resource)) return;
   if (req.params.resource === "leads") {
-    const lead = await entry.model.findById(req.params.id).select("interest");
-    if (lead && !canSeeLead(req.user, lead)) {
+    const lead = await entry.model.findById(req.params.id).select("interest destinations branch");
+    if (lead && !leadInReach(req.user, lead)) {
       return res.status(404).json({ success: false, message: "Not found" });
     }
   }
@@ -599,6 +640,9 @@ const stats = asyncHandler(async (req, res) => {
   if (general !== abroad) {
     leadFilter.interest = general ? { $ne: ABROAD_INTEREST } : ABROAD_INTEREST;
   }
+  // Filial/ölkə əhatəsi — son müraciətlər siyahısı başqa filialın adını və
+  // telefonunu göstərməsin.
+  applyLeadScope(leadFilter, req, "leads");
 
   const [newLeads, latestLeads] = await Promise.all([
     Lead.countDocuments({ ...leadFilter, status: "new" }),

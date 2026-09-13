@@ -1,6 +1,8 @@
 // Data
 import { apiGetStatus, apiGet } from "@/lib/api";
-import DOMPurify from "isomorphic-dompurify";
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 // Components
 import { ContentBlocks } from "@/components/site/ContentBlocks";
@@ -124,7 +126,7 @@ export default async function AboutPage() {
 
       <section style={{ maxWidth: 900, margin: "0 auto", padding: "56px 28px 0" }}>
         {p.contentHtml ? (
-          <article className="bz-body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p.contentHtml) }} />
+          <article className="bz-body" dangerouslySetInnerHTML={{ __html: sanitizeHtml(p.contentHtml) }} />
         ) : p.content?.length ? (
           <ContentBlocks blocks={p.content} />
         ) : (

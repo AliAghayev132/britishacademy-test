@@ -1,5 +1,6 @@
 // Next
 import { notFound } from "next/navigation";
+import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import { getT } from "@/lib/i18n/serverT";
@@ -11,7 +12,9 @@ import { apiGetStatus, isMissing } from "@/lib/api";
 import { ApplyButton } from "@/components/site/ApplyButton";
 
 // Utils / SEO
-import DOMPurify from "isomorphic-dompurify";
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { metaFromApi, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 // ── Metadata ──
@@ -187,6 +190,7 @@ export default async function TeacherPage({ params }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
+      <ViewBeacon type="teacher" slug={t.slug} />
 
       <TeacherHero t={t} tr={tr} />
 
@@ -195,7 +199,7 @@ export default async function TeacherPage({ params }) {
           <div>
             {t.bio ? (
               // Rich text from the admin editor — sanitize like blog content.
-              <div style={{ fontSize: 16.5, lineHeight: 1.85, color: "#3c3c47" }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t.bio) }} />
+              <div style={{ fontSize: 16.5, lineHeight: 1.85, color: "#3c3c47" }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(t.bio) }} />
             ) : (
               <p style={{ fontSize: 16.5, lineHeight: 1.85, color: "#3c3c47" }}>
                 {t.fullName} {tr("teacher.bioSoon")}

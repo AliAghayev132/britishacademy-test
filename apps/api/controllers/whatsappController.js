@@ -3,6 +3,7 @@
 
 // Models
 import { WhatsAppMessage, Lead } from "#models";
+import { applyLeadAccess, applyLeadScope } from "./adminController.js";
 
 // Services
 import { WhatsAppService, WhatsAppQueue, renderTemplate, logAction, listWaLogs, waLogSummary, clearWaLogs, waLog, LibVersion } from "#services";
@@ -202,6 +203,9 @@ const bulk = asyncHandler(async (req, res) => {
   if (leadStatus) {
     const filter = { isDeleted: false };
     if (leadStatus !== "all") filter.status = leadStatus;
+    // Müraciətlər siyahısı ilə eyni sərhəd (bölmə + filial/ölkə əhatəsi).
+    applyLeadAccess(filter, req, "leads");
+    applyLeadScope(filter, req, "leads");
     const leads = await Lead.find(filter).select("name phone").limit(1000).lean();
     recipients = leads
       .filter((l) => l.phone)

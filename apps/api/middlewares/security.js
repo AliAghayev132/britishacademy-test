@@ -71,6 +71,20 @@ const otpVerifyLimiter = rateLimit({
 });
 
 /**
+ * İctimai müraciət formu — admin yazmalarından AYRI limit.
+ *
+ * Əvvəl /api/leads admin panelinin bütün yazmaları ilə eyni hovuzda idi:
+ * spam həm müraciət, həm də admin işini bloklaya bilərdi.
+ */
+const leadRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: "Çox sayda müraciət göndərildi. Bir az sonra yenidən cəhd edin." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/**
  * Generic limiter for write operations (create/update/delete).
  */
 const writeRateLimiter = rateLimit({
@@ -140,6 +154,7 @@ export {
   loginRateLimiter,
   otpSendLimiter,
   otpVerifyLimiter,
+  leadRateLimiter,
   setUploadHeaders,
   writeRateLimiter,
   securityHeaders,

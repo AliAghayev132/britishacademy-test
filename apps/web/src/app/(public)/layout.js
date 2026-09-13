@@ -50,12 +50,18 @@ export default async function PublicLayout({ children }) {
   const destinations = destData?.destinations || [];
   const branches = branchData?.branches || [];
 
+  // Menyu, müraciət formu və WhatsApp üçün YALNIZ lazımi sahələr. Əvvəl tam
+  // sənədlər (ölkələrin mətni, FAQ-ı, SEO-su; kursların məzmunu) klient
+  // komponentlərinə ötürülürdü və HƏR səhifənin HTML-inə yazılırdı (audit #15).
+  const navDestinations = destinations.map(({ _id, country, slug, flag }) => ({ _id, country, slug, flag }));
+  const navBranches = branches.map(({ _id, name, whatsapp }) => ({ _id, name, whatsapp }));
+
   // ── derived values ──
   // Build the mega-menu: each course category with its courses.
   const coursesByCat = {};
   for (const c of courses) {
     const id = String(c.category?._id || c.category);
-    (coursesByCat[id] ||= []).push(c);
+    (coursesByCat[id] ||= []).push({ _id: c._id, title: c.title, slug: c.slug });
   }
   const xidmetler = categories.find((c) => c.slug === "xidmetler");
   const usaq = categories.find((c) => c.slug === "usaq");
@@ -126,11 +132,11 @@ export default async function PublicLayout({ children }) {
           tələbi ilə məzmundan əvvəldir; ID boşdursa heç nə render olunmur. */}
       <GtmNoScript id={inject.gtmId} />
       <GtmScript id={inject.gtmId} />
-      <SiteProvider branches={branches} destinations={destinations}>
+      <SiteProvider branches={navBranches} destinations={navDestinations}>
         <Suspense fallback={null}>
           <RouteLoader />
         </Suspense>
-        <Header site={settings} nav={nav} services={services} destinations={destinations} />
+        <Header site={settings} nav={nav} services={services} destinations={navDestinations} />
         <main>{children}</main>
         <Footer site={settings} />
       </SiteProvider>
