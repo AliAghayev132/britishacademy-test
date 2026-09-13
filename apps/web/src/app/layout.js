@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import { ldJson } from "@/lib/jsonLd";
 
 import { Providers } from "./providers";
 import {
@@ -7,8 +8,6 @@ import {
 } from "@/lib/seo";
 import { toList } from "@/utils/toList";
 import { getLocale } from "@/lib/i18n/serverT";
-import { CodeInjection } from "@/components/site/CodeInjection";
-import { GtmScript, GtmNoScript } from "@/components/site/GoogleTagManager";
 
 const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
@@ -76,12 +75,7 @@ async function siteJsonLd() {
 }
 
 export default async function RootLayout({ children }) {
-  const [ld, s, locale] = await Promise.all([
-    siteJsonLd(),
-    getSiteSettings(),
-    getLocale(),
-  ]);
-  const inject = s?.codeInjection || {};
+  const [ld, locale] = await Promise.all([siteJsonLd(), getLocale()]);
   return (
     // `lang` seçilmiş dilə görə — əvvəl sabit "az" idi, EN/RU səhifələrdə
     // ekran oxuyucular və axtarış sistemləri səhv dil görürdü.
@@ -89,17 +83,13 @@ export default async function RootLayout({ children }) {
       <head>
         {/* Şriftlər YERLİDİR (public/fonts + styles/fonts.css) — əvvəl hər
             ziyarətçi üçün Google-a 40-a yaxın sorğu gedirdi. */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-        {/* GTM — paneldəki ID boşdursa heç nə render olunmur. */}
-        <GtmScript id={inject.gtmId} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       </head>
       <body>
-        {/* GTM-in `<noscript>` hissəsi MƏHZ burada, `<body>`-nin əvvəlində
-            olmalıdır — Google-un tələb etdiyi yer budur. */}
-        <GtmNoScript id={inject.gtmId} />
+        {/* GTM və admin kod inyeksiyası BURADA DEYİL — (public)/layout.js-də.
+            Kök layout admin paneli və girişi də əhatə edir; orada ixtiyari
+            skript admin tokenini (localStorage) oxuya bilərdi. */}
         <Providers>{children}</Providers>
-        {/* Admin panelindən əlavə edilən analytics/pixel kodu */}
-        <CodeInjection head={inject.head} bodyEnd={inject.bodyEnd} />
       </body>
     </html>
   );

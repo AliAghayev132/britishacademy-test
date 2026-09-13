@@ -10,17 +10,20 @@ import {
   authenticateRefreshToken,
   authenticateResetToken,
   loginRateLimiter,
+  otpSendLimiter,
+  otpVerifyLimiter,
 } from "#middlewares";
 
 const AuthRouter = Router();
 
 // Public routes
-AuthRouter.post("/register", authController.register);
-AuthRouter.post("/verify-otp", authController.verifyOTP);
-AuthRouter.post("/resend-otp", authController.resendOTP);
+// Kod göndərən və yoxlayan marşrutlar limitlidir (bax security.js).
+AuthRouter.post("/register", otpSendLimiter, authController.register);
+AuthRouter.post("/verify-otp", otpVerifyLimiter, authController.verifyOTP);
+AuthRouter.post("/resend-otp", otpSendLimiter, authController.resendOTP);
 AuthRouter.post("/login", loginRateLimiter, authController.login);
-AuthRouter.post("/forgot-password", authController.forgotPassword);
-AuthRouter.post("/verify-reset-otp", authController.verifyResetOTP);
+AuthRouter.post("/forgot-password", otpSendLimiter, authController.forgotPassword);
+AuthRouter.post("/verify-reset-otp", otpVerifyLimiter, authController.verifyResetOTP);
 AuthRouter.post(
   "/reset-password",
   authenticateResetToken,

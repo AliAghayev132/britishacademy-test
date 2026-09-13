@@ -15,16 +15,10 @@ const nextConfig = {
   // Fail-safe: keep React strict mode on for better warnings in development.
   reactStrictMode: true,
 
-  images: {
-    // Placeholder remote pattern. Tighten `hostname` to your real asset/CDN
-    // host(s) before going to production (e.g. images.example.com).
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
+  // Uzaq şəkil nümunəsi YOXDUR. Əvvəl hostname ulduzlu (hər host) nümunə idi — /_next/image
+  // istənilən saytın şəklini bizim serverdə ölçüləndirirdi (CPU və trafik
+  // sui-istifadəsi). next/image saytda istifadə olunmur; lazım olsa yalnız
+  // öz yükləmə hostumuzu əlavə edin.
 
   // Basic security headers applied to every route. Extend as needed
   // (e.g. a strict Content-Security-Policy tuned to your app).

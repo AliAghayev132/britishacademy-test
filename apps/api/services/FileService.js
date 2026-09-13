@@ -17,10 +17,42 @@ class FileService {
     "image/png",
     "image/gif",
     "image/webp",
-    "image/svg+xml",
     "application/pdf",
   ];
   static maxFileSize = securityConfig.maxFileSize; // 10MB
+
+  /**
+   * Faylın uzantısı TİPDƏN qurulur, müştərinin göndərdiyi addan YOX.
+   *
+   * ── NİYƏ ──
+   * Əvvəl uzantı `file.name`-dən götürülürdü, yoxlama isə yalnız
+   * `file.mimetype`-a görə idi — ikisini də müştəri özü yazır. `x.html` adlı
+   * fayl `image/png` tipi ilə göndəriləndə `/uploads/…html` kimi saxlanır və
+   * saytın ÖZ domenindən HTML kimi açılırdı (admin tokeni oğurlana bilərdi).
+   * İndi uzantı bu xəritədən gəlir; xəritədə olmayan tip qəbul edilmir.
+   * SVG də yoxdur: içində skript ola bilər.
+   */
+  static MIME_EXT = {
+    "image/jpeg": ".jpg", "image/jpg": ".jpg", "image/png": ".png", "image/gif": ".gif",
+    "image/webp": ".webp", "image/avif": ".avif",
+    "video/mp4": ".mp4", "video/webm": ".webm", "video/ogg": ".ogv", "video/quicktime": ".mov",
+    "application/pdf": ".pdf",
+    "application/msword": ".doc",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+    "application/vnd.ms-excel": ".xls",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+    "application/vnd.ms-powerpoint": ".ppt",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+    "text/plain": ".txt",
+    "text/csv": ".csv",
+  };
+
+  /** Tipə uyğun uzantı; tanınmayan tip — xəta. */
+  static extFor(mimetype) {
+    const ext = this.MIME_EXT[String(mimetype || "").toLowerCase()];
+    if (!ext) throw new Error("File type not allowed");
+    return ext;
+  }
 
   /**
    * Ensure a directory exists (created recursively)
@@ -81,10 +113,7 @@ class FileService {
 
     const dir = this.ensureUploadDir(subDir);
 
-    const ext = path
-      .extname(file.name)
-      .replace(/[^a-zA-Z0-9.]/g, "")
-      .toLowerCase();
+    const ext = this.extFor(file.mimetype);
     const randomName = `${crypto.randomBytes(16).toString("hex")}${ext}`;
     const filePath = path.join(dir, randomName);
 
@@ -116,10 +145,7 @@ class FileService {
     // Forward-slash sub-path so ensureUploadDir's char guard keeps the separator.
     const originalsDir = this.ensureUploadDir(`originals/${folder}`);
 
-    const ext = path
-      .extname(file.name)
-      .replace(/[^a-zA-Z0-9.]/g, "")
-      .toLowerCase();
+    const ext = this.extFor(file.mimetype);
     const randomName = `${crypto.randomBytes(16).toString("hex")}${ext}`;
     const filePath = path.join(dir, randomName);
 
@@ -216,7 +242,8 @@ class FileService {
         .replace(/_+/g, "_")
         .replace(/^_+|_+$/g, "")
         .slice(0, 120) || "document";
-    const sanitizedExt = ext.replace(/[^a-zA-Z0-9.]/g, "").toLowerCase() || "";
+    // Uzantı tipdən gəlir (bax MIME_EXT) — addakı «.html» saxlanılmır.
+    const sanitizedExt = this.extFor(file.mimetype);
 
     // Random hex prefix keeps stored filenames unguessable/unique; the trailing
     // human name keeps downloads friendly.

@@ -1,11 +1,24 @@
 name: Next.js Client CD
 
+# Deploy YALNIZ «CI» workflow-u main-də UĞURLA bitəndə başlayır. Əvvəl hər
+# ikisi eyni push ilə paralel işə düşürdü — testlər və ya build yıxılsa belə
+# kod serverə gedirdi. workflow_dispatch — təcili halda əl ilə deploy.
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Eyni anda iki deploy serverdə bir-birinin üstünə yazmasın.
+concurrency:
+  group: deploy-client
+  cancel-in-progress: false
 
 jobs:
   deploy-client:
+    # CI yıxılıbsa deploy etmə (əl ilə işə salınanda şərt yoxdur).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:

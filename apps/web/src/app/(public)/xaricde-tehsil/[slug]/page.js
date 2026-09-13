@@ -1,5 +1,6 @@
 // Next
 import { notFound } from "next/navigation";
+import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import { getT } from "@/lib/i18n/serverT";
 import DOMPurify from "isomorphic-dompurify";
@@ -96,7 +97,7 @@ export default async function DestinationPage({ params }) {
   // ── Render ──
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
 
       <PageBanner
         title={d.country}

@@ -50,48 +50,68 @@ otpSchema.statics.generateCode = function () {
   return crypto.randomInt(100000, 999999).toString();
 };
 
-// Create an OTP with a 10 minute expiry (replaces any existing one of same type)
+/** Bir kod üçün səhv cəhd limiti. */
+export const OTP_MAX_ATTEMPTS = 5;
+
+/**
+ * 10 dəqiqəlik kod yarat (eyni tipli köhnəsini əvəz edir).
+ *
+ * CƏHD SAYĞACI YENİ KODLA SIFIRLANMIR. Əvvəl sıfırlanırdı: 5 səhv təxmindən
+ * sonra «yenidən göndər» basıb növbəti 5-i sınamaq olurdu — 6 rəqəmli kod
+ * saatlar ərzində tapılırdı. Sayğac köhnə sənəd TTL ilə silinənə qədər
+ * (10 dəqiqə) qalır; həqiqi istifadəçi ən çox 10 dəqiqə gözləyir.
+ */
 otpSchema.statics.createOTP = async function (email, type, data = {}) {
-  await this.deleteMany({ email: email.toLowerCase(), type });
+  const addr = email.toLowerCase();
+  const prev = await this.findOne({ email: addr, type }).select("attempts").lean();
+  await this.deleteMany({ email: addr, type });
 
   const code = this.generateCode();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   return this.create({
-    email: email.toLowerCase(),
+    email: addr,
     code,
     type,
     data,
     expiresAt,
+    attempts: prev?.attempts || 0,
   });
 };
 
-// Verify an OTP code
+/** Sabit vaxtlı müqayisə — cavab müddətindən kodu təxmin etmək olmasın. */
+const sameCode = (a, b) => {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+};
+
+/**
+ * Kodu yoxla.
+ *
+ * ATOMİK: cəhd kod müqayisəsindən ƏVVƏL, bir sorğu ilə sayılır. Əvvəl
+ * oxu → +1 → saxla idi: eyni anda göndərilən yüzlərlə təxminin hamısı
+ * «0 cəhd» görürdü və limit işləmirdi. Limitə çatmış kod SİLİNMİR — silinsə
+ * yeni kod sayğacı sıfırdan başladardı.
+ */
 otpSchema.statics.verifyOTP = async function (email, code, type) {
-  const otp = await this.findOne({
-    email: email.toLowerCase(),
-    type,
-    verified: false,
-  });
+  const addr = String(email || "").toLowerCase();
+  const now = new Date();
+  const otp = await this.findOneAndUpdate(
+    { email: addr, type, verified: false, expiresAt: { $gt: now }, attempts: { $lt: OTP_MAX_ATTEMPTS } },
+    { $inc: { attempts: 1 } },
+    { returnDocument: "after" },
+  );
 
   if (!otp) {
-    return { valid: false, error: "OTP not found or expired" };
+    const locked = await this.exists({ email: addr, type, verified: false, expiresAt: { $gt: now } });
+    return locked
+      ? { valid: false, error: "Too many invalid attempts. Try again in 10 minutes" }
+      : { valid: false, error: "OTP not found or expired" };
   }
 
-  if (otp.attempts >= 5) {
-    await otp.deleteOne();
-    return { valid: false, error: "Too many invalid attempts. Request a new code" };
-  }
-
-  if (otp.code !== code) {
-    otp.attempts += 1;
-    await otp.save();
+  if (!sameCode(otp.code, code)) {
     return { valid: false, error: "Invalid OTP code" };
-  }
-
-  if (otp.expiresAt < new Date()) {
-    await otp.deleteOne();
-    return { valid: false, error: "OTP code has expired" };
   }
 
   otp.verified = true;

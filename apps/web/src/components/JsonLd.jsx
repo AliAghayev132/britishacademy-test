@@ -1,3 +1,5 @@
+import { ldJson } from "@/lib/jsonLd";
+
 /**
  * Renders a JSON-LD structured-data <script> tag.
  *
@@ -11,8 +13,8 @@ export const JsonLd = ({ data }) => {
   return (
     <script
       type="application/ld+json"
-      // The data is app-controlled (not user input), so this is safe.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // Başlıqlar admin paneldən gəlir — `<` escape olunur (bax lib/jsonLd).
+      dangerouslySetInnerHTML={{ __html: ldJson(data) }}
     />
   )
 }

@@ -1,5 +1,6 @@
 // Next
 import { notFound } from "next/navigation";
+import { ldJson } from "@/lib/jsonLd";
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 import DOMPurify from "isomorphic-dompurify";
 import { getT } from "@/lib/i18n/serverT";
@@ -219,7 +220,7 @@ export default async function CoursePage({ params }) {
   // ── Render ──
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
 
       {/* Hero */}
       <PageBanner

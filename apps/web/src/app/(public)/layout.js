@@ -11,6 +11,8 @@ import { LocaleProvider } from "@/components/site/LocaleProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { RouteLoader } from "@/components/site/RouteLoader";
+import { GtmScript, GtmNoScript } from "@/components/site/GoogleTagManager";
+import { CodeInjection } from "@/components/site/CodeInjection";
 
 // Utils
 import { getT } from "@/lib/i18n/serverT";
@@ -41,6 +43,7 @@ export default async function PublicLayout({ children }) {
   ]);
 
   const settings = site?.settings || {};
+  const inject = settings.codeInjection || {};
   const menu = site?.menu?.header || [];
   const categories = cats?.categories || [];
   const courses = coursesData?.courses || [];
@@ -118,6 +121,11 @@ export default async function PublicLayout({ children }) {
   // ── render ──
   return (
     <LocaleProvider locale={locale}>
+      {/* GTM və admin kod inyeksiyası YALNIZ ictimai saytda — admin panel və
+          giriş səhifəsində ixtiyari skript işləməməlidir. noscript Google-un
+          tələbi ilə məzmundan əvvəldir; ID boşdursa heç nə render olunmur. */}
+      <GtmNoScript id={inject.gtmId} />
+      <GtmScript id={inject.gtmId} />
       <SiteProvider branches={branches} destinations={destinations}>
         <Suspense fallback={null}>
           <RouteLoader />
@@ -126,6 +134,8 @@ export default async function PublicLayout({ children }) {
         <main>{children}</main>
         <Footer site={settings} />
       </SiteProvider>
+      {/* Admin panelindən əlavə edilən analytics/pixel kodu */}
+      <CodeInjection head={inject.head} bodyEnd={inject.bodyEnd} />
     </LocaleProvider>
   );
 }

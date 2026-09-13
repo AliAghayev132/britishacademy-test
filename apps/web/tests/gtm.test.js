@@ -11,11 +11,16 @@ import fs from "node:fs";
  *   2. `<noscript>` hissəsi belə üsulla HEÇ VAXT işləmir: o, məhz JavaScript
  *      sönülü olanlar üçündür, JavaScript ilə əlavə olunan noscript isə
  *      mənasızdır.
- * Ona görə hər ikisi server tərəfdə, `layout.js`-in içində render olunur.
+ * Ona görə hər ikisi server tərəfdə render olunur.
+ *
+ * YER: `(public)/layout.js` — kök layout DEYİL. Kök layout admin panelini və
+ * girişi də əhatə edir; GTM konteyneri orada ixtiyari skript işlədib admin
+ * tokenini (localStorage) oxuya bilərdi (audit #7).
  */
 
 const gtm = fs.readFileSync("src/components/site/GoogleTagManager.jsx", "utf8");
-const layout = fs.readFileSync("src/app/layout.js", "utf8");
+const layout = fs.readFileSync("src/app/(public)/layout.js", "utf8");
+const rootLayout = fs.readFileSync("src/app/layout.js", "utf8");
 
 describe("GTM komponenti", () => {
   it("ID formatı yoxlanılır", () => {
@@ -44,18 +49,19 @@ describe("GTM komponenti", () => {
 });
 
 describe("layout-dakı yerləşmə", () => {
-  it("skript `<head>` içindədir", () => {
-    const head = layout.slice(layout.indexOf("<head>"), layout.indexOf("</head>"));
-    expect(head).toContain("<GtmScript");
+  it("kök layout-da YOXDUR — admin panelində işləmir", () => {
+    expect(rootLayout).not.toMatch(/<GtmScript|<GtmNoScript/);
   });
 
-  it("noscript `<body>`-nin ƏVVƏLİNDƏDİR", () => {
-    // Google-un tələb etdiyi yer budur.
-    const body = layout.slice(layout.indexOf("<body>"));
-    const ns = body.indexOf("<GtmNoScript");
-    const providers = body.indexOf("<Providers");
+  it("noscript və skript səhifə məzmunundan ƏVVƏLDİR", () => {
+    // Google-un tələbi: noscript body-nin əvvəlində.
+    const content = layout.indexOf("<SiteProvider");
+    const ns = layout.indexOf("<GtmNoScript");
+    const script = layout.indexOf("<GtmScript");
     expect(ns).toBeGreaterThan(0);
-    expect(ns, "noscript səhifə məzmunundan ƏVVƏL olmalıdır").toBeLessThan(providers);
+    expect(script).toBeGreaterThan(0);
+    expect(ns, "noscript məzmundan ƏVVƏL olmalıdır").toBeLessThan(content);
+    expect(script, "skript məzmundan ƏVVƏL olmalıdır").toBeLessThan(content);
   });
 
   it("ID paneldən oxunur, koda yazılmır", () => {
@@ -65,7 +71,7 @@ describe("layout-dakı yerləşmə", () => {
     // Şərhlər çıxarılır: sənəd blokundakı `GTM-XXXXXXX` NÜMUNƏSİ real ID
     // deyil, amma xam mətndə axtarsaq yalançı uyğunluq verir.
     const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
-    for (const [name, src] of [["layout.js", layout], ["GoogleTagManager.jsx", gtm]]) {
+    for (const [name, src] of [["(public)/layout.js", layout], ["GoogleTagManager.jsx", gtm]]) {
       expect(strip(src), `${name}: ID koda sabit yazılıb`).not.toMatch(/GTM-[A-Z0-9]{6,}/);
     }
   });

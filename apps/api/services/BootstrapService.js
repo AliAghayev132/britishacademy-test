@@ -8,21 +8,49 @@ import { HashService } from "#services";
 import { config } from "#config";
 
 /**
- * Create a default admin user on first boot if none exists.
- * Credentials come from DEFAULT_ADMIN_EMAIL / DEFAULT_ADMIN_PASSWORD.
+ * Standart (hamının bildiyi) parolla hesab yaratmaq.
+ *
+ * ── NİYƏ ──
+ * DEFAULT_*_PASSWORD verilməyəndə config `Admin123!` / `Developer123!`
+ * işlədir və əvvəl parol loga AÇIQ yazılırdı. Canlıda baza boş olanda (yeni
+ * server, bərpa) hamının bildiyi parolla admin hesabı yaranırdı.
+ *
+ * İndi CANLIDA parol ENV-də yoxdursa və ya standartdırsa hesab YARADILMIR.
+ * Proses dayanmır — sayt işləməyə davam edir, loga xəbərdarlıq düşür.
+ * Parol heç bir mühitdə loga yazılmır.
+ */
+const KNOWN_DEFAULTS = new Set(["Admin123!", "Developer123!"]);
+
+export const unsafeBootstrapPassword = (value) => !value || KNOWN_DEFAULTS.has(value);
+
+const mayCreate = (envName) => {
+  if (process.env.NODE_ENV !== "production") return true;
+  if (!unsafeBootstrapPassword(process.env[envName])) return true;
+  console.warn(
+    `⚠️  ${envName} canlıda təyin olunmayıb və ya standart paroldur — hesab YARADILMADI. ` +
+      "ENV-də güclü parol verib serveri yenidən başladın (və ya scripts/adminDoctor.js).",
+  );
+  return false;
+};
+
+/**
+ * İlk açılışda admin hesabı (heç bir admin/superadmin yoxdursa).
+ *
+ * Superadmin də sayılır: əvvəl yalnız `role: "admin"` yoxlanırdı — tək admin
+ * superadmin-ə yüksəldiləndə növbəti restartda standart admin YENİDƏN
+ * yaranırdı.
  */
 const bootstrapAdmin = async () => {
   try {
-    const existingAdmin = await User.findOne({ role: "admin" });
+    const existingAdmin = await User.findOne({ role: { $in: ["admin", "superadmin"] } });
 
     if (existingAdmin) {
       console.log("✅ Admin already exists:", existingAdmin.email);
       return;
     }
+    if (!mayCreate("DEFAULT_ADMIN_PASSWORD")) return;
 
-    const hashedPassword = await HashService.hashPassword(
-      config.defaultAdmin.password,
-    );
+    const hashedPassword = await HashService.hashPassword(config.defaultAdmin.password);
 
     const admin = await User.create({
       firstName: "Default",
@@ -35,7 +63,7 @@ const bootstrapAdmin = async () => {
 
     console.log("🚀 Default admin created successfully!");
     console.log("   Email:", admin.email);
-    console.log("   Password:", config.defaultAdmin.password);
+    console.log("   Password: DEFAULT_ADMIN_PASSWORD dəyişənindən (loga yazılmır)");
     console.log("   ⚠️  Please change the password after first login!");
   } catch (error) {
     console.error("❌ Error creating default admin:", error.message);
@@ -59,10 +87,9 @@ const bootstrapDeveloper = async () => {
       console.log("✅ Developer hesabı mövcuddur:", existing.email);
       return;
     }
+    if (!mayCreate("DEFAULT_DEVELOPER_PASSWORD")) return;
 
-    const hashedPassword = await HashService.hashPassword(
-      config.defaultDeveloper.password,
-    );
+    const hashedPassword = await HashService.hashPassword(config.defaultDeveloper.password);
 
     const dev = await User.create({
       // lastName modeldə MƏCBURİDİR — boş string validasiyadan keçmir və
@@ -77,7 +104,7 @@ const bootstrapDeveloper = async () => {
 
     console.log("🛠️  Developer hesabı yaradıldı!");
     console.log("   E-poçt:", dev.email);
-    console.log("   Parol :", config.defaultDeveloper.password);
+    console.log("   Parol : DEFAULT_DEVELOPER_PASSWORD dəyişənindən (loga yazılmır)");
     console.log("   ⚠️  İlk girişdən sonra parolu dəyişin.");
   } catch (error) {
     console.error("❌ Developer hesabı yaradıla bilmədi:", error.message);

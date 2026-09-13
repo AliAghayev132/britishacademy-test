@@ -1,5 +1,6 @@
 // ============ EXTERNAL PACKAGES ============
 import { http, cors, helmet, express, fileUpload, compression } from "#lib";
+import { setUploadHeaders } from "#middlewares";
 
 // ============ INTERNAL IMPORTS ============
 import { config, corsConfig, securityConfig } from "#config";
@@ -116,8 +117,8 @@ const setupMiddlewares = (app) => {
   // Router-lərdən ƏVVƏL qoşulur ki, bütün /api cavablarını əhatə etsin.
   app.use("/api", cacheHeaders);
 
-  // Static files (uploads)
-  app.use("/uploads", express.static("uploads"));
+  // Static files (uploads) — təhlükəsizlik başlıqları ilə (bax setUploadHeaders).
+  app.use("/uploads", express.static("uploads", { setHeaders: setUploadHeaders }));
 };
 
 /**

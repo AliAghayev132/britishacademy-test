@@ -9,6 +9,7 @@
 // React
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import DOMPurify from "isomorphic-dompurify";
 // Icons
 import { CheckCircle2, XCircle, Info, AlertTriangle, HelpCircle, X } from "lucide-react";
 
@@ -60,6 +61,19 @@ function closeDialog(result) {
   d?.resolve(result);
 }
 
+/**
+ * Pəncərə mətni formatlama dəstəkləyir (qalın yazı, sətir keçidi), amma içinə
+ * istifadəçi adı, müraciət adı, başlıq kimi KƏNAR məlumat yazılır. Əvvəl xam
+ * HTML idi: adı `<img src=x onerror=…>` olan redaktor superadminin «Sil»
+ * pəncərəsində skript işlədib tokenini ala bilərdi. Yalnız formatlama
+ * teqləri qalır, atributlar silinir.
+ */
+export const sanitizeDialogText = (html) =>
+  DOMPurify.sanitize(String(html ?? ""), {
+    ALLOWED_TAGS: ["b", "strong", "i", "em", "br", "code"],
+    ALLOWED_ATTR: [],
+  });
+
 // ── Visuals ──
 const TONES = {
   success: { Icon: CheckCircle2, color: "#12915b", bg: "#e9f7f0" },
@@ -108,7 +122,12 @@ function DialogModal({ dialog, onClose }) {
     okRef.current?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onClose(isConfirm ? false : undefined);
-      if (e.key === "Enter") onClose(isConfirm ? true : undefined);
+      // Enter YALNIZ təsdiq düyməsi fokusdadırsa təsdiqləyir. Əvvəl fokusdan
+      // asılı deyildi: Tab ilə «İmtina»-ya keçib Enter basan istifadəçi silirdi.
+      if (e.key === "Enter" && document.activeElement === okRef.current) {
+        e.preventDefault();
+        onClose(isConfirm ? true : undefined);
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -125,7 +144,7 @@ function DialogModal({ dialog, onClose }) {
             <Icon className="h-7 w-7" />
           </span>
           {dialog.title && <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 20, color: "#14141c", margin: 0 }}>{dialog.title}</h3>}
-          {dialog.text && <p style={{ fontSize: 14.5, color: "#5a5a66", margin: "10px 0 0", lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: dialog.text }} />}
+          {dialog.text && <p style={{ fontSize: 14.5, color: "#5a5a66", margin: "10px 0 0", lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: sanitizeDialogText(dialog.text) }} />}
         </div>
         <div style={{ display: "flex", gap: 10, padding: "0 26px 24px", justifyContent: "center" }}>
           {isConfirm && (

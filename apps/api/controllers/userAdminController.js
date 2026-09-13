@@ -5,6 +5,7 @@
 // users). Passwords are hashed with HashService; password is never returned.
 
 import { asyncHandler, fuzzyRegex, hasRole, cleanIds, isObjectId } from "#utils";
+import { initialPermissions } from "../utils/roles.js";
 import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
 import { HashService, logAction, diffDocs } from "#services";
@@ -72,7 +73,7 @@ const createUser = asyncHandler(async (req, res) => {
   }
   let cleanPerms;
   try {
-    cleanPerms = cleanPermissions(permissions);
+    cleanPerms = initialPermissions(role, cleanPermissions(permissions));
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
   }
@@ -143,11 +144,23 @@ const updateUser = asyncHandler(async (req, res) => {
     user.role = role;
   }
   if (Array.isArray(permissions)) {
+    let next;
     try {
-      user.permissions = cleanPermissions(permissions);
+      next = cleanPermissions(permissions);
     } catch (err) {
       return res.status(400).json({ success: false, message: err.message });
     }
+    // Boş siyahı «bütün bölmələr» deməkdir. MƏHDUD hesabı boşaltmaq ona
+    // səssizcə TAM giriş verirdi («Təmizlə» düyməsi). Köhnə, onsuz da boş
+    // hesab isə olduğu kimi qalır (məs. yalnız filialı dəyişdiriləndə).
+    const wasRestricted = (user.permissions || []).length > 0;
+    if (!next.length && wasRestricted && user.role !== "superadmin" && user.role !== "developer") {
+      return res.status(400).json({
+        success: false,
+        message: "Ən azı bir bölmə seçin. Hesabı tam bağlamaq üçün statusunu «deaktiv» edin.",
+      });
+    }
+    user.permissions = next;
   }
     if (Array.isArray(allowedDestinations)) {
       user.allowedDestinations = cleanDestinations(allowedDestinations);

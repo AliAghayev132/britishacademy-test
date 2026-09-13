@@ -1,8 +1,8 @@
 name: CI
 
-# Kod keyfiyyəti yoxlaması. Deploy workflow-undan AYRIDIR — bu, sınıq kodun
-# serverə çatmasının qarşısını alır; əvvəl heç bir baryer yox idi və hər push
-# birbaşa istehsalata gedirdi.
+# Kod keyfiyyəti yoxlaması. Deploy (deploy-*.yml) bu workflow main-də UĞURLA
+# bitəndən sonra başlayır (workflow_run) — sınıq kod serverə çatmır. Workflow
+# adı «CI» deploy faylında istinad olunur; dəyişdirsəniz orada da dəyişin.
 on:
   push:
     branches: [main]

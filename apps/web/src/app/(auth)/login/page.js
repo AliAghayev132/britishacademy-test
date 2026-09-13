@@ -2,6 +2,7 @@
 
 // React
 import { useState } from 'react'
+import { safeRedirect } from '@/lib/safeRedirect'
 
 // Next
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -45,7 +46,7 @@ export default function LoginPage() {
     try {
       const res = await login(form).unwrap()
       dispatch(setCredentials(res.data))
-      router.push(searchParams.get('from') || '/dashboard')
+      router.push(safeRedirect(searchParams.get('from')))
     } catch (err) {
       setError(err?.data?.message || 'Giriş alınmadı. Məlumatları yoxla.')
     }

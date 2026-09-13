@@ -1,5 +1,6 @@
 // Data
 import { apiGet } from "@/lib/api";
+import { ldJson } from "@/lib/jsonLd";
 import { BranchMapSwitcher } from "@/components/site/BranchMapSwitcher";
 
 // Components
@@ -82,7 +83,7 @@ export default async function BranchesPage() {
   // ── render ──
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
 
       <PageBanner
         title={tr("page.branches.title")}

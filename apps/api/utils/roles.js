@@ -50,6 +50,20 @@ export const destinationScope = (user) => scopeOf(user, "allowedDestinations");
  */
 export const branchScope = (user) => scopeOf(user, "allowedBranches");
 
+/**
+ * Yeni yaradılan istifadəçinin bölmə icazələri.
+ *
+ * Boş siyahı «bütün bölmələr» deməkdir — bu, KÖHNƏ hesablar üçün geriyə
+ * uyğunluqdur (bax canAccessSection). Yeni hesab isə boş yaranırdı və yeni
+ * redaktor müraciətləri, logları, WhatsApp-ı görürdü. İndi superadmin/
+ * developer olmayan yeni hesab yalnız «İdarə paneli» ilə yaranır; qalan
+ * bölmələri superadmin «İcazələr» pəncərəsindən açır.
+ */
+export const initialPermissions = (role, perms = []) => {
+  if (role === "superadmin" || role === "developer") return perms;
+  return perms.length ? perms : ["dashboard"];
+};
+
 export const canAccessSection = (user, section) => {
   if (!user) return false;
   if (seesEverything(user)) return true;

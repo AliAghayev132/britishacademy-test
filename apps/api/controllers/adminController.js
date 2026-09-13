@@ -538,6 +538,12 @@ const updateSettings = asyncHandler(async (req, res) => {
     }
   }
 
+  // Kod inyeksiyası (və GTM) saytda İXTİYARİ JavaScript işlədir. Admin
+  // tokenləri eyni origin-in localStorage-ındadır — admin rolunun yazdığı
+  // skript superadmin/developer sessiyasını ələ keçirə bilərdi. Ona görə
+  // yazmaq yalnız superadmin və developer üçündür.
+  if (!hasRole(req.user, "superadmin")) delete body.codeInjection;
+
   // Gizli açar boş gəlibsə köhnəsini saxla (frontend geri almır).
   if (body.smtp && !body.smtp.pass) {
     body.smtp = { ...body.smtp, pass: settings.smtp?.pass || "" };

@@ -1,4 +1,4 @@
-import { rateLimit } from "#lib";
+import { rateLimit, ipKeyGenerator } from "#lib";
 import { config } from "#config";
 
 /**
@@ -43,6 +43,34 @@ const loginRateLimiter = rateLimit({
 });
 
 /**
+ * OTP kodu GÖNDƏRƏN marşrutlar (qeydiyyat, yenidən göndər, şifrə bərpası).
+ *
+ * Əvvəl limit yox idi: istənilən ünvana limitsiz məktub atmaq və yeni kodla
+ * cəhd sayğacını sıfırlamaq mümkün idi. Açar IP + e-poçtdur — ofisdə eyni
+ * IP-dən fərqli adamlar bir-birini bloklamasın.
+ */
+const otpKey = (req) =>
+  `${ipKeyGenerator(req.ip || "")}|${String(req.body?.email || "").toLowerCase().slice(0, 120)}`;
+
+const otpSendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  keyGenerator: otpKey,
+  message: { success: false, message: "Çox sayda kod sorğusu. 15 dəqiqə sonra yenidən cəhd edin." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/** OTP kodu YOXLAYAN marşrutlar — təxmin etməyə qarşı IP üzrə limit. */
+const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: "Çox sayda yoxlama cəhdi. 15 dəqiqə sonra yenidən cəhd edin." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/**
  * Generic limiter for write operations (create/update/delete).
  */
 const writeRateLimiter = rateLimit({
@@ -55,6 +83,32 @@ const writeRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+/** Şəkil, video və PDF brauzerdə açılır; qalan hər şey endirilir. */
+const INLINE_UPLOAD_EXT = new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "mp4", "webm", "ogv", "ogg", "mov", "pdf"]);
+
+/**
+ * /uploads statik faylları üçün başlıqlar (express.static setHeaders).
+ *
+ * Yüklənən fayllar saytın ÖZ domenindən verilir — admin panel ilə eyni
+ * origin. Köhnə yükləmələr arasında HTML/SVG ola bilər, ona görə:
+ *   • nosniff — brauzer tipi «təxmin» edib HTML-ə çevirməsin;
+ *   • CSP sandbox — fayl birbaşa açılsa belə skript İŞLƏMİR (PDF-dən başqa:
+ *     brauzerin PDF görüntüləyicisi sandbox-da açılmır);
+ *   • şəkil/video/PDF olmayan hər şey endirmə kimi verilir.
+ * <img>/<video> teqləri bu başlıqlardan təsirlənmir.
+ */
+const setUploadHeaders = (res, filePath) => {
+  const ext = String(filePath).split(".").pop().toLowerCase();
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  if (ext !== "pdf") {
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox",
+    );
+  }
+  if (!INLINE_UPLOAD_EXT.has(ext)) res.setHeader("Content-Disposition", "attachment");
+};
 
 /**
  * Extra hardening headers (Helmet covers most; these are belt-and-braces).
@@ -84,6 +138,9 @@ const noCookies = (req, res, next) => {
 export {
   apiRateLimiter,
   loginRateLimiter,
+  otpSendLimiter,
+  otpVerifyLimiter,
+  setUploadHeaders,
   writeRateLimiter,
   securityHeaders,
   noCookies,
