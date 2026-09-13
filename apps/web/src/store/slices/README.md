@@ -2,7 +2,7 @@
 
 ## Məqsəd
 
-Bu qovluq Redux Toolkit `createSlice` reducer-lərini saxlayır — RTK Query cache-i ilə idarə olunmayan lokal/client state üçün. Hazırda burada `authSlice.js` var: autentifikasiya state-ini (`user`, `accessToken`, `refreshToken`, `isAuthenticated`, `role`) idarə edir, ilkin state-i SSR-təhlükəsiz şəkildə `localStorage`-dan oxuyur və token-i həmçinin cookie-yə yazır ki, Edge middleware qorunan route-ları yoxlaya bilsin.
+Bu qovluq Redux Toolkit `createSlice` reducer-lərini saxlayır — RTK Query cache-i ilə idarə olunmayan lokal/client state üçün. Hazırda burada `authSlice.js` var: autentifikasiya state-ini (`user`, `isAuthenticated`, `role`) idarə edir və profili SSR-təhlükəsiz şəkildə `localStorage`-da saxlayır. **Tokenlər burada yoxdur** — API onları HttpOnly cookie kimi yazır (bax `src/lib/session.js`).
 
 ## Adlandırma / yazılış konvensiyası
 

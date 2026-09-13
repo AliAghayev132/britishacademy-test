@@ -3,7 +3,7 @@ import { baseApi } from './baseApi'
 // Auth endpoints — mirror the server API contract exactly (see SPEC).
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Login → returns { user, tokens }
+    // Login → returns { user }; tokenlər HttpOnly cookie-lərdə gəlir
     login: builder.mutation({
       query: (credentials) => ({
         url: '/auth/login',
@@ -21,7 +21,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Verify OTP — Step 2: creates the user, returns { user, tokens }
+    // Verify OTP — Step 2: creates the user, returns { user } (+ cookie-lər)
     verifyOTP: builder.mutation({
       query: (data) => ({
         url: '/auth/verify-otp',

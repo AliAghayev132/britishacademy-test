@@ -60,7 +60,7 @@ export default function RegisterPage() {
     }
   }
 
-  // Step 2 — verify OTP; the server creates the user and returns tokens.
+  // Step 2 — verify OTP; the server creates the user and sets the session cookies.
   const handleVerify = async (e) => {
     e.preventDefault()
     setError('')

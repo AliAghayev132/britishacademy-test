@@ -1,5 +1,6 @@
 import { SocketServer, jwt } from "#lib";
 import { config, corsConfig } from "#config";
+import { readCookie } from "#utils";
 
 /**
  * SocketService (singleton)
@@ -52,7 +53,11 @@ class SocketService {
    */
   async authMiddleware(socket, next) {
     try {
-      const token = socket.handshake.auth?.token;
+      // Panel HttpOnly cookie ilə qoşulur (JS tokeni görmür); auth.token
+      // skriptlər üçün qalır.
+      const token =
+        socket.handshake.auth?.token ||
+        readCookie(socket.handshake.headers?.cookie, config.accessCookieName);
 
       if (!token) {
         return next(new Error("Authentication required"));

@@ -1,6 +1,9 @@
 // RTK Query
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+// Session
+import { refreshSession, redirectToLogin } from '@/lib/session'
+
 // Resolve the API base URL from the public env var. Next.js inlines
 // NEXT_PUBLIC_* variables at build time so this works in the browser.
 //
@@ -14,56 +17,37 @@ const RAW = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')
 const BASE_URL = RAW ? `${RAW}/api` : '/api'
 
 // ============ BASE QUERY ============
+// Sessiya HttpOnly cookie-lərdədir — brauzer onları `credentials: 'include'`
+// ilə özü qoşur, token başlığı qurulmur (audit #2).
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: 'include',
-  prepareHeaders: (headers, { getState }) => {
-    // Don't overwrite if already set (e.g. an explicit reset token).
-    if (!headers.get('Authorization')) {
-      const token = getState().auth?.accessToken
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`)
-      }
-    }
-    return headers
-  },
 })
 
+// Bu marşrutların 401-i sessiyanın bitməsi deyil (yanlış parol, səhv kod) —
+// onlarda refresh edib təkrarlamaq mənasızdır.
+const NO_REAUTH = /^\/?auth\/(login|register|verify-otp|resend-otp|forgot-password|verify-reset-otp|reset-password|change-password|refresh|logout)\b/
+const urlOf = (args) => (typeof args === 'string' ? args : args?.url) || ''
+
 // ============ REAUTH WRAPPER ============
-// On a 401, try to refresh the access token once using the refresh token,
-// then replay the original request. If refresh fails, force a logout.
+// 401-də access token refresh cookie ilə bir dəfə yenilənir və sorğu
+// təkrarlanır. Paralel 401-lər eyni refresh-i gözləyir (refreshSession mutex).
+// İstifadəçi YALNIZ sessiya həqiqətən bitəndə çıxarılır — şəbəkə xətasında yox.
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions)
+  const result = await baseQuery(args, api, extraOptions)
 
-  if (result?.error?.status === 401) {
-    const refreshToken = api.getState().auth?.refreshToken
-
-    if (refreshToken) {
-      const refreshResult = await baseQuery(
-        {
-          url: '/auth/refresh',
-          method: 'POST',
-          headers: { Authorization: `Bearer ${refreshToken}` },
-        },
-        api,
-        extraOptions
-      )
-
-      if (refreshResult?.data) {
-        api.dispatch({
-          type: 'auth/setTokens',
-          payload: refreshResult.data.data.tokens,
-        })
-        // Retry the original request with the new token.
-        result = await baseQuery(args, api, extraOptions)
-      } else {
-        api.dispatch({ type: 'auth/logout' })
-      }
-    } else {
-      api.dispatch({ type: 'auth/logout' })
-    }
+  if (result?.error?.status !== 401 || NO_REAUTH.test(urlOf(args))) {
+    return result
   }
 
+  const outcome = await refreshSession()
+  if (outcome === 'ok') {
+    return baseQuery(args, api, extraOptions)
+  }
+  if (outcome === 'expired') {
+    api.dispatch({ type: 'auth/logout' })
+    redirectToLogin()
+  }
   return result
 }
 

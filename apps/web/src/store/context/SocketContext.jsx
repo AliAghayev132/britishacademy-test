@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { io } from 'socket.io-client'
 import { useSelector } from 'react-redux'
+import { refreshSession } from '@/lib/session'
 
 const SocketContext = createContext(null)
 
@@ -20,18 +21,20 @@ const MAX_RECONNECT_ATTEMPTS = 5
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
-  const { accessToken, user, role } = useSelector((state) => state.auth)
+  const { isAuthenticated, user, role } = useSelector((state) => state.auth)
+  const userId = user?.id
   const reconnectAttempts = useRef(0)
 
   useEffect(() => {
     // Only connect for authenticated users.
-    if (!accessToken || !user) {
+    if (!isAuthenticated || !userId) {
       return undefined
     }
 
+    // Token handshake-də HttpOnly cookie ilə gedir (JS onu görmür).
     const newSocket = io(SOCKET_URL, {
+      withCredentials: true,
       auth: {
-        token: accessToken,
         role: role || 'user',
       },
       transports: ['websocket', 'polling'],
@@ -49,20 +52,24 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('disconnect', () => {
       setIsConnected(false)
     })
-    newSocket.on('connect_error', () => {
+    newSocket.on('connect_error', async () => {
       reconnectAttempts.current++
+      // Müvəqqəti xətada socket.io özü təkrar qoşulur. Server auth-u rədd
+      // edəndə (`active` false) isə etmir — access token bitmiş ola bilər,
+      // ona görə sessiya yenilənib bir daha cəhd olunur.
+      if (newSocket.active || reconnectAttempts.current > MAX_RECONNECT_ATTEMPTS) return
+      if ((await refreshSession()) === 'ok') newSocket.connect()
     })
 
     // Establishing the connection is a "subscribe to an external system"
     // effect; the instance is kept in state so consumers can read it from
     // context. Storing it here is intentional.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSocket(newSocket)
 
     return () => {
       newSocket.disconnect()
     }
-  }, [accessToken, user, role])
+  }, [isAuthenticated, userId, role])
 
   // ---- Generic `room` helpers (example real-time API) ----
   const joinRoom = useCallback(

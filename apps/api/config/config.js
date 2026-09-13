@@ -62,13 +62,20 @@ const config = {
   // Cookie names (prefixed to avoid collisions)
   accessCookieName: "__starter_at",
   refreshCookieName: "__starter_rt",
+  // Tokensiz göstərici — Next proxy-si /dashboard qapısı üçün oxuyur
+  // (apps/web/src/proxy.js). Ad dəyişsə orada da dəyişilməlidir.
+  sessionCookieName: "__starter_s",
 
-  // Cookie options
+  // Cookie options (bax utils/authCookies.js)
   cookie: {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "strict" : "lax",
-    domain: isProduction ? `.${domain}` : undefined,
+    // Defolt host-only: sayt və API nginx arxasında eyni origin-dədir.
+    // Əvvəl `.${DOMAIN}` idi — DOMAIN serverdə unudulanda `.localhost`
+    // olurdu və brauzer cookie-ni səssizcə rədd edirdi. Subdomenlər arası
+    // paylaşım lazımdırsa COOKIE_DOMAIN təyin et.
+    domain: process.env.COOKIE_DOMAIN || undefined,
     path: "/",
   },
 
@@ -121,15 +128,29 @@ const config = {
 };
 
 // CORS
-// ⚠️ MÜVƏQQƏTİ: bütün origin-lərə icazə verilir (deploy CORS problemini keçmək
-// üçün). `origin: true` gələn Origin-i əks etdirir, ona görə credentials (cookie)
-// işləməyə davam edir (`*` credentials ilə işləmir). Domen/HTTPS hazır olanda
-// aşağıdakı whitelist-ə qaytar:
-//   origin: isProduction
-//     ? [process.env.CLIENT_URL, `https://www.${domain}`, `https://${domain}`].filter(Boolean)
-//     : ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+// Ağ siyahı. Əvvəl `origin: true` idi (hər origin əks olunurdu) — sessiya
+// cookie-yə keçəndən sonra bu, başqa saytın admin adından sorğu göndərib
+// cavabı oxumasına yol açardı (SameSite yeganə sədd qalardı).
+//
+// Sayt API-ni nginx arxasında EYNİ origin-dən çağırır; eyni origin sorğusu
+// CORS-dan asılı deyil, ona görə bu siyahı adi işə təsir etmir. Başqa
+// origin lazımdırsa: CORS_ORIGINS=https://a.az,https://b.az
+const corsOrigins = [
+  ...new Set(
+    [
+      process.env.CLIENT_URL,
+      ...(isProduction ? [`https://${domain}`, `https://www.${domain}`] : []),
+      ...(process.env.CORS_ORIGINS || "").split(","),
+    ]
+      .map((o) => (o || "").trim().replace(/\/$/, ""))
+      .filter(Boolean),
+  ),
+  // Dev: istənilən lokal port (next dev 3000, e2e build 3599, vite 5173).
+  ...(isProduction ? [] : [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/]),
+];
+
 const corsConfig = {
-  origin: true,
+  origin: corsOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Authorization", "Content-Type", "x-internal-key"],
   credentials: true,

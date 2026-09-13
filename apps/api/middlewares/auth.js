@@ -13,21 +13,24 @@ import { User } from "#models";
 // Services
 import { AuthTokenService } from "#services";
 
+// Utils
+import { accessTokenOf, refreshTokenOf, clearAuthCookies } from "#utils";
+
 /**
  * Authenticate an access token and attach the user to req.user.
  */
 const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.header("Authorization");
+    // HttpOnly cookie (panel) və ya Authorization başlığı (skript/test).
+    const token = accessTokenOf(req);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: "Authentication required",
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
     const decoded = jwt.verify(token, config.accessSecretKey);
 
     const user = await User.findById(decoded.id).select("-password");
@@ -68,42 +71,38 @@ const authenticate = async (req, res, next) => {
  * Authenticate a refresh token and attach the user to req.user.
  */
 const authenticateRefreshToken = async (req, res, next) => {
-  try {
-    const authHeader = req.header("Authorization");
+  // Yeniləmə alınmırsa sessiya cookie-ləri də silinir. Əks halda göstərici
+  // cookie qalardı: proxy /login-dən /dashboard-a, panel isə 401 alıb yenidən
+  // /login-ə yönləndirərdi — sonsuz dövrə.
+  const reject = (message) => {
+    clearAuthCookies(req, res);
+    return res.status(401).json({ success: false, message });
+  };
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Refresh token required",
-      });
+  try {
+    const token = refreshTokenOf(req);
+
+    if (!token) {
+      return reject("Refresh token required");
     }
 
-    const token = authHeader.replace("Bearer ", "");
     const decoded = jwt.verify(token, config.refreshSecretKey);
 
     const user = await User.findById(decoded.id).select("-password");
 
-    if (!user || user.isDeleted) {
-      return res.status(401).json({
-        success: false,
-        message: "Account not found",
-      });
+    if (!user || user.isDeleted || user.status !== "active") {
+      return reject("Account not found");
     }
 
     if (decoded.tokenVersion !== user.tokenVersion) {
-      return res.status(401).json({
-        success: false,
-        message: "Session expired",
-      });
+      return reject("Session expired");
     }
 
     req.user = user;
+    req.refreshTokenPayload = decoded;
     next();
   } catch (_error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid refresh token",
-    });
+    return reject("Invalid refresh token");
   }
 };
 

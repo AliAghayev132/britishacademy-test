@@ -250,7 +250,9 @@ Server standart olaraq **`PORT` (default 5000)** portunda qalxır. Uğurlu açı
 | `ACCESS_SECRET_KEY` | Access token imzalama açarı. **Production-da mütləq güclü random dəyər** — default qalarsa server qalxmır. |
 | `REFRESH_SECRET_KEY` | Refresh token imzalama açarı (eyni qayda). |
 | `ENCRYPTION_KEY` | AES-256 şifrələmə + reset token açarı (32 simvol). |
-| `DOMAIN` | Əsas domen (cookie domain və CORS üçün). |
+| `DOMAIN` | Əsas domen (production CORS ağ siyahısı: `https://DOMAIN`, `https://www.DOMAIN`). |
+| `COOKIE_DOMAIN` | İxtiyari. Sessiya cookie-lərinin domeni (məs. `.britishacademy.az`). Boş — host-only (sayt və API eyni origin-dədir). |
+| `CORS_ORIGINS` | İxtiyari. Əlavə icazəli origin-lər, vergüllə. |
 | `APP_URL` | Backend-in public URL-i (default `http://localhost:5000`). |
 | `CLIENT_URL` | Frontend-in URL-i (CORS whitelist + welcome e-poçtdakı link, default `http://localhost:5173`). |
 | `SMTP_HOST` | SMTP server (məs. `smtp.gmail.com`). |

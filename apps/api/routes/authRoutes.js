@@ -36,7 +36,8 @@ AuthRouter.post(
   authenticateRefreshToken,
   authController.refreshToken,
 );
-AuthRouter.post("/logout", authenticate, authController.logout);
+// Qapısız: bitmiş sessiyada da cookie-ləri silə bilsin (bax authController).
+AuthRouter.post("/logout", authController.logout);
 AuthRouter.get("/me", authenticate, authController.getMe);
 AuthRouter.put(
   "/change-password",

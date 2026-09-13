@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server'
 import { buildPath, canonicalPath, localeOfPath, splitLocale } from '@/lib/i18n/routes'
 import { legacyTarget } from '@/lib/legacyRoutes'
 
+// Sessiya göstəriciləri — API girişdə HttpOnly cookie kimi yazır
+// (apps/api/utils/authCookies.js). `__starter_s` tokensizdir və refresh ilə
+// eyni ömrü yaşayır; access cookie 15 dəqiqədə bitdiyi üçün tək ona baxsaq
+// panel hər 15 dəqiqədən bir /login-ə atardı. Bu, yalnız yönləndirmə
+// qapısıdır — əsl yoxlama API-dədir.
+const SESSION_COOKIES = ['__starter_s', '__starter_at']
+
 // URL prefiksli dillər: /en, /ru. AZ default-dur (prefikssiz).
 const PREFIXED = ['en', 'ru']
 
@@ -15,15 +22,15 @@ const PREFIXED = ['en', 'ru']
  */
 export function proxy(request) {
   const { pathname } = request.nextUrl
-  const token = request.cookies.get('token')?.value
+  const hasSession = SESSION_COOKIES.some((name) => request.cookies.get(name)?.value)
 
   // ── Auth guard ──
-  if (pathname.startsWith('/dashboard') && !token) {
+  if (pathname.startsWith('/dashboard') && !hasSession) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('from', pathname)
     return NextResponse.redirect(loginUrl)
   }
-  if ((pathname === '/login' || pathname === '/register') && token) {
+  if ((pathname === '/login' || pathname === '/register') && hasSession) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
   // Admin sahəsi dil idarəçiliyindən kənardır.

@@ -153,21 +153,20 @@ configureStore({
 
 Store `providers.jsx` (Client Component) daxilində qurulur. `authSlice` ilkin state-i **SSR-safe** oxuduğu üçün bu modulun server render/build zamanı import olunması təhlükəsizdir.
 
-### `authSlice.js` — SSR-safe + cookie mirror
+### `authSlice.js` — SSR-safe profil (tokensiz)
 
 Hər browser API girişi `isBrowser()` (`typeof window !== 'undefined'`) ilə qorunur — beləliklə reducer server-də də import oluna bilər:
 
 | Konsept | Detal |
 |---|---|
 | `STORAGE_KEY = 'auth'` | localStorage-dəki persist blob-un açarı. |
-| `TOKEN_COOKIE = 'token'` | Middleware-in oxuduğu cookie adı. |
-| **Cookie mirror** | `setCredentials`/`setTokens` access token-i həm localStorage-a, həm də `token` cookie-sinə (7 gün, `SameSite=Lax`) yazır. `logout` hər ikisini təmizləyir. |
+| **HttpOnly sessiya** | Tokenlər JS-ə görünmür: API `__starter_at` (access), `__starter_rt` (refresh, yalnız `/api/auth`) və tokensiz `__starter_s` göstəricisini yazır. `proxy.js` /dashboard qapısı üçün `__starter_s`-ə baxır. |
 
-Reducer-lər: `setCredentials({ user, tokens })`, `setTokens({ accessToken, refreshToken })`, `updateUser(partial)`, `logout()` — React template ilə eyni, əlavə olaraq cookie sinxronizasiyası.
+Reducer-lər: `setCredentials({ user })`, `updateUser(partial)`, `logout()`. Köhnə versiyanın localStorage tokenləri və `token` cookie-si ilk yükləmədə silinir.
 
 ### `baseApi.js` — reauth
 
-React template ilə eyni məntiq: `baseUrl = ${NEXT_PUBLIC_API_URL}/api`, `prepareHeaders` token əlavə edir, 401-də `POST /auth/refresh` → uğurlu olsa `auth/setTokens` + orijinal sorğu təkrar, alınmasa `auth/logout`. `tagTypes: ['User', 'Post', 'Auth']`. Feature endpoint-ləri `injectEndpoints` ilə `authApi.js` / `postApi.js`-də əlavə olunur.
+`baseUrl = ${NEXT_PUBLIC_API_URL}/api`, `credentials: 'include'` (başlıq qurulmur). 401-də `refreshSession()` (`src/lib/session.js`, mutex — paralel 401-lər tək refresh gözləyir) → uğurlu olsa sorğu təkrarlanır; yalnız sessiya həqiqətən bitəndə (401/403) `auth/logout` + `/login`-ə keçid, şəbəkə xətasında çıxarılmır. `tagTypes: ['User', 'Post', 'Auth']`. Feature endpoint-ləri `injectEndpoints` ilə `authApi.js` / `postApi.js`-də əlavə olunur.
 
 > `NEXT_PUBLIC_*` dəyişənləri Next tərəfindən **build zamanı inline** olunur, ona görə də browser-də əlçatandır.
 

@@ -96,9 +96,9 @@ export const DashboardSidebar = ({ children }) => {
   // göstərmək server/klient HTML fərqi yaradırdı (React #418 — hidratasiya
   // uğursuzluğu, bütün ağac yenidən qurulur).
   //
-  // Store-a toxunmuruq — token dərhal əlçatan qalmalıdır, yoxsa ilk sorğular
-  // Authorization başlığı olmadan gedər. Yalnız GÖSTƏRİLMƏSİNİ mount-dan
-  // sonraya saxlayırıq: ilk render hər iki tərəfdə eyni (boş) olur.
+  // Store-a toxunmuruq — profil (icazələr, socket) dərhal əlçatan qalmalıdır.
+  // Yalnız GÖSTƏRİLMƏSİNİ mount-dan sonraya saxlayırıq: ilk render hər iki
+  // tərəfdə eyni (boş) olur.
   const [mounted, setMounted] = useState(false)
   // eslint-disable-next-line react-hooks/set-state-in-effect -- mount qapısı: localStorage-dan gələn user SSR-də yoxdur, ilk render uyğun olmalıdır (React #418)
   useEffect(() => setMounted(true), [])

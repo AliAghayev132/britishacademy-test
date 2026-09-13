@@ -16,3 +16,4 @@ export {
   i18nPlugin,
 } from "./i18n.js";
 export * from "./roles.js";
+export * from "./authCookies.js";

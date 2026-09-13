@@ -11,7 +11,13 @@ import {
 } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import {
+  asyncHandler,
+  accessTokenOf,
+  refreshTokenOf,
+  setAuthCookies,
+  clearAuthCookies,
+} from "#utils";
 
 // Config
 import { config } from "#config";
@@ -37,9 +43,12 @@ const toUserResponse = (user) => ({
 });
 
 /**
- * Issue tokens for a user and set them as httpOnly cookies.
+ * Issue tokens for a user as httpOnly cookies.
+ *
+ * Tokenlər cavabın GÖVDƏSİNDƏ qaytarılmır — brauzer JS-i onları heç görmür
+ * (audit #2, bax utils/authCookies.js).
  */
-const issueTokens = (res, user, rememberMe = false) => {
+const issueTokens = (req, res, user, rememberMe = false) => {
   const tokens = AuthTokenService.generateTokens(
     { id: user._id, role: user.role, tokenVersion: user.tokenVersion },
     rememberMe,
@@ -49,16 +58,7 @@ const issueTokens = (res, user, rememberMe = false) => {
     ? config.rememberMeMaxAge
     : config.refreshTokenMaxAge;
 
-  res.cookie(config.accessCookieName, tokens.accessToken, {
-    ...config.cookie,
-    maxAge: config.accessTokenMaxAge,
-  });
-  res.cookie(config.refreshCookieName, tokens.refreshToken, {
-    ...config.cookie,
-    maxAge: refreshMaxAge,
-  });
-
-  return tokens;
+  setAuthCookies(req, res, tokens, refreshMaxAge);
 };
 
 /**
@@ -153,12 +153,12 @@ const verifyOTP = asyncHandler(async (req, res) => {
   // Fire-and-forget welcome email (do not block the response on it).
   MailService.sendWelcome(user.email, user.firstName).catch(() => {});
 
-  const tokens = issueTokens(res, user);
+  issueTokens(req, res, user);
 
   res.status(201).json({
     success: true,
     message: "Registration completed successfully",
-    data: { user: toUserResponse(user), tokens },
+    data: { user: toUserResponse(user) },
   });
 });
 
@@ -268,12 +268,12 @@ const login = asyncHandler(async (req, res) => {
 
   await logAction(req, { action: "login", summary: `Giriş: ${user.email}`, actor: user });
 
-  const tokens = issueTokens(res, user, !!rememberMe);
+  issueTokens(req, res, user, !!rememberMe);
 
   res.json({
     success: true,
     message: "Login successful",
-    data: { user: toUserResponse(user), tokens },
+    data: { user: toUserResponse(user) },
   });
 });
 
@@ -284,17 +284,16 @@ const login = asyncHandler(async (req, res) => {
 const refreshToken = asyncHandler(async (req, res) => {
   const user = req.user;
 
-  // Detect rememberMe by inspecting the old refresh token's lifetime.
-  const authHeader = req.header("Authorization");
-  const oldRefreshToken = authHeader?.replace("Bearer ", "");
-  const decoded = AuthTokenService.verifyRefreshToken(oldRefreshToken);
+  // Detect rememberMe by inspecting the old refresh token's lifetime
+  // (authenticateRefreshToken artıq yoxlayıb).
+  const decoded = req.refreshTokenPayload;
   const tokenLifeMs =
     decoded?.exp && decoded?.iat ? (decoded.exp - decoded.iat) * 1000 : 0;
   const rememberMe = tokenLifeMs > 7 * 24 * 60 * 60 * 1000;
 
-  const tokens = issueTokens(res, user, rememberMe);
+  issueTokens(req, res, user, rememberMe);
 
-  res.json({ success: true, data: { tokens } });
+  res.json({ success: true, data: { user: toUserResponse(user) } });
 });
 
 /**
@@ -302,15 +301,23 @@ const refreshToken = asyncHandler(async (req, res) => {
  * POST /api/auth/logout
  */
 const logout = asyncHandler(async (req, res) => {
-  const user = req.user;
+  // `authenticate` olmadan: access token 15 dəqiqədə bitir, o qapı olsaydı
+  // bitmiş sessiyada çıxış 401 alar və cookie-lər brauzerdə qalardı. Ona görə
+  // access və ya refresh tokendən biri etibarlıdırsa sessiya bağlanır,
+  // cookie-lər isə HƏR HALDA silinir.
+  const decoded =
+    AuthTokenService.verifyAccessToken(accessTokenOf(req)) ||
+    AuthTokenService.verifyRefreshToken(refreshTokenOf(req));
+  const user = decoded?.id ? await User.findById(decoded.id) : null;
 
-  user.tokenVersion += 1;
-  await user.save();
+  clearAuthCookies(req, res);
 
-  res.clearCookie(config.accessCookieName, config.cookie);
-  res.clearCookie(config.refreshCookieName, config.cookie);
-
-  await logAction(req, { action: "logout", summary: `Çıxış: ${user.email}` });
+  if (user && decoded.tokenVersion === user.tokenVersion) {
+    user.tokenVersion += 1;
+    await user.save();
+    req.user = user;
+    await logAction(req, { action: "logout", summary: `Çıxış: ${user.email}` });
+  }
 
   res.json({ success: true, message: "Logout successful" });
 });
@@ -363,12 +370,12 @@ const changePassword = asyncHandler(async (req, res) => {
   user.tokenVersion += 1; // invalidate existing sessions
   await user.save();
 
-  const tokens = issueTokens(res, user);
+  // Digər cihazlar çıxarılır, bu brauzer yeni cookie-lərlə davam edir.
+  issueTokens(req, res, user);
 
   res.json({
     success: true,
     message: "Password changed successfully",
-    data: { tokens },
   });
 });
 

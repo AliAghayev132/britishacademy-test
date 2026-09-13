@@ -218,6 +218,19 @@ APP_URL=https://britishacademy.az
 pm2 restart 30002:britishacademy-server --update-env
 ```
 
+### Ehtiyat nüsxə
+
+Baza və `uploads` üçün gündəlik nüsxə skripti server reposundadır:
+`scripts/backup.sh`. Quraşdırma, cron, serverdən kənara köçürmə və bərpa —
+`server/scripts/README.md` → «Ehtiyat nüsxə».
+
+### Admin sessiyası (HttpOnly cookie)
+
+Tokenlər brauzerdə saxlanılmır, API onları HttpOnly cookie kimi yazır. Bu
+dəyişiklik deploy olunanda **hər admin bir dəfə yenidən daxil olmalıdır**.
+API və client eyni vaxtda deploy edilməlidir — yeni client köhnə API ilə
+işləmir (köhnə API cavabı tokeni gövdədə gözləyir).
+
 ### 6. Admin paneldə iki düymə
 
 Developer bölməsində, bu sıra ilə:
