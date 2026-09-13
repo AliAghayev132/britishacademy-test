@@ -1,5 +1,5 @@
 import { mongoDBService } from "#services";
-import { User, OTP, Post } from "#models";
+import { User, OTP } from "#models";
 
 /**
  * Reset Database Script
@@ -20,7 +20,6 @@ const resetDatabase = async () => {
     const models = [
       { name: "User", model: User },
       { name: "OTP", model: OTP },
-      { name: "Post", model: Post },
     ];
 
     console.log(`📊 Collections to clear: ${models.length}\n`);

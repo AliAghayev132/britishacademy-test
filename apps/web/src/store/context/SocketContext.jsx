@@ -1,13 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { useSelector } from 'react-redux'
 import { refreshSession } from '@/lib/session'
@@ -49,8 +42,14 @@ export const SocketProvider = ({ children }) => {
       setIsConnected(true)
       reconnectAttempts.current = 0
     })
-    newSocket.on('disconnect', () => {
+    newSocket.on('disconnect', async (reason) => {
       setIsConnected(false)
+      // Server bağlantını özü kəsəndə (token bitdi, rol/icazə dəyişdi)
+      // socket.io yenidən qoşulmur. Sessiya yenilənir və bir daha cəhd
+      // olunur — handshake icazəni bazadan təzədən yoxlayır.
+      if (reason !== 'io server disconnect') return
+      if (reconnectAttempts.current++ >= MAX_RECONNECT_ATTEMPTS) return
+      if ((await refreshSession()) === 'ok') newSocket.connect()
     })
     newSocket.on('connect_error', async () => {
       reconnectAttempts.current++
@@ -71,51 +70,9 @@ export const SocketProvider = ({ children }) => {
     }
   }, [isAuthenticated, userId, role])
 
-  // ---- Generic `room` helpers (example real-time API) ----
-  const joinRoom = useCallback(
-    (roomId) => {
-      if (socket && isConnected) socket.emit('join:room', roomId)
-    },
-    [socket, isConnected]
-  )
-
-  const leaveRoom = useCallback(
-    (roomId) => {
-      if (socket && isConnected) socket.emit('leave:room', roomId)
-    },
-    [socket, isConnected]
-  )
-
-  const startTyping = useCallback(
-    (roomId) => {
-      if (socket && isConnected) socket.emit('typing:start', roomId)
-    },
-    [socket, isConnected]
-  )
-
-  const stopTyping = useCallback(
-    (roomId) => {
-      if (socket && isConnected) socket.emit('typing:stop', roomId)
-    },
-    [socket, isConnected]
-  )
-
-  const sendMessage = useCallback(
-    (roomId, message) => {
-      if (socket && isConnected) socket.emit('message:new', { roomId, message })
-    },
-    [socket, isConnected]
-  )
-
-  const value = {
-    socket,
-    isConnected,
-    joinRoom,
-    leaveRoom,
-    startTyping,
-    stopTyping,
-    sendMessage,
-  }
+  // Axın yalnız serverdən gəlir (WhatsApp jurnalı, toplu göndəriş) —
+  // otaq/mesaj köməkçiləri şablondan qalmışdı və server onları artıq qəbul etmir.
+  const value = { socket, isConnected }
 
   return (
     <SocketContext.Provider value={value}>{children}</SocketContext.Provider>

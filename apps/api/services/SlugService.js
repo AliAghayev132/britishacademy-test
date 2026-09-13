@@ -71,8 +71,18 @@ class SlugService {
     while (n < 100) {
       const query = { slug };
       if (excludeId) query._id = { $ne: excludeId };
-      const clash = await model.exists(query);
+      const clash = await model.findOne(query).select("_id isDeleted").lean();
       if (!clash) return slug;
+      // Silinmiş sənəd slug-u tutmasın (audit #40): «IELTS» silinib yenidən
+      // yaradılanda ielts-kurslari-2 olurdu — başqa SEO ünvanı. Silinmişin
+      // slug-u kənara çəkilir; updateOne hook-ları işə salmır.
+      if (clash.isDeleted === true) {
+        await model.updateOne(
+          { _id: clash._id },
+          { $set: { slug: `${slug}-silinib-${String(clash._id).slice(-6)}` } },
+        );
+        return slug;
+      }
       n += 1;
       slug = `${base}-${n}`;
     }

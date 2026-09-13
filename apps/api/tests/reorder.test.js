@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import { RESOURCES } from "../controllers/resourceRegistry.js";
+import { planReorder } from "../controllers/adminController.js";
 
 /**
  * TOPLU SIRALAMA (`PATCH /admin/:resource/reorder`).
@@ -51,6 +52,32 @@ describe("sıralanabilən resurslar", () => {
   });
 });
 
+describe("planReorder", () => {
+  const docs = (...orders) => orders.map((order, i) => ({ _id: `id${i}`, order }));
+
+  it("2-ci səhifədə dəyişiklik 1-ci səhifəni qarışdırmır", () => {
+    // Hamısı 0-da (köhnə vəziyyət), səhifə ölçüsü 2: 2-ci səhifədə id3 yuxarı.
+    const all = docs(0, 0, 0, 0);
+    const ops = planReorder(all, ["id3", "id2"]);
+    const order = Object.fromEntries(all.map((d, i) => [d._id, i]));
+    for (const { id, order: o } of ops) order[id] = o;
+    expect(Object.entries(order).sort((a, b) => a[1] - b[1]).map(([id]) => id)).toEqual(["id0", "id1", "id3", "id2"]);
+  });
+
+  it("süzülmüş (qeyri-ardıcıl) elementlər yalnız öz yerlərində dəyişir", () => {
+    const all = docs(0, 1, 2, 3, 4);
+    expect(planReorder(all, ["id3", "id1"])).toEqual([
+      { id: "id3", order: 1 },
+      { id: "id1", order: 3 },
+    ]);
+  });
+
+  it("dəyişməyən sıra yazılmır, naməlum id nəzərə alınmır", () => {
+    expect(planReorder(docs(0, 1, 2), ["id0", "id1"])).toEqual([]);
+    expect(planReorder(docs(0, 1), ["yoxdur"])).toBeNull();
+  });
+});
+
 describe("reorder endpoint-inin qorumaları", () => {
   it("bölmə icazəsi yoxlanılır", () => {
     // Yazma əməliyyatıdır — `denySection` olmasa yalnız «müraciətlər» icazəsi
@@ -66,9 +93,8 @@ describe("reorder endpoint-inin qorumaları", () => {
     expect(reorderFn).toMatch(/isValidObjectId/);
   });
 
-  it("səhifə sürüşməsi (`start`) tətbiq olunur", () => {
-    expect(reorderFn).toMatch(/req\.body\?\.start/);
-    expect(reorderFn).toMatch(/order:\s*start\s*\+\s*i/);
+  it("bütün siyahı yenidən nömrələnir (audit #26)", () => {
+    expect(reorderFn).toMatch(/planReorder\(all, ids\)/);
   });
 
   it("massivin ölçüsü məhduddur", () => {

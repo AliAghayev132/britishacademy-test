@@ -1,5 +1,5 @@
 // ============ EXTERNAL PACKAGES ============
-import { http, cors, helmet, express, fileUpload, compression } from "#lib";
+import { http, cors, helmet, express, compression } from "#lib";
 import { setUploadHeaders } from "#middlewares";
 
 // ============ INTERNAL IMPORTS ============
@@ -7,7 +7,7 @@ import { config, corsConfig, securityConfig } from "#config";
 
 // Services
 import {
-  MailService, WhatsAppService, LibVersion,
+  MailService, WhatsAppService, LibVersion, BulkQueue,
   socketService,
   mongoDBService,
   bootstrapAdmin,
@@ -26,7 +26,6 @@ import {
 // Routes
 import {
   AuthRouter,
-  PostRouter,
   MediaRouter,
   AIRouter,
   PublicRouter,
@@ -37,8 +36,12 @@ import {
 const app = express();
 const httpServer = http.createServer(app);
 
-// Trust reverse proxy (nginx) - required for rate limiting behind a proxy
-app.set("trust proxy", 1);
+// Trust reverse proxy (nginx) - required for rate limiting behind a proxy.
+// "loopback": X-Forwarded-For-a YALNIZ sorğu serverin öz nginx-indən
+// (127.0.0.1/::1) gələndə inanılır. `1` olsaydı, 30002 portuna birbaşa gələn
+// sorğu da başlığı yazıb audit logdakı IP-ni və sürət limitini aldada bilərdi
+// (audit #22).
+app.set("trust proxy", "loopback");
 
 // ============ SETUP FUNCTIONS ============
 
@@ -90,16 +93,8 @@ const setupMiddlewares = (app) => {
   // CORS
   app.use(cors(corsConfig));
 
-  // File upload (must be before body parsers to handle multipart/form-data).
-  // The global ceiling is the largest allowed media type (video); each media
-  // route then enforces its own smaller limit via the uploadLimit middleware.
-  app.use(
-    fileUpload({
-      limits: { fileSize: config.upload.maxVideoSize },
-      abortOnLimit: true,
-      responseOnLimit: "File size limit exceeded",
-    }),
-  );
+  // Multipart fayllar QLOBAL qəbul olunmur — yalnız fayl marşrutlarında,
+  // autentifikasiyadan sonra (bax middlewares/upload.js → receiveFiles).
 
   // Body parsers
   // İctimai yazma marşrutları üçün KİÇİK limit. Əvvəl hər yerdə 10 MB idi —
@@ -110,6 +105,13 @@ const setupMiddlewares = (app) => {
   app.use(
     express.urlencoded({ extended: true, limit: securityConfig.maxPayloadSize }),
   );
+  // Parser tanımadığı tipdə (məs. fayl marşrutu olmayan yerə multipart)
+  // Express 5 req.body-ni undefined saxlayır — controller-lər onu açanda 500
+  // verirdi. Boş obyekt adi validasiya xətasına (400) aparır.
+  app.use((req, _res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+  });
 
   // NoSQL injection sanitization
   app.use(sanitizeInput);
@@ -130,7 +132,6 @@ const setupMiddlewares = (app) => {
  */
 const setupRoutes = (app) => {
   app.use("/api/auth", AuthRouter);
-  app.use("/api/posts", PostRouter);
   app.use("/api/media", MediaRouter);
   app.use("/api/ai", AIRouter);
 
@@ -241,6 +242,15 @@ const validateEnv = () => {
     process.exit(1);
   }
 
+  // Dayandırmır, amma açıq xəbərdarlıq: onsuz Next-in bütün server sorğuları
+  // bir IP-dən gəlib dəqiqədə 100 limitinə düşür (bot axınında menyular boş
+  // qalır, 429/5xx), qısa linklərdə isə ziyarətçinin IP-si itir (audit #36).
+  if (!config.internalApiKey) {
+    console.warn(
+      "⚠️  INTERNAL_API_KEY təyin olunmayıb — client və server .env-lərində EYNİ dəyəri yazın (bax deploy/README.md).",
+    );
+  }
+
   console.log("✅ Environment variables validated");
 };
 
@@ -318,19 +328,51 @@ const startApp = async () => {
 startApp();
 
 // ============ GRACEFUL SHUTDOWN ============
+//
+// Əvvəl yalnız HTTP server və Mongo bağlanırdı; Socket.IO, keep-alive
+// bağlantılar, WhatsApp/Chromium və taymerlər açıq qalırdı. httpServer.close
+// onları gözləyirdi, 10 saniyədən sonra məcburi exit(1) işə düşürdü —
+// hər deploy «çökmə» kimi görünürdü, Chromium isə yetim qalırdı (audit #48).
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let shuttingDown = false;
+
 const shutdown = async (signal) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
   console.log(`\n⚠️  ${signal} received. Shutting down gracefully...`);
-  httpServer.close(async () => {
+
+  const force = setTimeout(() => {
+    console.error("❌ Forced shutdown after timeout");
+    process.exit(1);
+  }, 15000);
+  force.unref();
+
+  try {
+    // 1) Toplu göndəriş: növbəti mesaj göndərilmir, cari mesaj bitsin.
+    if (BulkQueue.cancel()) {
+      console.log(`⏸  Toplu göndəriş dayandırıldı (${BulkQueue.getState().done ?? "?"} / ${BulkQueue.total} göndərilmişdi)`);
+      for (let i = 0; i < 50 && BulkQueue.running; i += 1) await sleep(100);
+    }
+
+    // 2) Yeni sorğu qəbul olunmur; socket-lər bağlanır (io.close HTTP serveri də bağlayır).
+    const serverClosed = socketService.getIO()
+      ? socketService.close()
+      : new Promise((r) => httpServer.close(() => r()));
+    httpServer.closeIdleConnections?.();
+    await Promise.race([serverClosed, sleep(3000)]);
+    httpServer.closeAllConnections?.();
+
+    // 3) Arxa fon işləri.
+    LibVersion.stop();
+    await WhatsAppService.shutdown();
+
     await mongoDBService.disconnect();
     console.log("✅ Server closed");
     process.exit(0);
-  });
-
-  // Force shutdown after 10 seconds
-  setTimeout(() => {
-    console.error("❌ Forced shutdown after timeout");
+  } catch (err) {
+    console.error("❌ Shutdown error:", err);
     process.exit(1);
-  }, 10000);
+  }
 };
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));

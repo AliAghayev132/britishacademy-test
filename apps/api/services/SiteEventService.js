@@ -1,5 +1,7 @@
 // Models
 import { SiteEvent } from "#models";
+// Utils
+import { BAKU_TZ, bakuDay } from "#utils";
 // Local
 import { parseUA, parseSource } from "./LinkTrackingService.js";
 
@@ -14,9 +16,8 @@ import { parseUA, parseSource } from "./LinkTrackingService.js";
 const CLIENT_TYPES = new Set(["visit", "modal_open"]);
 const SID_RE = /^[a-z0-9]{16,40}$/i;
 
-export const BAKU_TZ = "+04:00";
-/** Tarixin Bakı vaxtı ilə günü (YYYY-MM-DD). */
-export const bakuDay = (d) => new Date(d.getTime() + 4 * 3600e3).toISOString().slice(0, 10);
+// Köhnə importlar üçün (bax utils/bakuTime.js).
+export { BAKU_TZ, bakuDay };
 
 /** Yalnız yol — sorğu sətri (utm, gclid, e-poçt linkləri …) saxlanılmır. */
 export function cleanPath(p) {
@@ -50,15 +51,25 @@ export function resolveSource({ referrer, utm = {}, host } = {}) {
 }
 
 /** Sessiyanın ziyarəti — yoxdursa (izləmə gec gəlibsə) yaradılır. */
+/** Eyni sessiyanın paralel upsert-i unikal indeksə dəyir — bu, xəta deyil. */
+const isDuplicate = (err) => err?.code === 11000;
+
 async function sessionVisit(sid, { path, device }) {
   const visit = await SiteEvent.findOne({ sid, type: "visit" }).select("source campaign").lean();
   if (visit) return visit;
   // Huni ardıcıl qalsın: forma açan hər sessiyanın ziyarəti də olmalıdır.
-  await SiteEvent.updateOne(
-    { sid, type: "visit" },
-    { $setOnInsert: { sid, type: "visit", ts: new Date(), path, device, source: "birbaşa" } },
-    { upsert: true },
-  );
+  // YER TUTUCU: ziyarət sorğusu yoldadırsa, çatanda mənbəni yeniləyəcək.
+  try {
+    await SiteEvent.updateOne(
+      { sid, type: "visit" },
+      { $setOnInsert: { sid, type: "visit", ts: new Date(), path, device, source: "birbaşa", placeholder: true } },
+      { upsert: true },
+    );
+  } catch (err) {
+    if (!isDuplicate(err)) throw err;
+    const raced = await SiteEvent.findOne({ sid, type: "visit" }).select("source campaign").lean();
+    if (raced) return raced;
+  }
   return { source: "birbaşa" };
 }
 
@@ -77,23 +88,34 @@ export async function recordClientEvent(body = {}, { ua, host } = {}) {
 
   if (type === "visit") {
     const utm = body.utm && typeof body.utm === "object" ? body.utm : {};
-    // Sessiyada BİR ziyarət: upsert + $setOnInsert — təkrar sorğu heç nə dəyişmir.
-    const r = await SiteEvent.updateOne(
-      { sid, type: "visit" },
-      {
-        $setOnInsert: {
-          sid,
-          type,
-          ts: new Date(),
-          path,
-          device,
-          source: resolveSource({ referrer: body.referrer, utm, host }),
-          campaign: token(utm.campaign, 80) || undefined,
-        },
-      },
-      { upsert: true },
+    const source = resolveSource({ referrer: body.referrer, utm, host });
+    const campaign = token(utm.campaign, 80) || undefined;
+
+    // Forma açılışı ziyarətdən TEZ çatıbsa, «birbaşa» yer tutucusu var —
+    // həqiqi mənbə (Instagram, reklam) onu əvəz edir, həmin sessiyanın artıq
+    // yazılmış hadisələri də düzəlir (audit #41). Əvvəl həqiqi ziyarət heç
+    // nə dəyişmirdi və kampaniya konversiyası «birbaşa»ya yazılırdı.
+    const upgraded = await SiteEvent.updateOne(
+      { sid, type: "visit", placeholder: true },
+      { $set: { path, device, source, campaign }, $unset: { placeholder: "" } },
     );
-    return { ok: true, created: Boolean(r?.upsertedCount) };
+    if (upgraded?.modifiedCount) {
+      await SiteEvent.updateMany({ sid, type: { $ne: "visit" } }, { $set: { source, campaign } });
+      return { ok: true, created: false, upgraded: true };
+    }
+
+    // Sessiyada BİR ziyarət: upsert + $setOnInsert — təkrar sorğu heç nə dəyişmir.
+    try {
+      const r = await SiteEvent.updateOne(
+        { sid, type: "visit" },
+        { $setOnInsert: { sid, type, ts: new Date(), path, device, source, campaign } },
+        { upsert: true },
+      );
+      return { ok: true, created: Boolean(r?.upsertedCount) };
+    } catch (err) {
+      if (isDuplicate(err)) return { ok: true, created: false };
+      throw err;
+    }
   }
 
   const visit = await sessionVisit(sid, { path, device });

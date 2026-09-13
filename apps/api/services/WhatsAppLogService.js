@@ -39,7 +39,7 @@ export function waLog(type, message, { level = "info", meta = null, actor = null
   console.log(`${MARK[level] || "·"} WhatsApp[${type}] ${row.message}`);
 
   // Panelə dərhal — bazaya yazmağı gözləmədən.
-  socketService.emitToRole(["admin", "superadmin", "developer"], "whatsapp:log", row);
+  socketService.emitToSection("whatsapp", "whatsapp:log", row);
 
   WhatsAppLog.create(row).catch((err) => {
     console.error("⚠️ WhatsApp jurnalı yazılmadı:", err.message);

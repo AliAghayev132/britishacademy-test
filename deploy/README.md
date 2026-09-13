@@ -181,7 +181,16 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
 NEXT_PUBLIC_SITE_URL=https://britishacademy.az
 NEXT_PUBLIC_API_URL=https://britishacademy.az
 NEXT_PUBLIC_IMAGE_URL=https://britishacademy.az
+API_INTERNAL_URL=http://127.0.0.1:30002
+INTERNAL_API_KEY=<server .env-dəki ilə EYNİ dəyər>
 ```
+
+**`INTERNAL_API_KEY` məcburidir.** Next-in bütün server sorğuları bir IP-dən
+gəlir; açar olmasa API onları adi ziyarətçi kimi dəqiqədə 100 sorğu ilə
+məhdudlaşdırır — bot axınında menyular boş qalır, səhifələr 5xx verir. Qısa
+linklərdə ziyarətçinin IP-si də yalnız bu açarla ötürülür (unikal kliklər).
+Dəyər yaratmaq: `openssl rand -hex 32`. `NEXT_PUBLIC_` prefiksi YOXDUR —
+brauzerə getməməlidir.
 
 `NEXT_PUBLIC_IMAGE_URL` təyin olunmasa `NEXT_PUBLIC_API_URL`-dən törəyir, ona
 görə məcburi deyil — amma açıq yazmaq sonradan API-ni ayrı subdomenə keçirsən
@@ -212,7 +221,14 @@ qazandırdığı reytinq itər.
 DOMAIN=britishacademy.az
 CLIENT_URL=https://britishacademy.az
 APP_URL=https://britishacademy.az
+INTERNAL_API_KEY=<client .env-dəki ilə EYNİ dəyər>
 ```
+
+API açar olmadan başlayanda logda `⚠️ INTERNAL_API_KEY təyin olunmayıb` yazır.
+
+**nginx konfiqi yenilənib** (`/api/media/` bloku — 250 MB-a qədər video
+yükləmə). Faylı yenidən `scp` ilə göndərib `sudo nginx -t && sudo systemctl
+reload nginx` edin.
 
 ```bash
 pm2 restart 30002:britishacademy-server --update-env

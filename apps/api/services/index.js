@@ -25,7 +25,6 @@ export { importPageContent } from "./PageContentImportService.js";
 export { registerMedia, listFolders } from "./MediaLibraryService.js";
 export { importFlags } from "./FlagImportService.js";
 export { WhatsAppService } from "./WhatsAppService.js";
-export { WhatsAppQueue } from "./WhatsAppQueueService.js";
 export { BulkQueue, normalizeRecipients, renderTemplate, DELAY_LIMITS, resolveDelaySec } from "./BulkQueueService.js";
 export { aiChat, translateFields, resolveAiConfig, tryParseJson, LANG_NAMES } from "./AiService.js";
 export { default as socketService } from "./SocketService.js";

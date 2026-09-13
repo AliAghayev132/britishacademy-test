@@ -160,6 +160,7 @@ function UserForm({ user, onClose }) {
 
 // ── Page ──
 export default function UsersPage() {
+  const me = useSelector((st) => st.auth.user);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(null); // null | "create" | user object
@@ -268,6 +269,11 @@ export default function UsersPage() {
                       </td>
                       <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(u.lastLogin)}</td>
                       <td className="px-4 py-3">
+                        {/* Özündən yüksək/bərabər rütbəli hesab (və özün) burada
+                            idarə olunmur — server də rədd edir (audit #24). */}
+                        {!canAssignRole(me?.role, u.role) || String(u._id) === String(me?.id) ? (
+                          <span className="block text-right text-xs text-gray-400">—</span>
+                        ) : (
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => setPerms(u)}
@@ -283,6 +289,7 @@ export default function UsersPage() {
                             ]}
                           />
                         </div>
+                        )}
                       </td>
                     </tr>
                   );

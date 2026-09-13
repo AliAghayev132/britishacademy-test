@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+// Config
+import { config } from "#config";
 // Models
 import { ShortLink, LinkClick } from "#models";
 
@@ -14,10 +16,16 @@ import { ShortLink, LinkClick } from "#models";
  * verir, GDPR baxımından ən az müdaxiləli variantdır.
  */
 
-/** Duz — serverin gizli açarı + tarix. ENV yoxdursa proses açarı işlənir. */
+/**
+ * Duz — serverin gizli açarı + tarix.
+ *
+ * Əvvəl heç yerdə təyin olunmayan JWT_SECRET-dən gəlirdi, yəni praktikada
+ * hamıya məlum sabit "ba-link" idi (audit #22). Access token açarı canlıda
+ * məcburi və gizlidir.
+ */
 const dailySalt = () => {
   const day = new Date().toISOString().slice(0, 10);
-  return `${process.env.JWT_SECRET || "ba-link"}:${day}`;
+  return `${config.accessSecretKey}:link:${day}`;
 };
 
 /** Ziyarətçi izini geri çevrilməyən heşə çevir. */

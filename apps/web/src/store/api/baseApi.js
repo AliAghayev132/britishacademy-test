@@ -53,10 +53,10 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 // ============ API INSTANCE ============
 // Feature endpoints are attached lazily via injectEndpoints (see authApi.js,
-// postApi.js). Keep tagTypes generic to the starter domain.
+// adminApi.js, publicApi.js).
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Post', 'Auth', 'Site', 'Course', 'Blog', 'Resource'],
+  tagTypes: ['User', 'Auth', 'Site', 'Course', 'Blog', 'Resource'],
   endpoints: () => ({}),
 })

@@ -45,7 +45,10 @@ export async function GET(request, { params }) {
         "user-agent": h.get("user-agent") || "",
         referer: h.get("referer") || "",
         "accept-language": h.get("accept-language") || "",
-        "x-forwarded-for": h.get("x-forwarded-for") || h.get("x-real-ip") || "",
+        // Ziyarətçinin IP-si. X-Real-IP-ni nginx özü qoyur; X-Forwarded-For-un
+        // İLK dəyərini isə ziyarətçi yaza bilər, sonuncunu nginx əlavə edir.
+        // API bu başlığa yalnız x-internal-key ilə inanır (audit #22).
+        "x-client-ip": h.get("x-real-ip") || (h.get("x-forwarded-for") || "").split(",").pop().trim(),
         ...INTERNAL_HEADERS,
       },
     });

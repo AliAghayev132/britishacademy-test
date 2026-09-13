@@ -29,12 +29,19 @@ const siteEventSchema = new Schema(
     device: { type: String, enum: ["mobile", "tablet", "desktop", "other"], default: "other" },
     // lead_submit: müraciətin gəldiyi forma (apply-modal, contact-page …)
     form: { type: String, trim: true },
+    // Ziyarət hadisəsi forma açılışından SONRA çatanda yer tutucu kimi
+    // yaradılır; həqiqi ziyarət gələndə mənbə ilə əvəz olunur.
+    placeholder: { type: Boolean },
   },
   { versionKey: false },
 );
 
 siteEventSchema.index({ type: 1, ts: -1 });
 siteEventSchema.index({ sid: 1, type: 1 });
+// Sessiyada BİR ziyarət — paralel sorğular təkrar ziyarət yaratmasın (audit #41).
+// Açar `{ sid: 1 }`-dir: yuxarıdakı indekslə eyni açar fərqli seçimlərlə
+// MongoDB-də toqquşardı.
+siteEventSchema.index({ sid: 1 }, { unique: true, partialFilterExpression: { type: "visit" } });
 siteEventSchema.index({ ts: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 400 });
 
 export const SiteEvent = Model("SiteEvent", siteEventSchema);

@@ -17,7 +17,7 @@ import { Mail, Lock, GraduationCap, Users, Building2 } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 
 // Store
-import { useLoginMutation } from '@/store/api'
+import { baseApi, useLoginMutation } from '@/store/api'
 import { setCredentials } from '@/store/slices/authSlice'
 
 const HIGHLIGHTS = [
@@ -45,6 +45,8 @@ export default function LoginPage() {
     setError('')
     try {
       const res = await login(form).unwrap()
+      // Əvvəlki istifadəçinin keşlənmiş siyahıları yeni hesaba görünməsin (audit #28).
+      dispatch(baseApi.util.resetApiState())
       dispatch(setCredentials(res.data))
       router.push(safeRedirect(searchParams.get('from')))
     } catch (err) {

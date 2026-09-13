@@ -2,7 +2,7 @@
 
 ## Məqsəd
 
-Bu qovluq Redux-dan kənar, React Context ilə idarə olunan global state-i saxlayır. Hazırda burada `SocketContext.jsx` var: `socket.io-client` bağlantısını qurur, autentifikasiya olunmuş istifadəçi üçün real-time socket yaradır və `joinRoom`, `leaveRoom`, `sendMessage` kimi köməkçiləri context vasitəsilə paylaşır. Redux serializable state üçündür; socket instansı kimi qeyri-serializable, canlı obyektlər isə Context-ə daha uyğundur.
+Bu qovluq Redux-dan kənar, React Context ilə idarə olunan global state-i saxlayır. Hazırda burada `SocketContext.jsx` var: `socket.io-client` bağlantısını qurur, panel istifadəçisi üçün real-time socket yaradır və `{ socket, isConnected }` paylaşır. Axın yalnız serverdən klientə gedir (WhatsApp jurnalı, toplu göndəriş); server bağlantını kəsəndə sessiya yenilənib yenidən qoşulur. Redux serializable state üçündür; socket instansı kimi qeyri-serializable, canlı obyektlər isə Context-ə daha uyğundur.
 
 ## Adlandırma / yazılış konvensiyası
 
@@ -20,7 +20,7 @@ Bu qovluq Redux-dan kənar, React Context ilə idarə olunan global state-i saxl
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null)
-  const value = { socket, isConnected, joinRoom, sendMessage /* ... */ }
+  const value = { socket, isConnected }
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
 }
 

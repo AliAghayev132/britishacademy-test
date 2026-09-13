@@ -1,5 +1,5 @@
 import { rateLimit, ipKeyGenerator } from "#lib";
-import { config } from "#config";
+import { isInternalRequest } from "#utils";
 
 /**
  * Rate limiter for general API requests.
@@ -15,9 +15,7 @@ const apiRateLimiter = rateLimit({
   legacyHeaders: false,
   // Trusted server-to-server calls (Next.js SSR) come from ONE IP and would
   // otherwise exhaust the per-IP budget for every visitor at once.
-  skip: (req) =>
-    Boolean(config.internalApiKey) &&
-    req.headers["x-internal-key"] === config.internalApiKey,
+  skip: isInternalRequest,
 });
 
 /**

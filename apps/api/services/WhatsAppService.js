@@ -33,6 +33,11 @@ const MSG_TIMEOUT = 30_000;
 const INIT_TIMEOUT = 120_000;
 const READY_TIMEOUT = 180_000;   // authenticated → ready watchdog
 const HEALTH_INTERVAL = 60_000;  // dövri vəziyyət yoxlaması
+// Avtomatik bərpa uğursuz olanda növbəti cəhdə qədər gözləmə: 1, 2, 4 … 30 dəq.
+const AUTO_RETRY_BASE = 60_000;
+const AUTO_RETRY_MAX = 30 * 60_000;
+const isChromeMissing = (message) =>
+  /Could not find Chrome|Could not find (Chromium|browser)|Failed to launch the browser/i.test(String(message || ""));
 
 // İstehsalatda WhatsApp Web versiyasını pin etmək üçün (opsional).
 const WA_WEB_VERSION_URL = process.env.WA_WEB_VERSION_URL || null;
@@ -99,6 +104,12 @@ export class WhatsAppService {
   static _healthTimer = null;
   static _lib = null;
   static _pairPhone = null;   // pairing-kod istənilibsə hədəf nömrə
+  // Avtomatik bərpanın geri çəkilməsi (audit #38). Əvvəl Chrome tapılmayanda
+  // sağlamlıq taymeri hər 60 s yenidən cəhd edib 3 jurnal sətri yazırdı —
+  // gündə ~4300 qeyd, həqiqi hadisələr itirdi.
+  static _autoFailures = 0;
+  static _nextAutoAt = 0;
+  static _autoBlocked = null; // səbəb — əl ilə «Qoşul» basılana qədər avtomatik cəhd yoxdur
 
   // ── Kitabxana yüklənməsi (opsional asılılıq) ──
 
@@ -190,7 +201,7 @@ export class WhatsAppService {
    * @param {{ pairPhone?: string }} [opts] — verilsə QR əvəzinə telefon nömrəsi
    *   üçün 8 rəqəmli qoşulma kodu istənilir.
    */
-  static async init({ pairPhone } = {}) {
+  static async init({ pairPhone, auto = false } = {}) {
     const lib = await this._load();
     if (!lib) {
       this.lastError = "whatsapp-web.js quraşdırılmayıb (npm i whatsapp-web.js qrcode)";
@@ -203,6 +214,13 @@ export class WhatsAppService {
       meta: { pairPhone: pairPhone || null, hasSession: this.hasSession },
     });
     this.isInitializing = true;
+    this._auto = auto;
+    // Əl ilə qoşulma geri çəkilməni sıfırlayır.
+    if (!auto) {
+      this._autoFailures = 0;
+      this._nextAutoAt = 0;
+      this._autoBlocked = null;
+    }
     this.lastError = null;
     this._authOk = false;
     this.qrCode = null;
@@ -301,6 +319,9 @@ export class WhatsAppService {
         this.pairingCode = null;
         this.lastError = null;
         this.readyAt = new Date();
+        this._autoFailures = 0;
+        this._nextAutoAt = 0;
+        this._autoBlocked = null;
         this.info = this.client?.info || null;
         this.state = lib.WAState.CONNECTED;
         waLog("ready", `Hazırdır: ${this.info?.pushname || "?"} (+${this.info?.wid?.user || "?"})`, {
@@ -364,7 +385,23 @@ export class WhatsAppService {
       this.lastError = explainChromeError(error.message);
       this.isInitializing = false;
       this._authOk = false;
-      waLog("error", this.lastError, { level: "error", meta: { raw: error.message } });
+      let note = "";
+      if (this._auto) {
+        this._autoFailures += 1;
+        if (isChromeMissing(error.message)) {
+          // Chrome özü-özünə yaranmır — dəqiqədə bir yoxlamaq mənasızdır.
+          this._autoBlocked = "chrome";
+          note = " Avtomatik cəhdlər dayandırıldı — Chrome quraşdırıldıqdan sonra paneldən «Qoşul» basın.";
+        } else {
+          const wait = Math.min(AUTO_RETRY_BASE * 2 ** (this._autoFailures - 1), AUTO_RETRY_MAX);
+          this._nextAutoAt = Date.now() + wait;
+          note = ` Növbəti avtomatik cəhd ${Math.round(wait / 60_000)} dəq sonra.`;
+        }
+      }
+      waLog("error", this.lastError + note, {
+        level: "error",
+        meta: { raw: error.message, autoFailures: this._autoFailures, nextAutoAt: this._nextAutoAt || null },
+      });
       await this._destroyClient();
     }
   }
@@ -376,9 +413,15 @@ export class WhatsAppService {
   static async resumeIfSession() {
     const lib = await this._load();
     if (!lib || !this.hasSession || this.client || this.isInitializing) return;
+    if (!this._autoAllowed()) return;
     waLog("session", "Saxlanmış sessiya tapıldı — avtomatik bərpa edilir");
-    this.init().catch(() => {});
+    this.init({ auto: true }).catch(() => {});
     this.startHealthWatch();
+  }
+
+  /** Avtomatik cəhd indi edilə bilərmi (geri çəkilmə / daimi xəta)? */
+  static _autoAllowed() {
+    return !this._autoBlocked && Date.now() >= this._nextAutoAt;
   }
 
   /**
@@ -398,17 +441,25 @@ export class WhatsAppService {
         const state = await this.client.getState().catch(() => null);
         this.state = state;
         if (state && state !== "CONNECTED") {
+          if (!this._autoAllowed()) return;
           waLog("health", `Sağlamlıq yoxlaması: vəziyyət ${state} — yenidən qoşulur`, {
             level: "warn", meta: { state },
           });
           this.isReady = false;
           await this._destroyClient();
-          await this.init();
+          await this.init({ auto: true });
         }
       } catch { /* növbəti dövrədə yenidən yoxlanılacaq */ }
     }, HEALTH_INTERVAL);
     // Node prosesinin bağlanmasına mane olmasın.
     this._healthTimer.unref?.();
+  }
+
+  /** Proses dayananda: taymerləri dayandır, Chromium-u bağla, sessiyanı saxla. */
+  static async shutdown() {
+    this._clearTimers();
+    this.stopHealthWatch();
+    await this._destroyClient().catch(() => {});
   }
 
   static stopHealthWatch() {

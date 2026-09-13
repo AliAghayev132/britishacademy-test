@@ -22,6 +22,21 @@ import {
 // Data
 import { LEGACY_SLUG_OF } from "../data/slugAliases.mjs";
 
+/**
+ * Silinmiş və ya deaktiv edilmiş əlaqəli sənəd populate-da çıxmasın
+ * (audit #40). Əvvəl kurs səhifəsində silinmiş filialın qiyməti, müəllim
+ * kartında silinmiş kurs, cədvəldə silinmiş müəllim görünürdü.
+ */
+const LIVE = { isActive: true, isDeleted: false };
+const live = (path, select) => ({ path, select, match: LIVE });
+
+/** populate match-dən sonra istinadı boş qalan sətirləri at (POJO qaytarır). */
+const dropDangling = (doc, field, ref) => {
+  const obj = typeof doc?.toJSON === "function" ? doc.toJSON() : doc;
+  if (obj && Array.isArray(obj[field])) obj[field] = obj[field].filter((row) => row?.[ref]);
+  return obj;
+};
+
 /* ---------------- Site chrome ---------------- */
 
 /**
@@ -143,8 +158,10 @@ const getCategoryTree = asyncHandler(async (_req, res) => {
 const listCourses = asyncHandler(async (req, res) => {
   const filter = {};
   if (req.query.category) {
-    const cat = await CourseCategory.findOne({ slug: req.query.category });
-    if (cat) filter.category = cat._id;
+    const cat = await CourseCategory.findOne({ slug: req.query.category, isDeleted: false });
+    // Naməlum kateqoriya BÜTÜN kursları qaytarırdı (audit #40).
+    if (!cat) return res.json({ success: true, data: { courses: [] } });
+    filter.category = cat._id;
   }
   const courses = await Course.findPublic(filter).populate("category").select(CARD_EXCLUDE);
   res.json({ success: true, data: { courses } });
@@ -158,7 +175,7 @@ const listCourses = asyncHandler(async (req, res) => {
 const findCourse = (slug) =>
   Course.findOne({ slug, isActive: true, isDeleted: false })
     .populate("category")
-    .populate("pricing.branch");
+    .populate(live("pricing.branch"));
 
 /**
  * Siyahı və kart sorğularında QAYTARILMAYAN ağır sahələr.
@@ -193,8 +210,8 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
     isActive: true,
     isDeleted: false,
   })
-    .populate("teacher", "fullName slug title photo color")
-    .populate("branch", "name slug");
+    .populate(live("teacher", "fullName slug title photo color"))
+    .populate(live("branch", "name slug"));
 
   const teachersByBranch = {};
   for (const g of groups) {
@@ -215,7 +232,7 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: {
-      course,
+      course: dropDangling(course, "pricing", "branch"),
       teachersByBranch: Object.values(teachersByBranch),
       related,
     },
@@ -267,11 +284,14 @@ const listTeachers = asyncHandler(async (req, res) => {
   // assignments.branch — kartda filial adlarını göstərmək və axtarışda
   // kurs/filial adlarına görə tapmaq üçün.
   const teachers = await Teacher.findPublic(filter)
-    .populate("branches", "name slug")
-    .populate("courses", "title slug")
-    .populate("assignments.branch", "name slug")
-    .populate("assignments.courses", "title slug");
-  res.json({ success: true, data: { teachers } });
+    .populate(live("branches", "name slug"))
+    .populate(live("courses", "title slug"))
+    .populate(live("assignments.branch", "name slug"))
+    .populate(live("assignments.courses", "title slug"));
+  res.json({
+    success: true,
+    data: { teachers: teachers.map((t) => dropDangling(t, "assignments", "branch")) },
+  });
 });
 
 const getTeacherBySlug = asyncHandler(async (req, res) => {
@@ -280,11 +300,11 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
     isActive: true,
     isDeleted: false,
   })
-    .populate("branches", "name slug")
-    .populate("courses", "title slug")
+    .populate(live("branches", "name slug"))
+    .populate(live("courses", "title slug"))
     // Filial üzrə dərs təyinatları — müəllim səhifəsinin əsas bölməsi.
-    .populate("assignments.branch", "name slug")
-    .populate("assignments.courses", "title slug");
+    .populate(live("assignments.branch", "name slug"))
+    .populate(live("assignments.courses", "title slug"));
   if (!teacher) {
     return res.status(404).json({ success: false, message: "Müəllim tapılmadı" });
   }
@@ -300,10 +320,16 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
         isActive: true,
         isDeleted: false,
       })
-        .populate("course", "title slug")
-        .populate("branch", "name slug");
+        .populate(live("course", "title slug"))
+        .populate(live("branch", "name slug"));
 
-  res.json({ success: true, data: { teacher, groups } });
+  res.json({
+    success: true,
+    data: {
+      teacher: dropDangling(teacher, "assignments", "branch"),
+      groups: groups.filter((g) => g.course && g.branch),
+    },
+  });
 });
 
 /* ---------------- Testimonials ---------------- */
@@ -363,20 +389,24 @@ const getProjectBySlug = asyncHandler(async (req, res) => {
 /** GET /api/schedule?course=<slug>&branch=<slug> */
 const listSchedule = asyncHandler(async (req, res) => {
   const filter = { isActive: true, isDeleted: false };
+  // Naməlum kurs/filial süzgəci bütün cədvəli qaytarırdı (audit #40).
+  const none = () => res.json({ success: true, data: { groups: [] } });
   if (req.query.course) {
-    const c = await Course.findOne({ slug: req.query.course });
-    if (c) filter.course = c._id;
+    const c = await Course.findOne({ slug: req.query.course, ...LIVE });
+    if (!c) return none();
+    filter.course = c._id;
   }
   if (req.query.branch) {
-    const b = await Branch.findOne({ slug: req.query.branch });
-    if (b) filter.branch = b._id;
+    const b = await Branch.findOne({ slug: req.query.branch, ...LIVE });
+    if (!b) return none();
+    filter.branch = b._id;
   }
   const groups = await CourseGroup.find(filter)
     .sort({ startDate: 1 })
-    .populate("course", "title slug")
-    .populate("branch", "name slug")
-    .populate("teacher", "fullName slug title photo color");
-  res.json({ success: true, data: { groups } });
+    .populate(live("course", "title slug"))
+    .populate(live("branch", "name slug"))
+    .populate(live("teacher", "fullName slug title photo color"));
+  res.json({ success: true, data: { groups: groups.filter((g) => g.course && g.branch) } });
 });
 
 /* ---------------- Blog ---------------- */
@@ -388,8 +418,9 @@ const listBlog = asyncHandler(async (req, res) => {
 
   const filter = { status: "published", isDeleted: false };
   if (req.query.category) {
-    const cat = await BlogCategory.findOne({ slug: req.query.category });
-    if (cat) filter.category = cat._id;
+    const cat = await BlogCategory.findOne({ slug: req.query.category, isDeleted: false });
+    // Naməlum kateqoriya əvvəl bütün yazıları göstərirdi (audit #40).
+    filter.category = cat ? cat._id : { $in: [] };
   }
 
   const [posts, total, categories] = await Promise.all([

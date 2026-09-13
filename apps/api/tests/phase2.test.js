@@ -93,7 +93,8 @@ describe("#9 müraciət əhatəsi", () => {
     expect(ac).toMatch(/applyLeadScope\(leadFilter, req, "leads"\)/);
     expect(read("controllers/leadController.js")).toMatch(/if \(!leadInReach\(req\.user, lead\)\)/);
     expect(read("controllers/bulkController.js")).toMatch(/applyLeadScope\(filter, req, "leads"\)/);
-    expect(read("controllers/whatsappController.js")).toMatch(/applyLeadScope\(filter, req, "leads"\)/);
+    // Köhnə /whatsapp/bulk silinib (audit #42) — toplu göndəriş yalnız bulkController-dədir.
+    expect(read("controllers/whatsappController.js")).not.toMatch(/const bulk = asyncHandler/);
   });
 });
 

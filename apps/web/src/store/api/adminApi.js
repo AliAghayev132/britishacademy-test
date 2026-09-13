@@ -131,15 +131,6 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/whatsapp/send-media", method: "POST", body }),
       invalidatesTags: [{ type: "Site", id: "whatsapp-messages" }],
     }),
-    whatsappBulk: builder.mutation({
-      // { template, phones? | leadStatus?, skipDuplicates? }
-      query: (body) => ({ url: "/admin/whatsapp/bulk", method: "POST", body }),
-      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
-    }),
-    whatsappBulkCancel: builder.mutation({
-      query: () => ({ url: "/admin/whatsapp/bulk/cancel", method: "POST" }),
-      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
-    }),
     whatsappSend: builder.mutation({
       // { phone, message, lead?, vars? }
       query: (body) => ({ url: "/admin/whatsapp/send", method: "POST", body }),
@@ -367,8 +358,6 @@ export const {
   useWhatsappLogsQuery,
   useWhatsappClearLogsMutation,
   useWhatsappCheckVersionMutation,
-  useWhatsappBulkMutation,
-  useWhatsappBulkCancelMutation,
   useWhatsappDisconnectMutation,
   useWhatsappLogoutMutation,
   useAdminUsersQuery,

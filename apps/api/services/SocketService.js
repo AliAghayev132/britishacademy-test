@@ -1,35 +1,37 @@
 import { SocketServer, jwt } from "#lib";
 import { config, corsConfig } from "#config";
-import { readCookie } from "#utils";
+import { adminRoles } from "#constants";
+import { User } from "#models";
+import { readCookie, canAccessSection } from "#utils";
 
 /**
  * SocketService (singleton)
  *
- * Generic real-time layer built around a "room" concept. A room can be
- * anything in your domain (a chat thread, a document, a post's comments, ...).
- * Clients authenticate with their access token, then join/leave rooms and
- * exchange messages / typing indicators.
+ * Panelə canlı hadisələr: WhatsApp jurnalı və toplu göndərişin gedişatı.
+ * Axın YALNIZ serverdən klientə gedir.
  *
- * Events handled (client -> server):
- *   join:room      (roomId)
- *   leave:room     (roomId)
- *   typing:start   (roomId)
- *   typing:stop    (roomId)
- *   message:new    ({ roomId, message })
+ * TƏHLÜKƏSİZLİK (audit #21). Əvvəl:
+ *  - handshake yalnız tokenin imzasını yoxlayırdı — çıxış etmiş, bloklanmış
+ *    və ya rütbəsi endirilmiş admin socket açıq qaldıqca alıcıların telefon
+ *    nömrələrini almağa davam edirdi;
+ *  - hadisə tokendəki (köhnə) rola görə göndərilirdi, bölmə icazəsinə yox;
+ *  - istənilən giriş etmiş istifadəçi istənilən «otağa» qoşulub orada mesaj
+ *    yaya bilirdi (şablondan qalan, heç yerdə işlədilməyən relay).
  *
- * Events emitted (server -> client):
- *   user:joined, user:left, user:typing, user:stopped_typing, message:new
+ * İndi:
+ *  - handshake-də istifadəçi bazadan oxunur (status, tokenVersion, rol);
+ *  - bağlantı access tokenin bitdiyi anda kəsilir — klient sessiyanı yeniləyib
+ *    yenidən qoşulur, yəni icazələr ən geci 15 dəqiqədə bir yoxlanılır;
+ *  - istifadəçi dəyişdiriləndə, silinəndə və ya çıxış edəndə socket-ləri
+ *    dərhal kəsilir (disconnectUser);
+ *  - hadisə bölmə icazəsi olanlara göndərilir (emitToSection);
+ *  - klientdən gələn hadisə dinlənilmir.
  */
 class SocketService {
   constructor() {
     this.io = null;
-    this.connectedUsers = new Map(); // Map<roomId, Set<socketId>>
-    this.socketToUser = new Map(); // Map<socketId, { id, roomId }>
   }
 
-  /**
-   * Initialize Socket.IO with the HTTP server
-   */
   init(httpServer) {
     this.io = new SocketServer(httpServer, {
       cors: {
@@ -41,15 +43,14 @@ class SocketService {
       pingInterval: 25000,
     });
 
-    this.io.use(this.authMiddleware.bind(this));
-    this.setupEventHandlers();
+    this.io.use((socket, next) => this.authMiddleware(socket, next));
+    this.io.on("connection", (socket) => this.onConnection(socket));
 
     return this.io;
   }
 
   /**
-   * Authentication middleware for Socket.IO
-   * Verifies the access token passed in the handshake.
+   * Handshake: token + bazadakı istifadəçi.
    */
   async authMiddleware(socket, next) {
     try {
@@ -64,159 +65,77 @@ class SocketService {
       }
 
       const decoded = jwt.verify(token, config.accessSecretKey);
+      const user = await User.findById(decoded.id)
+        .select("role status isDeleted tokenVersion permissions")
+        .lean();
 
-      socket.userId = decoded.id;
-      socket.userRole = decoded.role;
-      socket.user = decoded;
+      if (
+        !user ||
+        user.isDeleted ||
+        user.status !== "active" ||
+        user.tokenVersion !== decoded.tokenVersion ||
+        !adminRoles.includes(user.role)
+      ) {
+        return next(new Error("Invalid token"));
+      }
 
+      socket.data.user = {
+        id: String(user._id),
+        role: user.role,
+        permissions: user.permissions || [],
+      };
+      socket.data.exp = decoded.exp;
       next();
     } catch (_error) {
       return next(new Error("Invalid token"));
     }
   }
 
-  /**
-   * Register Socket.IO event handlers
-   */
-  setupEventHandlers() {
-    this.io.on("connection", (socket) => {
-      // Join a room
-      socket.on("join:room", (roomId) => {
-        this.joinRoom(socket, roomId);
-      });
-
-      // Leave a room
-      socket.on("leave:room", (roomId) => {
-        this.leaveRoom(socket, roomId);
-      });
-
-      // Typing indicators
-      socket.on("typing:start", (roomId) => {
-        socket.to(`room:${roomId}`).emit("user:typing", {
-          roomId,
-          userId: socket.userId,
-        });
-      });
-
-      socket.on("typing:stop", (roomId) => {
-        socket.to(`room:${roomId}`).emit("user:stopped_typing", {
-          roomId,
-          userId: socket.userId,
-        });
-      });
-
-      // New message broadcast to a room
-      socket.on("message:new", ({ roomId, message }) => {
-        this.io.to(`room:${roomId}`).emit("message:new", {
-          roomId,
-          message,
-          userId: socket.userId,
-          sentAt: new Date(),
-        });
-      });
-
-      // Disconnect
-      socket.on("disconnect", () => {
-        this.handleDisconnect(socket);
-      });
-    });
+  onConnection(socket) {
+    // Token bitəndə bağlantı da bitir. Klient `io server disconnect` alıb
+    // sessiyanı yeniləyir və yenidən qoşulur — handshake yenə bazaya baxır.
+    const ms = (socket.data.exp || 0) * 1000 - Date.now();
+    const timer = setTimeout(() => socket.disconnect(true), Math.max(ms, 0));
+    timer.unref?.();
+    socket.on("disconnect", () => clearTimeout(timer));
   }
 
   /**
-   * Join a room and track membership
+   * Hadisəni həmin bölməni görə bilən qoşulmuş istifadəçilərə göndər.
    */
-  joinRoom(socket, roomId) {
-    const roomName = `room:${roomId}`;
-    socket.join(roomName);
-
-    if (!this.connectedUsers.has(roomId)) {
-      this.connectedUsers.set(roomId, new Set());
-    }
-    this.connectedUsers.get(roomId).add(socket.id);
-
-    this.socketToUser.set(socket.id, { id: socket.userId, roomId });
-
-    socket.to(roomName).emit("user:joined", {
-      roomId,
-      userId: socket.userId,
-    });
-  }
-
-  /**
-   * Leave a room and clean up tracking
-   */
-  leaveRoom(socket, roomId) {
-    const roomName = `room:${roomId}`;
-    socket.leave(roomName);
-
-    if (this.connectedUsers.has(roomId)) {
-      this.connectedUsers.get(roomId).delete(socket.id);
-      if (this.connectedUsers.get(roomId).size === 0) {
-        this.connectedUsers.delete(roomId);
-      }
-    }
-    this.socketToUser.delete(socket.id);
-
-    socket.to(roomName).emit("user:left", {
-      roomId,
-      userId: socket.userId,
-    });
-  }
-
-  /**
-   * Handle socket disconnect
-   */
-  handleDisconnect(socket) {
-    const info = this.socketToUser.get(socket.id);
-    if (info) {
-      this.leaveRoom(socket, info.roomId);
-    }
-  }
-
-  /**
-   * Emit an event to everyone in a room (from server-side code)
-   */
-  emitToRoom(roomId, event, data) {
+  emitToSection(section, event, data) {
     if (!this.io) return;
-    this.io.to(`room:${roomId}`).emit(event, data);
-  }
-
-  /**
-   * Emit an event to every connected socket whose role is in `roles`.
-   *
-   * NİYƏ OTAQ DEYİL: `join:room` istənilən autentifikasiya olunmuş
-   * istifadəçidən qəbul olunur — adi «user» rolu da özünü admin otağına yaza
-   * bilərdi. Toplu göndərişin canlı axını alıcıların telefon nömrələrini
-   * daşıyır, ona görə rol SERVERDƏ yoxlanılır.
-   */
-  emitToRole(roles, event, data) {
-    if (!this.io) return;
-    const allowed = new Set(roles);
     for (const socket of this.io.sockets.sockets.values()) {
-      if (allowed.has(socket.userRole)) socket.emit(event, data);
-    }
-  }
-
-  /**
-   * Emit an event to a specific connected user
-   */
-  emitToUser(userId, event, data) {
-    if (!this.io) return;
-    for (const [socketId, info] of this.socketToUser.entries()) {
-      if (info.id === userId) {
-        this.io.to(socketId).emit(event, data);
+      if (socket.data.user && canAccessSection(socket.data.user, section)) {
+        socket.emit(event, data);
       }
     }
   }
 
   /**
-   * Get the raw IO instance
+   * İstifadəçinin bütün socket-lərini kəs (rol/icazə dəyişikliyi, silinmə,
+   * çıxış). Hələ də səlahiyyəti varsa klient özü yenidən qoşulur.
    */
+  disconnectUser(userId) {
+    if (!this.io || !userId) return;
+    const id = String(userId);
+    for (const socket of this.io.sockets.sockets.values()) {
+      if (socket.data.user?.id === id) socket.disconnect(true);
+    }
+  }
+
+  /** Bütün bağlantıları bağla (prosesin dayanması). */
+  close() {
+    return new Promise((resolve) => {
+      if (!this.io) return resolve();
+      this.io.close(() => resolve());
+    });
+  }
+
   getIO() {
     return this.io;
   }
 }
 
-// Export singleton instance
 const socketService = new SocketService();
 export default socketService;

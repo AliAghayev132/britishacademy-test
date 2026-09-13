@@ -2,11 +2,10 @@
 // Bütün marşrutlar /api/admin/whatsapp/* altındadır (router səviyyəsində auth).
 
 // Models
-import { WhatsAppMessage, Lead } from "#models";
-import { applyLeadAccess, applyLeadScope } from "./adminController.js";
+import { WhatsAppMessage } from "#models";
 
 // Services
-import { WhatsAppService, WhatsAppQueue, renderTemplate, logAction, listWaLogs, waLogSummary, clearWaLogs, waLog, LibVersion } from "#services";
+import { WhatsAppService, BulkQueue, renderTemplate, logAction, listWaLogs, waLogSummary, clearWaLogs, waLog, LibVersion } from "#services";
 
 // Utils
 import { asyncHandler, hasRole } from "#utils";
@@ -37,7 +36,7 @@ const getStatus = asyncHandler(async (_req, res) => {
     success: true,
     data: {
       ...WhatsAppService.getStatus(),
-      queue: WhatsAppQueue.getState(),
+      queue: BulkQueue.getState(),
       version,
       logSummary: summary,
     },
@@ -182,66 +181,12 @@ const sendMedia = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Fayl göndərildi" });
 });
 
-/**
- * POST /api/admin/whatsapp/bulk
- * body: { template, phones?: string[], leadStatus?: string, skipDuplicates?: boolean }
- *
- * `leadStatus` verilsə həmin statusdakı müraciətlərin nömrələrinə göndərilir və
- * mesajda {{ad}} / {{telefon}} dəyişənləri müraciət məlumatı ilə doldurulur.
+/*
+ * Köhnə POST /whatsapp/bulk və /whatsapp/bulk/cancel silindi (audit #42).
+ * Onların ayrıca «işləyir» bayrağı vardı: yeni /bulk növbəsi ilə eyni anda
+ * işləyib mesajlar arası gecikməni iki dəfə azaldırdı — nömrənin bloklanma
+ * riski. Toplu göndəriş yalnız bulkController (BulkQueue) ilə gedir.
  */
-const bulk = asyncHandler(async (req, res) => {
-  // Kütləvi göndəriş şirkət nömrəsinin bloklanmasına səbəb ola bilər — yalnız admin.
-  if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
-  }
-  const { template, phones, leadStatus, skipDuplicates = true } = req.body || {};
-  if (!template?.trim()) {
-    return res.status(400).json({ success: false, message: "Mesaj mətni məcburidir" });
-  }
-
-  let recipients = [];
-  if (leadStatus) {
-    const filter = { isDeleted: false };
-    if (leadStatus !== "all") filter.status = leadStatus;
-    // Müraciətlər siyahısı ilə eyni sərhəd (bölmə + filial/ölkə əhatəsi).
-    applyLeadAccess(filter, req, "leads");
-    applyLeadScope(filter, req, "leads");
-    const leads = await Lead.find(filter).select("name phone").limit(1000).lean();
-    recipients = leads
-      .filter((l) => l.phone)
-      .map((l) => ({ phone: l.phone, lead: l._id, vars: { ad: l.name || "", telefon: l.phone } }));
-  } else if (Array.isArray(phones)) {
-    recipients = phones.filter(Boolean).map((p) => ({ phone: p, vars: { telefon: p } }));
-  }
-
-  if (!recipients.length) {
-    return res.status(400).json({ success: false, message: "Göndəriləcək nömrə tapılmadı" });
-  }
-
-  try {
-    const state = await WhatsAppQueue.start({
-      recipients,
-      template,
-      source: leadStatus ? "lead" : "bulk",
-      sentBy: req.user?._id,
-      skipDuplicates,
-    });
-    await logAction(req, {
-      action: "settings", resource: "whatsapp",
-      summary: `WhatsApp toplu göndəriş başladı: ${state.total} nömrə`,
-    });
-    res.json({ success: true, message: `Toplu göndəriş başladı — ${state.total} nömrə`, data: state });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-});
-
-/** POST /api/admin/whatsapp/bulk/cancel */
-const cancelBulk = asyncHandler(async (req, res) => {
-  const ok = WhatsAppQueue.cancel();
-  if (ok) await logAction(req, { action: "settings", resource: "whatsapp", summary: "WhatsApp toplu göndəriş dayandırıldı" });
-  res.json({ success: true, message: ok ? "Dayandırılır…" : "İşləyən göndəriş yoxdur" });
-});
 
 /** GET /api/admin/whatsapp/messages?page=&limit=&status=&phone= — göndəriş tarixçəsi */
 const listMessages = asyncHandler(async (req, res) => {
@@ -289,4 +234,4 @@ const logout = asyncHandler(async (req, res) => {
 
 export {
   getStatus, init, checkNumber, send, sendMedia,
-  bulk, cancelBulk, listMessages, disconnect, logout, getLogs, removeLogs, checkVersion };
+  listMessages, disconnect, logout, getLogs, removeLogs, checkVersion };

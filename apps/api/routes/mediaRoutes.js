@@ -9,7 +9,7 @@ import { mediaController } from "#controllers";
 import { SiteSetting } from "#models";
 
 // Middlewares
-import { authenticate, requireRole, uploadLimit } from "#middlewares";
+import { authenticate, requireRole, uploadLimit, receiveFiles } from "#middlewares";
 
 /**
  * Şəkil limiti admin panelindən idarə olunur (Tənzimləmələr → SEO/Texniki →
@@ -42,16 +42,19 @@ MediaRouter.get("/folders", mediaController.folders);
 // (fayl FileService-ə çatmazdan əvvəl).
 MediaRouter.post(
   "/upload-image",
+  receiveFiles,
   uploadLimit(resolveImageLimit),
   mediaController.uploadImage,
 );
 MediaRouter.post(
   "/upload-video",
+  receiveFiles,
   uploadLimit(config.upload.maxVideoSize),
   mediaController.uploadVideo,
 );
 MediaRouter.post(
   "/upload-document",
+  receiveFiles,
   uploadLimit(config.upload.maxDocSize),
   mediaController.uploadDocument,
 );

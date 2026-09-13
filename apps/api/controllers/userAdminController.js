@@ -4,11 +4,11 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler, fuzzyRegex, hasRole, cleanIds, isObjectId } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, cleanIds, isObjectId, dateRange } from "#utils";
 import { initialPermissions } from "../utils/roles.js";
 import { canAssignRole } from "#middlewares";
 import { User, AuditLog } from "#models";
-import { HashService, logAction, diffDocs } from "#services";
+import { HashService, logAction, diffDocs, socketService } from "#services";
 import { adminRoles, adminSections } from "#constants";
 
 /**
@@ -175,6 +175,9 @@ const updateUser = asyncHandler(async (req, res) => {
     user.tokenVersion += 1; // force re-login everywhere on password change
   }
   await user.save();
+  // Açıq socket köhnə rol/icazə ilə qalmasın — klient yenidən qoşulanda
+  // handshake yeni vəziyyəti oxuyur (audit #21).
+  socketService.disconnectUser(user._id);
   // Rol və icazə dəyişikliyi jurnalın ƏN VACİB hissəsidir — kimin nə vaxt
   // hansı səlahiyyəti aldığı buradan görünür. Parol dəyişikliyi də qeydə
   // düşür, amma DƏYƏRİ yox (diffDocs onu maskalayır).
@@ -202,6 +205,13 @@ const removeUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
 
+  // Yaratma və yeniləmədəki qayda silmədə də: özündən yüksək və ya bərabər
+  // rütbəli hesab silinmir. Əvvəl superadmin developer-i və digər
+  // superadmin-ləri silə bilirdi (audit #24).
+  if (!canAssignRole(req.user?.role, user.role)) {
+    return res.status(403).json({ success: false, message: "Bu istifadəçini silməyə icazəniz yoxdur" });
+  }
+
   // Panelə girişi olan SONUNCU hesabı silməyə imkan vermirik. Əvvəl yalnız
   // "admin" rolu sayılırdı — superadmin/developer varsa admin silinə bilmirdi,
   // əksinə sonuncu developer isə asanlıqla silinirdi.
@@ -220,6 +230,7 @@ const removeUser = asyncHandler(async (req, res) => {
   }
   user.isDeleted = true;
   await user.save();
+  socketService.disconnectUser(user._id);
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi silindi: ${user.email}` });
   res.json({ success: true, message: "Silindi" });
 });
@@ -243,18 +254,9 @@ const listLogs = asyncHandler(async (req, res) => {
   if (req.query.status) filter.status = req.query.status;
   if (isObjectId(req.query.actor)) filter["actor.id"] = req.query.actor;
 
-  // Tarix aralığı. `to` GÜNÜN SONUNA qədər götürülür — əks halda «1-dən
-  // 5-ə qədər» seçəndə 5-i günü ümumiyyətlə düşmürdü.
-  const range = {};
-  if (req.query.from) {
-    const d = new Date(req.query.from);
-    if (!Number.isNaN(d.getTime())) range.$gte = d;
-  }
-  if (req.query.to) {
-    const d = new Date(req.query.to);
-    if (!Number.isNaN(d.getTime())) range.$lte = new Date(d.setHours(23, 59, 59, 999));
-  }
-  if (Object.keys(range).length) filter.createdAt = range;
+  // Tarix aralığı — Bakı günləri, `to` GÜNÜN SONUNA qədər (bax utils/bakuTime.js).
+  const range = dateRange(req.query.from, req.query.to);
+  if (range) filter.createdAt = range;
 
   if (req.query.search) {
     const rx = fuzzyRegex(req.query.search, 80);
@@ -281,7 +283,16 @@ const listLogs = asyncHandler(async (req, res) => {
  * yox: silinmiş istifadəçi də seçimdə qalır (onun izi jurnalda var), yeni
  * əməliyyat növü isə koda əl vurmadan görünür.
  */
+// Süzgəc siyahısı bütün jurnal üzrə $group və distinct işlədir. Jurnal
+// böyüdükcə hər «Loglar» açılışında bu tam skan olurdu — nəticə 2 dəqiqə
+// yaddaşda saxlanılır (yeni aktyor ən geci 2 dəqiqəyə görünür) (audit #47).
+const FILTERS_TTL = 2 * 60 * 1000;
+let filtersCache = { at: 0, data: null };
+
 const logFilters = asyncHandler(async (_req, res) => {
+  if (filtersCache.data && Date.now() - filtersCache.at < FILTERS_TTL) {
+    return res.json({ success: true, data: filtersCache.data });
+  }
   const [actors, actions, resources] = await Promise.all([
     AuditLog.aggregate([
       { $match: { "actor.id": { $ne: null } } },
@@ -293,14 +304,13 @@ const logFilters = asyncHandler(async (_req, res) => {
     AuditLog.distinct("resource"),
   ]);
 
-  res.json({
-    success: true,
-    data: {
-      actors: actors.map((a) => ({ id: String(a._id), name: a.name, email: a.email, count: a.count })),
-      actions: actions.filter(Boolean).sort(),
-      resources: resources.filter(Boolean).sort(),
-    },
-  });
+  const data = {
+    actors: actors.map((a) => ({ id: String(a._id), name: a.name, email: a.email, count: a.count })),
+    actions: actions.filter(Boolean).sort(),
+    resources: resources.filter(Boolean).sort(),
+  };
+  filtersCache = { at: Date.now(), data };
+  res.json({ success: true, data });
 });
 
 export { listUsers, createUser, updateUser, removeUser, listLogs, logFilters };

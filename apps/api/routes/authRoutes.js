@@ -12,6 +12,7 @@ import {
   loginRateLimiter,
   otpSendLimiter,
   otpVerifyLimiter,
+  receiveFiles,
 } from "#middlewares";
 
 const AuthRouter = Router();
@@ -45,6 +46,6 @@ AuthRouter.put(
   authController.changePassword,
 );
 AuthRouter.put("/profile", authenticate, authController.updateProfile);
-AuthRouter.put("/avatar", authenticate, authController.updateAvatar);
+AuthRouter.put("/avatar", authenticate, receiveFiles, authController.updateAvatar);
 
 export { AuthRouter };

@@ -2,6 +2,7 @@
 // «Tut-unut» audit jurnalı. HEÇ VAXT sorğu axınına xəta atmır.
 
 import { AuditLog } from "#models";
+import { clientIp } from "#utils";
 
 /** Jurnala DÜŞMƏYƏCƏK sahələr — hər yazıda dəyişir, məlumat vermir. */
 const NOISE = new Set([
@@ -122,12 +123,8 @@ export const pickFields = (doc, fields) => {
   return Object.fromEntries((fields || []).map((f) => [f, redact(src[f])]));
 };
 
-/** Sorğudan IP çıxar (proxy arxasında `x-forwarded-for` birincidir). */
-const ipOf = (req) =>
-  (req?.headers?.["x-forwarded-for"] || req?.ip || "")
-    .toString()
-    .split(",")[0]
-    .trim() || undefined;
+/** Sorğudan IP çıxar — saxtalaşdırıla bilməyən mənbədən (bax utils/clientIp.js). */
+const ipOf = (req) => (req ? clientIp(req) : undefined);
 
 /**
  * Admin əməliyyatını qeyd et.

@@ -2,7 +2,7 @@
 // Kampaniya linkinə kliklərin qeydiyyatı (public) və detallı hesabat (admin).
 
 // Utils
-import { asyncHandler } from "#utils";
+import { asyncHandler, clientIp, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
 // Models
 import { ShortLink, LinkClick } from "#models";
 // Services
@@ -20,8 +20,9 @@ import { recordClick, logAction } from "#services";
  */
 const track = asyncHandler(async (req, res) => {
   const result = await recordClick(req.params.code, {
-    // Serverin arxasında nginx var — həqiqi IP forwarded header-dədir.
-    ip: req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip,
+    // Sorğu Next serverindən gəlir; ziyarətçinin IP-si gizli açarla
+    // təsdiqlənmiş x-client-ip-dədir (bax utils/clientIp.js).
+    ip: clientIp(req),
     ua: req.headers["user-agent"],
     referer: req.headers.referer || req.headers.referrer,
     lang: req.headers["accept-language"],
@@ -50,9 +51,9 @@ const stats = asyncHandler(async (req, res) => {
   }
 
   const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 365);
-  const since = new Date();
-  since.setDate(since.getDate() - (days - 1));
-  since.setHours(0, 0, 0, 0);
+  // Günlər də saatlar kimi Bakı vaxtı ilə (audit #39).
+  const dayKeys = bakuDays(days);
+  const since = bakuDayStart(dayKeys[0]);
 
   const match = { link: link._id };
   const windowed = { ...match, ts: { $gte: since } };
@@ -61,7 +62,7 @@ const stats = asyncHandler(async (req, res) => {
     await Promise.all([
       LinkClick.aggregate([
         { $match: windowed },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$ts" } }, count: { $sum: 1 } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$ts", timezone: BAKU_ZONE } }, count: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]),
       LinkClick.aggregate([{ $match: windowed }, { $group: { _id: "$device", count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
@@ -71,7 +72,7 @@ const stats = asyncHandler(async (req, res) => {
       // Saat bölgüsü — reklamı nə vaxt göstərməyin daha səmərəli olduğunu göstərir.
       LinkClick.aggregate([
         { $match: windowed },
-        { $group: { _id: { $hour: { date: "$ts", timezone: "Asia/Baku" } }, count: { $sum: 1 } } },
+        { $group: { _id: { $hour: { date: "$ts", timezone: BAKU_ZONE } }, count: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]),
       // Unikal ziyarətçi: heş gündəlik duzla qurulur, ona görə bu rəqəm
@@ -83,13 +84,7 @@ const stats = asyncHandler(async (req, res) => {
 
   // Klik olmayan günlər də qrafikdə görünsün — əks halda xətt sıçrayır.
   const byDay = new Map(daily.map((d) => [d._id, d.count]));
-  const series = [];
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    series.push({ date: key, count: byDay.get(key) || 0 });
-  }
+  const series = dayKeys.map((date) => ({ date, count: byDay.get(date) || 0 }));
 
   const hourMap = new Map(byHour.map((h) => [h._id, h.count]));
   const hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourMap.get(h) || 0 }));

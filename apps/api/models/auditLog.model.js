@@ -83,6 +83,12 @@ const auditLogSchema = new Schema(
 );
 
 auditLogSchema.index({ createdAt: -1 });
+// Jurnal limitsiz böyüyürdü (audit #47): bir kurs yeniləməsi 3 dildə mətnlə
+// ~150 KB yaza bilər. 400 gündən köhnə qeydlər avtomatik silinir — il-il
+// müqayisə və təhlükəsizlik araşdırması üçün kifayətdir. (Açar `createdAt: 1`
+// — yuxarıdakı -1 indeksi ilə toqquşmur. Müddəti sonradan dəyişmək üçün
+// MongoDB-də collMod lazımdır, sadəcə bu rəqəmi dəyişmək bəs etmir.)
+auditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 400 });
 auditLogSchema.index({ action: 1, createdAt: -1 });
 auditLogSchema.index({ resource: 1, createdAt: -1 });
 // «Bu adam nə edib?» — panelin istifadəçi süzgəci bu indeksdən istifadə edir.

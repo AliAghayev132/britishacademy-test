@@ -7,7 +7,7 @@ import { mongoose } from "#lib";
 import { SiteSetting, Lead } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAccessSection } from "#utils";
+import { asyncHandler, fuzzyRegex, hasRole, destinationScope, branchScope, canAccessSection, dateRange } from "#utils";
 
 // Services
 import { logAction, diffDocs, redact, pickFields } from "#services";
@@ -262,23 +262,11 @@ const list = asyncHandler(async (req, res) => {
   // Müraciətlərdə «bu həftə nə gəldi» ən çox verilən sualdır; əvvəl yalnız
   // bərabərlik filtrləri vardı. `to` günün SONUNA qədər götürülür, əks halda
   // eyni günü seçəndə heç nə tapılmırdı (00:00-dan 00:00-a aralıq boşdur).
+  // Günlər Bakı vaxtı ilə (audit #39) — server saatından asılı deyil.
   const dateField = entry.model.schema.path("createdAt") ? "createdAt" : null;
   if (dateField) {
-    const range = {};
-    const from = req.query.from;
-    const to = req.query.to;
-    if (from) {
-      const d = new Date(from);
-      if (!Number.isNaN(d.getTime())) range.$gte = d;
-    }
-    if (to) {
-      const d = new Date(to);
-      if (!Number.isNaN(d.getTime())) {
-        d.setHours(23, 59, 59, 999);
-        range.$lte = d;
-      }
-    }
-    if (Object.keys(range).length) filter[dateField] = range;
+    const range = dateRange(req.query.from, req.query.to);
+    if (range) filter[dateField] = range;
   }
 
   // Əhatə məhdudiyyətləri — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə
@@ -468,6 +456,32 @@ const remove = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Yeni sıranı hesabla (saf funksiya).
+ *
+ * `all` — cari sıra ilə bütün elementlər, `ids` — paneldə yenidən düzülmüş
+ * alt çoxluq (bir səhifə və ya axtarış nəticəsi). Həmin elementlər
+ * tutduqları YERLƏRİN içində yeni ardıcıllıqla yerləşdirilir, qalanlar
+ * yerində qalır; sonra hamı 0..n-1 nömrələnir. Yalnız `order`-i dəyişənlər
+ * qaytarılır.
+ *
+ * @returns {Array<{id:string, order:number}> | null}  null — heç biri tapılmadı
+ */
+export function planReorder(all, ids) {
+  const position = new Map(all.map((d, i) => [String(d._id), i]));
+  const moved = ids.map(String).filter((id) => position.has(id));
+  if (!moved.length) return null;
+
+  const next = all.map((d) => String(d._id));
+  const slots = moved.map((id) => position.get(id)).sort((a, b) => a - b);
+  slots.forEach((slot, i) => { next[slot] = moved[i]; });
+
+  const current = new Map(all.map((d) => [String(d._id), d.order]));
+  return next
+    .map((id, order) => ({ id, order }))
+    .filter(({ id, order }) => current.get(id) !== order);
+}
+
+/**
  * Toplu sıralama: PATCH /api/admin/:resource/reorder
  * body: { ids: [id, ...], start?: number }
  *
@@ -499,13 +513,27 @@ const reorder = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "Bir dəfəyə ən çox 200 element" });
   }
 
-  const start = Math.max(0, parseInt(req.body?.start, 10) || 0);
-
-  await entry.model.bulkWrite(
-    ids.map((id, i) => ({
-      updateOne: { filter: { _id: id }, update: { $set: { order: start + i } } },
-    })),
-  );
+  // BÜTÜN siyahı yenidən nömrələnir (audit #26). Əvvəl yalnız cari səhifəyə
+  // `start + i` yazılırdı; qalan səhifələr 0-da qalır, birinci elementlə
+  // bərabərləşib ada görə düzülür və birinci səhifəyə sıçrayırdı.
+  // `start` artıq lazım deyil — klient göndərsə də nəzərə alınmır.
+  const softDelete = entry.softDelete !== false && entry.model.schema.path("isDeleted");
+  const all = await entry.model
+    .find(softDelete ? { isDeleted: false } : {})
+    .sort(entry.sort || { order: 1 })
+    .select("_id order")
+    .lean();
+  const ops = planReorder(all, ids);
+  if (ops === null) {
+    return res.status(400).json({ success: false, message: "Göndərilən elementlər tapılmadı" });
+  }
+  if (ops.length) {
+    await entry.model.bulkWrite(
+      ops.map(({ id, order }) => ({
+        updateOne: { filter: { _id: id }, update: { $set: { order } } },
+      })),
+    );
+  }
   await logAction(req, {
     action: "reorder", resource: req.params.resource,
     summary: `${labelForResource(req.params.resource)}: ${ids.length} elementin sırası dəyişdi`,

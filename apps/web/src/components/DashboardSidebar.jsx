@@ -27,8 +27,8 @@ import {
 } from 'lucide-react'
 
 // Utils
-import { logout } from '@/store/slices/authSlice'
-import { useLogoutMutation } from '@/store/api'
+import { logout, updateUser } from '@/store/slices/authSlice'
+import { baseApi, useLogoutMutation, useGetMeQuery } from '@/store/api'
 import { useAdminStatsQuery } from '@/store/api/adminApi'
 import { ADMIN_RESOURCES } from '@/lib/adminResources'
 import { NAV_TOP, NAV_GROUPS, NAV_BOTTOM, searchNav } from '@/lib/adminNav'
@@ -206,6 +206,15 @@ export const DashboardSidebar = ({ children }) => {
     })
   const [logoutApi] = useLogoutMutation()
 
+  // Panel açılanda profil serverdən yenilənir. Başqa admin icazələri
+  // dəyişibsə, menyu yalnız profil səhifəsinə girəndə yox, dərhal
+  // uyğunlaşır (audit #28).
+  const { data: meData } = useGetMeQuery()
+  const freshUser = meData?.data?.user
+  useEffect(() => {
+    if (freshUser) dispatch(updateUser(freshUser))
+  }, [freshUser, dispatch])
+
   // Yeni (baxılmamış) müraciət sayı — sidebar-da qırmızı badge. Status
   // dəyişəndə adminLeadStatus "stats" tag-ını invalidate etdiyi üçün yenilənir.
   const { data: stats } = useAdminStatsQuery()
@@ -237,6 +246,9 @@ export const DashboardSidebar = ({ children }) => {
       // Ignore network errors; we clear the local session regardless.
     }
     dispatch(logout())
+    // RTK keşi təmizlənir: eyni tabda sonra daxil olan (məhdud) istifadəçi
+    // əvvəlkinin müraciətlərini və statistikasını görməsin (audit #28).
+    dispatch(baseApi.util.resetApiState())
     router.push('/login')
   }
 

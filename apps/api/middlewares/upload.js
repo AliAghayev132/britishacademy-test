@@ -1,3 +1,10 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+import { fileUpload } from "#lib";
+import { config } from "#config";
+
 /**
  * Per-route upload size guard.
  *
@@ -43,4 +50,36 @@ const uploadLimit = (maxBytes) => async (req, res, next) => {
   next();
 };
 
-export { uploadLimit };
+/**
+ * Multipart faylları qəbul et (audit #52).
+ *
+ * Əvvəl express-fileupload BÜTÜN marşrutlarda, autentifikasiyadan ƏVVƏL və
+ * faylı YADDAŞDA saxlayaraq işləyirdi: istənilən ziyarətçi /api/leads-ə
+ * 250 MB göndərib prosesin yaddaşını doldura bilərdi. İndi:
+ *  - yalnız fayl qəbul edən marşrutlarda, `authenticate`-dən SONRA;
+ *  - fayl müvəqqəti diskə yazılır (FileService `mv()` ilə köçürür);
+ *  - köçürülməyən müvəqqəti fayl cavabdan sonra silinir.
+ */
+const receiveFiles = (() => {
+  const parse = fileUpload({
+    limits: { fileSize: config.upload.maxVideoSize },
+    abortOnLimit: true,
+    responseOnLimit: "File size limit exceeded",
+    useTempFiles: true,
+    tempFileDir: path.join(os.tmpdir(), "ba-uploads"),
+  });
+  const cleanup = (req) => {
+    for (const entry of Object.values(req.files || {})) {
+      for (const file of Array.isArray(entry) ? entry : [entry]) {
+        if (file?.tempFilePath) fs.unlink(file.tempFilePath, () => {});
+      }
+    }
+  };
+  return (req, res, next) => {
+    res.on("finish", () => cleanup(req));
+    res.on("close", () => cleanup(req));
+    parse(req, res, next);
+  };
+})();
+
+export { uploadLimit, receiveFiles };

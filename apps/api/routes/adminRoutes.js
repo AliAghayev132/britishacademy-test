@@ -105,8 +105,6 @@ AdminRouter.post("/whatsapp/version/check", whatsappController.checkVersion);
 AdminRouter.post("/whatsapp/init", whatsappController.init);
 AdminRouter.post("/whatsapp/send", writeRateLimiter, whatsappController.send);
 AdminRouter.post("/whatsapp/send-media", writeRateLimiter, whatsappController.sendMedia);
-AdminRouter.post("/whatsapp/bulk", whatsappController.bulk);
-AdminRouter.post("/whatsapp/bulk/cancel", whatsappController.cancelBulk);
 AdminRouter.post("/whatsapp/disconnect", whatsappController.disconnect);
 AdminRouter.post("/whatsapp/logout", whatsappController.logout);
 

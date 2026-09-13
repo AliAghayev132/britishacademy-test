@@ -61,10 +61,34 @@ describe("saytdan gələn hadisə", () => {
       { type: "visit", sid: SID, path: "/kurslar?x=1", referrer: "https://l.instagram.com/", utm: { campaign: "Yay 2026!" } },
       { ua: CHROME, host: "britishacademy.az" },
     );
-    const [filter, update, opts] = upd.mock.calls[0];
+    // Birinci çağırış yer tutucunu yeniləmək cəhdidir (burada yoxdur).
+    expect(upd.mock.calls[0][0]).toEqual({ sid: SID, type: "visit", placeholder: true });
+    const [filter, update, opts] = upd.mock.calls[1];
     expect(filter).toEqual({ sid: SID, type: "visit" });
     expect(opts).toEqual({ upsert: true });
     expect(update.$setOnInsert).toMatchObject({ path: "/kurslar", source: "instagram.com", device: "desktop", campaign: "yay2026" });
+  });
+
+  it("forma ziyarətdən tez gəlibsə, həqiqi ziyarət «birbaşa» mənbəni əvəz edir (audit #41)", async () => {
+    const upd = vi.spyOn(SiteEvent, "updateOne").mockResolvedValue({ modifiedCount: 1 });
+    const many = vi.spyOn(SiteEvent, "updateMany").mockResolvedValue({});
+    const r = await recordClientEvent(
+      { type: "visit", sid: SID, path: "/", utm: { source: "instagram", campaign: "yay" } },
+      { ua: CHROME, host: "britishacademy.az" },
+    );
+    expect(r).toMatchObject({ ok: true, upgraded: true });
+    expect(upd).toHaveBeenCalledTimes(1);
+    expect(upd.mock.calls[0][1].$unset).toEqual({ placeholder: "" });
+    expect(many.mock.calls[0][0]).toEqual({ sid: SID, type: { $ne: "visit" } });
+    expect(many.mock.calls[0][1].$set.campaign).toBe("yay");
+  });
+
+  it("paralel ziyarət unikal indeksə dəysə xəta sayılmır", async () => {
+    vi.spyOn(SiteEvent, "updateOne")
+      .mockResolvedValueOnce({ modifiedCount: 0 })
+      .mockRejectedValueOnce(Object.assign(new Error("E11000"), { code: 11000 }));
+    const r = await recordClientEvent({ type: "visit", sid: SID, path: "/" }, { ua: CHROME, host: "britishacademy.az" });
+    expect(r).toEqual({ ok: true, created: false });
   });
 
   it("forma açılışı sessiyanın mənbəyini götürür", async () => {
@@ -80,6 +104,7 @@ describe("saytdan gələn hadisə", () => {
     vi.spyOn(SiteEvent, "create").mockResolvedValue({});
     await recordClientEvent({ type: "modal_open", sid: SID, path: "/" }, { ua: CHROME });
     expect(upd.mock.calls[0][0]).toEqual({ sid: SID, type: "visit" });
+    expect(upd.mock.calls[0][1].$setOnInsert.placeholder).toBe(true);
   });
 });
 

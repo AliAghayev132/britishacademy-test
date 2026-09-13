@@ -8,6 +8,7 @@ import {
   MailService,
   AuthTokenService,
   logAction,
+  socketService,
 } from "#services";
 
 // Utils
@@ -315,6 +316,7 @@ const logout = asyncHandler(async (req, res) => {
   if (user && decoded.tokenVersion === user.tokenVersion) {
     user.tokenVersion += 1;
     await user.save();
+    socketService.disconnectUser(user._id);
     req.user = user;
     await logAction(req, { action: "logout", summary: `Çıxış: ${user.email}` });
   }
@@ -369,6 +371,7 @@ const changePassword = asyncHandler(async (req, res) => {
   user.password = await HashService.hashPassword(newPassword);
   user.tokenVersion += 1; // invalidate existing sessions
   await user.save();
+  socketService.disconnectUser(user._id);
 
   // Digər cihazlar çıxarılır, bu brauzer yeni cookie-lərlə davam edir.
   issueTokens(req, res, user);

@@ -98,7 +98,6 @@ describe("admin xaricindəki router-lər", () => {
   for (const [file, why] of [
     ["routes/mediaRoutes.js", "fayl yükləmə"],
     ["routes/aiRoutes.js", "ödənişli AI sorğuları"],
-    ["routes/postRoutes.js", "məzmun yazma"],
   ]) {
     it(`${file} rol yoxlaması edir (${why})`, () => {
       const src = fs.readFileSync(file, "utf8");

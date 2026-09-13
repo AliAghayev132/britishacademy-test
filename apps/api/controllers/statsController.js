@@ -6,7 +6,7 @@
 // çəkib orada saymaq 27 kurs üçün işləsə də, müraciət sayı artdıqca
 // yavaşlayardı.
 
-import { asyncHandler } from "#utils";
+import { asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
 import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models";
 import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
 
@@ -28,9 +28,9 @@ const topByViews = (Model, fields, limit = 10) =>
  */
 const contentStats = asyncHandler(async (req, res) => {
   const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 7), 365);
-  const since = new Date();
-  since.setDate(since.getDate() - days);
-  since.setHours(0, 0, 0, 0);
+  // Pəncərə qrafikdəki günlərlə eynidir və Bakı vaxtı ilə başlayır (audit #39).
+  const dayKeys = bakuDays(days);
+  const since = bakuDayStart(dayKeys[0]);
 
   const [
     topCourses,
@@ -85,7 +85,7 @@ const contentStats = asyncHandler(async (req, res) => {
       { $match: { isDeleted: false, createdAt: { $gte: since } } },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: BAKU_ZONE } },
           count: { $sum: 1 },
         },
       },
@@ -111,13 +111,7 @@ const contentStats = asyncHandler(async (req, res) => {
   // Boşluqları doldur — qrafikdə müraciət olmayan günlər də görünsün,
   // əks halda xətt sıçrayır və dinamika yanlış oxunur.
   const byDay = new Map(daily.map((d) => [d._id, d.count]));
-  const series = [];
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    series.push({ date: key, count: byDay.get(key) || 0 });
-  }
+  const series = dayKeys.map((date) => ({ date, count: byDay.get(date) || 0 }));
 
   const clean = (rows, field) =>
     rows.map((r) => ({ ...r, [field]: az(r[field]) }));

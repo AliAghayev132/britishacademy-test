@@ -170,7 +170,7 @@ export class BulkQueue {
     const row = { ...entry, at: new Date() };
     this.feed.unshift(row);
     if (this.feed.length > FEED_LIMIT) this.feed.length = FEED_LIMIT;
-    socketService.emitToRole(["admin", "superadmin", "developer"], "bulk:progress", {
+    socketService.emitToSection("whatsapp", "bulk:progress", {
       entry: row,
       state: {
         running: this.running,
@@ -247,7 +247,7 @@ export class BulkQueue {
     this.startedAt = new Date();
     this.finishedAt = null;
 
-    socketService.emitToRole(["admin", "superadmin", "developer"], "bulk:start", this.getState());
+    socketService.emitToSection("whatsapp", "bulk:start", this.getState());
 
     // Arxa fonda işlə — HTTP cavabı bloklanmasın.
     this._run(recipients, { channel, template, subject, source, sentBy, skipDuplicates })
@@ -331,7 +331,7 @@ export class BulkQueue {
     this.running = false;
     this.current = null;
     this.finishedAt = new Date();
-    socketService.emitToRole(["admin", "superadmin", "developer"], "bulk:done", this.getState());
+    socketService.emitToSection("whatsapp", "bulk:done", this.getState());
     console.log(
       `✅ Toplu göndəriş bitdi (${channel}): ${this.sent} göndərildi, ${this.failed} alınmadı, ${this.skipped} ötürüldü`,
     );

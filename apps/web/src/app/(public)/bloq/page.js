@@ -52,7 +52,7 @@ function BlogPostCard({ post }) {
 function PaginationLink({ page, currentPage, category }) {
   const active = page === currentPage;
   return (
-    <Link href={`/bloq?${category ? `kateqoriya=${category}&` : ""}seh=${page}`} style={{ width: 40, height: 40, display: "grid", placeItems: "center", borderRadius: 12, fontWeight: 700, fontSize: 14.5, background: active ? "var(--accent)" : "#fff", color: active ? "#fff" : "#4C4C58", border: "1px solid", borderColor: active ? "var(--accent)" : "#E4E6EF" }}>{page}</Link>
+    <Link href={`/bloq?${category ? `kateqoriya=${encodeURIComponent(category)}&` : ""}seh=${page}`} style={{ width: 40, height: 40, display: "grid", placeItems: "center", borderRadius: 12, fontWeight: 700, fontSize: 14.5, background: active ? "var(--accent)" : "#fff", color: active ? "#fff" : "#4C4C58", border: "1px solid", borderColor: active ? "var(--accent)" : "#E4E6EF" }}>{page}</Link>
   );
 }
 
@@ -60,10 +60,13 @@ export default async function BlogPage({ searchParams }) {
   const tr = await getT();
   // ── data fetching ──
   const sp = await searchParams;
-  const category = sp?.kateqoriya || "";
-  const page = Math.max(parseInt(sp?.seh, 10) || 1, 1);
+  // Dəyərlər API sorğusuna encode olunaraq qoşulur: əvvəl ?kateqoriya=x%26limit=1000
+  // kimi dəyər əlavə API parametrləri yaradırdı. Səhifə nömrəsinin yuxarı
+  // həddi isə sonsuz keş girişlərinin qarşısını alır (audit #55).
+  const category = String(sp?.kateqoriya || "").slice(0, 80);
+  const page = Math.min(Math.max(parseInt(sp?.seh, 10) || 1, 1), 500);
 
-  const data = await apiGet(`/blog?limit=9&page=${page}${category ? `&category=${category}` : ""}`);
+  const data = await apiGet(`/blog?limit=9&page=${page}${category ? `&category=${encodeURIComponent(category)}` : ""}`);
   const posts = data?.posts || [];
   const categories = data?.categories || [];
   const pg = data?.pagination || { page: 1, pages: 1 };
@@ -82,7 +85,7 @@ export default async function BlogPage({ searchParams }) {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 32 }}>
             <CategoryChip href="/bloq" label={tr("common.all")} active={!category} />
             {categories.map((c) => (
-              <CategoryChip key={c._id} href={`/bloq?kateqoriya=${c.slug}`} label={c.name} active={category === c.slug} />
+              <CategoryChip key={c._id} href={`/bloq?kateqoriya=${encodeURIComponent(c.slug)}`} label={c.name} active={category === c.slug} />
             ))}
           </div>
         )}

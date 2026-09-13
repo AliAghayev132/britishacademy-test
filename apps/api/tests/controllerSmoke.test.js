@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { init, bulk, disconnect, logout } from "#controllers/whatsappController.js";
+import { init, disconnect, logout } from "#controllers/whatsappController.js";
 import { send as bulkSend } from "#controllers/bulkController.js";
 
 /**
@@ -36,7 +36,6 @@ const EDITOR = { _id: "1", email: "editor@test.local", role: "editor" };
 
 const HANDLERS = [
   ["whatsapp/init", init],
-  ["whatsapp/bulk", bulk],
   ["whatsapp/disconnect", disconnect],
   ["whatsapp/logout", logout],
   ["bulk/send", bulkSend],

@@ -170,7 +170,8 @@ describe("süzgəclər", () => {
 
   it("`to` günün SONUNA qədər götürülür", () => {
     // Onsuz «1-dən 5-ə qədər» seçəndə 5-i günü ümumiyyətlə düşmürdü.
-    expect(users).toMatch(/setHours\(23, 59, 59, 999\)/);
+    // Bakı günü ilə (bax utils/bakuTime.js → dateRange, dateFilter.test.js).
+    expect(users).toMatch(/dateRange\(req\.query\.from, req\.query\.to\)/);
   });
 
   it("aktyor id-si ObjectId kimi yoxlanılır", () => {
