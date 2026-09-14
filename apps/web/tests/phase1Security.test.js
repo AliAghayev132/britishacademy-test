@@ -97,12 +97,16 @@ describe("#17 şəkil optimizatoru", () => {
   });
 });
 
+// Client reposu CI-da TƏK checkout olunur — `../api` yalnız monorepoda var.
+// Orada yoxdursa server faylları yoxlanmır (server reposunun öz CI-ı var).
+const hasApi = fs.existsSync("../api/.github/workflows/ci.yml");
+
 describe("#10 deploy yalnız CI uğurla bitəndə", () => {
-  for (const [f, job] of [
-    [".github/workflows/deploy-client.yml", "deploy-client"],
-    ["../api/.github/workflows/deploy-server.yml", "deploy-server"],
+  for (const [f, job, needsApi] of [
+    [".github/workflows/deploy-client.yml", "deploy-client", false],
+    ["../api/.github/workflows/deploy-server.yml", "deploy-server", true],
   ]) {
-    it(`${job}`, () => {
+    it.skipIf(needsApi && !hasApi)(`${job}`, () => {
       const src = read(f);
       expect(src).toMatch(/workflow_run:\s*\n\s*workflows: \[CI\]/);
       expect(src).toMatch(/github\.event\.workflow_run\.conclusion == 'success'/);
@@ -112,6 +116,6 @@ describe("#10 deploy yalnız CI uğurla bitəndə", () => {
 
   it("CI workflow-unun adı deploy-dakı istinadla eynidir", () => {
     expect(read(".github/workflows/ci.yml")).toMatch(/^name: CI$/m);
-    expect(read("../api/.github/workflows/ci.yml")).toMatch(/^name: CI$/m);
+    if (hasApi) expect(read("../api/.github/workflows/ci.yml")).toMatch(/^name: CI$/m);
   });
 });

@@ -7,7 +7,8 @@ import { t as translate } from "@/lib/i18n/strings";
  * AUDİT — dördüncü paket (web): #30 #31 #32 #33 #34 #35 #53 #54.
  */
 
-const read = (f) => fs.readFileSync(f, "utf8");
+// CRLF → LF: Windows-da `core.autocrlf` ilə klonlananda regex-lərdəki \n tutmurdu.
+const read = (f) => fs.readFileSync(f, "utf8").replace(/\r\n/g, "\n");
 afterEach(() => {
   vi.resetModules();
   vi.doUnmock("@/lib/api");

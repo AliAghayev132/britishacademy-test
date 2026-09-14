@@ -19,7 +19,9 @@ const EVENT = "ba-sfx";
 let ctx = null;
 let master = null;
 let unlocked = false;
-let lastReveal = 0;
+// -Infinity: `performance.now()` səhifə/proses açılandan sayılır. 0 olsaydı
+// ilk 180 ms-də gələn birinci «tık» da atılırdı (CI-da test belə yıxılırdı).
+let lastReveal = -Infinity;
 
 const hasWindow = () => typeof window !== "undefined";
 
