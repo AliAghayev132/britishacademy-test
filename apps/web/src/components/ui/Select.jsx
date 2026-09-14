@@ -7,7 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 
 // Hooks
-import { useDismiss } from "@/hooks";
+import { useAnchoredPosition, useDismiss } from "@/hooks";
 
 // Lib
 import { useMarkDirty } from "@/lib";
@@ -32,7 +32,6 @@ const norm = (s) => String(s || "").toLocaleLowerCase("az");
 export function Select({ options = [], placeholder, value, onChange, disabled, className, ariaLabel }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [coords, setCoords] = useState(null);
   const [active, setActive] = useState(-1);
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
@@ -46,6 +45,7 @@ export function Select({ options = [], placeholder, value, onChange, disabled, c
   const items = placeholder !== undefined ? [{ value: "", label: placeholder, empty: true }, ...filtered] : filtered;
 
   useDismiss(open, () => setOpen(false), [triggerRef, menuRef]);
+  const coords = useAnchoredPosition(open, triggerRef, { matchWidth: true });
 
   // Aktiv variant görünən sahədə qalsın.
   useEffect(() => {
@@ -55,10 +55,6 @@ export function Select({ options = [], placeholder, value, onChange, disabled, c
 
   const openMenu = () => {
     if (disabled) return;
-    const r = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - r.bottom;
-    const up = spaceBelow < 280 && r.top > spaceBelow;
-    setCoords({ left: r.left, width: r.width, top: up ? undefined : r.bottom + 4, bottom: up ? window.innerHeight - r.top + 4 : undefined });
     setQ("");
     setActive(Math.max(0, items.findIndex((o) => String(o.value) === String(value ?? ""))));
     setOpen(true);

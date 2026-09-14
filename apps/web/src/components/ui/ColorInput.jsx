@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 // Hooks
-import { useDismiss } from "@/hooks";
+import { useAnchoredPosition, useDismiss } from "@/hooks";
 
 // Lib
 import { useMarkDirty } from "@/lib";
@@ -77,7 +77,6 @@ function DragArea({ onPick, className, style, children, label }) {
  */
 export function ColorInput({ value, onChange, disabled = false, className = "", ariaLabel = "Rəng seç" }) {
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState(null);
   const [draft, setDraft] = useState("");
   const btnRef = useRef(null);
   const popRef = useRef(null);
@@ -87,6 +86,7 @@ export function ColorInput({ value, onChange, disabled = false, className = "", 
   const hsv = hexToHsv(hex);
 
   useDismiss(open, () => setOpen(false), [btnRef, popRef]);
+  const coords = useAnchoredPosition(open, btnRef, { panelHeight: 320, panelWidth: 240, gap: 6 });
 
   const emit = (next) => {
     if (next.toUpperCase() === hex) return;
@@ -97,10 +97,6 @@ export function ColorInput({ value, onChange, disabled = false, className = "", 
   const toggle = () => {
     if (disabled) return;
     if (open) return setOpen(false);
-    const r = btnRef.current.getBoundingClientRect();
-    const up = window.innerHeight - r.bottom < 320 && r.top > 320;
-    const left = Math.min(r.left, window.innerWidth - 248);
-    setCoords({ left: Math.max(8, left), top: up ? undefined : r.bottom + 6, bottom: up ? window.innerHeight - r.top + 6 : undefined });
     setDraft(hex);
     setOpen(true);
   };

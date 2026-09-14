@@ -10,6 +10,9 @@ import { useState } from "react";
 // Components
 import { FileUpload } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
@@ -59,7 +62,7 @@ export function PageForm({ item, onClose }) {
   // səhifəsindəki foto ona görə boş plaseholder qalmışdı.
   const [cover, setCover] = useState(item?.cover || "");
 
-  const [blocks, setBlocks] = useState(
+  const blockList = useRowList(() =>
     Array.isArray(item?.content) && item.content.length
       ? item.content.map((b) => ({
           heading: b.heading || "",
@@ -80,13 +83,10 @@ export function PageForm({ item, onClose }) {
   const [error, setError] = useState("");
 
   // ── Content block helpers ──
-  const addBlock = () => setBlocks((rows) => [...rows, { ...emptyBlock }]);
-  const removeBlock = (i) =>
-    setBlocks((rows) => rows.filter((_, idx) => idx !== i));
-  const setBlock = (i, key, val) =>
-    setBlocks((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)),
-    );
+  const blocks = blockList.rows;
+  const addBlock = () => blockList.add({ ...emptyBlock });
+  const removeBlock = blockList.remove;
+  const setBlock = (i, key, val) => blockList.update(i, { [key]: val });
 
   const saving = creating || updating;
 
@@ -226,7 +226,7 @@ export function PageForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {blocks.map((b, i) => (
-            <div key={i} className="flex items-start gap-3">
+            <div key={blockList.keys[i]} className="flex items-start gap-3">
               <div className="flex-1 space-y-3">
                 <Field label={`Başlıq ${i + 1}`}>
                   <LocalizedInput

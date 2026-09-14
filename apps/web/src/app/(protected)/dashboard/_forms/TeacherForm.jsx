@@ -10,6 +10,9 @@ import { useState } from "react";
 // Components
 import { ColorInput, FileUpload } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import { useAdminLookupsQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
@@ -79,7 +82,7 @@ export function TeacherForm({ item, onClose }) {
   //
   // Köhnə qeydlərdə yalnız `branches` massivi var — onları dərssiz təyinat
   // kimi açırıq ki, məlumat itməsin.
-  const [assignments, setAssignments] = useState(() => {
+  const assignmentList = useRowList(() => {
     const existing = (item?.assignments || []).map((a) => ({
       branch: toId(a.branch),
       courses: (a.courses || []).map(toId),
@@ -88,16 +91,16 @@ export function TeacherForm({ item, onClose }) {
     return (item?.branches || []).map((b) => ({ branch: toId(b), courses: [] }));
   });
 
-  const addAssignment = () => setAssignments((p) => [...p, { branch: "", courses: [] }]);
-  const removeAssignment = (i) => setAssignments((p) => p.filter((_, x) => x !== i));
-  const patchAssignment = (i, patch) =>
-    setAssignments((p) => p.map((a, x) => (x === i ? { ...a, ...patch } : a)));
+  const assignments = assignmentList.rows;
+  const addAssignment = () => assignmentList.add({ branch: "", courses: [] });
+  const removeAssignment = assignmentList.remove;
+  const patchAssignment = assignmentList.update;
 
   // Bir filial iki dəfə seçilməsin — artıq işlədilənləri gizlədirik.
   const usedBranches = new Set(assignments.map((a) => a.branch).filter(Boolean));
 
   // ── Certificates ──
-  const [certificates, setCertificates] = useState(
+  const certificateList = useRowList(() =>
     (item?.certificates || []).map((c) => ({
       title: c.title || "",
       image: c.image || "",
@@ -106,7 +109,7 @@ export function TeacherForm({ item, onClose }) {
   );
 
   // ── Stats ──
-  const [stats, setStats] = useState(
+  const statList = useRowList(() =>
     (item?.stats || []).map((s) => ({
       label: s.label || "",
       value: s.value || "",
@@ -132,22 +135,15 @@ export function TeacherForm({ item, onClose }) {
   );
 
   // ── Repeatable row helpers ──
-  const addCertificate = () =>
-    setCertificates((rows) => [...rows, { title: "", image: "", year: "" }]);
-  const updateCertificate = (i, patch) =>
-    setCertificates((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
-    );
-  const removeCertificate = (i) =>
-    setCertificates((rows) => rows.filter((_, idx) => idx !== i));
+  const certificates = certificateList.rows;
+  const addCertificate = () => certificateList.add({ title: "", image: "", year: "" });
+  const updateCertificate = certificateList.update;
+  const removeCertificate = certificateList.remove;
 
-  const addStat = () => setStats((rows) => [...rows, { label: "", value: "" }]);
-  const updateStat = (i, patch) =>
-    setStats((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
-    );
-  const removeStat = (i) =>
-    setStats((rows) => rows.filter((_, idx) => idx !== i));
+  const stats = statList.rows;
+  const addStat = () => statList.add({ label: "", value: "" });
+  const updateStat = statList.update;
+  const removeStat = statList.remove;
 
   // ── Save ──
   const handleSave = async () => {
@@ -327,7 +323,7 @@ export function TeacherForm({ item, onClose }) {
 
         <div className="space-y-3">
           {assignments.map((a, i) => (
-            <div key={i} className="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+            <div key={assignmentList.keys[i]} className="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
               <div className="mb-3 flex items-center gap-3">
                 <div className="flex-1">
                   <NativeSelect
@@ -373,7 +369,7 @@ export function TeacherForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {certificates.map((c, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={certificateList.keys[i]} className="flex items-end gap-3">
               <Field label="Başlıq" className="flex-1">
                 <LocalizedInput
                   value={c.title}
@@ -414,7 +410,7 @@ export function TeacherForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {stats.map((s, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={statList.keys[i]} className="flex items-end gap-3">
               <Field label="Etiket" className="flex-1">
                 <LocalizedInput
                   value={s.label}

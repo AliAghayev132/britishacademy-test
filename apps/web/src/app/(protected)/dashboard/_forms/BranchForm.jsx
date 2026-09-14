@@ -10,6 +10,9 @@ import { useState } from "react";
 // Components
 import { FileUpload } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
@@ -52,7 +55,7 @@ export function BranchForm({ item, onClose }) {
   const [whatsapp, setWhatsapp] = useState(item?.whatsapp || "");
   const [email, setEmail] = useState(item?.email || "");
 
-  const [workingHours, setWorkingHours] = useState(
+  const hours = useRowList(() =>
     Array.isArray(item?.workingHours) && item.workingHours.length
       ? item.workingHours.map((h) => ({
           days: toLoc(h.days),
@@ -70,9 +73,10 @@ export function BranchForm({ item, onClose }) {
   );
   const [mapEmbedUrl, setMapEmbedUrl] = useState(item?.mapEmbedUrl || "");
 
-  const [images, setImages] = useState(
+  const imageList = useRowList(() =>
     Array.isArray(item?.images) && item.images.length ? [...item.images] : [],
   );
+  const images = imageList.rows;
 
   const [seo, setSeo] = useState(item?.seo || {});
 
@@ -87,20 +91,15 @@ export function BranchForm({ item, onClose }) {
   const [error, setError] = useState("");
 
   // ── Working hours helpers ──
-  const addHour = () => setWorkingHours((rows) => [...rows, { ...emptyHour }]);
-  const removeHour = (i) =>
-    setWorkingHours((rows) => rows.filter((_, idx) => idx !== i));
-  const setHour = (i, key, val) =>
-    setWorkingHours((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)),
-    );
+  const workingHours = hours.rows;
+  const addHour = () => hours.add({ ...emptyHour });
+  const removeHour = hours.remove;
+  const setHour = (i, key, val) => hours.update(i, { [key]: val });
 
   // ── Image helpers ──
-  const addImage = () => setImages((rows) => [...rows, ""]);
-  const removeImage = (i) =>
-    setImages((rows) => rows.filter((_, idx) => idx !== i));
-  const setImage = (i, val) =>
-    setImages((rows) => rows.map((r, idx) => (idx === i ? val : r)));
+  const addImage = () => imageList.add("");
+  const removeImage = imageList.remove;
+  const setImage = (i, val) => imageList.update(i, val);
 
   const saving = creating || updating;
 
@@ -279,7 +278,7 @@ export function BranchForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {workingHours.map((h, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={hours.keys[i]} className="flex items-end gap-3">
               <Field label="Günlər" className="flex-1">
                 <LocalizedInput
                   value={h.days}
@@ -351,7 +350,7 @@ export function BranchForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {images.map((url, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={imageList.keys[i]} className="flex items-end gap-3">
               <Field label={`Şəkil ${i + 1}`} className="flex-1">
                 <FileUpload
                   value={url}

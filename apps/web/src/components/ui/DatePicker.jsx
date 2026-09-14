@@ -8,7 +8,7 @@ import { createPortal } from "react-dom";
 import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 // Hooks
-import { useDismiss } from "@/hooks";
+import { useAnchoredPosition, useDismiss } from "@/hooks";
 
 /**
  * Tarix seçici — brend dizaynı ilə.
@@ -66,26 +66,18 @@ export function DatePicker({
   const selected = parse(value);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(() => selected || new Date());
-  const [coords, setCoords] = useState(null);
   const btnRef = useRef(null);
   const popRef = useRef(null);
 
-  // Açılanda seçilmiş tarixin ayına qayıt; mövqeyi hesabla. Portal olduğu
-  // üçün yerləşdirmə bizim üzərimizdədir.
+  // Açılanda seçilmiş tarixin ayına qayıt. Portal olduğu üçün mövqe
+  // useAnchoredPosition ilə düyməyə bağlanır.
   useEffect(() => {
     if (!open) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- açılış anında: görünüş ayı və menyu mövqeyi yalnız DOM ölçüldükdən sonra bilinir
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- açılış anında görünüş ayı seçilmiş tarixə qayıdır
     if (selected) setView(selected);
-    const r = btnRef.current?.getBoundingClientRect();
-    if (!r) return;
-    const below = window.innerHeight - r.bottom;
-    setCoords({
-      left: Math.min(r.left, window.innerWidth - 300),
-      top: below > 340 ? r.bottom + 6 : undefined,
-      bottom: below > 340 ? undefined : window.innerHeight - r.top + 6,
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+  const coords = useAnchoredPosition(open, btnRef, { panelHeight: 340, panelWidth: 292, gap: 6 });
 
   // Kənara klik və Escape ilə bağlanma.
   useDismiss(open, () => setOpen(false), [popRef, btnRef]);

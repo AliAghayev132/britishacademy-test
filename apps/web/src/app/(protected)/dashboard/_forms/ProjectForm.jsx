@@ -15,6 +15,9 @@ import { useState } from "react";
 // Components
 import { ColorInput, FileUpload } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
@@ -64,9 +67,10 @@ export function ProjectForm({ item, onClose }) {
   const [image, setImage] = useState(item?.image || "");
   const [color, setColor] = useState(item?.color || "#00157A");
 
-  const [facts, setFacts] = useState(
+  const factList = useRowList(() =>
     (item?.facts || []).map((f) => ({ label: toLoc(f.label), value: toLoc(f.value) })),
   );
+  const facts = factList.rows;
 
   const [applyEnabled, setApplyEnabled] = useState(isEdit ? Boolean(item?.applyEnabled) : true);
   const [applyLabel, setApplyLabel] = useState(toLoc(item?.applyLabel));
@@ -76,10 +80,9 @@ export function ProjectForm({ item, onClose }) {
   const [order, setOrder] = useState(item?.order ?? 0);
   const [isActive, setIsActive] = useState(isEdit ? Boolean(item?.isActive) : true);
 
-  const addFact = () => setFacts((p) => [...p, emptyFact()]);
-  const removeFact = (i) => setFacts((p) => p.filter((_, x) => x !== i));
-  const setFact = (i, key, v) =>
-    setFacts((p) => p.map((f, x) => (x === i ? { ...f, [key]: v } : f)));
+  const addFact = () => factList.add(emptyFact());
+  const removeFact = factList.remove;
+  const setFact = (i, key, v) => factList.update(i, { [key]: v });
 
   const handleSave = async () => {
     setError("");
@@ -189,7 +192,7 @@ export function ProjectForm({ item, onClose }) {
           <p className="text-sm text-gray-400">Məsələn: müddət, iştirakçı sayı, yer.</p>
         )}
         {facts.map((f, i) => (
-          <div key={i} className="flex items-end gap-2">
+          <div key={factList.keys[i]} className="flex items-end gap-2">
             <Field label="Etiket" className="flex-1">
               <LocalizedInput value={f.label} onChange={(v) => setFact(i, "label", v)} />
             </Field>

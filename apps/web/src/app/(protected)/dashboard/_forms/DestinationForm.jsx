@@ -10,6 +10,9 @@ import { useState } from "react";
 // Components
 import { ColorInput, FileUpload } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
@@ -62,18 +65,20 @@ export function DestinationForm({ item, onClose }) {
   const [contentHtml, setContentHtml] = useState(toLoc(item?.contentHtml));
 
   // ── Facts (label/value) ──
-  const [facts, setFacts] = useState(
+  const factList = useRowList(() =>
     (item?.facts || []).map((f) => ({ label: f.label || "", value: f.value || "" })),
   );
+  const facts = factList.rows;
 
   // ── Universities (name/city/url) ──
-  const [universities, setUniversities] = useState(
+  const universityList = useRowList(() =>
     (item?.universities || []).map((u) => ({
       name: u.name || "",
       city: u.city || "",
       url: u.url || "",
     })),
   );
+  const universities = universityList.rows;
 
   // ── SEO ──
   const [seo, setSeo] = useState(item?.seo || {});
@@ -85,20 +90,14 @@ export function DestinationForm({ item, onClose }) {
   const [isActive, setIsActive] = useState(isEdit ? Boolean(item?.isActive) : true);
 
   // ── Fact row helpers ──
-  const addFact = () => setFacts((rows) => [...rows, { label: "", value: "" }]);
-  const updateFact = (i, patch) =>
-    setFacts((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  const removeFact = (i) => setFacts((rows) => rows.filter((_, idx) => idx !== i));
+  const addFact = () => factList.add({ label: "", value: "" });
+  const updateFact = factList.update;
+  const removeFact = factList.remove;
 
   // ── University row helpers ──
-  const addUniversity = () =>
-    setUniversities((rows) => [...rows, { name: "", city: "", url: "" }]);
-  const updateUniversity = (i, patch) =>
-    setUniversities((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
-    );
-  const removeUniversity = (i) =>
-    setUniversities((rows) => rows.filter((_, idx) => idx !== i));
+  const addUniversity = () => universityList.add({ name: "", city: "", url: "" });
+  const updateUniversity = universityList.update;
+  const removeUniversity = universityList.remove;
 
   // ── Save ──
   const handleSave = async () => {
@@ -279,7 +278,7 @@ export function DestinationForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {facts.map((f, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={factList.keys[i]} className="flex items-end gap-3">
               <Field label="Etiket" className="flex-1">
                 <LocalizedInput
                   value={f.label}
@@ -314,7 +313,7 @@ export function DestinationForm({ item, onClose }) {
         )}
         <div className="space-y-3">
           {universities.map((u, i) => (
-            <div key={i} className="flex items-end gap-3">
+            <div key={universityList.keys[i]} className="flex items-end gap-3">
               <Field label="Ad" className="flex-1">
                 <LocalizedInput
                   value={u.name}

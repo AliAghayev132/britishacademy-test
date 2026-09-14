@@ -12,6 +12,9 @@ import { useMemo, useState } from "react";
 // Components
 import { DatePicker, TimeSelect } from "@/components";
 
+// Hooks
+import { useRowList } from "@/hooks";
+
 // Store
 import {
   useAdminListQuery,
@@ -113,7 +116,7 @@ export function CourseGroupForm({ item, onClose }) {
     isEdit ? Boolean(item?.isActive) : true,
   );
 
-  const [schedule, setSchedule] = useState(
+  const slots = useRowList(() =>
     Array.isArray(item?.schedule) && item.schedule.length
       ? item.schedule.map((s) => ({
           weekday: s.weekday != null ? String(s.weekday) : "",
@@ -128,13 +131,10 @@ export function CourseGroupForm({ item, onClose }) {
   const saving = creating || updating;
 
   // ── Schedule helpers ──
-  const addSlot = () => setSchedule((rows) => [...rows, emptySlot()]);
-  const removeSlot = (i) =>
-    setSchedule((rows) => rows.filter((_, idx) => idx !== i));
-  const setSlot = (i, key, val) =>
-    setSchedule((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)),
-    );
+  const schedule = slots.rows;
+  const addSlot = () => slots.add(emptySlot());
+  const removeSlot = slots.remove;
+  const setSlot = (i, key, val) => slots.update(i, { [key]: val });
 
   // Qrafikin insan oxunaqlı xülasəsi — admin nəticəni dərhal görsün.
   const scheduleSummary = schedule
@@ -327,7 +327,7 @@ export function CourseGroupForm({ item, onClose }) {
               <span className="w-28">Bitiş</span>
             </div>
             {schedule.map((s, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={slots.keys[i]} className="flex items-center gap-2">
                 <NativeSelect
                   className="w-32"
                   placeholder="Gün"
