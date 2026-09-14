@@ -1,13 +1,13 @@
 "use client";
 
 // Icons
-import { Loader2, FileSpreadsheet, Upload, X } from "lucide-react";
+import { Download, Loader2, FileSpreadsheet, Upload, X } from "lucide-react";
 
 // Components
 import { Select } from "@/components";
 
 // Lib
-import { parseLines } from "@/lib";
+import { downloadRecipientTemplate, parseLines } from "@/lib";
 
 // Local
 import { input, label, LEAD_STATUSES } from "../shared";
@@ -46,7 +46,19 @@ export function RecipientsInput({
 
       {source === "excel" && (
         <div>
-          <label className={label}>Excel / CSV faylı</label>
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <label className="block text-sm font-medium text-gray-700">Excel / CSV faylı</label>
+            {/* Hazır şablon — başlıqlar parserin tanıdığı adlardır, nömrə
+                sütunu mətn formatındadır (baştakı 0 itmir). */}
+            <button
+              type="button"
+              onClick={downloadRecipientTemplate}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Şablonu endir
+            </button>
+          </div>
           {rows.length > 0 ? (
             <div className="flex items-center gap-3 rounded-lg border border-gray-200 p-2.5">
               <FileSpreadsheet className="h-5 w-5 flex-none text-emerald-600" />

@@ -201,10 +201,15 @@ img { display: block; max-width: 100%; }
   60%  { transform: scale(1.3) rotate(10deg); }
   100% { transform: scale(1) rotate(0); }
 }
+/* Sistemdə animasiyalar söndürülübsə (Windows «Animasiya effektləri»,
+   macOS «Hərəkəti azalt») HƏRƏKƏT yoxdur, amma qısa solğunlaşma qalır.
+   Əvvəl hamısı 0.01ms idi və forma birdən «partlayıb» açılırdı — belə
+   kompüterlərdə animasiya heç görünmürdü. */
 @media (prefers-reduced-motion: reduce) {
-  .ba-am-overlay, .ba-am-card, .ba-am-head > *, .ba-am-form > *, .ba-am-success, .ba-am-emoji {
-    animation-duration: .01ms !important; animation-delay: 0s !important;
-  }
+  .ba-am-overlay { animation-duration: .2s; }
+  .ba-am-card { animation: ba-am-fade .2s ease-out both; }
+  .ba-am-overlay.is-closing .ba-am-card { animation: ba-am-fade-out .2s ease-in both; }
+  .ba-am-head > *, .ba-am-form > *, .ba-am-success, .ba-am-emoji { animation: none; }
 }
 
 /* ── Səs effektləri düyməsi (sol aşağı — sağda WhatsApp var) ── */

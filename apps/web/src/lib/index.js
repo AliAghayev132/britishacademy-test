@@ -52,7 +52,13 @@ export {
   safeColor,
   svgToDataUrl,
 } from "./qr";
-export { parseLines, parseSpreadsheet } from "./recipientParser";
+export {
+  TEMPLATE_HEADERS,
+  buildRecipientTemplate,
+  downloadRecipientTemplate,
+  parseLines,
+  parseSpreadsheet,
+} from "./recipientParser";
 export { safeRedirect } from "./safeRedirect";
 export { redirectToLogin, refreshSession } from "./session";
 export { isSfxOn, playSfx, setSfxOn, subscribeSfx, unlockSfx } from "./sfx";

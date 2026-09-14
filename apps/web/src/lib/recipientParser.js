@@ -70,6 +70,57 @@ export async function parseSpreadsheet(file) {
   return { rows, headerDetected: false, sheet: sheetName };
 }
 
+/** Şablonun başlıqları — parserin tanıdığı adlardandır (bax HEAD). */
+export const TEMPLATE_HEADERS = ["Ad", "Nömrə", "E-poçt"];
+const TEMPLATE_ROWS = 1000;
+
+/**
+ * Doldurulmağa hazır Excel şablonu (workbook obyekti).
+ *
+ * Birinci vərəq «Alıcılar» — yalnız başlıq; parser məhz birinci vərəqi
+ * oxuyur, ona görə nümunə sətirlər oraya QOYULMUR (yoxsa silinməsi unudulanda
+ * nümunə nömrələrə mesaj gedərdi). Nümunə və qaydalar ikinci vərəqdədir.
+ *
+ * Nömrə və e-poçt sütunları mətn formatındadır: Excel «0501234567»-ni ədəd
+ * sayıb baştakı sıfırı silirdi.
+ */
+export function buildRecipientTemplate() {
+  const recipients = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS]);
+  for (let r = 1; r <= TEMPLATE_ROWS; r += 1) {
+    for (const c of [1, 2]) {
+      recipients[XLSX.utils.encode_cell({ r, c })] = { t: "s", v: "", z: "@" };
+    }
+  }
+  recipients["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: TEMPLATE_ROWS, c: 2 } });
+  recipients["!cols"] = [{ wch: 28 }, { wch: 18 }, { wch: 30 }];
+
+  const guide = XLSX.utils.aoa_to_sheet([
+    ["Necə doldurmalı"],
+    [],
+    ["1. «Alıcılar» vərəqində hər sətrə bir nəfər yazın. Başlıq sətrini silməyin."],
+    ["2. WhatsApp göndərişi üçün «Nömrə», e-poçt göndərişi üçün «E-poçt» sütunu kifayətdir."],
+    ["3. «Ad» istəyə bağlıdır — mesajdakı {{ad}} dəyişəninin yerinə yazılır."],
+    ["4. Nömrə istənilən formada ola bilər: 0501234567, 994501234567, +994 50 123 45 67."],
+    ["5. Faylı yadda saxlayıb admin paneldə «Excel faylı» mənbəyi ilə yükləyin."],
+    [],
+    ["Nümunə (bu vərəq oxunmur):"],
+    TEMPLATE_HEADERS,
+    ["Aynur Məmmədova", "0501234567", "aynur@mail.com"],
+    ["Elvin Əliyev", "+994 55 212 41 51", ""],
+  ]);
+  guide["!cols"] = [{ wch: 28 }, { wch: 22 }, { wch: 30 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, recipients, "Alıcılar");
+  XLSX.utils.book_append_sheet(wb, guide, "Təlimat");
+  return wb;
+}
+
+/** Şablonu brauzerdə .xlsx kimi endir. */
+export function downloadRecipientTemplate() {
+  XLSX.writeFile(buildRecipientTemplate(), "toplu-gonderis-sablonu.xlsx");
+}
+
 /**
  * Əl ilə yazılan mətni siyahıya çevir — hər sətir bir alıcı.
  *
