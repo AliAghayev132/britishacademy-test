@@ -42,7 +42,7 @@ describe("slug alias xəritəsi", () => {
     // Mənbə yoxlaması: ehtiyat axtarış silinsə 301→404 zənciri geri qayıdar,
     // adi testlər isə bunu tutmaz (baza lazımdır).
     const src = fs.readFileSync(
-      path.join(ROOT, "controllers/publicController.js"),
+      path.join(ROOT, "controllers/public/courseController.js"),
       "utf8",
     );
     expect(src).toContain("LEGACY_SLUG_OF");

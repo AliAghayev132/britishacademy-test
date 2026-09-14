@@ -109,9 +109,9 @@ describe("jurnal sxemi", () => {
 });
 
 describe("qeyd edilən nöqtələr", () => {
-  const auth = fs.readFileSync("controllers/authController.js", "utf8");
+  const auth = fs.readFileSync("controllers/auth/sessionController.js", "utf8");
   const lead = fs.readFileSync("controllers/leadController.js", "utf8");
-  const admin = fs.readFileSync("controllers/adminController.js", "utf8");
+  const admin = fs.readFileSync("controllers/admin/crudController.js", "utf8");
   const users = fs.readFileSync("controllers/userAdminController.js", "utf8");
 
   it("giriş və çıxış yazılır", () => {
@@ -192,7 +192,8 @@ describe("süzgəclər", () => {
 });
 
 describe("tam məlumat (modal üçün)", () => {
-  const admin = fs.readFileSync("controllers/adminController.js", "utf8");
+  const admin = ["controllers/admin/crudController.js", "controllers/admin/settingsController.js"]
+    .map((f) => fs.readFileSync(f, "utf8")).join("\n");
 
   it("yaradılan sənəd saxlanılır", () => {
     // Əvvəl yalnız «yaradıldı» yazılırdı — nə ilə yaradıldığı heç yerdə

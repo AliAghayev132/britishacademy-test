@@ -84,7 +84,7 @@ describe("#1 /uploads başlıqları", () => {
   });
 
   it("app.js başlıqları statik fayllara tətbiq edir", () => {
-    const app = fs.readFileSync("app.js", "utf8");
+    const app = fs.readFileSync("app/middleware.js", "utf8");
     expect(app).toMatch(/express\.static\("uploads", \{ setHeaders: setUploadHeaders \}\)/);
   });
 });
@@ -185,7 +185,7 @@ describe("#4 standart parollar", () => {
 
 describe("#7 kod inyeksiyası", () => {
   it("yazmaq yalnız superadmin və yuxarısı üçündür", () => {
-    const src = fs.readFileSync("controllers/adminController.js", "utf8");
+    const src = fs.readFileSync("controllers/admin/settingsController.js", "utf8");
     expect(src).toMatch(/if \(!hasRole\(req\.user, "superadmin"\)\) delete body\.codeInjection;/);
   });
 });

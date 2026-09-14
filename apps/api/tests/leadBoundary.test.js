@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { movesLeadOutOfReach, ABROAD_INTEREST } from "../controllers/adminController.js";
+import { movesLeadOutOfReach, ABROAD_INTEREST } from "../services/LeadAccessService.js";
 
 /**
  * MÜRACİƏTİ ÖZ GÖRMƏ SAHƏSİNDƏN ÇIXARMAQ.

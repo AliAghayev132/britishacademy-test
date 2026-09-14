@@ -20,20 +20,24 @@ import { hasRole, canAccessSection } from "#utils";
 
 const API_ROOT = path.resolve(import.meta.dirname, "..");
 
-/** Yoxlanılan qovluqlardakı bütün .js faylları. */
+/**
+ * Yoxlanılan qovluqlardakı bütün .js faylları — alt qovluqlar da daxil
+ * (bölünmüş modullar controllers/public/, services/whatsapp/ və s. altındadır).
+ */
 function collect(dir) {
   const full = path.join(API_ROOT, dir);
   if (!fs.existsSync(full)) return [];
-  return fs
-    .readdirSync(full)
-    .filter((f) => f.endsWith(".js"))
-    .map((f) => ({ rel: `${dir}/${f}`, text: fs.readFileSync(path.join(full, f), "utf8") }));
+  return fs.readdirSync(full, { withFileTypes: true }).flatMap((e) => {
+    const rel = `${dir}/${e.name}`;
+    if (e.isDirectory()) return collect(rel);
+    return e.name.endsWith(".js") ? [{ rel, text: fs.readFileSync(path.join(full, e.name), "utf8") }] : [];
+  });
 }
 
 describe("rol yoxlamaları iyerarxiya ilə edilir", () => {
-  // devController qəsdən istisnadır: developer alətləri YALNIZ developer
+  // Developer alətləri qəsdən istisnadır: onlar YALNIZ developer
   // rolundadır, orada iyerarxiya deyil, dəqiq rol tələb olunur.
-  const EXEMPT = new Set(["controllers/devController.js"]);
+  const EXEMPT = new Set(["controllers/dev/devTool.js"]);
 
   const files = [...collect("controllers"), ...collect("services")];
 

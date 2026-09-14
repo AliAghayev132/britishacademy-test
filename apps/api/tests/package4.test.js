@@ -53,8 +53,8 @@ describe("#30 sitemap URL siyahısı", () => {
 
 describe("#51 kurs səhifəsi", () => {
   it("qruplar və əlaqəli kurslar paralel, kartlar yüngül", () => {
-    const src = fs.readFileSync("controllers/publicController.js", "utf8");
-    const fn = src.slice(src.indexOf("const getCourseBySlug"), src.indexOf("/* ---------------- Branches"));
+    const src = fs.readFileSync("controllers/public/courseController.js", "utf8");
+    const fn = src.slice(src.indexOf("const getCourseBySlug"), src.indexOf("/* ---------------- Schedule"));
     expect(fn).toMatch(/const \[groups, related\] = await Promise\.all\(/);
     expect(fn).toMatch(/\.limit\(6\)\s*\n\s*\.select\(CARD_EXCLUDE\)/);
   });

@@ -15,7 +15,7 @@ import fs from "node:fs";
  */
 
 const hero = fs.readFileSync("src/components/site/Hero.jsx", "utf8");
-const cards = fs.readFileSync("src/components/site/cards.jsx", "utf8");
+const cards = fs.readFileSync("src/components/site/cards/CourseCard.jsx", "utf8");
 
 describe("hero düymələri", () => {
   it("paneldən gələn linkləri oxuyur", () => {
@@ -120,7 +120,8 @@ describe("kurs kartlarının rəngi", () => {
 });
 
 describe("düymələrin sırası", () => {
-  const admin = fs.readFileSync("src/app/(protected)/dashboard/ana-sehife/page.js", "utf8");
+  // Düymə redaktoru səhifədən ayrı komponentə çıxarılıb.
+  const admin = fs.readFileSync("src/app/(protected)/dashboard/ana-sehife/_components/PillLinksEditor.jsx", "utf8");
 
   it("paneldə sıra dəyişdirmə var", () => {
     // Sıra saytda görünən ardıcıllıqdır. Onsuz ən çox satılan kursu əvvələ

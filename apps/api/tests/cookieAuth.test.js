@@ -86,14 +86,15 @@ describe("cookie parametrləri", () => {
 
 describe("tokenlər cavab gövdəsində yoxdur", () => {
   it("giriş, qeydiyyat, refresh və parol dəyişmə tokenləri JSON-da qaytarmır", () => {
-    const src = read("controllers/authController.js");
+    const src = ["register", "session", "password", "profile"]
+      .map((n) => read(`controllers/auth/${n}Controller.js`)).join("\n");
     expect(src).not.toMatch(/data: \{[^}]*\btokens\b/);
     expect(src).not.toMatch(/const tokens = issueTokens/);
   });
 
   it("çıxış bitmiş sessiyada da cookie-ləri silir", () => {
     expect(read("routes/authRoutes.js")).toMatch(/AuthRouter\.post\("\/logout", authController\.logout\)/);
-    expect(read("controllers/authController.js")).toMatch(/clearAuthCookies\(req, res\);/);
+    expect(read("controllers/auth/sessionController.js")).toMatch(/clearAuthCookies\(req, res\);/);
   });
 
   it("socket cookie ilə doğrulanır", () => {

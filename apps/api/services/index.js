@@ -6,6 +6,7 @@ export { EncryptionService } from "./EncryptionService.js";
 export { SlugService } from "./SlugService.js";
 export { buildGraph, validateGraph, seedDatabase, HEADER_MENU } from "./SeedService.js";
 export { logAction, diffDocs, redact, pickFields } from "./LogService.js";
+export { ABROAD_INTEREST, applyLeadAccess, applyLeadScope, canSeeLead, leadInReach, movesLeadOutOfReach } from "./LeadAccessService.js";
 export { bootstrapAdmin, bootstrapDeveloper } from "./BootstrapService.js";
 export { migrateI18n } from "./I18nMigrationService.js";
 export { autoTranslate } from "./I18nAutoTranslateService.js";

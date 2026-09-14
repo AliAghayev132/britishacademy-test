@@ -101,7 +101,7 @@ describe("#34 əlçatanlıq", () => {
     expect(modal).toMatch(/aria-label=\{t\("apply\.close"\)\}/);
     expect(modal).toMatch(/aria-label=\{t\("apply\.name"\)\}/);
     expect(read("src/components/site/SearchOverlay.jsx")).toMatch(/useDialogFocus\(open, \{ initialFocus: inputRef, onEscape: onClose \}\)/);
-    const header = read("src/components/site/Header.jsx");
+    const header = read("src/components/site/Header.jsx") + read("src/components/site/header/MobileNav.jsx");
     expect(header).toMatch(/inert=\{!mobile\}/);
     expect(header).not.toMatch(/aria-label="Menyu"/);
   });
@@ -135,6 +135,6 @@ describe("#53 / #54", () => {
     expect(read("src/components/site/Header.jsx")).toMatch(/const canonical = stripLocale\(pathname\);/);
     // SVG mətni birbaşa src-ə yazılmır — data URI-yə çevrilir (DOMPurify-sız, skript işləmir).
     expect(read("src/components/site/ApplyModal.jsx")).toMatch(/isInlineSvg\(d\.flag\) \? svgDataUri\(d\.flag\) : d\.flag/);
-    expect(read("src/components/site/cards.jsx")).not.toMatch(/dangerouslySetInnerHTML/);
+    expect(read("src/components/site/cards/DestinationCard.jsx")).not.toMatch(/dangerouslySetInnerHTML/);
   });
 });

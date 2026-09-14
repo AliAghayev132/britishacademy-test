@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 
 // Components
-import { ColorInput, Switch, notify, QueryState, FileUpload } from "@/components";
+import { notify, QueryState } from "@/components";
 
 // Store
 import {
@@ -13,34 +13,18 @@ import {
   useAdminTestMailMutation,
 } from "@/store";
 
-// Lib
-import { IMAGE_SPECS } from "@/lib";
-
 // Utils
 import { apiErrorMessage } from "@/utils";
 
 // Local
 // Çoxdilli redaktə (modallardakı ilə eyni sistem)
-import {
-  LocalizedFormProvider,
-  LocaleSwitcher,
-  GlobalAiBar,
-  LocalizedInput,
-  toLoc,
-  trimLoc,
-} from "../_forms/Localized";
-
-const input = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500";
-const label = "mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500";
-
-// Defined OUTSIDE the page component — otherwise React remounts the subtree on
-// every keystroke and inputs lose focus.
-const Section = ({ title, children }) => (
-  <div className="rounded-xl border border-gray-200 bg-white p-5">
-    <h2 className="mb-4 text-sm font-bold text-gray-900">{title}</h2>
-    <div className="grid gap-4 sm:grid-cols-2">{children}</div>
-  </div>
-);
+import { LocalizedFormProvider, LocaleSwitcher, GlobalAiBar, trimLoc } from "../_forms/Localized";
+import { settingsToForm } from "./_components/settingsToForm";
+import { BrandTab } from "./_components/BrandTab";
+import { ContactTab } from "./_components/ContactTab";
+import { SeoTab } from "./_components/SeoTab";
+import { SmtpTab } from "./_components/SmtpTab";
+import { AiTab } from "./_components/AiTab";
 
 // Tənzimləmələr tab-ları — hər biri müvafiq bölmələri göstərir. Bütün sahələr
 // tək `form` state-də saxlanılır, ona görə "Yadda saxla" hansı tabda olsan da
@@ -57,6 +41,9 @@ const TABS = [
  * Site settings editor. Covers the client brief's admin requirements:
  * contact/socials, hero words+colors, stats, head/body code injection, robots.txt,
  * SMTP email göndərişi və AI (OpenRouter) — hamısı SiteSetting singleton-da.
+ *
+ * Forma vəziyyəti, yadda saxlama və test məktubu burada qalır; hər tabın UI-ı
+ * `_components/` altındadır.
  */
 export default function SettingsPage() {
   const { data, isLoading, isError, error, refetch } = useAdminGetSettingsQuery();
@@ -70,63 +57,7 @@ export default function SettingsPage() {
     const s = data?.data?.settings;
     if (s && !form) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- tənzimləmələr yüklənəndə forma bir dəfə doldurulur (`!form` şərti təkrarın qarşısını alır)
-      setForm({
-        brand: {
-          name: s.brand?.name || "",
-          logo: s.brand?.logo || "",
-          shield: s.brand?.shield || "",
-          badge: s.brand?.badge || "",
-          favicon: s.brand?.favicon || "",
-          ogImage: s.brand?.ogImage || "",
-          themeColor: s.brand?.themeColor || "#00157A",
-        },
-        contact: {
-          ...s.contact,
-          // Ünvan və iş saatları çoxdillidir — hər səhifədə görünürlər.
-          address: toLoc(s.contact?.address),
-          hours: toLoc(s.contact?.hours),
-        },
-        socials: { ...s.socials },
-        smtp: {
-          enabled: Boolean(s.smtp?.enabled),
-          host: s.smtp?.host || "",
-          port: s.smtp?.port ?? 587,
-          secure: Boolean(s.smtp?.secure),
-          user: s.smtp?.user || "",
-          fromName: s.smtp?.fromName || "",
-          fromEmail: s.smtp?.fromEmail || "",
-          notifyLeads: s.smtp?.notifyLeads !== false,
-          notifyEmail: s.smtp?.notifyEmail || "",
-          pass: "", // yalnız-yazma; boş = köhnəni saxla
-          hasPass: Boolean(s.smtp?.hasPass),
-        },
-        ai: {
-          enabled: Boolean(s.ai?.enabled),
-          model: s.ai?.model || "openai/gpt-4o-mini",
-          apiKey: "", // yalnız-yazma; boş = köhnəni saxla
-          hasKey: Boolean(s.ai?.hasKey),
-        },
-        codeInjection: {
-          head: s.codeInjection?.head || "",
-          bodyEnd: s.codeInjection?.bodyEnd || "",
-          gtmId: s.codeInjection?.gtmId || "",
-        },
-        robotsTxt: s.robotsTxt || "",
-        maxImageSizeKb: s.maxImageSizeKb || 500,
-        seo: {
-          titleTemplate: s.seo?.titleTemplate || "",
-          defaultTitle: toLoc(s.seo?.defaultTitle),
-          defaultDescription: toLoc(s.seo?.defaultDescription),
-          defaultOgImage: s.seo?.defaultOgImage || "",
-          twitterHandle: s.seo?.twitterHandle || "",
-          keywords: toLoc(s.seo?.keywords),
-          verification: {
-            google: s.seo?.verification?.google || "",
-            yandex: s.seo?.verification?.yandex || "",
-            bing: s.seo?.verification?.bing || "",
-          },
-        },
-      });
+      setForm(settingsToForm(s));
     }
   }, [data, form]);
 
@@ -214,276 +145,48 @@ export default function SettingsPage() {
 
   return (
     <LocalizedFormProvider>
-    <div className="flex flex-col gap-5">
-      {/* Tab bar + yadda saxla */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1 rounded-xl border border-gray-200 bg-white p-1">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === t.id ? "bg-blue-900 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <button onClick={save} disabled={saving} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
-          {saving ? "Saxlanılır…" : "Yadda saxla"}
-        </button>
-      </div>
-
-      {/* Çoxdilli sahələr üçün qlobal dil düyməsi + AI (hamısını tərcümə/səliqələ) */}
-      {hasLocalized && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2">
-          <LocaleSwitcher />
-          <GlobalAiBar />
-        </div>
-      )}
-
-      {/* ── Brend ── */}
-      {tab === "brand" && (
-        <Section title="Loqolar və nişanlar">
-          <div className="sm:col-span-2">
-            <label className={label}>Brend adı</label>
-            <input className={input} value={form.brand.name} onChange={(e) => set("brand.name", e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>Loqo (üfüqi)</label>
-            <FileUpload value={form.brand.logo} onChange={(u) => set("brand.logo", u)} kind="image" spec={IMAGE_SPECS.brandLogo} />
-          </div>
-          <div>
-            <label className={label}>Qalxan nişanı</label>
-            <FileUpload value={form.brand.shield} onChange={(u) => set("brand.shield", u)} kind="image" spec={IMAGE_SPECS.brandShield} />
-          </div>
-          <div>
-            <label className={label}>Yubiley nişanı</label>
-            <FileUpload value={form.brand.badge} onChange={(u) => set("brand.badge", u)} kind="image" spec={IMAGE_SPECS.brandBadge} />
-          </div>
-          <div>
-            <label className={label}>Favicon</label>
-            <FileUpload value={form.brand.favicon} onChange={(u) => set("brand.favicon", u)} kind="image" spec={IMAGE_SPECS.favicon} />
-          </div>
-          <div>
-            <label className={label}>Paylaşım şəkli (OG)</label>
-            <FileUpload value={form.brand.ogImage} onChange={(u) => set("brand.ogImage", u)} kind="image" spec={IMAGE_SPECS.ogImage} />
-          </div>
-          <div>
-            <label className={label}>Tema rəngi</label>
-            <ColorInput
-              value={form.brand.themeColor}
-              onChange={(e) => set("brand.themeColor", e.target.value)}
-              className="h-10 w-full"
-            />
-            <p className="mt-1 text-xs text-gray-400">Mobil brauzerin ünvan zolağının rəngi.</p>
-          </div>
-        </Section>
-      )}
-
-      {/* ── Əlaqə ── */}
-      {tab === "contact" && (
-        <>
-          <Section title="Əlaqə">
-            {["phone", "phone2", "email"].map((k) => (
-              <div key={k}>
-                <label className={label}>{{ phone: "Telefon", phone2: "Telefon 2", email: "E-poçt" }[k]}</label>
-                <input className={input} value={form.contact?.[k] || ""} onChange={(e) => set(`contact.${k}`, e.target.value)} />
-              </div>
-            ))}
-            {/* Ünvan və iş saatları 3 dildədir — header-in üst lentində,
-                footer-də və «Əlaqə» səhifəsində, yəni bütün saytda görünürlər. */}
-            <div>
-              <label className={label}>Ünvan <span className="text-gray-400">· 3 dildə</span></label>
-              <LocalizedInput value={form.contact.address} onChange={(v) => set("contact.address", v)} />
-            </div>
-            <div>
-              <label className={label}>İş saatları <span className="text-gray-400">· 3 dildə</span></label>
-              <LocalizedInput value={form.contact.hours} onChange={(v) => set("contact.hours", v)} />
-            </div>
-          </Section>
-
-          <Section title="Sosial şəbəkələr">
-            {["instagram", "facebook", "youtube", "whatsapp", "tiktok"].map((k) => (
-              <div key={k}>
-                <label className={label}>{k}</label>
-                <input className={input} value={form.socials?.[k] || ""} onChange={(e) => set(`socials.${k}`, e.target.value)} />
-              </div>
-            ))}
-          </Section>
-        </>
-      )}
-
-      {tab === "seo" && (
-        <>
-          <Section title="SEO (qlobal)">
-            <div>
-              <label className={label}>Başlıq şablonu</label>
-              <input className={input} placeholder="%s — British Academy" value={form.seo.titleTemplate} onChange={(e) => set("seo.titleTemplate", e.target.value)} />
-              <p className="mt-1 text-xs text-gray-400">%s başlıq yerinə keçir, məs. &quot;%s — British Academy&quot;</p>
-            </div>
-            <div>
-              <label className={label}>Default başlıq (3 dildə)</label>
-              <LocalizedInput value={form.seo.defaultTitle} onChange={(v) => set("seo.defaultTitle", v)} />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>Default təsvir (3 dildə)</label>
-              <LocalizedInput value={form.seo.defaultDescription} onChange={(v) => set("seo.defaultDescription", v)} multiline rows={3} />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>Açar sözlər — vergüllə (3 dildə)</label>
-              <LocalizedInput value={form.seo.keywords} onChange={(v) => set("seo.keywords", v)} />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>Default OG şəkil (URL)</label>
-              <FileUpload
-                value={form.seo.defaultOgImage}
-                onChange={(url) => set("seo.defaultOgImage", url)}
-                kind="image"
-                spec={IMAGE_SPECS.ogImage}
-              />
-            </div>
-            <div>
-              <label className={label}>Twitter handle</label>
-              <input className={input} placeholder="@britishacademy" value={form.seo.twitterHandle} onChange={(e) => set("seo.twitterHandle", e.target.value)} />
-            </div>
-            <div>
-              <label className={label}>Google doğrulama kodu</label>
-              <input className={input} value={form.seo.verification.google} onChange={(e) => set("seo.verification.google", e.target.value)} />
-            </div>
-            <div>
-              <label className={label}>Yandex doğrulama</label>
-              <input className={input} value={form.seo.verification.yandex} onChange={(e) => set("seo.verification.yandex", e.target.value)} />
-            </div>
-            <div>
-              <label className={label}>Bing doğrulama</label>
-              <input className={input} value={form.seo.verification.bing} onChange={(e) => set("seo.verification.bing", e.target.value)} />
-            </div>
-          </Section>
-
-          <Section title="SEO / Texniki (PDF tələbləri)">
-            <div className="sm:col-span-2">
-              <label className={label}>Google Tag Manager ID</label>
-              <input
-                className={`${input} font-mono`}
-                placeholder="GTM-XXXXXXX"
-                value={form.codeInjection.gtmId}
-                onChange={(e) => set("codeInjection.gtmId", e.target.value)}
-              />
-              <p className="mt-1.5 text-xs text-gray-400">
-                Yalnız ID yazın — kodun özünü yapışdırmaq lazım deyil. Boş qalsa GTM
-                ümumiyyətlə yüklənmir. GTM-in <b>hər iki</b> hissəsi (skript və
-                noscript) düzgün yerdə avtomatik qoyulur.
-              </p>
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>&lt;head&gt; kodu (analytics, pixel və s.)</label>
-              <textarea rows={4} spellCheck={false} className={`${input} font-mono text-xs`} value={form.codeInjection.head} onChange={(e) => set("codeInjection.head", e.target.value)} />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>&lt;/body&gt; öncəsi kod</label>
-              <textarea rows={3} spellCheck={false} className={`${input} font-mono text-xs`} value={form.codeInjection.bodyEnd} onChange={(e) => set("codeInjection.bodyEnd", e.target.value)} />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={label}>robots.txt məzmunu</label>
-              <textarea rows={5} spellCheck={false} className={`${input} font-mono text-xs`} value={form.robotsTxt} onChange={(e) => set("robotsTxt", e.target.value)} />
-            </div>
-            <div>
-              <label className={label}>Maks. şəkil ölçüsü (KB)</label>
-              <input type="number" className={input} value={form.maxImageSizeKb} onChange={(e) => set("maxImageSizeKb", e.target.value)} />
-            </div>
-          </Section>
-        </>
-      )}
-
-      {/* ── SMTP ── */}
-      {tab === "smtp" && (
-        <Section title="SMTP (email göndərişi)">
-          <div className="sm:col-span-2 flex items-center gap-2">
-            <Switch checked={form.smtp.enabled} onChange={(v) => set("smtp.enabled", v)} label="SMTP aktiv (email göndərişi üçün)" />
-          </div>
-          <div>
-            <label className={label}>Host</label>
-            <input className={input} placeholder="smtp.gmail.com" value={form.smtp.host} onChange={(e) => set("smtp.host", e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>Port</label>
-            <input type="number" className={input} placeholder="587" value={form.smtp.port} onChange={(e) => set("smtp.port", e.target.value)} />
-          </div>
-          <div className="flex items-center gap-2 pt-6">
-            <Switch checked={form.smtp.secure} onChange={(v) => set("smtp.secure", v)} label="Secure (SSL — port 465)" />
-          </div>
-          <div>
-            <label className={label}>İstifadəçi (user)</label>
-            <input className={input} placeholder="mail@domain.com" value={form.smtp.user} onChange={(e) => set("smtp.user", e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>Parol {form.smtp.hasPass && <span className="text-emerald-600">(təyin olunub)</span>}</label>
-            <input type="password" autoComplete="new-password" className={input} placeholder={form.smtp.hasPass ? "•••••••• (dəyişmək üçün yaz)" : "SMTP parolu"} value={form.smtp.pass} onChange={(e) => set("smtp.pass", e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>Göndərən adı (from name)</label>
-            <input className={input} placeholder="British Academy" value={form.smtp.fromName} onChange={(e) => set("smtp.fromName", e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>Göndərən email (from)</label>
-            <input className={input} placeholder="info@britishacademy.az" value={form.smtp.fromEmail} onChange={(e) => set("smtp.fromEmail", e.target.value)} />
-          </div>
-          {/* ── Müraciət bildirişi ── */}
-          <div className="sm:col-span-2 flex items-center gap-2 border-t border-gray-100 pt-4">
-            <Switch checked={form.smtp.notifyLeads} onChange={(v) => set("smtp.notifyLeads", v)} label="Yeni müraciət gələndə mənə məktub göndər" />
-          </div>
-          <div className="sm:col-span-2">
-            <label className={label}>Bildiriş ünvanı</label>
-            <input className={input} placeholder={form.smtp.fromEmail || form.smtp.user || "boş = SMTP-nin öz ünvanı"} value={form.smtp.notifyEmail} onChange={(e) => set("smtp.notifyEmail", e.target.value)} />
-            <p className="mt-1.5 text-xs text-gray-400">
-              Boş buraxsanız bildiriş SMTP hesabının <b>öz ünvanına</b> gedir (yuxarıdakı «Göndərən email»).
-              Bir neçə ünvan üçün vergüllə ayırın.
-            </p>
-          </div>
-
-          <div className="sm:col-span-2 rounded-lg bg-gray-50 p-3">
-            <label className={label}>Test məktubu göndər</label>
-            <div className="flex flex-wrap items-center gap-2">
-              <input className={`${input} max-w-xs`} placeholder="test@ünvan.com" value={testTo} onChange={(e) => setTestTo(e.target.value)} />
-              <button onClick={sendTest} disabled={testing} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
-                {testing ? "Göndərilir…" : "Test göndər"}
+      <div className="flex flex-col gap-5">
+        {/* Tab bar + yadda saxla */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-1 rounded-xl border border-gray-200 bg-white p-1">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${tab === t.id ? "bg-blue-900 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"}`}
+              >
+                {t.label}
               </button>
-            </div>
-            <p className="mt-1.5 text-xs text-gray-400">Əvvəlcə SMTP-ni yadda saxlayın, sonra test göndərin.</p>
+            ))}
           </div>
-        </Section>
-      )}
+          <button onClick={save} disabled={saving} className="rounded-lg bg-blue-900 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+            {saving ? "Saxlanılır…" : "Yadda saxla"}
+          </button>
+        </div>
 
-      {/* ── AI (OpenRouter) ── */}
-      {tab === "ai" && (
-        <Section title="AI köməkçi (OpenRouter)">
-          <div className="sm:col-span-2 flex items-center gap-2">
-            <Switch checked={form.ai.enabled} onChange={(v) => set("ai.enabled", v)} label="AI aktiv (modallardakı tərcümə / səliqə düymələri üçün)" />
+        {/* Çoxdilli sahələr üçün qlobal dil düyməsi + AI (hamısını tərcümə/səliqələ) */}
+        {hasLocalized && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2">
+            <LocaleSwitcher />
+            <GlobalAiBar />
           </div>
-          <div className="sm:col-span-2">
-            <label className={label}>API açarı {form.ai.hasKey && <span className="text-emerald-600">(təyin olunub)</span>}</label>
-            <input type="password" autoComplete="new-password" className={input} placeholder={form.ai.hasKey ? "•••••••• (dəyişmək üçün yaz)" : "sk-or-v1-..."} value={form.ai.apiKey} onChange={(e) => set("ai.apiKey", e.target.value)} />
-            <p className="mt-1 text-xs text-gray-400">
-              Açarı <span className="font-semibold">openrouter.ai/keys</span> ünvanından alın. Yalnız-yazma — boş buraxsanız köhnə açar saxlanılır.
-            </p>
-          </div>
-          <div className="sm:col-span-2">
-            <label className={label}>Model</label>
-            <input className={input} placeholder="openai/gpt-4o-mini" value={form.ai.model} onChange={(e) => set("ai.model", e.target.value)} />
-            <p className="mt-1 text-xs text-gray-400">
-              OpenRouter model id, məs. <span className="font-mono">openai/gpt-4o-mini</span>, <span className="font-mono">google/gemini-2.0-flash-001</span>, <span className="font-mono">anthropic/claude-3.5-haiku</span>.
-            </p>
-          </div>
-          <div className="sm:col-span-2 rounded-lg bg-violet-50 p-3 text-xs text-violet-800">
-            Aktivləşdirib yadda saxladıqdan sonra formalardakı çoxdilli sahələrdə
-            <span className="font-semibold"> “AZ-dən tərcümə et” </span>
-            və
-            <span className="font-semibold"> “Səliqəyə sal” </span>
-            düymələri işləyəcək.
-          </div>
-        </Section>
-      )}
-    </div>
+        )}
+
+        {tab === "brand" && <BrandTab form={form} set={set} />}
+        {tab === "contact" && <ContactTab form={form} set={set} />}
+        {tab === "seo" && <SeoTab form={form} set={set} />}
+        {tab === "smtp" && (
+          <SmtpTab
+            form={form}
+            set={set}
+            testTo={testTo}
+            setTestTo={setTestTo}
+            sendTest={sendTest}
+            testing={testing}
+          />
+        )}
+        {tab === "ai" && <AiTab form={form} set={set} />}
+      </div>
     </LocalizedFormProvider>
   );
 }

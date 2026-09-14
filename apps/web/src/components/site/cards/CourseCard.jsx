@@ -1,13 +1,10 @@
 "use client";
 
 // Lib
-import { useT, getImageUrl } from "@/lib";
-
-// Utils
-import { isInlineSvg, svgDataUri } from "@/utils";
+import { useT } from "@/lib";
 
 // Local
-import { LocaleLink as Link } from "./LocaleLink";
+import { LocaleLink as Link } from "../LocaleLink";
 
 /**
  * Kurs kartlarının vurğu rəngi.
@@ -69,7 +66,7 @@ function accentFor(key, index) {
 }
 
 /** Course card — used on the homepage and category hubs. */
-export function CourseCard({ course, index }) {
+export default function CourseCard({ course, index }) {
   const t = useT();
   const from = course.priceFrom;
   const accent = accentFor(course.slug || course._id, index);
@@ -101,84 +98,5 @@ export function CourseCard({ course, index }) {
         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--accent)", whiteSpace: "nowrap" }}>{t("card.view")}</span>
       </div>
     </Link>
-  );
-}
-
-// Country → flag emoji (used as a decorative wash when no SVG flag is stored).
-const COUNTRY_FLAGS = {
-  "Almaniya": "🇩🇪", "Türkiyə": "🇹🇷", "İngiltərə": "🇬🇧", "Kanada": "🇨🇦",
-  "Polşa": "🇵🇱", "Latviya": "🇱🇻", "Macarıstan": "🇭🇺", "Litva": "🇱🇹",
-  "Rusiya": "🇷🇺", "Gürcüstan": "🇬🇪", "Estoniya": "🇪🇪", "Amerika": "🇺🇸",
-  "Fransa": "🇫🇷", "İspaniya": "🇪🇸", "İtaliya": "🇮🇹", "Niderland": "🇳🇱",
-};
-
-/**
- * Study-abroad destination card — sağ tərəfdə solğun "wash" görüntüsü.
- *
- * Üstünlük sırası:
- *   1) dest.image  — admin paneldən yüklənən şəkil (ƏN SADƏ YOL)
- *   2) dest.flag   — inline SVG bayraq (JSON redaktorundan)
- *   3) emoji       — heç nə yoxdursa (⚠️ Windows-da bayraq emojiləri
- *                    dəstəklənmir, "DE" kimi hərf cütü görünür)
- */
-export function DestinationCard({ dest }) {
-  const flag = COUNTRY_FLAGS[dest.country] || (dest.isScholarship ? "🎓" : "🌍");
-  return (
-    <Link href={`/xaricde-tehsil/${dest.slug}`} className="ba-fdest" style={{ "--cc": dest.color || "#2E6BE6" }}>
-      {dest.image ? (
-        <span className="ba-flag" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={getImageUrl(dest.image)} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </span>
-      ) : dest.flag ? (
-        <span className="ba-flag" aria-hidden="true">
-          {/* Admin sərbəst mətn sahəsidir (inline SVG). <img> kimi yüklənən
-              SVG-də skript işləmir — sanitizasiya və DOMPurify lazım deyil. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={isInlineSvg(dest.flag) ? svgDataUri(dest.flag) : dest.flag} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-        </span>
-      ) : (
-        <span aria-hidden="true" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 92, lineHeight: 1, opacity: 0.9, pointerEvents: "none", userSelect: "none", WebkitMaskImage: "linear-gradient(to left, #000 55%, transparent)", maskImage: "linear-gradient(to left, #000 55%, transparent)" }}>{flag}</span>
-      )}
-      <span className="ba-fdest-body">
-        <span className="ba-fdest-tag" style={{ display: "block" }}>{dest.region}</span>
-        <span className="ba-fdest-name" style={{ display: "block" }}>{dest.country}</span>
-        <span className="ba-fdest-sub" style={{ display: "block" }}>{dest.tagline}</span>
-      </span>
-    </Link>
-  );
-}
-
-const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
-
-/** Text testimonial card (review wall). */
-export function TestimonialCard({ t }) {
-  const tr = useT();
-  const rating = t.rating || 5;
-  return (
-    <figure className="ba-review" style={{ "--c": t.color || "#2E6BE6" }}>
-      <span className="ba-review-quote" aria-hidden="true">”</span>
-      <span className="ba-stars" role="img" aria-label={tr("review.rating").replace("{n}", rating)}>{stars(rating)}</span>
-      <blockquote style={{ margin: "12px 0 0", fontSize: 15.5, lineHeight: 1.75, color: "#3c3c47" }}>{t.quote}</blockquote>
-      <figcaption style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 18, paddingTop: 16, borderTop: "1px solid #EFF0F5" }}>
-        <span className="ba-av" style={{ "--c": t.color, width: 46, height: 46, fontSize: 18 }}>
-          {t.photo ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={t.photo} alt="" />) : <span>{(t.name || "?").charAt(0)}</span>}
-        </span>
-        <span>
-          <span style={{ display: "block", fontFamily: "'Poppins'", fontWeight: 700, fontSize: 15, color: "#16161C" }}>{t.name}</span>
-          <span style={{ display: "block", fontSize: 13, color: t.color, fontWeight: 600, marginTop: 2 }}>{t.achievement}</span>
-        </span>
-      </figcaption>
-    </figure>
-  );
-}
-
-/** Section heading used across pages. */
-export function SectionHead({ title, sub }) {
-  return (
-    <div style={{ marginBottom: 26 }}>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,44px)", letterSpacing: "-.02em", margin: 0, lineHeight: 1.08, color: "#14141C" }}>{title}</h2>
-      {sub && <div style={{ color: "#7C7D8C", fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(20px,3vw,30px)", lineHeight: 1.1 }}>{sub}</div>}
-    </div>
   );
 }

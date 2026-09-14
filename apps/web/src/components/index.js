@@ -6,10 +6,8 @@ export { DashboardSidebar } from "./DashboardSidebar";
 export { JsonLd } from "./JsonLd";
 export { SectionGuard } from "./SectionGuard";
 
-// Ai / Components
-export { default as AIFieldActions } from "./ai/components/AIFieldActions";
-export { default as AISuggestion } from "./ai/components/AISuggestion";
-export { default as AIToolbar } from "./ai/components/AIToolbar";
+// Ai
+export { AIFieldActions, AISuggestion, AIToolbar } from "./ai/components";
 
 // Site
 export { ApplyButton } from "./site/ApplyButton";

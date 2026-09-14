@@ -76,7 +76,9 @@ describe("#16 Socket.IO yalnız admin panelində", () => {
 
   it("ictimai komponentlər socket işlətmir", () => {
     const dir = "src/components/site";
-    for (const f of fs.readdirSync(dir)) {
+    // Alt qovluqlar (header/, quiz/, cards/) da yoxlanır.
+    for (const f of fs.readdirSync(dir, { recursive: true })) {
+      if (fs.statSync(`${dir}/${f}`).isDirectory()) continue;
       expect(read(`${dir}/${f}`), f).not.toMatch(/useSocket|SocketContext/);
     }
   });

@@ -75,7 +75,7 @@ describe("#37 admin yazmasından sonra sayt keşi", () => {
   });
 
   it("middleware admin router-dən əvvəl qoşulub", () => {
-    const app = fs.readFileSync("app.js", "utf8");
+    const app = fs.readFileSync("app/routes.js", "utf8");
     expect(app.indexOf('app.use("/api/admin", revalidateOnWrite)')).toBeGreaterThan(-1);
     expect(app.indexOf('app.use("/api/admin", revalidateOnWrite)')).toBeLessThan(app.indexOf('app.use("/api/admin", AdminRouter)'));
   });

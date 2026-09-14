@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 
 // Icons
-import { ArrowDown, ArrowUp, Eye, EyeOff, Lock, Save } from "lucide-react";
+import { Save } from "lucide-react";
 
 // Components
 import { notify, QueryState } from "@/components";
@@ -20,7 +20,6 @@ import { apiErrorMessage, rowKey } from "@/utils";
 
 // Local
 import {
-  LocalizedInput,
   LocalizedFormProvider,
   LocaleSwitcher,
   GlobalAiBar,
@@ -28,7 +27,10 @@ import {
   trimLoc,
   locAz,
 } from "../_forms/Localized";
-import { FeaturedPicker } from "./FeaturedPicker";
+import { SectionsPanel } from "./_components/SectionsPanel";
+import { HeroPanel } from "./_components/HeroPanel";
+import { MarqueePanel } from "./_components/MarqueePanel";
+import { ContentPanel } from "./_components/ContentPanel";
 
 /**
  * Ana səhifə idarəetməsi — HAMISI BİR YERDƏ.
@@ -43,26 +45,16 @@ import { FeaturedPicker } from "./FeaturedPicker";
  *   Hero      — başlıq, sözlər, həblər, rənglər
  *   Lent      — sürüşən sözlər və statistika
  *   Məzmun    — hansı kurs/ölkə/rəy ana səhifədə göstərilir
+ *
+ * Bu fayl forma vəziyyətini və yadda saxlamanı saxlayır; hər tabın UI-ı
+ * `_components/` altındadır.
  */
-
-const label = "mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500";
-const input = "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500";
 
 const TABS = [
   { key: "sections", label: "Bölmələr" },
   { key: "hero", label: "Hero" },
   { key: "marquee", label: "Lent və statistika" },
   { key: "content", label: "Məzmun seçimi" },
-];
-
-/** «Məzmun seçimi» tabındakı resurslar. */
-const PICKERS = [
-  { key: "courses", label: "Kurslar", resource: "courses", limit: 6, title: "title", sub: "slug" },
-  { key: "destinations", label: "Ölkələr", resource: "destinations", limit: 8, title: "country", sub: "tagline" },
-  { key: "projects", label: "Layihələr", resource: "projects", limit: 6, title: "title", sub: "tagline" },
-  { key: "videos", label: "Video rəylər", resource: "testimonials", limit: 8, title: "name", sub: "achievement", filter: { type: "video" } },
-  { key: "testimonials", label: "Yazılı rəylər", resource: "testimonials", limit: 6, title: "name", sub: "achievement", filter: { type: "text" } },
-  { key: "teachers", label: "Müəllimlər", resource: "teachers", limit: 8, title: "fullName", sub: "title" },
 ];
 
 export default function HomeAdminPage() {
@@ -131,21 +123,6 @@ export default function HomeAdminPage() {
     setDirty(true);
   };
 
-  /**
-   * Hero düyməsinin sırasını dəyiş.
-   *
-   * Sıra SAYTDA GÖRÜNƏN ardıcıllıqdır — ən çox satılan kursu əvvələ çəkmək
-   * üçün düyməni silib yenidən yazmaq lazım gəlmirdi. `move` (bölmələr üçün)
-   * ilə eyni məntiq, amma o, ayrıca `rows` vəziyyəti üzərində işləyir.
-   */
-  const movePill = (index, dir) => {
-    const list = [...(form.hero.pillLinks || [])];
-    const target = index + dir;
-    if (target < 0 || target >= list.length) return;
-    [list[index], list[target]] = [list[target], list[index]];
-    set("hero.pillLinks", list);
-  };
-
   const save = async () => {
     try {
       await update({
@@ -176,349 +153,50 @@ export default function HomeAdminPage() {
     }
   };
 
-  const visible = rows.filter((r) => r.enabled).length;
-  const active = PICKERS.find((p) => p.key === picker);
-
   return (
     <LocalizedFormProvider>
-    <div className="max-w-4xl">
-      {/* Dil keçidi + AI köməkçiləri — provider olmadan yalnız AZ redaktə
-          oluna bilərdi, halbuki bütün hero mətnləri 3 dillidir. */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <LocaleSwitcher />
-        <GlobalAiBar />
-      </div>
+      <div className="max-w-4xl">
+        {/* Dil keçidi + AI köməkçiləri — provider olmadan yalnız AZ redaktə
+            oluna bilərdi, halbuki bütün hero mətnləri 3 dillidir. */}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <LocaleSwitcher />
+          <GlobalAiBar />
+        </div>
 
-      {/* Tablar + yadda saxla */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1">
-          {TABS.map((t) => (
+        {/* Tablar + yadda saxla */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-1 rounded-xl bg-gray-100 p-1">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
+                  tab === t.key ? "bg-white text-[#00157A] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Məzmun seçimi dərhal yadda saxlanılır, ona görə düymə orada gizlənir */}
+          {tab !== "content" && (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`rounded-lg px-3.5 py-1.5 text-sm font-semibold transition ${
-                tab === t.key ? "bg-white text-[#00157A] shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
+              onClick={save}
+              disabled={!dirty || saving}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#00157A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#001d9e] disabled:opacity-40"
             >
-              {t.label}
+              <Save className="h-4 w-4" />
+              {saving ? "Saxlanılır…" : dirty ? "Yadda saxla" : "Dəyişiklik yoxdur"}
             </button>
-          ))}
+          )}
         </div>
 
-        {/* Məzmun seçimi dərhal yadda saxlanılır, ona görə düymə orada gizlənir */}
-        {tab !== "content" && (
-          <button
-            onClick={save}
-            disabled={!dirty || saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#00157A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#001d9e] disabled:opacity-40"
-          >
-            <Save className="h-4 w-4" />
-            {saving ? "Saxlanılır…" : dirty ? "Yadda saxla" : "Dəyişiklik yoxdur"}
-          </button>
-        )}
+        {tab === "sections" && <SectionsPanel rows={rows} move={move} toggleSection={toggleSection} />}
+        {tab === "hero" && <HeroPanel form={form} set={set} />}
+        {tab === "marquee" && <MarqueePanel form={form} set={set} />}
+        {tab === "content" && <ContentPanel picker={picker} setPicker={setPicker} />}
       </div>
-
-      {/* ── Bölmələr ── */}
-      {tab === "sections" && (
-        <>
-          <p className="mb-3 text-sm text-gray-500">
-            Ana səhifədə <b className="text-gray-900">{visible}</b> / {rows.length} bölmə görünür.
-            Sıranı oxlarla dəyişin.
-          </p>
-          <div className="space-y-2">
-            {rows.map((r, i) => (
-              <div
-                key={r.key}
-                className={`flex items-start gap-3 rounded-xl border p-4 transition ${
-                  r.enabled ? "border-gray-200 bg-white" : "border-dashed border-gray-200 bg-gray-50"
-                }`}
-              >
-                <div className="flex flex-col gap-0.5 pt-0.5">
-                  <button
-                    onClick={() => move(i, -1)}
-                    disabled={i === 0}
-                    aria-label="Yuxarı"
-                    className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
-                  >
-                    <ArrowUp className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => move(i, 1)}
-                    disabled={i === rows.length - 1}
-                    aria-label="Aşağı"
-                    className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
-                  >
-                    <ArrowDown className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-
-                <span className="mt-1 grid h-6 w-6 flex-none place-items-center rounded-md bg-gray-100 text-xs font-bold text-gray-500">
-                  {i + 1}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-semibold ${r.enabled ? "text-gray-900" : "text-gray-400"}`}>
-                      {r.label}
-                    </span>
-                    {r.locked && (
-                      <span title="Bu bölmə gizlədilə bilməz" className="text-gray-300">
-                        <Lock className="h-3.5 w-3.5" />
-                      </span>
-                    )}
-                    {r.limit && (
-                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold text-gray-500">
-                        maks. {r.limit}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs text-gray-500">{r.hint}</p>
-                </div>
-
-                <button
-                  onClick={() => toggleSection(r.key)}
-                  disabled={r.locked}
-                  title={r.locked ? "Bu bölmə həmişə göstərilir" : r.enabled ? "Gizlət" : "Göstər"}
-                  className={`inline-flex flex-none items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                    r.locked
-                      ? "cursor-not-allowed border-gray-100 text-gray-300"
-                      : r.enabled
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300"
-                        : "border-gray-200 text-gray-400 hover:border-gray-300"
-                  }`}
-                >
-                  {r.enabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                  {r.enabled ? "Görünür" : "Gizli"}
-                </button>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* ── Hero ── */}
-      {tab === "hero" && (
-        <div className="grid gap-4 rounded-xl border border-gray-200 bg-white p-5 sm:grid-cols-2">
-          <div>
-            <label className={label}>Başlıq prefiksi (3 dildə)</label>
-            <LocalizedInput value={form.hero.titlePrefix} onChange={(v) => set("hero.titlePrefix", v)} />
-          </div>
-          <div>
-            <label className={label}>Alt yazı (3 dildə)</label>
-            <LocalizedInput value={form.hero.subtitle} onChange={(v) => set("hero.subtitle", v)} />
-          </div>
-          <div>
-            <label className={label}>Fırlanan sözlər — vergüllə (3 dildə)</label>
-            <LocalizedInput value={form.hero.words} onChange={(v) => set("hero.words", v)} />
-          </div>
-          <div>
-            <label className={label}>Rənglər (vergüllə, hex)</label>
-            <input className={input} value={form.hero.colors} onChange={(e) => set("hero.colors", e.target.value)} />
-          </div>
-
-          <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 sm:col-span-2">
-            <p className="mb-3 text-xs text-gray-500">
-              Hero-nun <b>solunda və sağında</b> üzən sözlər. Hər səhifə açılışında
-              siyahıdan <b>təsadüfi 3-ü</b> seçilir — sol və sağ müstəqil şəkildə.
-              Boş buraxsanız hazır dəyərlər işlənir.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={label}>Sol tərəf — vergüllə (3 dildə)</label>
-                <LocalizedInput
-                  value={form.hero.chipsLeft}
-                  onChange={(v) => set("hero.chipsLeft", v)}
-                  placeholder="Speaking, IELTS 8.5, Hallo"
-                />
-              </div>
-              <div>
-                <label className={label}>Sağ tərəf — vergüllə (3 dildə)</label>
-                <LocalizedInput
-                  value={form.hero.chipsRight}
-                  onChange={(v) => set("hero.chipsRight", v)}
-                  placeholder="Привет, A1 → C1, Konfrans"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className={label}>Kateqoriya həbləri — vergüllə (3 dildə)</label>
-            <LocalizedInput
-              value={form.hero.pills}
-              onChange={(v) => set("hero.pills", v)}
-              placeholder="İngilis dili, IELTS, Duolingo, Rus dili"
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              Aşağıdakı «linkli düymələr» siyahısı doldurulubsa BU sahə
-              işlədilmir — yalnız köhnə (linksiz) davranış üçün qalıb.
-            </p>
-          </div>
-
-          {/* Linkli düymələr */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5 sm:col-span-2">
-            <div className="mb-1 flex items-center justify-between">
-              <label className={label}>Hero düymələri — link ilə</label>
-              <button
-                onClick={() =>
-                  set("hero.pillLinks", [...(form.hero.pillLinks || []), { _key: rowKey(), label: toLoc(""), href: "" }])
-                }
-                className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
-              >
-                + Düymə
-              </button>
-            </div>
-            <p className="mb-3 text-xs text-gray-400">
-              Hər düymənin öz ünvanı olur. Ünvan boş qalsa həmin düymə kurslar
-              bölməsinə sürüşdürür. Sıra saytda göründüyü ardıcıllıqdır — ox
-              düymələri ilə dəyişdirin.
-            </p>
-
-            {(form.hero.pillLinks || []).length === 0 && (
-              <p className="text-sm text-gray-400">Düymə əlavə edilməyib — yuxarıdakı mətn siyahısı işlənəcək.</p>
-            )}
-            <div className="space-y-3">
-              {(form.hero.pillLinks || []).map((row, i) => (
-                <div key={row._key} className="flex items-start gap-3">
-                  {/* Sıra — saytda göründüyü ardıcıllıq */}
-                  <div className="mt-6 flex flex-none flex-col">
-                    <button
-                      onClick={() => movePill(i, -1)}
-                      disabled={i === 0}
-                      aria-label="Yuxarı"
-                      className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
-                    >
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => movePill(i, 1)}
-                      disabled={i === (form.hero.pillLinks || []).length - 1}
-                      aria-label="Aşağı"
-                      className="grid h-6 w-6 place-items-center rounded text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-20"
-                    >
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  <span className="mt-7 grid h-6 w-6 flex-none place-items-center rounded-md bg-gray-100 text-xs font-bold text-gray-500">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1">
-                    <label className={label}>Yazı (3 dildə)</label>
-                    <LocalizedInput
-                      value={row.label}
-                      onChange={(v) => set(`hero.pillLinks.${i}.label`, v)}
-                      placeholder="IELTS"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className={label}>Ünvan</label>
-                    <input
-                      className={input}
-                      value={row.href}
-                      onChange={(e) => set(`hero.pillLinks.${i}.href`, e.target.value)}
-                      placeholder="/kurslar/ielts-kurslari"
-                    />
-                    <p className="mt-1 text-xs text-gray-400">
-                      Saytdaxili yol («/kurslar/…»), lövbər («#kurslar») və ya tam link.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      set("hero.pillLinks", form.hero.pillLinks.filter((_, j) => j !== i))
-                    }
-                    className="mt-6 rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50"
-                    aria-label="Sil"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Lent və statistika ── */}
-      {tab === "marquee" && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <label className={label}>Hərəkət edən lent — vergüllə (3 dildə)</label>
-            <LocalizedInput value={form.marquee} onChange={(v) => set("marquee", v)} />
-            <p className="mt-1 text-xs text-gray-400">Hero-nun altında sürüşən sözlər.</p>
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <label className={label}>Statistika (məs. 20 000+ · məzun)</label>
-              <button
-                onClick={() => set("stats", [...form.stats, { _key: rowKey(), label: toLoc(""), value: toLoc("") }])}
-                className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
-              >
-                + Göstərici
-              </button>
-            </div>
-            {form.stats.length === 0 && <p className="text-sm text-gray-400">Göstərici əlavə edilməyib</p>}
-            <div className="space-y-3">
-              {form.stats.map((row, i) => (
-                <div key={row._key} className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <label className={label}>Dəyər</label>
-                    <LocalizedInput value={row.value} onChange={(v) => set(`stats.${i}.value`, v)} placeholder="20 000+" />
-                  </div>
-                  <div className="flex-1">
-                    <label className={label}>Etiket</label>
-                    <LocalizedInput value={row.label} onChange={(v) => set(`stats.${i}.label`, v)} placeholder="məzun tələbə" />
-                  </div>
-                  <button
-                    onClick={() => set("stats", form.stats.filter((_, j) => j !== i))}
-                    className="mt-6 rounded-lg border border-gray-200 p-2 text-red-500 hover:bg-red-50"
-                    aria-label="Sil"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Məzmun seçimi ── */}
-      {tab === "content" && (
-        <div>
-          <div className="mb-3 flex flex-wrap gap-2">
-            {PICKERS.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => setPicker(p.key)}
-                className={`rounded-lg border px-3.5 py-1.5 text-sm font-semibold transition ${
-                  picker === p.key
-                    ? "border-[#00157A] bg-[#00157A] text-white"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <p className="mb-3 text-xs text-gray-500">
-              Kliklə seçin — dəyişiklik <b>dərhal</b> saxlanılır, ayrıca «yadda
-              saxla» lazım deyil.
-            </p>
-            <FeaturedPicker
-              key={active.key}
-              resource={active.resource}
-              limit={active.limit}
-              filter={active.filter}
-              titleField={active.title}
-              subField={active.sub}
-            />
-          </div>
-        </div>
-      )}
-    </div>
     </LocalizedFormProvider>
   );
 }

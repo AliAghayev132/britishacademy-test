@@ -76,7 +76,10 @@ describe("siyahı səhifəsinin sıralama davranışı", () => {
   });
 
   it("sərhəd oxları sönülüdür", () => {
-    expect(page).toMatch(/disabled=\{i === 0 \|\| isFetching\}/);
-    expect(page).toMatch(/disabled=\{i === items\.length - 1 \|\| isFetching\}/);
+    // Sətir markup-ı ayrıca komponentdədir; `total` = items.length.
+    const row = fs.readFileSync("src/app/(protected)/dashboard/resurslar/[resource]/_components/ResourceRow.jsx", "utf8");
+    expect(row).toMatch(/disabled=\{i === 0 \|\| isFetching\}/);
+    expect(row).toMatch(/disabled=\{i === total - 1 \|\| isFetching\}/);
+    expect(fs.readFileSync("src/app/(protected)/dashboard/resurslar/[resource]/_components/ResourceTable.jsx", "utf8")).toMatch(/total=\{items\.length\}/);
   });
 });

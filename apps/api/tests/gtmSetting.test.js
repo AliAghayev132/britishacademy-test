@@ -12,7 +12,7 @@ import fs from "node:fs";
  */
 
 const model = fs.readFileSync("models/siteSetting.model.js", "utf8");
-const controller = fs.readFileSync("controllers/adminController.js", "utf8");
+const controller = fs.readFileSync("controllers/admin/settingsController.js", "utf8");
 
 /** `codeInjection: { … }` blokunun mətni. */
 const codeBlock = (model.match(/codeInjection:\s*\{[\s\S]*?\n {4}\}/) || [""])[0];

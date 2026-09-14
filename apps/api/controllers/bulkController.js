@@ -14,13 +14,12 @@ import {
   logAction,
   resolveDelaySec,
   DELAY_LIMITS,
+  applyLeadAccess,
+  applyLeadScope,
 } from "#services";
 
 // Utils
 import { fail, ok, asyncHandler, hasRole, canAccessSection } from "#utils";
-
-// Local
-import { applyLeadAccess, applyLeadScope } from "./adminController.js";
 
 /** Müraciətlərdən alıcı siyahısı qur. */
 async function fromLeads({ leadStatus, channel }, req) {

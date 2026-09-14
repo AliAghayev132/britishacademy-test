@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import { RESOURCES } from "../controllers/resourceRegistry.js";
-import { planReorder } from "../controllers/adminController.js";
+import { planReorder } from "../controllers/admin/crudController.js";
 
 /**
  * TOPLU SIRALAMA (`PATCH /admin/:resource/reorder`).
@@ -18,8 +18,8 @@ import { planReorder } from "../controllers/adminController.js";
  *     yazılırdı və heç nəyə təsir etmirdi.
  */
 
-const src = fs.readFileSync("controllers/adminController.js", "utf8");
-const reorderFn = src.slice(src.indexOf("const reorder = asyncHandler"), src.indexOf("const updateSettings"));
+const src = fs.readFileSync("controllers/admin/crudController.js", "utf8");
+const reorderFn = src.slice(src.indexOf("const reorder = asyncHandler"));
 
 /** Sıralaması `order` ilə BAŞLAYAN resurslar — oxlar yalnız onlarda mənalıdır. */
 const orderFirst = Object.entries(RESOURCES).filter(

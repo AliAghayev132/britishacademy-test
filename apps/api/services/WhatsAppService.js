@@ -1,14 +1,19 @@
-// Node
-import os from "node:os";
-import fs from "node:fs";
-import path from "node:path";
-
-// Models
-import { WhatsAppMessage } from "#models";
-
 // Local
 import { waLog } from "./WhatsAppLogService.js";
-import { installedVersion } from "./LibVersionService.js";
+import { INIT_TIMEOUT, HEALTH_INTERVAL } from "./whatsapp/constants.js";
+import { explainChromeError } from "./whatsapp/chrome.js";
+import { createClient, killClient } from "./whatsapp/client.js";
+import { resetAutoRetry, autoAllowed, registerAutoFailure } from "./whatsapp/autoRetry.js";
+import { attachClientEvents, onAck } from "./whatsapp/events.js";
+import { buildStatus } from "./whatsapp/status.js";
+import {
+  normalizePhone,
+  withSendTimeout,
+  loadLib,
+  sessionExists,
+  removeSessionDir,
+  makeQrDataUrl,
+} from "./whatsapp/helpers.js";
 
 /**
  * WhatsApp (whatsapp-web.js 1.34.x) — admin panelindən qoşulma və mesaj göndərmə.
@@ -27,68 +32,10 @@ import { installedVersion } from "./LibVersionService.js";
  *  - `authenticated` → `ready` gəlməsə: brauzer öldürülür, SESSİYA SAXLANILIR
  *    (yavaş resume-da etibarlı sessiya itməsin — health-check bərpa edir)
  *  - sessiya YALNIZ `auth_failure`-da və ya istifadəçi «çıxış» edəndə silinir
+ *
+ * Köməkçi hissələr services/whatsapp/ altındadır (Chrome, klient, hadisələr,
+ * geri çəkilmə, status); vəziyyət isə bu sinfin statik sahələrində qalır.
  */
-
-// ── Vaxt limitləri ──
-const MSG_TIMEOUT = 30_000;
-const INIT_TIMEOUT = 120_000;
-const READY_TIMEOUT = 180_000;   // authenticated → ready watchdog
-const HEALTH_INTERVAL = 60_000;  // dövri vəziyyət yoxlaması
-// Avtomatik bərpa uğursuz olanda növbəti cəhdə qədər gözləmə: 1, 2, 4 … 30 dəq.
-const AUTO_RETRY_BASE = 60_000;
-const AUTO_RETRY_MAX = 30 * 60_000;
-const isChromeMissing = (message) =>
-  /Could not find Chrome|Could not find (Chromium|browser)|Failed to launch the browser/i.test(String(message || ""));
-
-// İstehsalatda WhatsApp Web versiyasını pin etmək üçün (opsional).
-const WA_WEB_VERSION_URL = process.env.WA_WEB_VERSION_URL || null;
-// Sessiya qovluğu — deploy-da persistent volume-a yönəldilə bilər.
-const SESSION_DIR = process.env.WA_SESSION_DIR || path.resolve(".wwebjs_auth");
-const CLIENT_ID = "british-academy";
-
-/** Puppeteer-in öz Chrome-u yoxdursa sistem Chrome-unu tap. */
-function findSystemChrome() {
-  if (process.env.WHATSAPP_CHROME_PATH) return process.env.WHATSAPP_CHROME_PATH;
-  const platform = os.platform();
-  const candidates =
-    platform === "win32"
-      ? [
-          path.join(process.env.PROGRAMFILES || "", "Google/Chrome/Application/chrome.exe"),
-          path.join(process.env["PROGRAMFILES(X86)"] || "", "Google/Chrome/Application/chrome.exe"),
-          path.join(process.env.LOCALAPPDATA || "", "Google/Chrome/Application/chrome.exe"),
-        ]
-      : platform === "darwin"
-        ? ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
-        : [
-            "/usr/bin/google-chrome",
-            "/usr/bin/google-chrome-stable",
-            "/usr/bin/chromium-browser",
-            "/usr/bin/chromium",
-          ];
-  for (const p of candidates) {
-    if (p && fs.existsSync(p)) return p;
-  }
-  return null;
-}
-
-/**
- * Puppeteer-in xam «Could not find Chrome (ver. …)» mesajı səbəbi izah etmir —
- * istifadəçi admin paneldə yalnız bu sətri görür və nə edəcəyini bilmir.
- * Brauzer ümumiyyətlə tapılmadıqda mesajı həlli göstərən mətnlə əvəz edirik.
- */
-function explainChromeError(message) {
-  if (!/Could not find Chrome|Could not find (Chromium|browser)|Failed to launch the browser/i.test(message)) {
-    return message;
-  }
-  return (
-    "Serverdə Chrome tapılmadı — WhatsApp Web brauzer olmadan işləmir. " +
-    "Həlli: sistemə Google Chrome quraşdırın (Debian/Ubuntu: " +
-    "apt-get install -y google-chrome-stable), sonra serveri yenidən başladın. " +
-    "Fərqli yerdədirsə WHATSAPP_CHROME_PATH dəyişənində tam yolu göstərin. " +
-    "Orijinal xəta: " + message
-  );
-}
-
 export class WhatsAppService {
   static client = null;
   static isReady = false;
@@ -105,9 +52,7 @@ export class WhatsAppService {
   static _healthTimer = null;
   static _lib = null;
   static _pairPhone = null;   // pairing-kod istənilibsə hədəf nömrə
-  // Avtomatik bərpanın geri çəkilməsi (audit #38). Əvvəl Chrome tapılmayanda
-  // sağlamlıq taymeri hər 60 s yenidən cəhd edib 3 jurnal sətri yazırdı —
-  // gündə ~4300 qeyd, həqiqi hadisələr itirdi.
+  // Avtomatik bərpanın geri çəkilməsi (audit #38) — bax whatsapp/autoRetry.js.
   static _autoFailures = 0;
   static _nextAutoAt = 0;
   static _autoBlocked = null; // səbəb — əl ilə «Qoşul» basılana qədər avtomatik cəhd yoxdur
@@ -117,21 +62,7 @@ export class WhatsAppService {
   /** Kitabxananı lazım olanda yüklə; yoxdursa `false` saxlanılır. */
   static async _load() {
     if (this._lib !== null) return this._lib;
-    try {
-      const pkg = await import("whatsapp-web.js");
-      const mod = pkg.default || pkg;
-      this._lib = {
-        Client: mod.Client,
-        LocalAuth: mod.LocalAuth,
-        MessageMedia: mod.MessageMedia,
-        Events: mod.Events,
-        WAState: mod.WAState,
-        MessageAck: mod.MessageAck,
-        version: mod.version,
-      };
-    } catch {
-      this._lib = false;
-    }
+    this._lib = await loadLib();
     return this._lib;
   }
 
@@ -141,21 +72,12 @@ export class WhatsAppService {
 
   /** Diskdə saxlanmış sessiya varmı? (varsa QR-siz bərpa mümkündür) */
   static get hasSession() {
-    try {
-      return fs.existsSync(path.join(SESSION_DIR, `session-${CLIENT_ID}`));
-    } catch {
-      return false;
-    }
+    return sessionExists();
   }
 
   /** QR mətnini lokal PNG data URL-ə çevir (`qrcode` yoxdursa null). */
-  static async _makeQrDataUrl(text) {
-    try {
-      const { default: QRCode } = await import("qrcode");
-      return await QRCode.toDataURL(text, { width: 320, margin: 1 });
-    } catch {
-      return null;
-    }
+  static _makeQrDataUrl(text) {
+    return makeQrDataUrl(text);
   }
 
   // ── Daxili köməkçilər ──
@@ -169,31 +91,12 @@ export class WhatsAppService {
     const client = this.client;
     if (!client) return;
     this.client = null; // dərhal təmizlə — paralel çağırış iki dəfə öldürməsin
-    try { client.removeAllListeners(); } catch { /* ignore */ }
-    try {
-      const browser = client.pupBrowser || client?.pupPage?.browser?.();
-      await client.destroy();
-      if (browser) {
-        try { await browser.close(); } catch { /* ignore */ }
-        try { browser.process()?.kill("SIGKILL"); } catch { /* ignore */ }
-      }
-    } catch { /* ignore */ }
+    await killClient(client);
   }
 
   /** `message_ack` → bazadakı mesajın çatdırılma statusunu yenilə. */
-  static async _onAck(msg, ack) {
-    try {
-      if (!msg?.fromMe || !msg?.to) return;
-      const phone = String(msg.to).split("@")[0];
-      // 1 = serverə çatdı, 2 = cihaza çatdı, 3 = oxundu, 4 = səsli mesaj dinlənildi
-      const status = ack >= 3 ? "read" : ack === 2 ? "delivered" : ack === 1 ? "sent" : null;
-      if (!status) return;
-      await WhatsAppMessage.findOneAndUpdate(
-        { phone, status: { $in: ["sent", "delivered"] } },
-        { $set: { status } },
-        { sort: { createdAt: -1 } },
-      );
-    } catch { /* ack izləmə kritik deyil */ }
+  static _onAck(msg, ack) {
+    return onAck(msg, ack);
   }
 
   // ── Qoşulma ──
@@ -217,11 +120,7 @@ export class WhatsAppService {
     this.isInitializing = true;
     this._auto = auto;
     // Əl ilə qoşulma geri çəkilməni sıfırlayır.
-    if (!auto) {
-      this._autoFailures = 0;
-      this._nextAutoAt = 0;
-      this._autoBlocked = null;
-    }
+    if (!auto) resetAutoRetry(this);
     this.lastError = null;
     this._authOk = false;
     this.qrCode = null;
@@ -233,145 +132,8 @@ export class WhatsAppService {
     try {
       await this._destroyClient();
 
-      const puppeteer = {
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-accelerated-2d-canvas",
-          "--no-first-run",
-          "--no-zygote",
-          "--disable-gpu",
-          "--disable-extensions",
-          "--disable-background-timer-throttling",
-          "--disable-backgrounding-occluded-windows",
-          "--disable-renderer-backgrounding",
-          "--js-flags=--max-old-space-size=256",
-        ],
-      };
-      const chrome = findSystemChrome();
-      if (chrome) puppeteer.executablePath = chrome;
-
-      this.client = new lib.Client({
-        authStrategy: new lib.LocalAuth({ clientId: CLIENT_ID, dataPath: SESSION_DIR }),
-        puppeteer,
-        // Başqa yerdə WhatsApp Web açılsa sessiyanı geri al (yoxsa bizim klient düşür).
-        takeoverOnConflict: true,
-        takeoverTimeoutMs: 10_000,
-        qrMaxRetries: 5,
-        authTimeoutMs: 60_000,
-        // Telefon nömrəsi verilibsə QR əvəzinə qoşulma kodu ilə pair et.
-        ...(this._pairPhone ? { pairWithPhoneNumber: { phoneNumber: this._pairPhone, showNotification: true } } : {}),
-        webVersionCache: WA_WEB_VERSION_URL
-          ? { type: "remote", remotePath: WA_WEB_VERSION_URL }
-          : { type: "none" },
-      });
-
-      const E = lib.Events;
-
-      this.client.on(E.QR_RECEIVED, async (qr) => {
-        this.qrCode = qr;
-        this.qrDataUrl = await this._makeQrDataUrl(qr);
-        this._qrCount = (this._qrCount || 0) + 1;
-        waLog("qr", `QR kodu yaradıldı (#${this._qrCount})`, { meta: { attempt: this._qrCount } });
-      });
-
-      // pairWithPhoneNumber rejimində QR yerinə 8 rəqəmli kod gəlir.
-      this.client.on(E.CODE_RECEIVED, (code) => {
-        this.pairingCode = code;
-        waLog("qr", `Telefon qoşulma kodu hazırdır: ${code}`, { meta: { code } });
-      });
-
-      this.client.on(E.LOADING_SCREEN, (pct, msg) => {
-        console.log(`⏳ WhatsApp yüklənir: ${pct}% — ${msg}`);
-        // Yalnız mərhələlər jurnala düşür — hər faiz sətir yaratmasın.
-        if (pct === 0 || pct === 100) waLog("init", `Yüklənir: ${pct}% — ${msg}`, { meta: { pct } });
-      });
-
-      // authenticated gəldi, amma ready gəlmirsə: brauzeri bağla, SESSİYANI SAXLA.
-      this.client.on(E.AUTHENTICATED, () => {
-        if (this._authOk) return;
-        this._authOk = true;
-        this.qrCode = null;
-        this.qrDataUrl = null;
-        this.pairingCode = null;
-        waLog("auth", "Autentifikasiya uğurlu — hazır siqnalı gözlənilir");
-        this._readyTimer = setTimeout(async () => {
-          if (!this.isReady) {
-            waLog("error", "Hazır siqnalı gəlmədi — klient bağlanır, sessiya saxlanılır", {
-              level: "error",
-              meta: { timeoutMs: READY_TIMEOUT, hint: "Adətən kitabxana köhnə qalanda olur — versiya bildirişinə bax" },
-            });
-            this.lastError = "Qoşulma gecikdi — avtomatik yenidən cəhd ediləcək.";
-            this.isInitializing = false;
-            this._authOk = false;
-            await this._destroyClient(); // sessiya silinmir
-          }
-        }, READY_TIMEOUT);
-      });
-
-      this.client.on(E.READY, async () => {
-        this._clearTimers();
-        this.isReady = true;
-        this.isInitializing = false;
-        this.qrCode = null;
-        this.qrDataUrl = null;
-        this.pairingCode = null;
-        this.lastError = null;
-        this.readyAt = new Date();
-        this._autoFailures = 0;
-        this._nextAutoAt = 0;
-        this._autoBlocked = null;
-        this.info = this.client?.info || null;
-        this.state = lib.WAState.CONNECTED;
-        waLog("ready", `Hazırdır: ${this.info?.pushname || "?"} (+${this.info?.wid?.user || "?"})`, {
-          meta: { pushname: this.info?.pushname, phone: this.info?.wid?.user, platform: this.info?.platform },
-        });
-        this.startHealthWatch();
-      });
-
-      this.client.on(E.AUTHENTICATION_FAILURE, async (msg) => {
-        waLog("auth", `Autentifikasiya alınmadı: ${msg}`, { level: "error", meta: { reason: String(msg) } });
-        this.isReady = false;
-        this.isInitializing = false;
-        this._authOk = false;
-        this.lastError = "Auth failure: " + msg;
-        // Saxlanmış kimlik həqiqətən etibarsızdır — YALNIZ burada avtomatik sil.
-        await this.clearSession();
-        waLog("session", "Etibarsız sessiya avtomatik silindi — yenidən QR lazımdır", { level: "warn" });
-      });
-
-      this.client.on(E.DISCONNECTED, (reason) => {
-        waLog("disconnect", `Bağlantı kəsildi: ${reason}`, {
-          level: "warn",
-          meta: { reason: String(reason), uptimeMin: this.readyAt ? Math.round((Date.now() - this.readyAt) / 60000) : null },
-        });
-        this.isReady = false;
-        this.isInitializing = false;
-        this._authOk = false;
-        this.info = null;
-        this.state = null;
-        this.readyAt = null;
-        this.lastError = "Bağlantı kəsildi: " + reason;
-        this._clearTimers();
-        this._destroyClient().catch(() => {});
-      });
-
-      this.client.on(E.STATE_CHANGED, (s) => {
-        const prev = this.state;
-        this.state = s;
-        // Eyni vəziyyət təkrarlanırsa jurnal doldurulmur.
-        if (prev !== s) {
-          waLog("state", `Vəziyyət: ${prev || "—"} → ${s}`, {
-            level: s === "CONNECTED" ? "info" : "warn",
-            meta: { from: prev, to: s },
-          });
-        }
-      });
-
-      // Göndərilən mesajların çatdırılma/oxunma statusu.
-      this.client.on(E.MESSAGE_ACK, (msg, ack) => this._onAck(msg, ack));
+      this.client = createClient(lib, this._pairPhone);
+      attachClientEvents(this, lib);
 
       let timeoutId;
       const timeout = new Promise((_, rej) => {
@@ -386,19 +148,7 @@ export class WhatsAppService {
       this.lastError = explainChromeError(error.message);
       this.isInitializing = false;
       this._authOk = false;
-      let note = "";
-      if (this._auto) {
-        this._autoFailures += 1;
-        if (isChromeMissing(error.message)) {
-          // Chrome özü-özünə yaranmır — dəqiqədə bir yoxlamaq mənasızdır.
-          this._autoBlocked = "chrome";
-          note = " Avtomatik cəhdlər dayandırıldı — Chrome quraşdırıldıqdan sonra paneldən «Qoşul» basın.";
-        } else {
-          const wait = Math.min(AUTO_RETRY_BASE * 2 ** (this._autoFailures - 1), AUTO_RETRY_MAX);
-          this._nextAutoAt = Date.now() + wait;
-          note = ` Növbəti avtomatik cəhd ${Math.round(wait / 60_000)} dəq sonra.`;
-        }
-      }
+      const note = this._auto ? registerAutoFailure(this, error.message) : "";
       waLog("error", this.lastError + note, {
         level: "error",
         meta: { raw: error.message, autoFailures: this._autoFailures, nextAutoAt: this._nextAutoAt || null },
@@ -422,7 +172,7 @@ export class WhatsAppService {
 
   /** Avtomatik cəhd indi edilə bilərmi (geri çəkilmə / daimi xəta)? */
   static _autoAllowed() {
-    return !this._autoBlocked && Date.now() >= this._nextAutoAt;
+    return autoAllowed(this);
   }
 
   /**
@@ -474,11 +224,7 @@ export class WhatsAppService {
 
   /** "0501234567" / "+994 50 123 45 67" → "994501234567" */
   static normalizePhone(phone) {
-    const cleaned = String(phone || "").replace(/[^0-9]/g, "");
-    if (cleaned.startsWith("994")) return cleaned;
-    if (cleaned.startsWith("0") && cleaned.length === 10) return `994${cleaned.slice(1)}`;
-    if (cleaned.length === 9) return `994${cleaned}`;
-    return cleaned;
+    return normalizePhone(phone);
   }
 
   /**
@@ -513,10 +259,7 @@ export class WhatsAppService {
     if (!phone || !message) throw new Error("Telefon nömrəsi və mesaj məcburidir");
     const chatId = await this._resolveChatId(phone);
     try {
-      await Promise.race([
-        this.client.sendMessage(chatId, message),
-        new Promise((_, rej) => setTimeout(() => rej(new Error("Göndərmə vaxtı bitdi")), MSG_TIMEOUT)),
-      ]);
+      await withSendTimeout(this.client.sendMessage(chatId, message));
       waLog("send", `Mesaj göndərildi: ${chatId}`, { meta: { chatId, length: String(message).length } });
     } catch (error) {
       waLog("send", `Mesaj alınmadı (${chatId}): ${error.message}`, {
@@ -534,10 +277,7 @@ export class WhatsAppService {
     const chatId = await this._resolveChatId(phone);
     const media = new lib.MessageMedia(mimetype, base64, filename);
     try {
-      await Promise.race([
-        this.client.sendMessage(chatId, media, caption ? { caption } : {}),
-        new Promise((_, rej) => setTimeout(() => rej(new Error("Göndərmə vaxtı bitdi")), MSG_TIMEOUT)),
-      ]);
+      await withSendTimeout(this.client.sendMessage(chatId, media, caption ? { caption } : {}));
       waLog("send", `Fayl göndərildi: ${filename} → ${chatId}`, { meta: { chatId, filename, mimetype } });
     } catch (error) {
       waLog("send", `Fayl alınmadı (${chatId}): ${error.message}`, {
@@ -550,35 +290,7 @@ export class WhatsAppService {
   // ── Status / bağlanma ──
 
   static getStatus() {
-    return {
-      installed: this.isInstalled,
-      libVersion: installedVersion() || this._lib?.version || null,
-      isReady: this.isReady,
-      isInitializing: this.isInitializing,
-      initialized: Boolean(this.client),
-      hasSession: this.hasSession,
-      needsQR: Boolean(this.qrCode) && !this.isReady,
-      qrDataUrl: this.qrDataUrl,
-      pairingCode: this.pairingCode,
-      state: this.state,
-      connectedAs: this.info?.pushname || null,
-      phoneNumber: this.info?.wid?.user || null,
-      readyAt: this.readyAt,
-      lastError: this.lastError,
-
-      // ── Diaqnostika ──
-      // Bağlantı kəsiləndə ilk verilən suallar: nə qədərdir açıqdır, hansı
-      // cihazdır, Chrome haradadır, sessiya faylı yerindədirmi.
-      uptimeSec: this.readyAt ? Math.round((Date.now() - this.readyAt.getTime()) / 1000) : 0,
-      platform: this.info?.platform || null,
-      deviceManufacturer: this.info?.phone?.device_manufacturer || null,
-      waVersion: this.info?.phone?.wa_version || null,
-      chromePath: findSystemChrome() || null,
-      sessionDir: SESSION_DIR,
-      qrCount: this._qrCount || 0,
-      healthWatch: Boolean(this._healthTimer),
-      serverUptimeSec: Math.round(process.uptime()),
-    };
+    return buildStatus(this);
   }
 
   /** Bağla, amma sessiyanı saxla (yenidən QR lazım olmur). */
@@ -608,15 +320,6 @@ export class WhatsAppService {
       if (this.client && this.isReady) await this.client.logout();
     } catch { /* logout alınmasa da sessiya faylları silinəcək */ }
     await this.disconnect();
-    // LocalAuth faylları bəzən dərhal buraxılmır — bir neçə cəhd et.
-    for (let i = 0; i < 3; i += 1) {
-      try {
-        if (!fs.existsSync(SESSION_DIR)) break;
-        fs.rmSync(SESSION_DIR, { recursive: true, force: true });
-        break;
-      } catch {
-        await new Promise((r) => setTimeout(r, 400));
-      }
-    }
+    await removeSessionDir();
   }
 }

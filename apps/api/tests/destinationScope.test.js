@@ -45,7 +45,8 @@ describe("destinationScope", () => {
 });
 
 describe("əhatənin serverdə tətbiqi", () => {
-  const SRC = fs.readFileSync(path.join(ROOT, "controllers/adminController.js"), "utf8");
+  const SRC = ["controllers/admin/crudController.js", "services/LeadAccessService.js"]
+    .map((f) => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
 
   it("siyahı sorğusuna tətbiq olunur", () => {
     expect(SRC).toContain("applyLeadScope(filter, req, req.params.resource)");

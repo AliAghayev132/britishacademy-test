@@ -2,7 +2,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import fs from "node:fs";
 import { Course, Lead } from "#models";
 import { view } from "../controllers/eventController.js";
-import { stripSystemFields, leadInReach } from "../controllers/adminController.js";
+import { stripSystemFields } from "../controllers/admin/crudController.js";
+import { leadInReach } from "../services/LeadAccessService.js";
 import { planGroupSync } from "../controllers/courseComposer.js";
 
 /**
@@ -13,6 +14,8 @@ import { planGroupSync } from "../controllers/courseComposer.js";
 
 afterEach(() => vi.restoreAllMocks());
 const read = (f) => fs.readFileSync(f, "utf8");
+/** Qovluqdakı bütün .js fayllarının mətni (bölünmüş modullar üçün). */
+const readDir = (dir) => fs.readdirSync(dir).filter((f) => f.endsWith(".js")).map((f) => read(`${dir}/${f}`)).join("\n");
 
 describe("#13 baxış sayğacı brauzerdən", () => {
   const call = async (body, ua = "Mozilla/5.0 Chrome/120") => {
@@ -37,14 +40,14 @@ describe("#13 baxış sayğacı brauzerdən", () => {
   });
 
   it("keşlənən GET-lərdə sayğac qalmayıb", () => {
-    expect(read("controllers/publicController.js")).not.toMatch(/\$inc: \{ views: 1 \}/);
+    expect(readDir("controllers/public")).not.toMatch(/\$inc: \{ views: 1 \}/);
     expect(read("routes/publicRoutes.js")).toMatch(/PublicRouter\.post\("\/views", eventController\.view\)/);
   });
 });
 
 describe("#15 siyahılar ağır sahələri qaytarmır", () => {
   it("kart sorğuları mətn, FAQ və SEO-nu çıxarır, detal sorğuları toxunulmur", () => {
-    const src = read("controllers/publicController.js");
+    const src = readDir("controllers/public");
     expect(src).toMatch(/const CARD_EXCLUDE = "-contentHtml -content -faq -seo";/);
     for (const q of [
       /Course\.findPublic\(filter\)\.populate\("category"\)\.select\(CARD_EXCLUDE\)/,
@@ -65,7 +68,7 @@ describe("#20 sistem sahələri", () => {
   });
 
   it("silinmiş sənəd redaktə olunmur, yaradan serverdə qoyulur", () => {
-    const src = read("controllers/adminController.js");
+    const src = read("controllers/admin/crudController.js");
     expect(src).toMatch(/if \(!item \|\| item\.isDeleted\)/);
     expect(src).toMatch(/data\.createdBy = req\.user\?\._id/);
   });
@@ -87,7 +90,7 @@ describe("#9 müraciət əhatəsi", () => {
   });
 
   it("yeniləmə, silmə, status, dashboard və toplu göndərmə eyni yoxlamadan keçir", () => {
-    const ac = read("controllers/adminController.js");
+    const ac = read("controllers/admin/crudController.js") + read("controllers/admin/dashboardController.js");
     expect(ac).toMatch(/resource === "leads" && !leadInReach\(req\.user, item\)/);
     expect(ac).toMatch(/lead && !leadInReach\(req\.user, lead\)/);
     expect(ac).toMatch(/applyLeadScope\(leadFilter, req, "leads"\)/);
@@ -141,7 +144,7 @@ describe("#19 spam qorunması", () => {
 
   it("honeypot, kiçik body limiti və ayrı limit", () => {
     expect(read("controllers/leadController.js")).toMatch(/if \(req\.body\?\.website\)/);
-    expect(read("app.js")).toMatch(/express\.json\(\{ limit: "32kb" \}\)/);
+    expect(read("app/middleware.js")).toMatch(/express\.json\(\{ limit: "32kb" \}\)/);
     expect(read("routes/publicRoutes.js")).toMatch(/post\("\/leads", leadRateLimiter/);
   });
 });

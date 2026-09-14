@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { RESOURCES, RESOURCE_SECTION } from "../controllers/resourceRegistry.js";
-import { ABROAD_INTEREST } from "../controllers/adminController.js";
+import { ABROAD_INTEREST } from "../services/LeadAccessService.js";
 import { adminSections } from "#constants";
 
 /**

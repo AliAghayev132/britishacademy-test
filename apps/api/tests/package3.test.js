@@ -14,13 +14,15 @@ import { removeUser } from "../controllers/userAdminController.js";
 
 afterEach(() => vi.restoreAllMocks());
 const read = (f) => fs.readFileSync(f, "utf8");
+/** Qovluqdakı bütün .js fayllarının mətni (bölünmüş modullar üçün). */
+const readDir = (dir) => fs.readdirSync(dir).filter((f) => f.endsWith(".js")).map((f) => read(`${dir}/${f}`)).join("\n");
 
 describe("#18 şablondan qalan /api/posts", () => {
   it("marşrut, controller və model yoxdur", () => {
     for (const f of ["routes/postRoutes.js", "controllers/postController.js", "models/post.model.js"]) {
       expect(fs.existsSync(f), f).toBe(false);
     }
-    expect(read("app.js")).not.toMatch(/\/api\/posts/);
+    expect(read("app.js") + readDir("app")).not.toMatch(/\/api\/posts/);
   });
 });
 
@@ -77,7 +79,7 @@ describe("#21 socket", () => {
     expect(read("services/BulkQueueService.js")).not.toMatch(/emitToRole/);
     const users = read("controllers/userAdminController.js");
     expect(users.split("socketService.disconnectUser(user._id)").length - 1).toBe(2);
-    expect(read("controllers/authController.js").split("socketService.disconnectUser(user._id)").length - 1).toBe(2);
+    expect((read("controllers/auth/sessionController.js") + read("controllers/auth/passwordController.js")).split("socketService.disconnectUser(user._id)").length - 1).toBe(2);
   });
 });
 
@@ -135,7 +137,8 @@ describe("#40 silinmiş sənədlər", () => {
   });
 
   it("populate silinmişləri süzür, naməlum süzgəc boş qaytarır", () => {
-    const src = read("controllers/publicController.js");
+    // publicController controllers/public/ altında domenlərə bölünüb.
+    const src = readDir("controllers/public");
     expect(src).toMatch(/const LIVE = \{ isActive: true, isDeleted: false \};/);
     expect(src).toMatch(/populate\(live\("pricing\.branch"\)\)/);
     expect(src).toMatch(/if \(!cat\) return ok\(res, \{ courses: \[\] \}\)/);
@@ -152,13 +155,14 @@ describe("#42 tək toplu göndəriş növbəsi", () => {
 
 describe("#36 #38 #47 #48 #52 server", () => {
   it("INTERNAL_API_KEY yoxdursa xəbərdarlıq edilir", () => {
-    expect(read("app.js")).toMatch(/if \(!config\.internalApiKey\)/);
+    expect(read("app/env.js")).toMatch(/if \(!config\.internalApiKey\)/);
   });
 
   it("WhatsApp avtomatik bərpası geri çəkilir, Chrome yoxdursa dayanır", () => {
-    const src = read("services/WhatsAppService.js");
+    // Geri çəkilmə vəziyyəti services/whatsapp/autoRetry.js-də (svc = WhatsAppService).
+    const src = read("services/WhatsAppService.js") + readDir("services/whatsapp");
     expect(src).toMatch(/AUTO_RETRY_MAX = 30 \* 60_000/);
-    expect(src).toMatch(/this\._autoBlocked = "chrome"/);
+    expect(src).toMatch(/svc\._autoBlocked = "chrome"/);
     expect(src).toMatch(/if \(!this\._autoAllowed\(\)\) return;/);
   });
 
@@ -167,14 +171,14 @@ describe("#36 #38 #47 #48 #52 server", () => {
   });
 
   it("dayanmada socket, bağlantılar, WhatsApp və toplu göndəriş bağlanır", () => {
-    const src = read("app.js");
+    const src = read("app/shutdown.js");
     for (const re of [/socketService\.close\(\)/, /closeAllConnections/, /WhatsAppService\.shutdown\(\)/, /BulkQueue\.cancel\(\)/, /LibVersion\.stop\(\)/]) {
       expect(src).toMatch(re);
     }
   });
 
   it("fayl qəbulu qlobal deyil, autentifikasiyadan sonra və diskdə", () => {
-    expect(read("app.js")).not.toMatch(/fileUpload\(/);
+    expect(read("app.js") + readDir("app")).not.toMatch(/fileUpload\(/);
     expect(read("middlewares/upload.js")).toMatch(/useTempFiles: true/);
     expect(read("routes/mediaRoutes.js").split("receiveFiles,").length - 1).toBe(3);
     expect(read("routes/authRoutes.js")).toMatch(/"\/avatar", authenticate, receiveFiles/);

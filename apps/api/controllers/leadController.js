@@ -4,13 +4,10 @@
 import { Lead } from "#models";
 
 // Services
-import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
+import { MailService, logAction, diffDocs, recordLeadSubmit, leadInReach } from "#services";
 
 // Utils
 import { fail, ok, asyncHandler, isObjectId, cleanIds } from "#utils";
-
-// Local
-import { leadInReach } from "./adminController.js";
 
 /**
  * POST /api/leads — public. Rate-limited at the route.

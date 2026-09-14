@@ -1,275 +1,23 @@
 "use client";
 
 // React
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 // Next
 import { usePathname } from "next/navigation";
 
-// Hooks
-import { useDismiss } from "@/hooks";
-
 // Lib
-import { useT, useLocale, stripLocale, withLocale } from "@/lib";
+import { useT, stripLocale } from "@/lib";
 
 // Local
 import { LocaleLink as Link } from "./LocaleLink";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
-import { Disclosure } from "./Disclosure";
 import { SearchOverlay } from "./SearchOverlay";
-import { useDialogFocus } from "./useDialogFocus";
-
-// ── Dillər ──
-// Ad öz dilində yazılır (endonim): rus dilli ziyarətçi «Rus dili» yox,
-// «Русский» axtarır.
-const LANGS = [
-  { code: "az", label: "AZ", name: "Azərbaycan" },
-  { code: "en", label: "EN", name: "English" },
-  { code: "ru", label: "RU", name: "Русский" },
-];
-
-/**
- * Dil dəyişdirmə məntiqi — iki fərqli görünüş (masaüstü lent, mobil dropdown)
- * eyni davranışı paylaşsın deyə ayrıca hook-dur.
- */
-function useLangSwitch() {
-  const locale = useLocale();
-  const pathname = usePathname();
-  const base = stripLocale(pathname);
-  const go = useCallback(
-    (l) => {
-      if (l === locale) return;
-      document.cookie = `lang=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
-      // withLocale həm prefiksi qoyur, həm slug-u hədəf dilə çevirir
-      // (/en/contact → /ru/kontakty).
-      const target = withLocale(l, base);
-      // Hard reload — serverdən tam yenidən render (nav/menyu daxil) yeni dildə.
-      window.location.assign(target || "/");
-    },
-    [locale, base],
-  );
-  return { locale, go };
-}
-
-// ── Dil seçicisi (AZ/EN/RU) — üst lentdə, yalnız masaüstü ──
-const LanguageSwitcher = memo(function LanguageSwitcher() {
-  const { locale, go } = useLangSwitch();
-  return (
-    <div style={{ display: "inline-flex", background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 99, padding: 2 }}>
-      {["az", "en", "ru"].map((l) => {
-        const on = l === locale;
-        return (
-          <button
-            key={l}
-            type="button"
-            onClick={() => go(l)}
-            style={{ border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: on ? "var(--accent)" : "transparent", color: on ? "#fff" : "rgba(255,255,255,.65)" }}
-          >
-            {l.toUpperCase()}
-          </button>
-        );
-      })}
-    </div>
-  );
-});
-
-/**
- * Mobil dil seçicisi — hamburger düyməsinin yanında dropdown.
- *
- * Masaüstündə dil üst lentdədir, lakin o lent mobildə gizlədilir: e-poçt,
- * telefon, iş saatı və üç dil düyməsi dar ekranda alt-alta düşüb header-i
- * ikiqat hündürlüyə çıxarırdı. Dil seçimi isə lazımdır, ona görə bura
- * yığcam dropdown kimi köçürüldü.
- */
-const LanguageMenu = memo(function LanguageMenu() {
-  const { locale, go } = useLangSwitch();
-  const t = useT();
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  // Kənara toxunanda və Escape-də bağlan. `pointerdown` — `click` gec
-  // işləyir və menyu açıq qalmış görünür.
-  useDismiss(open, () => setOpen(false), ref, { event: "pointerdown" });
-
-  const current = LANGS.find((l) => l.code === locale) || LANGS[0];
-
-  return (
-    <div className="ba-langmenu" ref={ref}>
-      <button
-        type="button"
-        className="ba-langmenu-btn"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={`${t("common.language")}: ${current.name}`}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <span>{current.label}</span>
-        <svg
-          width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"
-          style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="ba-langmenu-pop" role="menu">
-          {LANGS.map((l) => (
-            <button
-              key={l.code}
-              type="button"
-              role="menuitem"
-              className={`ba-langmenu-item${l.code === locale ? " is-on" : ""}`}
-              onClick={() => { setOpen(false); go(l.code); }}
-            >
-              <b>{l.label}</b>
-              <span>{l.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-});
-
-/**
- * Xidmətlər menyusundakı bəndin ünvanı.
- *
- * Standart bəndlər kurs kateqoriyası/kursudur və /kurslar/<slug> naxışını
- * izləyir. «Onlayn Testlər» qrupu isə kurs deyil — o, açıq `href` verir
- * (bax (public)/layout.js).
- */
-const svcHref = (x) => x.href || `/kurslar/${x.slug}`;
-
-// ── Constants ──
-const caret = (
-  <svg className="ba-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);
-const ddArrow = (
-  <svg className="ba-dd-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="m9 6 6 6-6 6" />
-  </svg>
-);
-
-// Standart nav bəndləri üçün tərcümə açarı (menyu EN/RU boş olsa belə tərcümə olsun).
-const NAV_KEY_BY_HREF = {
-  "/": "common.home",
-  "/kurslar": "common.courses",
-  "/muellimler": "common.teachers",
-  "/filiallar": "page.branches.title",
-  "/bloq": "home.blog.title",
-  "/elaqe": "footer.link.contact",
-  "/haqqimizda": "about.eyebrow",
-  "/telebelerimiz": "page.students.title",
-  "/xaricde-tehsil": "home.abroad.title",
-};
-function navKey(item) {
-  if (item.variant === "mega") return "nav.services";
-  if (item.variant === "destinations") return "home.abroad.title";
-  return NAV_KEY_BY_HREF[item.href] || null;
-}
-/** Nav bəndinin göstəriləcək adı: tanınan standart bənd → t(); əks halda DB label. */
-function useNavLabel(item) {
-  const t = useT();
-  const k = navKey(item);
-  return k ? t(k) : item.label;
-}
-
-// ── Subcomponents ──
-const DesktopNavItem = memo(function DesktopNavItem({ item, active, services, destinations }) {
-  const label = useNavLabel(item);
-  if (item.variant === "mega") {
-    // Nested dropdown (category → hover → sub-links) — matches the static site.
-    return (
-      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-        <Link href={item.href}>{label} {caret}</Link>
-        <div className="ba-dd ba-dd--nest">
-          {services.map((g) => (
-            <div key={g.category._id} className="ba-dd-item">
-              <Link href={svcHref(g.category)}><span>{g.category.name}</span>{ddArrow}</Link>
-              <div className="ba-dd-sub">
-                {g.courses.map((c) => (
-                  <Link key={c._id} href={svcHref(c)}>{c.title}</Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (item.variant === "destinations") {
-    return (
-      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-        <Link href={item.href}>{label} {caret}</Link>
-        <div className="ba-dd ba-dd--right ba-dd--2col">
-          {destinations.map((d) => (
-            <Link key={d._id} href={`/xaricde-tehsil/${d.slug}`}>{d.country}</Link>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  // Sadə dropdown — menyu bəndinin öz uşaqları (məs. Haqqımızda → Müəllimlər,
-  // Tələbələrimiz). Siyahı DB-dən gəlir, burada sabit yazılmır.
-  if (item.variant === "links") {
-    return (
-      <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-        <Link href={item.href}>{label} {caret}</Link>
-        <div className="ba-dd">
-          {item.children.map((c) => (
-            <Link key={c.href} href={c.href}>{c.label}</Link>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className={`ba-nav-item${active ? " is-active" : ""}`}>
-      <Link href={item.href}>{label}</Link>
-    </div>
-  );
-});
-
-const MobileNavItem = memo(function MobileNavItem({ item, services, destinations, onClose }) {
-  const t = useT();
-  const label = useNavLabel(item);
-  if (item.variant) {
-    return (
-      <Disclosure label={label}>
-        <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{label} — {t("common.all")}</Link>
-
-        {/* Xidmətlər — iç-içə açılan: kateqoriya → kliklə → kursları açılır */}
-        {item.variant === "mega" &&
-          services.map((g) => (
-            <Disclosure key={g.category._id} className="ba-macc--sub" label={g.category.name}>
-              <Link className="ba-msub ba-msub--all" href={svcHref(g.category)} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
-              {g.courses.map((c) => (
-                <Link key={c._id} className="ba-msub" href={svcHref(c)} onClick={onClose}>{c.title}</Link>
-              ))}
-            </Disclosure>
-          ))}
-
-        {item.variant === "destinations" &&
-          destinations.map((d) => (
-            <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
-          ))}
-
-        {item.variant === "links" &&
-          (item.children || []).map((c) => (
-            <Link key={c.href} className="ba-msub" href={c.href} onClick={onClose}>{c.label}</Link>
-          ))}
-      </Disclosure>
-    );
-  }
-  return (
-    <Link className="ba-mrow" href={item.href} onClick={onClose}>{label}</Link>
-  );
-});
+import LanguageSwitcher from "./header/LanguageSwitcher";
+import LanguageMenu from "./header/LanguageMenu";
+import NavItem from "./header/NavItem";
+import MobileNav from "./header/MobileNav";
 
 // Giriş pərdəsi (IntroLoader) silindi (audit #32): sessiyanın ilk ziyarətində
 // 1.2–1.8 s qeyri-şəffaf pərdə məzmunu örtür və kliki bloklayırdı — reklamdan
@@ -293,8 +41,6 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
 
   // ── Handlers ──
   const closeMobile = useCallback(() => setMobile(false), []);
-  // Açıq menyuda fokus içəridə qalır, Escape bağlayır, səhifə arxada sürüşmür.
-  const mobileRef = useDialogFocus(mobile, { onEscape: closeMobile });
   const openSearch = useCallback(() => setSearch(true), []);
   const closeSearch = useCallback(() => setSearch(false), []);
 
@@ -339,7 +85,7 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
 
           <nav className="ba-nav">
             {nav.map((item) => (
-              <DesktopNavItem
+              <NavItem
                 key={item.label}
                 item={item}
                 active={isActive(item.href)}
@@ -392,46 +138,15 @@ export function Header({ site, nav = [], services = [], destinations = [] }) {
       </header>
 
       {/* mobile drawer */}
-      {/* Bağlı olanda `inert`: ekrandan kənardakı linklərə Tab ilə düşülmürdü (audit #34). */}
-      <div className={`ba-mnav${mobile ? " open" : ""}`} onClick={() => setMobile(false)} inert={!mobile}>
-        <div
-          ref={mobileRef}
-          id="ba-mobile-nav"
-          className="ba-mnav-inner"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t("nav.menu")}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {nav.map((item) => (
-            <MobileNavItem
-              key={item.label}
-              item={item}
-              services={services}
-              destinations={destinations}
-              onClose={closeMobile}
-            />
-          ))}
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <button
-              type="button"
-              onClick={() => { setMobile(false); openSearch(); }}
-              style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#F1F2F6", border: "1px solid #E7E8EE", color: "#4C4C58", fontWeight: 700, fontSize: 14.5, padding: "12px 16px", borderRadius: 12, cursor: "pointer" }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-              {t("nav.search")}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMobile(false); open(); }}
-              className="ba-apply-btn"
-              style={{ flex: 1, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14.5, padding: "12px 16px", borderRadius: 12, cursor: "pointer" }}
-            >
-              {t("nav.apply")}
-            </button>
-          </div>
-        </div>
-      </div>
+      <MobileNav
+        mobile={mobile}
+        nav={nav}
+        services={services}
+        destinations={destinations}
+        onClose={closeMobile}
+        onSearch={openSearch}
+        onApply={() => open()}
+      />
     </div>
 
     <SearchOverlay open={search} onClose={closeSearch} />

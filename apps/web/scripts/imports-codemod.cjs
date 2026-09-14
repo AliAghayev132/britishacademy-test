@@ -187,7 +187,20 @@ function webBarrels() {
   const S = `${ROOT}/src`;
   const list = (dir, { recursive = true, skip = [] } = {}) =>
     walk(`${S}/${dir}`).filter((f) => (recursive || path.dirname(f) === `${S}/${dir}`) && !/\/index\.jsx?$/.test(f) && !skip.some((s) => f.includes(s)));
-  const comps = list("components", { skip: ["/components/editor/", "/components/server.js"] });
+  // Komponentin daxili hissələri barrel-ə düşmür: `components/<sahə>/<qovluq>/`
+  // (məs. site/header/, ui/qr-studio/) və `components/sidebar/` şəxsidir —
+  // yalnız sahibi nisbi import edir. Belə qovluğun `index.js`-i isə açıqdır
+  // (məs. site/cards/index.js kartları ixrac edir).
+  const privateComponent = (f) => {
+    const parts = path.relative(`${S}/components`, f).split(/[\\/]/);
+    if (parts[0] === "sidebar") return true;
+    return parts.length >= 3 && !/^index\.jsx?$/.test(parts[parts.length - 1]);
+  };
+  const comps = walk(`${S}/components`).filter((f) =>
+    f !== `${S}/components/index.js` &&
+    !["/components/editor/", "/components/server.js"].some((s) => f.includes(s)) &&
+    !(/\/index\.jsx?$/.test(f) && path.relative(`${S}/components`, f).split(/[\\/]/).length < 3) &&
+    !privateComponent(f));
   const libs = list("lib");
   const barrels = [
     { spec: "@/components/editor", dir: `${S}/components/editor`, file: `${S}/components/editor/index.js`, modules: [`${S}/components/editor/TiptapEditor.jsx`], keep: true },
@@ -238,7 +251,7 @@ function generateBarrel(b) {
     const ex = exportsOf(mod);
     // api (Node ESM) uzantı tələb edir; web (bundler) uzantısız işləyir.
     const relPath = "./" + norm(path.relative(path.dirname(b.file), mod));
-    const rel = APP === "api" ? relPath : relPath.replace(/\.(jsx?|mjs)$/, "");
+    const rel = APP === "api" ? relPath : relPath.replace(/\.(jsx?|mjs)$/, "").replace(/\/index$/, "");
     const add = (local, exported) => {
       if (owner.has(exported)) {
         collisions.push(`${exported}: ${norm(path.relative(ROOT, owner.get(exported)))} ↔ ${norm(path.relative(ROOT, mod))}`);
