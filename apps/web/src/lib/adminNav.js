@@ -168,8 +168,8 @@ export const NAV_GROUPS = [
     icon: Settings,
     items: [
       {
-        name: "WhatsApp", href: "/dashboard/whatsapp", icon: MessageCircle, section: "whatsapp",
-        tags: ["qr", "qoşul", "mesaj", "şablon", "toplu göndəriş", "tarixçə", "jurnal", "bağlantı", "nömrə yoxla"],
+        name: "Mesaj mərkəzi", href: "/dashboard/mesajlar", icon: MessageCircle, section: "whatsapp",
+        tags: ["whatsapp", "qr", "qoşul", "mesaj", "e-poçt", "şablon", "toplu göndəriş", "tarixçə", "jurnal", "diaqnostika", "bağlantı", "nömrə yoxla"],
       },
       {
         name: "İstifadəçilər", href: "/dashboard/istifadeciler", icon: ShieldCheck, section: "users",

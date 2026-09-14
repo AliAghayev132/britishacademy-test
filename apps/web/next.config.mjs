@@ -22,6 +22,12 @@ const nextConfig = {
 
   // Basic security headers applied to every route. Extend as needed
   // (e.g. a strict Content-Security-Policy tuned to your app).
+  // Səhifə «WhatsApp»-dan «Mesaj mərkəzi»nə köçdü — köhnə əlfəcinlər və
+  // bildiriş linkləri işləsin (tab parametri saxlanılır).
+  async redirects() {
+    return [{ source: '/dashboard/whatsapp', destination: '/dashboard/mesajlar', permanent: true }];
+  },
+
   async headers() {
     return [
       // public/ faylları Next defolt olaraq `max-age=0` ilə verir — 23 şrift və

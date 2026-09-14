@@ -80,10 +80,11 @@ describe("axtarış — sıralama", () => {
     expect(r.map((x) => x.name)).toContain("Filiallar");
   });
 
-  it("«qr» → WhatsApp birincidir", () => {
+  it("«qr» və «whatsapp» → Mesaj mərkəzi birincidir", () => {
     // «qr» sözü «qrup», «qrafik», «qrafiki» içində də keçir — dəqiq etiket
     // uyğunluğu bu səs-küyü üstələməlidir.
-    expect(first("qr")).toBe("WhatsApp");
+    expect(first("qr")).toBe("Mesaj mərkəzi");
+    expect(first("whatsapp")).toBe("Mesaj mərkəzi");
     expect(search("qr").map((x) => x.name)).toContain("İzlənilən linklər");
   });
 

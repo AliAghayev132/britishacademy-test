@@ -1,17 +1,24 @@
 "use client";
 
-// ── WhatsApp ──
-// whatsapp-web.js (1.34.x) ilə QR / qoşulma kodu üzərindən bağlanma, tək və
-// toplu mesaj göndərişi, göndəriş tarixçəsi.
+// ── Mesaj mərkəzi ──
+// WhatsApp bağlantısı (whatsapp-web.js — QR və ya qoşulma kodu), tək və toplu
+// göndəriş (WhatsApp + e-poçt), tarixçə, bağlantı jurnalı və diaqnostika.
 //
 // Bu fayl yalnız ORKESTRATORDUR: status, tab seçimi və mutasiyalar. Hər tabın
-// və bölmənin öz UI-ı `_components/` altındadır (əvvəl hamısı 578 sətirlik tək fayl idi).
+// öz UI-ı `_components/` altındadır.
+//
+// Səhifə əvvəl «WhatsApp» adlanırdı (/dashboard/whatsapp) — toplu göndəriş
+// e-poçtla da getdiyi üçün ad çaşdırırdı. Köhnə ünvan next.config-də bura
+// yönləndirilir.
 //
 // QR şəkli SERVERDƏ generasiya olunur (data URL) — kənar QR servisinə
 // göndərmirik, çünki QR sessiya qoşulma məlumatı daşıyır.
 
 // React
 import { useState } from "react";
+
+// Next
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // Components
 import { notify, QueryState } from "@/components";
@@ -35,17 +42,21 @@ import { ConnectTab } from "./_components/ConnectTab";
 import { BulkTab } from "./_components/BulkTab";
 import { HistoryTab } from "./_components/HistoryTab";
 import { LogsTab } from "./_components/LogsTab";
+import { DiagnosticsTab } from "./_components/DiagnosticsTab";
 import { SendModal } from "./_components/SendModal";
 import { PageHeader } from "./_components/PageHeader";
-import { StatusBar } from "./_components/StatusBar";
-import { UpdateNotice } from "./_components/UpdateNotice";
-import { DiagnosticsPanel } from "./_components/DiagnosticsPanel";
 import { InstallNotice } from "./_components/InstallNotice";
-import { TabNav } from "./_components/TabNav";
+import { TabNav, TABS } from "./_components/TabNav";
 import { useBulkQueue } from "./_components/useBulkQueue";
 
-export default function WhatsAppPage() {
-  const [tab, setTab] = useState("connect");
+export default function MessagesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Seçilmiş tab ünvandadır (?tab=bulk) — səhifə yenilənəndə və link
+  // paylaşılanda eyni tab açılır.
+  const requested = searchParams.get("tab");
   const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -72,6 +83,16 @@ export default function WhatsAppPage() {
   const wantedPoll = isReady && !queue.running ? 15000 : 3000;
   if (wantedPoll !== poll) setPoll(wantedPoll);
 
+  // Ünvanda tab yoxdursa: qoşulubsa göndəriş, qoşulmayıbsa bağlantı.
+  // Status gələnə qədər tab seçilmir — əks halda «Bağlantı» bir anlıq açılıb
+  // «Toplu göndəriş»ə sıçrayırdı.
+  const tab = TABS.some((t) => t.id === requested) ? requested : isLoading ? null : isReady ? "bulk" : "connect";
+  const setTab = (id) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", id);
+    router.replace(`${pathname}?${params}`, { scroll: false });
+  };
+
   /** Mutasiya işlədici — uğur/xəta toast-u ilə. */
   const run = async (fn, arg, okMsg) => {
     try {
@@ -90,11 +111,21 @@ export default function WhatsAppPage() {
     return ok;
   };
 
+  const errors24h = s.logSummary?.errors || 0;
+  const badges = {
+    ...(queue.running ? { bulk: { text: "gedir", tone: "live" } } : {}),
+    ...(errors24h
+      ? { diagnostics: { text: errors24h, tone: "error" } }
+      : s.version?.outdated
+        ? { diagnostics: { text: "yeniləmə", tone: "warn" } }
+        : {}),
+  };
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <PageHeader
-        isReady={isReady}
-        installed={installed}
+        status={s}
+        isLoading={isLoading}
         onRefresh={() => refetch()}
         onNewMessage={() => setModal(true)}
         onDisconnect={() => run(disconnect, undefined, "Bağlandı")}
@@ -103,18 +134,6 @@ export default function WhatsAppPage() {
         loggingOut={loggingOut}
       />
 
-      <StatusBar status={s} isLoading={isLoading} />
-
-      <UpdateNotice version={s.version} />
-
-      {installed && (
-        <DiagnosticsPanel
-          status={s}
-          onCheckVersion={() => run(checkVersion, undefined, "Yoxlanıldı")}
-          checkingVersion={checkingVersion}
-        />
-      )}
-
       {/* Status sorğusu uğursuzdursa — səbəb + yenidən cəhd */}
       {isError && (
         <div className="rounded-xl border border-gray-200 bg-white">
@@ -122,25 +141,26 @@ export default function WhatsAppPage() {
         </div>
       )}
 
-      {lastError && !isReady && !isError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {lastError}
-        </div>
-      )}
-
       {!installed ? (
         <InstallNotice />
       ) : (
         <>
-          <TabNav value={tab} onChange={setTab} />
+          <TabNav value={tab} onChange={setTab} badges={badges} />
 
-          <div key={tab} className="ba-fade">
+          {tab && <div key={tab} role="tabpanel" aria-labelledby={`msg-tab-${tab}`} className="ba-fade">
             {tab === "connect" && (
-              <ConnectTab
-                status={s}
-                initing={initing}
-                onInit={(arg) => run(init, arg, arg?.pairPhone ? "Kod hazırlanır…" : "Başladılır…")}
-              />
+              <div className="space-y-4">
+                {lastError && !isReady && !isError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {lastError}
+                  </div>
+                )}
+                <ConnectTab
+                  status={s}
+                  initing={initing}
+                  onInit={(arg) => run(init, arg, arg?.pairPhone ? "Kod hazırlanır…" : "Başladılır…")}
+                />
+              </div>
             )}
             {tab === "bulk" && (
               <BulkTab
@@ -152,7 +172,14 @@ export default function WhatsAppPage() {
             )}
             {tab === "history" && <HistoryTab page={page} onPage={setPage} />}
             {tab === "logs" && <LogsTab />}
-          </div>
+            {tab === "diagnostics" && (
+              <DiagnosticsTab
+                status={s}
+                onCheckVersion={() => run(checkVersion, undefined, "Yoxlanıldı")}
+                checkingVersion={checkingVersion}
+              />
+            )}
+          </div>}
         </>
       )}
 

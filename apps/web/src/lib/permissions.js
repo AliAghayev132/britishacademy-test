@@ -39,7 +39,7 @@ export const SECTIONS = [
   { key: "projects", label: "Layihələr" },
   { key: "blog", label: "Bloq" },
   { key: "resources", label: "Digər resurslar" },
-  { key: "whatsapp", label: "WhatsApp" },
+  { key: "whatsapp", label: "Mesaj mərkəzi (WhatsApp, toplu göndəriş)" },
   { key: "users", label: "İstifadəçilər" },
   { key: "stats", label: "Statistika" },
   { key: "links", label: "İzlənilən linklər" },
@@ -97,7 +97,8 @@ const ROUTE_SECTIONS = [
   ["/dashboard/muracietler/xaricde-tehsil", "leads-abroad"],
   ["/dashboard/muracietler", "leads"],
   ["/dashboard/ana-sehife", "home"],
-  ["/dashboard/whatsapp", "whatsapp"],
+  ["/dashboard/mesajlar", "whatsapp"],
+  ["/dashboard/whatsapp", "whatsapp"], // köhnə ünvan — yönləndirilir
   ["/dashboard/istifadeciler", "users"],
   ["/dashboard/statistika", "stats"],
   ["/dashboard/linkler", "links"],
