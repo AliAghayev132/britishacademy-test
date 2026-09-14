@@ -23,7 +23,7 @@ import {
 import { logAction } from "#services";
 
 // Utils
-import { asyncHandler, destinationScope, branchScope } from "#utils";
+import { fail, ok, asyncHandler, destinationScope, branchScope } from "#utils";
 
 // ── Helpers ──
 
@@ -160,7 +160,7 @@ const getLookups = asyncHandler(async (req, res) => {
       .sort({ order: 1, country: 1 })
       .select("country slug"),
   ]);
-  res.json({ success: true, data: { branches, teachers, categories, courses, destinations } });
+  ok(res, { branches, teachers, categories, courses, destinations });
 });
 
 // ── GET /api/admin/courses/full/:id ──
@@ -169,7 +169,7 @@ const getLookups = asyncHandler(async (req, res) => {
 const getCourseFull = asyncHandler(async (req, res) => {
   const course = await Course.findById(req.params.id);
   if (!course || course.isDeleted) {
-    return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
+    return fail(res, "Kurs tapılmadı", 404);
   }
   const groups = await CourseGroup.find({
     course: course._id,
@@ -202,17 +202,14 @@ const getCourseFull = asyncHandler(async (req, res) => {
     });
   });
 
-  res.json({
-    success: true,
-    data: { course, branches: [...byBranch.values()] },
-  });
+  ok(res, { course, branches: [...byBranch.values()] });
 });
 
 // ── POST /api/admin/courses/full ──
 const createCourseFull = asyncHandler(async (req, res) => {
   const { course = {}, branches = [] } = req.body || {};
   if (!course.title || !course.category) {
-    return res.status(400).json({ success: false, message: "Kurs adı və kateqoriya tələb olunur" });
+    return fail(res, "Kurs adı və kateqoriya tələb olunur", 400);
   }
 
   const created = await Course.create({
@@ -234,7 +231,7 @@ const createCourseFull = asyncHandler(async (req, res) => {
   }
 
   await logAction(req, { action: "create", resource: "courses", resourceId: created._id, summary: `Kurs yaradıldı: ${created.title}` });
-  res.status(201).json({ success: true, message: "Kurs yaradıldı", data: { course: created } });
+  ok(res, { course: created }, "Kurs yaradıldı", 201);
 });
 
 // ── PUT /api/admin/courses/full/:id ──
@@ -244,7 +241,7 @@ const updateCourseFull = asyncHandler(async (req, res) => {
   const { course = {}, branches = [] } = req.body || {};
   const doc = await Course.findById(req.params.id);
   if (!doc || doc.isDeleted) {
-    return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
+    return fail(res, "Kurs tapılmadı", 404);
   }
 
   // Qruplar kurs yenilənməzdən ƏVVƏL yoxlanılır — bir səhv qrup yarımçıq
@@ -275,7 +272,7 @@ const updateCourseFull = asyncHandler(async (req, res) => {
   await syncTeacherLinks(doc._id, branches);
 
   await logAction(req, { action: "update", resource: "courses", resourceId: doc._id, summary: `Kurs yeniləndi: ${doc.title}` });
-  res.json({ success: true, message: "Kurs yeniləndi", data: { course: doc } });
+  ok(res, { course: doc }, "Kurs yeniləndi");
 });
 
 export { getLookups, getCourseFull, createCourseFull, updateCourseFull };

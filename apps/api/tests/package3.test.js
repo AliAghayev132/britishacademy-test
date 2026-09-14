@@ -138,7 +138,7 @@ describe("#40 silinmiş sənədlər", () => {
     const src = read("controllers/publicController.js");
     expect(src).toMatch(/const LIVE = \{ isActive: true, isDeleted: false \};/);
     expect(src).toMatch(/populate\(live\("pricing\.branch"\)\)/);
-    expect(src).toMatch(/if \(!cat\) return res\.json\(\{ success: true, data: \{ courses: \[\] \} \}\)/);
+    expect(src).toMatch(/if \(!cat\) return ok\(res, \{ courses: \[\] \}\)/);
     expect(src).toMatch(/filter\.category = cat \? cat\._id : \{ \$in: \[\] \}/);
   });
 });

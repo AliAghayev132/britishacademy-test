@@ -1,6 +1,7 @@
 // SEO data endpoints. The Next.js app owns /robots.txt and /sitemap.xml, but it
 // pulls the editable content (admin-managed robots body) and the URL list from
 // here so the API stays the single source of truth.
+
 // Models
 import {
   SiteSetting,
@@ -16,7 +17,7 @@ import {
 } from "#models";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { ok, asyncHandler } from "#utils";
 
 /**
  * Səhifə sənədi (Page) → saytdakı marşrut. Page kolleksiyasındakı hər sənədin
@@ -36,8 +37,8 @@ const latest = (...lists) => {
 
 /** GET /api/seo/robots — raw robots.txt body (admin-editable). */
 const getRobots = asyncHandler(async (_req, res) => {
-  const settings = await SiteSetting.get();
-  res.json({ success: true, data: { robotsTxt: settings.robotsTxt || "" } });
+  const settings = await SiteSetting.getCached();
+  ok(res, { robotsTxt: settings.robotsTxt || "" });
 });
 
 /**
@@ -94,7 +95,7 @@ const getUrls = asyncHandler(async (_req, res) => {
     ...map(quizzes, "/testler", 0.7),
   ];
 
-  res.json({ success: true, data: { urls } });
+  ok(res, { urls });
 });
 
 export { getRobots, getUrls };

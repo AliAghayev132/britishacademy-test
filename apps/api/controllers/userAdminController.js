@@ -18,6 +18,10 @@ import { canAssignRole } from "#middlewares";
 
 // Utils
 import {
+  fail,
+  ok,
+  pageInfo,
+  parsePage,
   asyncHandler,
   fuzzyRegex,
   hasRole,
@@ -55,8 +59,7 @@ const publicUser = (u) => ({
 
 // ── GET /api/admin/users ──
 const listUsers = asyncHandler(async (req, res) => {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const { page, limit, skip } = parsePage(req.query);
   const filter = { isDeleted: false, role: { $in: adminRoles } };
   if (req.query.role && adminRoles.includes(req.query.role)) filter.role = req.query.role;
   if (req.query.search) {
@@ -64,38 +67,38 @@ const listUsers = asyncHandler(async (req, res) => {
     filter.$or = [{ firstName: rx }, { lastName: rx }, { email: rx }];
   }
   const [items, total] = await Promise.all([
-    User.find(filter).select("-password").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+    User.find(filter).select("-password").sort({ createdAt: -1 }).skip(skip).limit(limit),
     User.countDocuments(filter),
   ]);
-  res.json({ success: true, data: { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } } });
+  ok(res, { items, pagination: pageInfo({ page, limit }, total) });
 });
 
 // ── POST /api/admin/users ──
 const createUser = asyncHandler(async (req, res) => {
-  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
+  if (!canManageUsers(req)) return fail(res, "Bu əməliyyat üçün super admin səlahiyyəti lazımdır", 403);
   const {
     firstName, lastName, email, password, phone,
     role = "editor", status = "active", permissions = [], allowedDestinations = [], allowedBranches = [],
   } = req.body || {};
   if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ success: false, message: "Ad, soyad, e-poçt və parol tələb olunur" });
+    return fail(res, "Ad, soyad, e-poçt və parol tələb olunur", 400);
   }
-  if (String(password).length < 8) return res.status(400).json({ success: false, message: "Parol ən azı 8 simvol olmalıdır" });
-  if (!adminRoles.includes(role)) return res.status(400).json({ success: false, message: "Yanlış rol" });
+  if (String(password).length < 8) return fail(res, "Parol ən azı 8 simvol olmalıdır", 400);
+  if (!adminRoles.includes(role)) return fail(res, "Yanlış rol", 400);
   // Kimsə ÖZÜNDƏN yüksək rol təyin edə bilməz — əks halda istənilən
   // superadmin özünə developer hesabı yaradardı.
   if (!canAssignRole(req.user?.role, role)) {
-    return res.status(403).json({ success: false, message: "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz" });
+    return fail(res, "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz", 403);
   }
   let cleanPerms;
   try {
     cleanPerms = initialPermissions(role, cleanPermissions(permissions));
   } catch (err) {
-    return res.status(400).json({ success: false, message: err.message });
+    return fail(res, err.message, 400);
   }
 
   const exists = await User.findOne({ email: String(email).toLowerCase() });
-  if (exists) return res.status(409).json({ success: false, message: "Bu e-poçt artıq istifadə olunur" });
+  if (exists) return fail(res, "Bu e-poçt artıq istifadə olunur", 409);
 
   const user = await User.create({
     firstName, lastName, email, phone, role, status, permissions: cleanPerms,
@@ -104,7 +107,7 @@ const createUser = asyncHandler(async (req, res) => {
     password: await HashService.hashPassword(password),
   });
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi yaradıldı: ${email} (${role})` });
-  res.status(201).json({ success: true, message: "İstifadəçi yaradıldı", data: { item: publicUser(user) } });
+  ok(res, { item: publicUser(user) }, "İstifadəçi yaradıldı", 201);
 });
 
 /**
@@ -130,16 +133,16 @@ function cleanPermissions(list) {
 
 // ── PUT /api/admin/users/:id ──
 const updateUser = asyncHandler(async (req, res) => {
-  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
+  if (!canManageUsers(req)) return fail(res, "Bu əməliyyat üçün super admin səlahiyyəti lazımdır", 403);
   const user = await User.findById(req.params.id);
-  if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
+  if (!user || user.isDeleted) return fail(res, "Tapılmadı", 404);
 
   const { firstName, lastName, phone, role, status, password, permissions, allowedDestinations, allowedBranches } = req.body || {};
 
   // Özündən yüksək/bərabər istifadəçiyə toxunmaq olmaz — admin superadmin-i
   // dəyişə bilməməlidir.
   if (!canAssignRole(req.user?.role, user.role)) {
-    return res.status(403).json({ success: false, message: "Bu istifadəçini dəyişməyə icazəniz yoxdur" });
+    return fail(res, "Bu istifadəçini dəyişməyə icazəniz yoxdur", 403);
   }
   // Dəyişiklikdən ƏVVƏLKİ dəyərlər — jurnalda «nə idi → nə oldu» üçün.
   const before = {
@@ -155,7 +158,7 @@ const updateUser = asyncHandler(async (req, res) => {
   if (phone != null) user.phone = phone;
   if (role && adminRoles.includes(role)) {
     if (!canAssignRole(req.user?.role, role)) {
-      return res.status(403).json({ success: false, message: "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz" });
+      return fail(res, "Özünüzdən yüksək və ya bərabər rol təyin edə bilməzsiniz", 403);
     }
     user.role = role;
   }
@@ -164,17 +167,14 @@ const updateUser = asyncHandler(async (req, res) => {
     try {
       next = cleanPermissions(permissions);
     } catch (err) {
-      return res.status(400).json({ success: false, message: err.message });
+      return fail(res, err.message, 400);
     }
     // Boş siyahı «bütün bölmələr» deməkdir. MƏHDUD hesabı boşaltmaq ona
     // səssizcə TAM giriş verirdi («Təmizlə» düyməsi). Köhnə, onsuz da boş
     // hesab isə olduğu kimi qalır (məs. yalnız filialı dəyişdiriləndə).
     const wasRestricted = (user.permissions || []).length > 0;
     if (!next.length && wasRestricted && user.role !== "superadmin" && user.role !== "developer") {
-      return res.status(400).json({
-        success: false,
-        message: "Ən azı bir bölmə seçin. Hesabı tam bağlamaq üçün statusunu «deaktiv» edin.",
-      });
+      return fail(res, "Ən azı bir bölmə seçin. Hesabı tam bağlamaq üçün statusunu «deaktiv» edin.", 400);
     }
     user.permissions = next;
   }
@@ -186,7 +186,7 @@ const updateUser = asyncHandler(async (req, res) => {
     }
   if (status) user.status = status;
   if (password) {
-    if (String(password).length < 8) return res.status(400).json({ success: false, message: "Parol ən azı 8 simvol olmalıdır" });
+    if (String(password).length < 8) return fail(res, "Parol ən azı 8 simvol olmalıdır", 400);
     user.password = await HashService.hashPassword(password);
     user.tokenVersion += 1; // force re-login everywhere on password change
   }
@@ -209,23 +209,23 @@ const updateUser = asyncHandler(async (req, res) => {
     summary: `İstifadəçi yeniləndi: ${user.email}`,
     changes,
   });
-  res.json({ success: true, message: "Yeniləndi", data: { item: publicUser(user) } });
+  ok(res, { item: publicUser(user) }, "Yeniləndi");
 });
 
 // ── DELETE /api/admin/users/:id ──
 const removeUser = asyncHandler(async (req, res) => {
-  if (!canManageUsers(req)) return res.status(403).json({ success: false, message: "Bu əməliyyat üçün super admin səlahiyyəti lazımdır" });
+  if (!canManageUsers(req)) return fail(res, "Bu əməliyyat üçün super admin səlahiyyəti lazımdır", 403);
   if (String(req.params.id) === String(req.user._id)) {
-    return res.status(400).json({ success: false, message: "Özünü silə bilməzsən" });
+    return fail(res, "Özünü silə bilməzsən", 400);
   }
   const user = await User.findById(req.params.id);
-  if (!user || user.isDeleted) return res.status(404).json({ success: false, message: "Tapılmadı" });
+  if (!user || user.isDeleted) return fail(res, "Tapılmadı", 404);
 
   // Yaratma və yeniləmədəki qayda silmədə də: özündən yüksək və ya bərabər
   // rütbəli hesab silinmir. Əvvəl superadmin developer-i və digər
   // superadmin-ləri silə bilirdi (audit #24).
   if (!canAssignRole(req.user?.role, user.role)) {
-    return res.status(403).json({ success: false, message: "Bu istifadəçini silməyə icazəniz yoxdur" });
+    return fail(res, "Bu istifadəçini silməyə icazəniz yoxdur", 403);
   }
 
   // Panelə girişi olan SONUNCU hesabı silməyə imkan vermirik. Əvvəl yalnız
@@ -238,17 +238,14 @@ const removeUser = asyncHandler(async (req, res) => {
       _id: { $ne: user._id },
     });
     if (remaining === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Panelə girişi olan sonuncu hesabı silmək olmaz",
-      });
+      return fail(res, "Panelə girişi olan sonuncu hesabı silmək olmaz", 400);
     }
   }
   user.isDeleted = true;
   await user.save();
   socketService.disconnectUser(user._id);
   await logAction(req, { action: "user", resource: "users", resourceId: user._id, summary: `İstifadəçi silindi: ${user.email}` });
-  res.json({ success: true, message: "Silindi" });
+  ok(res, null, "Silindi");
 });
 
 /**
@@ -261,8 +258,7 @@ const removeUser = asyncHandler(async (req, res) => {
  * sualına cavab vermək üçün bütün siyahını əl ilə gəzmək lazım gəlirdi.
  */
 const listLogs = asyncHandler(async (req, res) => {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 30, 1), 100);
+  const { page, limit, skip } = parsePage(req.query, { defaultLimit: 30 });
 
   const filter = {};
   if (req.query.action) filter.action = req.query.action;
@@ -286,10 +282,10 @@ const listLogs = asyncHandler(async (req, res) => {
   }
 
   const [items, total] = await Promise.all([
-    AuditLog.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+    AuditLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     AuditLog.countDocuments(filter),
   ]);
-  res.json({ success: true, data: { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } } });
+  ok(res, { items, pagination: pageInfo({ page, limit }, total) });
 });
 
 /**
@@ -307,7 +303,7 @@ let filtersCache = { at: 0, data: null };
 
 const logFilters = asyncHandler(async (_req, res) => {
   if (filtersCache.data && Date.now() - filtersCache.at < FILTERS_TTL) {
-    return res.json({ success: true, data: filtersCache.data });
+    return ok(res, filtersCache.data);
   }
   const [actors, actions, resources] = await Promise.all([
     AuditLog.aggregate([
@@ -326,7 +322,7 @@ const logFilters = asyncHandler(async (_req, res) => {
     resources: resources.filter(Boolean).sort(),
   };
   filtersCache = { at: Date.now(), data };
-  res.json({ success: true, data });
+  ok(res, data);
 });
 
 export { listUsers, createUser, updateUser, removeUser, listLogs, logFilters };

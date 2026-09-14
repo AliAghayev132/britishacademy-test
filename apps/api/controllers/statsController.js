@@ -13,7 +13,7 @@ import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models
 import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
 
 // Utils
-import { asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
+import { ok, asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
 
 /** Lokallaşdırılmış dəyərdən AZ mətni götür (admin paneli AZ-dır). */
 const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v || "");
@@ -121,26 +121,23 @@ const contentStats = asyncHandler(async (req, res) => {
   const clean = (rows, field) =>
     rows.map((r) => ({ ...r, [field]: az(r[field]) }));
 
-  res.json({
-    success: true,
-    data: {
-      days,
-      totals: {
-        leads: leadsTotal,
-        leadsInWindow,
-        courseViews: courseViews[0]?.v || 0,
-        postViews: postViews[0]?.v || 0,
-      },
-      topCourses: clean(topCourses, "title"),
-      topPosts: clean(topPosts, "title"),
-      topTeachers: clean(topTeachers, "fullName"),
-      topDestinations: clean(topDestinations, "country"),
-      leadsByCourse: clean(leadsByCourse, "title"),
-      leadsByBranch: clean(leadsByBranch, "name"),
-      leadsBySource: leadsBySource.map((r) => ({ source: r._id || "other", count: r.count })),
-      leadsByStatus: leadsByStatus.map((r) => ({ status: r._id || "new", count: r.count })),
-      series,
+  ok(res, {
+    days,
+    totals: {
+      leads: leadsTotal,
+      leadsInWindow,
+      courseViews: courseViews[0]?.v || 0,
+      postViews: postViews[0]?.v || 0,
     },
+    topCourses: clean(topCourses, "title"),
+    topPosts: clean(topPosts, "title"),
+    topTeachers: clean(topTeachers, "fullName"),
+    topDestinations: clean(topDestinations, "country"),
+    leadsByCourse: clean(leadsByCourse, "title"),
+    leadsByBranch: clean(leadsByBranch, "name"),
+    leadsBySource: leadsBySource.map((r) => ({ source: r._id || "other", count: r.count })),
+    leadsByStatus: leadsByStatus.map((r) => ({ status: r._id || "new", count: r.count })),
+    series,
   });
 });
 
@@ -181,10 +178,7 @@ const funnelStats = asyncHandler(async (req, res) => {
     SiteEvent.findOne().sort({ ts: 1 }).select("ts").lean(),
   ]);
 
-  res.json({
-    success: true,
-    data: buildFunnel({ byType, daily, pages, sources, devices, firstTs: first?.ts || null }, { days, now }),
-  });
+  ok(res, buildFunnel({ byType, daily, pages, sources, devices, firstTs: first?.ts || null }, { days, now }));
 });
 
 export { contentStats, funnelStats };

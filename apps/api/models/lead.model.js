@@ -45,6 +45,10 @@ const leadSchema = new Schema(
 
 leadSchema.index({ status: 1, createdAt: -1 });
 leadSchema.index({ createdAt: -1 });
+// Admin siyahısı həmişə `isDeleted: false` ilə süzüb tarixə görə düzür;
+// filial meneceri isə öz filialı ilə (bax applyLeadScope).
+leadSchema.index({ isDeleted: 1, createdAt: -1 });
+leadSchema.index({ branch: 1, createdAt: -1 });
 
 leadSchema.methods.markHandled = async function (userId, status = "contacted") {
   this.status = status;

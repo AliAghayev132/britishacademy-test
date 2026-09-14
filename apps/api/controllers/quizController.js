@@ -5,7 +5,7 @@
 import { Quiz, QuizAttempt } from "#models";
 
 // Utils
-import { asyncHandler, parseLocale } from "#utils";
+import { fail, ok, asyncHandler, parseLocale } from "#utils";
 
 /**
  * TƏHLÜKƏSİZLİK QAYDASI:
@@ -108,29 +108,26 @@ const listQuizzes = asyncHandler(async (_req, res) => {
     .populate("category", "name slug color order")
     .lean();
 
-  res.json({
-    success: true,
-    data: {
-      items: items.map((q) => ({
-        _id: q._id,
-        title: q.title,
-        slug: q.slug,
-        lead: q.lead,
-        // Siyahıda yalnız sual SAYI göstərilir — sualların özü yox.
-        questionCount: q.questionCount || (q.questions || []).filter((x) => x.isActive !== false).length,
-        timeLimitMin: q.timeLimitMin || 0,
-        // Kateqoriya siyahını bölmələrə ayırmaq üçündür; yoxdursa null.
-        category: q.category
-          ? {
-              _id: q.category._id,
-              name: q.category.name,
-              slug: q.category.slug,
-              color: q.category.color,
-              order: q.category.order,
-            }
-          : null,
-      })),
-    },
+  ok(res, {
+    items: items.map((q) => ({
+      _id: q._id,
+      title: q.title,
+      slug: q.slug,
+      lead: q.lead,
+      // Siyahıda yalnız sual SAYI göstərilir — sualların özü yox.
+      questionCount: q.questionCount || (q.questions || []).filter((x) => x.isActive !== false).length,
+      timeLimitMin: q.timeLimitMin || 0,
+      // Kateqoriya siyahını bölmələrə ayırmaq üçündür; yoxdursa null.
+      category: q.category
+        ? {
+            _id: q.category._id,
+            name: q.category.name,
+            slug: q.category.slug,
+            color: q.category.color,
+            order: q.category.order,
+          }
+        : null,
+    })),
   });
 });
 
@@ -148,7 +145,7 @@ const getQuiz = asyncHandler(async (req, res) => {
   });
 
   if (!quiz) {
-    return res.status(404).json({ success: false, message: "Test tapılmadı" });
+    return fail(res, "Test tapılmadı", 404);
   }
 
   // Baxış sayğacı — statistika səhifəsi üçün. Cavabı gözlətməmək
@@ -165,19 +162,16 @@ const getQuiz = asyncHandler(async (req, res) => {
   // 0 və ya bankdan böyükdürsə hamısı verilir.
   questions = questions.slice(0, servedCount(quiz));
 
-  res.json({
-    success: true,
-    data: {
-      _id: quiz._id,
-      title: quiz.title,
-      slug: quiz.slug,
-      lead: quiz.lead,
-      description: quiz.description,
-      timeLimitMin: quiz.timeLimitMin || 0,
-      total: questions.length,
-      questions: questions.map((q) => publicQuestion(q, quiz.shuffleOptions)),
-      seo: quiz.seo,
-    },
+  ok(res, {
+    _id: quiz._id,
+    title: quiz.title,
+    slug: quiz.slug,
+    lead: quiz.lead,
+    description: quiz.description,
+    timeLimitMin: quiz.timeLimitMin || 0,
+    total: questions.length,
+    questions: questions.map((q) => publicQuestion(q, quiz.shuffleOptions)),
+    seo: quiz.seo,
   });
 });
 
@@ -196,12 +190,12 @@ const submitQuiz = asyncHandler(async (req, res) => {
   });
 
   if (!quiz) {
-    return res.status(404).json({ success: false, message: "Test tapılmadı" });
+    return fail(res, "Test tapılmadı", 404);
   }
 
   const answers = Array.isArray(req.body?.answers) ? req.body.answers : [];
   if (answers.length === 0) {
-    return res.status(400).json({ success: false, message: "Cavab göndərilməyib" });
+    return fail(res, "Cavab göndərilməyib", 400);
   }
 
   const active = (quiz.questions || []).filter((q) => q.isActive !== false);
@@ -225,18 +219,15 @@ const submitQuiz = asyncHandler(async (req, res) => {
     lang: parseLocale(req.query.lang || req.headers["x-lang"]),
   });
 
-  res.json({
-    success: true,
-    data: {
-      score,
-      total,
-      percent,
-      level: level
-        ? { label: level.label, title: level.title, description: level.description }
-        : null,
-      results,
-      cta: quiz.ctaHref ? { label: quiz.ctaLabel, href: quiz.ctaHref } : null,
-    },
+  ok(res, {
+    score,
+    total,
+    percent,
+    level: level
+      ? { label: level.label, title: level.title, description: level.description }
+      : null,
+    results,
+    cta: quiz.ctaHref ? { label: quiz.ctaLabel, href: quiz.ctaHref } : null,
   });
 });
 

@@ -11,6 +11,10 @@ import { logAction, diffDocs, redact, pickFields } from "#services";
 
 // Utils
 import {
+  fail,
+  ok,
+  pageInfo,
+  parsePage,
   asyncHandler,
   fuzzyRegex,
   hasRole,
@@ -50,7 +54,7 @@ export const ABROAD_INTEREST = "Xaricdə təhsil";
 function resolve(req, res) {
   const entry = RESOURCES[req.params.resource];
   if (!entry) {
-    res.status(404).json({ success: false, message: "Unknown resource" });
+    fail(res, "Unknown resource", 404);
     return null;
   }
   return entry;
@@ -82,11 +86,11 @@ function denySection(req, res, resource) {
   const sections = sectionsFor(resource);
   // Reyestrdə olmayan resurs — fail-closed.
   if (!sections.length) {
-    res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+    fail(res, "Bu bölməyə icazəniz yoxdur", 403);
     return true;
   }
   if (sections.some((s) => canAccessSection(req.user, s))) return false;
-  res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+  fail(res, "Bu bölməyə icazəniz yoxdur", 403);
   return true;
 }
 
@@ -231,9 +235,7 @@ const list = asyncHandler(async (req, res) => {
   if (denySection(req, res, req.params.resource)) return;
   const { model, search = [], sort, softDelete = true, populate } = entry;
 
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
-  const skip = (page - 1) * limit;
+  const { page, limit, skip } = parsePage(req.query);
 
   const filter = {};
   if (softDelete) filter.isDeleted = false;
@@ -287,12 +289,9 @@ const list = asyncHandler(async (req, res) => {
     model.countDocuments(filter),
   ]);
 
-  res.json({
-    success: true,
-    data: {
-      items,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    },
+  ok(res, {
+    items,
+    pagination: pageInfo({ page, limit }, total),
   });
 });
 
@@ -307,7 +306,7 @@ const getOne = asyncHandler(async (req, res) => {
   );
   // Silinmiş sənəd siyahıda görünmür — id ilə də açılmamalıdır.
   if (!item || item.isDeleted) {
-    return res.status(404).json({ success: false, message: "Not found" });
+    return fail(res, "Not found", 404);
   }
   // Siyahı məhduddursa tək sənəd də məhdud olmalıdır — əks halda id-ni
   // bilən istifadəçi icazəsi olmayan müraciəti aça bilərdi.
@@ -315,20 +314,20 @@ const getOne = asyncHandler(async (req, res) => {
     // Bölmə icazəsi: adi müraciətlərə baxa bilən adam id ilə xaricdə təhsil
     // müraciətini aça bilməməlidir (və əksinə).
     if (!canSeeLead(req.user, item)) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return fail(res, "Not found", 404);
     }
     const dScope = destinationScope(req.user);
     const own = (item.destinations || []).map(String);
     if (dScope && own.length && !own.some((d) => dScope.includes(d))) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return fail(res, "Not found", 404);
     }
     const bScope = branchScope(req.user);
     const b = item.branch ? String(item.branch._id || item.branch) : null;
     if (bScope && b && !bScope.includes(b)) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return fail(res, "Not found", 404);
     }
   }
-  res.json({ success: true, data: { item } });
+  ok(res, { item });
 });
 
 /**
@@ -361,10 +360,7 @@ const create = asyncHandler(async (req, res) => {
   if (req.params.resource === "leads") {
     const out = movesLeadOutOfReach(req.user, req.body || {});
     if (out) {
-      return res.status(403).json({
-        success: false,
-        message: `Bu ${out} üzrə müraciət yaratmağa icazəniz yoxdur`,
-      });
+      return fail(res, `Bu ${out} üzrə müraciət yaratmağa icazəniz yoxdur`, 403);
     }
   }
   // Slug/defaults are handled by each model's pre-save hook.
@@ -379,7 +375,7 @@ const create = asyncHandler(async (req, res) => {
     // yaradıldığı heç yerdə qalmırdı.
     details: { after: redact(item) },
   });
-  res.status(201).json({ success: true, message: "Yaradıldı", data: { item } });
+  ok(res, { item }, "Yaradıldı", 201);
 });
 
 /** PUT /api/admin/:resource/:id */
@@ -390,11 +386,11 @@ const update = asyncHandler(async (req, res) => {
   const item = await entry.model.findById(req.params.id);
   // Silinmiş sənəd redaktə olunmur — əvvəl `isDeleted: false` ilə bərpa olurdu.
   if (!item || item.isDeleted) {
-    return res.status(404).json({ success: false, message: "Not found" });
+    return fail(res, "Not found", 404);
   }
   // Bölmə VƏ filial/ölkə əhatəsi — oxuma ilə eyni qayda (bax leadInReach).
   if (req.params.resource === "leads" && !leadInReach(req.user, item)) {
-    return res.status(404).json({ success: false, message: "Not found" });
+    return fail(res, "Not found", 404);
   }
   // Klient sistem sahələrini yaza bilməz (bax SYSTEM_FIELDS).
   const body = stripSystemFields(req.body);
@@ -402,10 +398,7 @@ const update = asyncHandler(async (req, res) => {
   if (req.params.resource === "leads") {
     const out = movesLeadOutOfReach(req.user, body);
     if (out) {
-      return res.status(403).json({
-        success: false,
-        message: `Müraciəti başqa ${out} altına köçürməyə icazəniz yoxdur`,
-      });
+      return fail(res, `Müraciəti başqa ${out} altına köçürməyə icazəniz yoxdur`, 403);
     }
   }
   // Dəyişiklikdən ƏVVƏLKİ nüsxə — jurnalda «nə idi → nə oldu» üçün.
@@ -432,7 +425,7 @@ const update = asyncHandler(async (req, res) => {
       ? { before: pickFields(before, touched), after: pickFields(item, touched) }
       : undefined,
   });
-  res.json({ success: true, message: "Yeniləndi", data: { item } });
+  ok(res, { item }, "Yeniləndi");
 });
 
 /** DELETE /api/admin/:resource/:id — soft delete unless the resource opts out. */
@@ -443,7 +436,7 @@ const remove = asyncHandler(async (req, res) => {
   if (req.params.resource === "leads") {
     const lead = await entry.model.findById(req.params.id).select("interest destinations branch");
     if (lead && !leadInReach(req.user, lead)) {
-      return res.status(404).json({ success: false, message: "Not found" });
+      return fail(res, "Not found", 404);
     }
   }
   // Silinməzdən əvvəl adını götür — sonra sənəd tapılmır və jurnalda
@@ -452,7 +445,7 @@ const remove = asyncHandler(async (req, res) => {
   // Olmayan və ya artıq silinmiş sənəd — əvvəl «silindi» cavabı verilir və
   // jurnala boş qeyd düşürdü.
   if (!doomed || doomed.isDeleted) {
-    return res.status(404).json({ success: false, message: "Not found" });
+    return fail(res, "Not found", 404);
   }
 
   if (entry.softDelete === false) {
@@ -466,7 +459,7 @@ const remove = asyncHandler(async (req, res) => {
     // Silinən sənəd tam saxlanılır — bərpa lazım gələrsə istinad buradır.
     details: doomed ? { before: redact(doomed) } : undefined,
   });
-  res.json({ success: true, message: "Silindi" });
+  ok(res, null, "Silindi");
 });
 
 /**
@@ -514,17 +507,17 @@ const reorder = asyncHandler(async (req, res) => {
   // Sırası olmayan modeldə (müraciətlər, media…) `order` yazmaq sxemə yad
   // sahə əlavə etmək və heç nəyə təsir etməmək demək idi.
   if (!entry.model.schema.path("order")) {
-    return res.status(400).json({ success: false, message: "Bu bölmədə sıralama yoxdur" });
+    return fail(res, "Bu bölmədə sıralama yoxdur", 400);
   }
 
   const raw = Array.isArray(req.body?.ids) ? req.body.ids : [];
   // Yararsız id `findByIdAndUpdate`-i CastError ilə çökdürürdü (500).
   const ids = [...new Set(raw.map(String))].filter((id) => mongoose.isValidObjectId(id));
   if (!ids.length) {
-    return res.status(400).json({ success: false, message: "Sıralanacaq element göndərilməyib" });
+    return fail(res, "Sıralanacaq element göndərilməyib", 400);
   }
   if (ids.length > 200) {
-    return res.status(400).json({ success: false, message: "Bir dəfəyə ən çox 200 element" });
+    return fail(res, "Bir dəfəyə ən çox 200 element", 400);
   }
 
   // BÜTÜN siyahı yenidən nömrələnir (audit #26). Əvvəl yalnız cari səhifəyə
@@ -539,7 +532,7 @@ const reorder = asyncHandler(async (req, res) => {
     .lean();
   const ops = planReorder(all, ids);
   if (ops === null) {
-    return res.status(400).json({ success: false, message: "Göndərilən elementlər tapılmadı" });
+    return fail(res, "Göndərilən elementlər tapılmadı", 400);
   }
   if (ops.length) {
     await entry.model.bulkWrite(
@@ -552,7 +545,7 @@ const reorder = asyncHandler(async (req, res) => {
     action: "reorder", resource: req.params.resource,
     summary: `${labelForResource(req.params.resource)}: ${ids.length} elementin sırası dəyişdi`,
   });
-  res.json({ success: true, message: "Sıralama yeniləndi" });
+  ok(res, null, "Sıralama yeniləndi");
 });
 
 /**
@@ -584,7 +577,7 @@ function maskSettings(settings) {
 /** GET /api/admin/settings — the singleton SiteSetting document. */
 const getSettings = asyncHandler(async (_req, res) => {
   const settings = await SiteSetting.get();
-  res.json({ success: true, data: { settings: maskSettings(settings) } });
+  ok(res, { settings: maskSettings(settings) });
 });
 
 /** PUT /api/admin/settings — partial update of the singleton. */
@@ -599,7 +592,7 @@ const updateSettings = asyncHandler(async (req, res) => {
   const canSettings = canAccessSection(req.user, "settings");
   const canHome = canAccessSection(req.user, "home");
   if (!canSettings && !canHome) {
-    return res.status(403).json({ success: false, message: "Bu bölməyə icazəniz yoxdur" });
+    return fail(res, "Bu bölməyə icazəniz yoxdur", 403);
   }
   if (!canSettings) {
     for (const key of Object.keys(body)) {
@@ -656,7 +649,7 @@ const updateSettings = asyncHandler(async (req, res) => {
       : undefined,
   });
   // Cavabda da maskala — əks halda parol/açar admin panelə geri qayıdırdı.
-  res.json({ success: true, message: "Tənzimləmələr yeniləndi", data: { settings: maskSettings(settings) } });
+  ok(res, { settings: maskSettings(settings) }, "Tənzimləmələr yeniləndi");
 });
 
 /** GET /api/admin/stats — dashboard overview: per-resource counts + new leads. */
@@ -676,7 +669,7 @@ const stats = asyncHandler(async (req, res) => {
   const general = canAccessSection(req.user, "leads");
   const abroad = canAccessSection(req.user, "leads-abroad");
   if (!general && !abroad) {
-    return res.json({ success: true, data: { counts, newLeads: 0, latestLeads: [] } });
+    return ok(res, { counts, newLeads: 0, latestLeads: [] });
   }
   const leadFilter = { isDeleted: false };
   if (general !== abroad) {
@@ -694,7 +687,7 @@ const stats = asyncHandler(async (req, res) => {
       .populate("course", "title")
       .populate("branch", "name"),
   ]);
-  res.json({ success: true, data: { counts, newLeads, latestLeads } });
+  ok(res, { counts, newLeads, latestLeads });
 });
 
 export { list, getOne, create, update, remove, reorder, getSettings, updateSettings, stats };

@@ -393,6 +393,7 @@ const shutdown = async (signal) => {
     // 3) Arxa fon işləri.
     LibVersion.stop();
     await WhatsAppService.shutdown();
+    MailService.shutdown();
 
     await mongoDBService.disconnect();
     console.log("✅ Server closed");

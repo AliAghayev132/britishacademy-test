@@ -2,7 +2,7 @@
 import { FileService, registerMedia, listFolders } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { fail, ok, asyncHandler } from "#utils";
 
 /**
  * Editor media upload controllers (TipTap).
@@ -16,9 +16,7 @@ import { asyncHandler } from "#utils";
  */
 const uploadImage = asyncHandler(async (req, res) => {
   if (!req.files || !req.files.image) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Image file is required" });
+    return fail(res, "Image file is required", 400);
   }
 
   try {
@@ -33,11 +31,9 @@ const uploadImage = asyncHandler(async (req, res) => {
       type: "image",
       uploadedBy: req.user?._id,
     });
-    res.status(200).json({ success: true, data: { url, media } });
+    ok(res, { url, media }, undefined, 200);
   } catch (error) {
-    res
-      .status(400)
-      .json({ success: false, message: error.message || "Image upload failed" });
+    fail(res, error.message || "Image upload failed", 400);
   }
 });
 
@@ -47,9 +43,7 @@ const uploadImage = asyncHandler(async (req, res) => {
  */
 const uploadVideo = asyncHandler(async (req, res) => {
   if (!req.files || !req.files.video) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Video file is required" });
+    return fail(res, "Video file is required", 400);
   }
 
   try {
@@ -61,11 +55,9 @@ const uploadVideo = asyncHandler(async (req, res) => {
       type: "video",
       uploadedBy: req.user?._id,
     });
-    res.status(200).json({ success: true, data: { url, media } });
+    ok(res, { url, media }, undefined, 200);
   } catch (error) {
-    res
-      .status(400)
-      .json({ success: false, message: error.message || "Video upload failed" });
+    fail(res, error.message || "Video upload failed", 400);
   }
 });
 
@@ -75,9 +67,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
  */
 const uploadDocument = asyncHandler(async (req, res) => {
   if (!req.files || !req.files.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Document file is required" });
+    return fail(res, "Document file is required", 400);
   }
 
   const customName = req.body?.name || null;
@@ -88,12 +78,9 @@ const uploadDocument = asyncHandler(async (req, res) => {
       "documents",
       customName,
     );
-    res.status(200).json({ success: true, data: result });
+    ok(res, result, undefined, 200);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message || "Document upload failed",
-    });
+    fail(res, error.message || "Document upload failed", 400);
   }
 });
 
@@ -101,7 +88,7 @@ const uploadDocument = asyncHandler(async (req, res) => {
  * GET /api/media/folders — qalereyadakı qovluqlar və say (UI filtri üçün).
  */
 const folders = asyncHandler(async (_req, res) => {
-  res.json({ success: true, data: { folders: await listFolders() } });
+  ok(res, { folders: await listFolders() });
 });
 
 export { uploadImage, uploadVideo, uploadDocument, folders };

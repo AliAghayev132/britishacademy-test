@@ -156,7 +156,7 @@ describe("controller bağlantısı", () => {
 
   it("bildiriş CAVABDAN SONRA göndərilir", () => {
     // Ziyarətçi SMTP-nin cavabını gözləməməlidir.
-    const resAt = src.indexOf("res.status(201)");
+    const resAt = src.indexOf("ok(res, { id: lead._id }");
     const mailAt = src.indexOf("sendLeadNotice");
     expect(resAt).toBeGreaterThan(0);
     expect(mailAt).toBeGreaterThan(resAt);

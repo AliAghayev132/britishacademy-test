@@ -68,7 +68,7 @@ describe("əhatənin serverdə tətbiqi", () => {
     const next = SRC.indexOf("\nconst ", from + 10);
     const block = SRC.slice(from, next > 0 ? next : undefined);
     expect(block).toMatch(/destinationScope/);
-    expect(block).toMatch(/status\(404\)/);
+    expect(block).toMatch(/fail\(res, "Not found", 404\)/);
   });
 
   it("ölkəsiz müraciətlər əhatədən kənardır", () => {

@@ -19,6 +19,8 @@ import {
 
 // Utils
 import {
+  fail,
+  ok,
   asyncHandler,
   accessTokenOf,
   refreshTokenOf,
@@ -70,25 +72,16 @@ const register = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, phone } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Please fill in all required fields",
-    });
+    return fail(res, "Please fill in all required fields", 400);
   }
 
   if (password.length < 8) {
-    return res.status(400).json({
-      success: false,
-      message: "Password must be at least 8 characters",
-    });
+    return fail(res, "Password must be at least 8 characters", 400);
   }
 
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    return res.status(400).json({
-      success: false,
-      message: "This email is already registered",
-    });
+    return fail(res, "This email is already registered", 400);
   }
 
   // Hash the password now; store it in the OTP payload until verification.
@@ -105,17 +98,10 @@ const register = asyncHandler(async (req, res) => {
 
   if (!emailResult.success) {
     await OTP.deleteOne({ _id: otp._id });
-    return res.status(500).json({
-      success: false,
-      message: "Could not send email. Please try again",
-    });
+    return fail(res, "Could not send email. Please try again", 500);
   }
 
-  res.status(200).json({
-    success: true,
-    message: "Verification code sent to your email",
-    data: { email: email.toLowerCase(), expiresIn: config.otpExpiresIn },
-  });
+  ok(res, { email: email.toLowerCase(), expiresIn: config.otpExpiresIn }, "Verification code sent to your email", 200);
 });
 
 /**
@@ -126,16 +112,13 @@ const verifyOTP = asyncHandler(async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and verification code are required",
-    });
+    return fail(res, "Email and verification code are required", 400);
   }
 
   const verification = await OTP.verifyOTP(email, code, "register");
 
   if (!verification.valid) {
-    return res.status(400).json({ success: false, message: verification.error });
+    return fail(res, verification.error, 400);
   }
 
   const data = verification.data;
@@ -156,11 +139,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 
   issueTokens(req, res, user);
 
-  res.status(201).json({
-    success: true,
-    message: "Registration completed successfully",
-    data: { user: toUserResponse(user) },
-  });
+  ok(res, { user: toUserResponse(user) }, "Registration completed successfully", 201);
 });
 
 /**
@@ -171,7 +150,7 @@ const resendOTP = asyncHandler(async (req, res) => {
   const { email, type = "register" } = req.body;
 
   if (!email) {
-    return res.status(400).json({ success: false, message: "Email is required" });
+    return fail(res, "Email is required", 400);
   }
 
   const existingOTP = await OTP.findOne({
@@ -181,27 +160,17 @@ const resendOTP = asyncHandler(async (req, res) => {
   });
 
   if (!existingOTP) {
-    return res.status(400).json({
-      success: false,
-      message: "No pending verification found. Please start again",
-    });
+    return fail(res, "No pending verification found. Please start again", 400);
   }
 
   const otp = await OTP.createOTP(email, type, existingOTP.data);
   const emailResult = await MailService.sendOTP(email, otp.code, type);
 
   if (!emailResult.success) {
-    return res.status(500).json({
-      success: false,
-      message: "Could not send email",
-    });
+    return fail(res, "Could not send email", 500);
   }
 
-  res.json({
-    success: true,
-    message: "A new verification code has been sent",
-    data: { email: email.toLowerCase(), expiresIn: config.otpExpiresIn },
-  });
+  ok(res, { email: email.toLowerCase(), expiresIn: config.otpExpiresIn }, "A new verification code has been sent");
 });
 
 /**
@@ -212,10 +181,7 @@ const login = asyncHandler(async (req, res) => {
   const { email, password, rememberMe } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and password are required",
-    });
+    return fail(res, "Email and password are required", 400);
   }
 
   // Parol `select: false`-dur — müqayisə üçün açıq şəkildə istənilir.
@@ -233,10 +199,7 @@ const login = asyncHandler(async (req, res) => {
       summary: `Uğursuz giriş: ${email}`,
       actor: { email: String(email).toLowerCase() },
     });
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email or password",
-    });
+    return fail(res, "Invalid email or password", 401);
   }
 
   const isMatch = await HashService.comparePassword(password, user.password);
@@ -246,10 +209,7 @@ const login = asyncHandler(async (req, res) => {
       summary: `Uğursuz giriş: ${user.email}`,
       actor: user,
     });
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email or password",
-    });
+    return fail(res, "Invalid email or password", 401);
   }
 
   if (user.status !== "active") {
@@ -258,10 +218,7 @@ const login = asyncHandler(async (req, res) => {
       summary: `Uğursuz giriş: ${user.email}`,
       actor: user,
     });
-    return res.status(403).json({
-      success: false,
-      message: "Your account is not active",
-    });
+    return fail(res, "Your account is not active", 403);
   }
 
   user.lastLogin = new Date();
@@ -271,11 +228,7 @@ const login = asyncHandler(async (req, res) => {
 
   issueTokens(req, res, user, !!rememberMe);
 
-  res.json({
-    success: true,
-    message: "Login successful",
-    data: { user: toUserResponse(user) },
-  });
+  ok(res, { user: toUserResponse(user) }, "Login successful");
 });
 
 /**
@@ -294,7 +247,7 @@ const refreshToken = asyncHandler(async (req, res) => {
 
   issueTokens(req, res, user, rememberMe);
 
-  res.json({ success: true, data: { user: toUserResponse(user) } });
+  ok(res, { user: toUserResponse(user) });
 });
 
 /**
@@ -321,7 +274,7 @@ const logout = asyncHandler(async (req, res) => {
     await logAction(req, { action: "logout", summary: `Çıxış: ${user.email}` });
   }
 
-  res.json({ success: true, message: "Logout successful" });
+  ok(res, null, "Logout successful");
 });
 
 /**
@@ -331,7 +284,7 @@ const logout = asyncHandler(async (req, res) => {
 const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select("-password");
 
-  res.json({ success: true, data: { user: toUserResponse(user) } });
+  ok(res, { user: toUserResponse(user) });
 });
 
 /**
@@ -342,17 +295,11 @@ const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "Current and new password are required",
-    });
+    return fail(res, "Current and new password are required", 400);
   }
 
   if (newPassword.length < 8) {
-    return res.status(400).json({
-      success: false,
-      message: "New password must be at least 8 characters",
-    });
+    return fail(res, "New password must be at least 8 characters", 400);
   }
 
   const user = await User.findById(req.user._id).select("+password");
@@ -362,10 +309,7 @@ const changePassword = asyncHandler(async (req, res) => {
     user.password,
   );
   if (!isMatch) {
-    return res.status(401).json({
-      success: false,
-      message: "Current password is incorrect",
-    });
+    return fail(res, "Current password is incorrect", 401);
   }
 
   user.password = await HashService.hashPassword(newPassword);
@@ -376,10 +320,7 @@ const changePassword = asyncHandler(async (req, res) => {
   // Digər cihazlar çıxarılır, bu brauzer yeni cookie-lərlə davam edir.
   issueTokens(req, res, user);
 
-  res.json({
-    success: true,
-    message: "Password changed successfully",
-  });
+  ok(res, null, "Password changed successfully");
 });
 
 /**
@@ -390,18 +331,14 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ success: false, message: "Email is required" });
+    return fail(res, "Email is required", 400);
   }
 
   const user = await User.findOne({ email: email.toLowerCase() });
 
   // Always return success to avoid email enumeration.
   if (!user) {
-    return res.json({
-      success: true,
-      message: "If this email exists, a reset code has been sent",
-      data: { email: email.toLowerCase(), expiresIn: config.otpExpiresIn },
-    });
+    return ok(res, { email: email.toLowerCase(), expiresIn: config.otpExpiresIn }, "If this email exists, a reset code has been sent");
   }
 
   const otp = await OTP.createOTP(email, "reset-password", { userId: user._id });
@@ -413,17 +350,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   if (!emailResult.success) {
     await OTP.deleteOne({ _id: otp._id });
-    return res.status(500).json({
-      success: false,
-      message: "Could not send email. Please try again",
-    });
+    return fail(res, "Could not send email. Please try again", 500);
   }
 
-  res.json({
-    success: true,
-    message: "Reset code sent to your email",
-    data: { email: email.toLowerCase(), expiresIn: config.otpExpiresIn },
-  });
+  ok(res, { email: email.toLowerCase(), expiresIn: config.otpExpiresIn }, "Reset code sent to your email");
 });
 
 /**
@@ -434,21 +364,18 @@ const verifyResetOTP = asyncHandler(async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and verification code are required",
-    });
+    return fail(res, "Email and verification code are required", 400);
   }
 
   const verification = await OTP.verifyOTP(email, code, "reset-password");
 
   if (!verification.valid) {
-    return res.status(400).json({ success: false, message: verification.error });
+    return fail(res, verification.error, 400);
   }
 
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
+    return fail(res, "User not found", 404);
   }
 
   await OTP.deleteMany({ email: email.toLowerCase(), type: "reset-password" });
@@ -460,11 +387,7 @@ const verifyResetOTP = asyncHandler(async (req, res) => {
     tv: user.tokenVersion || 0,
   });
 
-  res.json({
-    success: true,
-    message: "OTP verified",
-    data: { resetToken },
-  });
+  ok(res, { resetToken }, "OTP verified");
 });
 
 /**
@@ -476,24 +399,18 @@ const resetPassword = asyncHandler(async (req, res) => {
   const user = req.user;
 
   if (!newPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "New password is required",
-    });
+    return fail(res, "New password is required", 400);
   }
 
   if (newPassword.length < 8) {
-    return res.status(400).json({
-      success: false,
-      message: "Password must be at least 8 characters",
-    });
+    return fail(res, "Password must be at least 8 characters", 400);
   }
 
   user.password = await HashService.hashPassword(newPassword);
   user.tokenVersion = (user.tokenVersion || 0) + 1;
   await user.save();
 
-  res.json({ success: true, message: "Password reset successfully" });
+  ok(res, null, "Password reset successfully");
 });
 
 /**
@@ -505,7 +422,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
   const user = await User.findById(req.user._id);
   if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
+    return fail(res, "User not found", 404);
   }
 
   if (firstName) user.firstName = firstName.trim();
@@ -514,11 +431,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  res.json({
-    success: true,
-    message: "Profil yeniləndi",
-    data: { user: toUserResponse(user) },
-  });
+  ok(res, { user: toUserResponse(user) }, "Profil yeniləndi");
 });
 
 /**
@@ -527,10 +440,7 @@ const updateProfile = asyncHandler(async (req, res) => {
  */
 const updateAvatar = asyncHandler(async (req, res) => {
   if (!req.files || !req.files.avatar) {
-    return res.status(400).json({
-      success: false,
-      message: "Avatar file is required",
-    });
+    return fail(res, "Avatar file is required", 400);
   }
 
   const user = await User.findById(req.user._id);
@@ -548,11 +458,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
   user.avatar = savedFile.path;
   await user.save();
 
-  res.json({
-    success: true,
-    message: "Avatar updated",
-    data: { avatar: user.avatar },
-  });
+  ok(res, { avatar: user.avatar }, "Avatar updated");
 });
 
 export {

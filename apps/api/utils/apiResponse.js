@@ -11,7 +11,7 @@ const ok = (res, data = null, message, status = 200) => {
   const body = { success: true };
   if (message) body.message = message;
   if (data !== null) body.data = data;
-  return res.status(status).json(body);
+  return (status === 200 ? res : res.status(status)).json(body);
 };
 
 const fail = (res, message, status = 400, errors) => {

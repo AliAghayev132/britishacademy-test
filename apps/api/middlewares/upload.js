@@ -9,6 +9,9 @@ import { fileUpload } from "#lib";
 // Config
 import { config } from "#config";
 
+// Utils
+import { fail } from "#utils";
+
 /**
  * Per-route upload size guard.
  *
@@ -40,13 +43,9 @@ const uploadLimit = (maxBytes) => async (req, res, next) => {
       const files = Array.isArray(entry) ? entry : [entry];
       for (const file of files) {
         if (file && typeof file.size === "number" && file.size > limit) {
-          return res.status(413).json({
-            success: false,
-            message:
-              limit < 1024 * 1024
-                ? `Fayl çox böyükdür. Maksimum: ${Math.round(limit / 1024)} KB`
-                : `Fayl çox böyükdür. Maksimum: ${Math.round(limit / 1024 / 1024)} MB`,
-          });
+          return fail(res, limit < 1024 * 1024
+              ? `Fayl çox böyükdür. Maksimum: ${Math.round(limit / 1024)} KB`
+              : `Fayl çox böyükdür. Maksimum: ${Math.round(limit / 1024 / 1024)} MB`, 413);
         }
       }
     }

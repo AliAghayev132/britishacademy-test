@@ -1,4 +1,5 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
+
 // Models
 import { Lead } from "#models";
 
@@ -6,7 +7,7 @@ import { Lead } from "#models";
 import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
 
 // Utils
-import { asyncHandler, isObjectId, cleanIds } from "#utils";
+import { fail, ok, asyncHandler, isObjectId, cleanIds } from "#utils";
 
 // Local
 import { leadInReach } from "./adminController.js";
@@ -20,7 +21,7 @@ const createLead = asyncHandler(async (req, res) => {
   // isə bütün sahələri doldurur. Bot uğur cavabı alır (yenidən cəhd etməsin),
   // müraciət isə yazılmır və məktub getmir.
   if (req.body?.website) {
-    return res.status(201).json({ success: true, message: "Müraciətin qəbul edildi!", data: {} });
+    return ok(res, {}, "Müraciətin qəbul edildi!", 201);
   }
   const { name, phone, email, course, branch, interest, message, source, pageUrl } =
     req.body;
@@ -30,10 +31,7 @@ const createLead = asyncHandler(async (req, res) => {
   const destinations = cleanIds(req.body?.destinations, 12);
 
   if (!name || !phone) {
-    return res.status(400).json({
-      success: false,
-      message: "Ad və telefon mütləqdir",
-    });
+    return fail(res, "Ad və telefon mütləqdir", 400);
   }
 
   const lead = await Lead.create({
@@ -51,11 +49,7 @@ const createLead = asyncHandler(async (req, res) => {
     project: isObjectId(req.body?.project) ? req.body.project : undefined,
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Müraciətin qəbul edildi! Tezliklə səninlə əlaqə saxlayacağıq.",
-    data: { id: lead._id },
-  });
+  ok(res, { id: lead._id }, "Müraciətin qəbul edildi! Tezliklə səninlə əlaqə saxlayacağıq.", 201);
 
   // ── Bildiriş məktubu ──
   //
@@ -84,13 +78,13 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
   const { status, note } = req.body;
   const lead = await Lead.findById(req.params.id);
   if (!lead || lead.isDeleted) {
-    return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
+    return fail(res, "Müraciət tapılmadı", 404);
   }
   // Statusu dəyişmək müraciəti görmək deməkdir. Adi müraciətlərə baxan adam
   // xaricdə təhsil müraciətini id ilə tapıb işarələyə bilməməlidir.
   // Bölmə VƏ filial/ölkə əhatəsi — oxuma ilə eyni qayda (bax leadInReach).
   if (!leadInReach(req.user, lead)) {
-    return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
+    return fail(res, "Müraciət tapılmadı", 404);
   }
   // Müraciətə TOXUNAN hər şey jurnala düşməlidir. Bu endpoint generic
   // CRUD-dan yan keçir, ona görə əvvəl heç bir iz qoymurdu: kimin hansı
@@ -111,7 +105,7 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
     changes: diffDocs(before, { status: lead.status, note: lead.note }),
   });
 
-  res.json({ success: true, message: "Yeniləndi", data: { lead } });
+  ok(res, { lead }, "Yeniləndi");
 });
 
 export { createLead, updateLeadStatus };

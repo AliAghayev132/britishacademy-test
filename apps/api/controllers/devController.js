@@ -22,7 +22,7 @@ import {
 } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { fail, ok, asyncHandler } from "#utils";
 
 // Data
 import { tri } from "#data";
@@ -34,16 +34,12 @@ import { tri } from "#data";
  */
 const runSeed = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
 
   const { counts } = await seedDatabase();
   await logAction(req, { action: "seed", resource: "dev", summary: "Mock data yükləndi (content əvəzləndi)" });
-  res.json({
-    success: true,
-    message: "Mock data yükləndi (mövcud content əvəzləndi)",
-    data: { counts },
-  });
+  ok(res, { counts }, "Mock data yükləndi (mövcud content əvəzləndi)");
 });
 
 /**
@@ -53,7 +49,7 @@ const runSeed = asyncHandler(async (req, res) => {
  */
 const runMigrateI18n = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
 
   const result = await migrateI18n();
@@ -62,11 +58,7 @@ const runMigrateI18n = asyncHandler(async (req, res) => {
     resource: "dev",
     summary: `i18n miqrasiya: ${result.totalDocs} sənəd, ${result.totalFields} sahə çevrildi`,
   });
-  res.json({
-    success: true,
-    message: `Miqrasiya tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə çevrildi`,
-    data: result,
-  });
+  ok(res, result, `Miqrasiya tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə çevrildi`);
 });
 
 /**
@@ -75,18 +67,18 @@ const runMigrateI18n = asyncHandler(async (req, res) => {
  */
 const runTestMail = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const to = String(req.body?.to || "").trim();
   if (!to) {
-    return res.status(400).json({ success: false, message: "Email ünvanı lazımdır" });
+    return fail(res, "Email ünvanı lazımdır", 400);
   }
   const result = await MailService.sendTest(to);
   if (!result.success) {
-    return res.status(400).json({ success: false, message: result.error || "Göndərilmədi — SMTP konfiqurasiyasını yoxlayın" });
+    return fail(res, result.error || "Göndərilmədi — SMTP konfiqurasiyasını yoxlayın", 400);
   }
   await logAction(req, { action: "settings", resource: "dev", summary: `SMTP test məktubu göndərildi: ${to}` });
-  res.json({ success: true, message: `Test məktubu göndərildi: ${to}` });
+  ok(res, null, `Test məktubu göndərildi: ${to}`);
 });
 
 /**
@@ -96,7 +88,7 @@ const runTestMail = asyncHandler(async (req, res) => {
  */
 const runAutoTranslate = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
 
   const { langs, model, limit, overwrite } = req.body || {};
@@ -120,11 +112,7 @@ const runAutoTranslate = asyncHandler(async (req, res) => {
     resource: "dev",
     summary: `AI toplu tərcümə: ${result.totalDocs} sənəd, ${result.totalFields} sahə`,
   });
-  res.json({
-    success: true,
-    message: `Tərcümə tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə (${result.totalCalls} AI sorğusu)`,
-    data: result,
-  });
+  ok(res, result, `Tərcümə tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə (${result.totalCalls} AI sorğusu)`);
 });
 
 /**
@@ -134,7 +122,7 @@ const runAutoTranslate = asyncHandler(async (req, res) => {
  */
 const runImportCourses = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importCourseData({ dryRun });
@@ -162,7 +150,7 @@ const runImportCourses = asyncHandler(async (req, res) => {
  */
 const runImportFlags = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const result = await importFlags({ overwrite: Boolean(req.body?.overwrite) });
   await logAction(req, {
@@ -170,11 +158,7 @@ const runImportFlags = asyncHandler(async (req, res) => {
     resource: "dev",
     summary: `Bayraqlar endirildi: ${result.imported}/${result.total}`,
   });
-  res.json({
-    success: true,
-    message: `${result.imported} bayraq endirildi, ${result.skipped} ötürüldü`,
-    data: result,
-  });
+  ok(res, result, `${result.imported} bayraq endirildi, ${result.skipped} ötürüldü`);
 });
 
 /**
@@ -185,7 +169,7 @@ const runImportFlags = asyncHandler(async (req, res) => {
  */
 const runImportTeachers = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importTeacherAssignments({
@@ -216,7 +200,7 @@ const runImportTeachers = asyncHandler(async (req, res) => {
  */
 const runImportBranches = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importBranchData({ dryRun });
@@ -245,7 +229,7 @@ const runImportBranches = asyncHandler(async (req, res) => {
  */
 const runMigrateSlugs = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await migrateCourseSlugs({ dryRun });
@@ -274,7 +258,7 @@ const runMigrateSlugs = asyncHandler(async (req, res) => {
  */
 const runImportQuizzes = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const overwrite = Boolean(req.body?.overwrite);
@@ -286,11 +270,7 @@ const runImportQuizzes = asyncHandler(async (req, res) => {
       summary: `Testlər: ${result.created} yaradıldı, ${result.replaced} əvəz olundu`,
     });
   }
-  res.json({
-    success: true,
-    message: `${result.created} yaradıldı, ${result.replaced} əvəz olundu, ${result.skipped} toxunulmadı`,
-    data: result,
-  });
+  ok(res, result, `${result.created} yaradıldı, ${result.replaced} əvəz olundu, ${result.skipped} toxunulmadı`);
 });
 
 /**
@@ -305,7 +285,7 @@ const runImportQuizzes = asyncHandler(async (req, res) => {
  */
 const runImportBlog = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const overwrite = Boolean(req.body?.overwrite);
@@ -318,11 +298,7 @@ const runImportBlog = asyncHandler(async (req, res) => {
       summary: `Bloq: ${summary.created} yazı yaradıldı, ${summary.published} dərc olundu, ${summary.replaced} əvəz olundu`,
     });
   }
-  res.json({
-    success: true,
-    message: `${summary.created} yaradıldı, ${summary.published} dərc olundu, ${summary.replaced} əvəz olundu, ${summary.skipped} toxunulmadı`,
-    data: { report, summary },
-  });
+  ok(res, { report, summary }, `${summary.created} yaradıldı, ${summary.published} dərc olundu, ${summary.replaced} əvəz olundu, ${summary.skipped} toxunulmadı`);
 });
 
 /**
@@ -334,7 +310,7 @@ const runImportBlog = asyncHandler(async (req, res) => {
  */
 const runImportMenu = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importHeaderMenu(HEADER_MENU, tri, { dryRun });
@@ -362,7 +338,7 @@ const runImportMenu = asyncHandler(async (req, res) => {
  */
 const runImportContact = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const result = await importContactI18n(tri, { dryRun, force: Boolean(req.body?.force) });
@@ -391,7 +367,7 @@ const runImportContact = asyncHandler(async (req, res) => {
  */
 const runImportPageContent = asyncHandler(async (req, res) => {
   if (req.user?.role !== "developer") {
-    return res.status(403).json({ success: false, message: "Yalnız developer bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız developer bu əməliyyatı edə bilər", 403);
   }
   const dryRun = Boolean(req.body?.dryRun);
   const overwrite = Boolean(req.body?.overwrite);
@@ -403,11 +379,7 @@ const runImportPageContent = asyncHandler(async (req, res) => {
       summary: `Səhifə məzmunu: ${summary.filled} səhifə dolduruldu${overwrite ? " (üzərinə yazılaraq)" : ""}`,
     });
   }
-  res.json({
-    success: true,
-    message: `${summary.filled} səhifə ${dryRun ? "doldurulacaq" : "dolduruldu"}, ${summary.untouched} artıq dolu idi${summary.missing ? `, ${summary.missing} tapılmadı` : ""}`,
-    data: { report, summary },
-  });
+  ok(res, { report, summary }, `${summary.filled} səhifə ${dryRun ? "doldurulacaq" : "dolduruldu"}, ${summary.untouched} artıq dolu idi${summary.missing ? `, ${summary.missing} tapılmadı` : ""}`);
 });
 
 export { runImportContact, runSeed, runMigrateI18n, runTestMail, runAutoTranslate, runImportCourses, runImportFlags, runImportTeachers, runImportBranches, runMigrateSlugs, runImportQuizzes, runImportMenu, runImportBlog, runImportPageContent };

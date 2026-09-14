@@ -16,9 +16,44 @@ import { otpTemplate, welcomeTemplate } from "#templates";
  * gəlir; boş sahələr ENV-dən (config.smtp) doldurulur. Hər göndərişdə cari
  * konfiqurasiya oxunur — admin dəyişəndə yenidən başlatmağa ehtiyac yoxdur.
  */
+/**
+ * Konfiqurasiyaya görə təkrar istifadə olunan SMTP transport.
+ *
+ * Əvvəl HƏR məktub üçün yeni transport (yeni TCP + TLS əl sıxma + AUTH)
+ * yaradılırdı. Toplu göndərişdə 2000 məktub = 2000 bağlantı; Gmail kimi
+ * provayderlər qısa müddətdə çox bağlantını məhdudlaşdırır. Konfiq dəyişəndə
+ * (admin paneldən) köhnə pul bağlanır və yenisi yaradılır.
+ */
+let pooled = { key: "", transporter: null };
+
+function transporterFor(c) {
+  const key = [c.host, c.port, c.secure, c.user, c.pass].join("|");
+  if (pooled.key !== key || !pooled.transporter) {
+    pooled.transporter?.close?.();
+    pooled = {
+      key,
+      transporter: nodemailer.createTransport({
+        host: c.host,
+        port: c.port,
+        secure: c.secure,
+        auth: { user: c.user, pass: c.pass },
+        pool: true,
+        maxConnections: 2,
+      }),
+    };
+  }
+  return pooled.transporter;
+}
+
 class MailService {
   /** Startup no-op (geriyə uyğunluq üçün saxlanılır). */
   static init() {}
+
+  /** Açıq SMTP bağlantılarını bağla (serverin dayanması). */
+  static shutdown() {
+    pooled.transporter?.close?.();
+    pooled = { key: "", transporter: null };
+  }
 
   /** Cari SMTP konfiqurasiyası: DB (admin) üstünlükdə, ENV fallback. */
   static async resolveConfig() {
@@ -59,13 +94,7 @@ class MailService {
     }
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: c.host,
-        port: c.port,
-        secure: c.secure,
-        auth: { user: c.user, pass: c.pass },
-      });
-      await transporter.sendMail({
+      await transporterFor(c).sendMail({
         from: `"${c.fromName}" <${c.fromEmail}>`,
         to,
         subject,

@@ -14,7 +14,7 @@ import { User } from "#models";
 import { AuthTokenService } from "#services";
 
 // Utils
-import { accessTokenOf, refreshTokenOf, clearAuthCookies } from "#utils";
+import { fail, accessTokenOf, refreshTokenOf, clearAuthCookies } from "#utils";
 
 /**
  * Authenticate an access token and attach the user to req.user.
@@ -25,10 +25,7 @@ const authenticate = async (req, res, next) => {
     const token = accessTokenOf(req);
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
+      return fail(res, "Authentication required", 401);
     }
 
     const decoded = jwt.verify(token, config.accessSecretKey);
@@ -36,18 +33,12 @@ const authenticate = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user || user.isDeleted || user.status !== "active") {
-      return res.status(401).json({
-        success: false,
-        message: "Account not found or inactive",
-      });
+      return fail(res, "Account not found or inactive", 401);
     }
 
     // Check token version (for "logout all devices")
     if (decoded.tokenVersion !== user.tokenVersion) {
-      return res.status(401).json({
-        success: false,
-        message: "Session expired, please login again",
-      });
+      return fail(res, "Session expired, please login again", 401);
     }
 
     req.user = user;
@@ -60,10 +51,7 @@ const authenticate = async (req, res, next) => {
         code: "TOKEN_EXPIRED",
       });
     }
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
+    return fail(res, "Invalid token", 401);
   }
 };
 
@@ -76,7 +64,7 @@ const authenticateRefreshToken = async (req, res, next) => {
   // /login-ə yönləndirərdi — sonsuz dövrə.
   const reject = (message) => {
     clearAuthCookies(req, res);
-    return res.status(401).json({ success: false, message });
+    return fail(res, message, 401);
   };
 
   try {
@@ -122,48 +110,33 @@ const authenticateResetToken = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Reset token required",
-      });
+      return fail(res, "Reset token required", 401);
     }
 
     const decoded = AuthTokenService.verifyResetToken(token);
 
     if (!decoded) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired reset token",
-      });
+      return fail(res, "Invalid or expired reset token", 401);
     }
 
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user || user.isDeleted) {
-      return res.status(401).json({
-        success: false,
-        message: "Account not found",
-      });
+      return fail(res, "Account not found", 401);
     }
 
     // Birdəfəlik: parol sıfırlananda tokenVersion artır. Əvvəl token 10 dəqiqə
     // ərzində istənilən qədər işlənə bilirdi — ələ keçən token parolu yenidən
     // dəyişməyə imkan verirdi (həm də sıfırlamadan sonra).
     if (decoded.tv !== (user.tokenVersion || 0)) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired reset token",
-      });
+      return fail(res, "Invalid or expired reset token", 401);
     }
 
     req.resetData = { email: decoded.email, userId: decoded.userId };
     req.user = user;
     next();
   } catch (_error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid reset token",
-    });
+    return fail(res, "Invalid reset token", 401);
   }
 };
 
@@ -174,17 +147,11 @@ const authenticateResetToken = async (req, res, next) => {
 const requireRole = (allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
+      return fail(res, "Authentication required", 401);
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission for this action",
-      });
+      return fail(res, "You do not have permission for this action", 403);
     }
 
     next();
@@ -203,7 +170,7 @@ const requireRole = (allowedRoles) => {
 const requireSection = (section) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Authentication required" });
+      return fail(res, "Authentication required", 401);
     }
     const role = req.user.role;
     if (role === "superadmin" || role === "developer") return next();
@@ -214,10 +181,7 @@ const requireSection = (section) => {
     if (allowed.length === 0) return next();
 
     if (!allowed.includes(section)) {
-      return res.status(403).json({
-        success: false,
-        message: "Bu bölməyə icazəniz yoxdur",
-      });
+      return fail(res, "Bu bölməyə icazəniz yoxdur", 403);
     }
     next();
   };

@@ -16,7 +16,7 @@
 import { Course, BlogPost, Project, Quiz, Destination, Teacher, Branch, Page } from "#models";
 
 // Utils
-import { asyncHandler, fuzzyRegex } from "#utils";
+import { ok, asyncHandler, fuzzyRegex } from "#utils";
 
 /**
  * Axtarılan mənbələr.
@@ -129,7 +129,7 @@ const search = asyncHandler(async (req, res) => {
   const q = String(req.query.q || "").trim();
   // İki hərfdən qısa sorğu demək olar hər şeyi tapır — mənasız yükdür.
   if (q.length < 2) {
-    return res.json({ success: true, data: { query: q, total: 0, groups: [] } });
+    return ok(res, { query: q, total: 0, groups: [] });
   }
 
   const perSource = Math.min(20, Math.max(1, Number(req.query.limit) || PER_SOURCE));
@@ -162,13 +162,10 @@ const search = asyncHandler(async (req, res) => {
   );
 
   const filled = groups.filter((g) => g.items.length);
-  res.json({
-    success: true,
-    data: {
-      query: q,
-      total: filled.reduce((n, g) => n + g.items.length, 0),
-      groups: filled,
-    },
+  ok(res, {
+    query: q,
+    total: filled.reduce((n, g) => n + g.items.length, 0),
+    groups: filled,
   });
 });
 

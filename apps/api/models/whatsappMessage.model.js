@@ -71,5 +71,15 @@ const whatsappMessageSchema = new Schema(
 );
 
 whatsappMessageSchema.index({ createdAt: -1 });
+// Toplu göndərişdə «son 24 saatda göndərilib?» yoxlaması HƏR alıcı üçün
+// işləyir, çatdırılma (ack) yeniləməsi də nömrəyə görə ən son mesajı axtarır —
+// indekssiz hər ikisi bütün tarixçəni skan edirdi.
+whatsappMessageSchema.index({ phone: 1, createdAt: -1 });
+whatsappMessageSchema.index(
+  { email: 1, createdAt: -1 },
+  { partialFilterExpression: { email: { $type: "string" } } },
+);
+// Tarixçə səhifəsinin status süzgəci.
+whatsappMessageSchema.index({ status: 1, createdAt: -1 });
 
 export const WhatsAppMessage = Model("WhatsAppMessage", whatsappMessageSchema);

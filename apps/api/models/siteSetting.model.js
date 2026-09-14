@@ -207,6 +207,36 @@ siteSettingSchema.statics.get = async function () {
   return this.create({ key: "site" });
 };
 
+/**
+ * Oxu keşi — ictimai sorğular üçün (hər səhifə /api/site, ana səhifə /api/home).
+ *
+ * Tənzimləmələr nadir dəyişir, amma hər səhifə açılışında bazadan oxunurdu.
+ * Keş SAXLANIŞDA dərhal təmizlənir (aşağıdakı hook-lar) — admin dəyişikliyindən
+ * sonra Next keşi yenilənəndə (SiteCacheService) API artıq təzə dəyər verir.
+ * TTL yalnız başqa prosesdən (seed skripti) gələn yazılar üçün ehtiyatdır.
+ *
+ * Qaytarılan obyekt PAYLAŞILIR — dəyişdirmə. Yazmaq lazımdırsa `get()` işlət.
+ */
+const READ_TTL_MS = 30_000;
+let readCache = null;
+
+siteSettingSchema.statics.getCached = async function () {
+  if (readCache && Date.now() - readCache.at < READ_TTL_MS) return readCache.value;
+  const doc = await this.get();
+  readCache = { at: Date.now(), value: doc.toObject() };
+  return readCache.value;
+};
+
+siteSettingSchema.statics.clearCache = function () {
+  readCache = null;
+};
+
+const clearReadCache = () => {
+  readCache = null;
+};
+siteSettingSchema.post("save", clearReadCache);
+siteSettingSchema.post(["findOneAndUpdate", "updateOne", "updateMany", "deleteMany", "deleteOne"], clearReadCache);
+
 siteSettingSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.SiteSetting });
 
 export const SiteSetting = Model("SiteSetting", siteSettingSchema);

@@ -2,7 +2,7 @@
 import { aiChat, tryParseJson, resolveAiConfig, LANG_NAMES } from "#services";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { fail, ok, asyncHandler } from "#utils";
 
 const MAX_CONTENT_LENGTH = 50000;
 
@@ -19,32 +19,21 @@ const processAI = asyncHandler(async (req, res) => {
   // Konfiqurasiya saytdan (Tənzimləmələr → AI) və ya ENV-dən gəlir.
   const aiCfg = await resolveAiConfig();
   if (!aiCfg.apiKey) {
-    return res.status(503).json({
-      success: false,
-      message: "AI xidməti konfiqurasiya olunmayıb (Tənzimləmələr → AI)",
-    });
+    return fail(res, "AI xidməti konfiqurasiya olunmayıb (Tənzimləmələr → AI)", 503);
   }
 
   const { action, fields, sourceLang, targetLang, content, isHtml } = req.body;
 
   if (!action) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Action is required" });
+    return fail(res, "Action is required", 400);
   }
 
   // Input length validation to prevent abuse.
   if (content && content.length > MAX_CONTENT_LENGTH) {
-    return res.status(400).json({
-      success: false,
-      message: `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`,
-    });
+    return fail(res, `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`, 400);
   }
   if (fields && JSON.stringify(fields).length > MAX_CONTENT_LENGTH) {
-    return res.status(400).json({
-      success: false,
-      message: `Fields data exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`,
-    });
+    return fail(res, `Fields data exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`, 400);
   }
 
   let systemPrompt = "";
@@ -209,9 +198,7 @@ Return ONLY valid JSON, no markdown, no code fences:
 
 
     default:
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid action" });
+      return fail(res, "Invalid action", 400);
   }
 
   const ai = await aiChat({
@@ -223,7 +210,7 @@ Return ONLY valid JSON, no markdown, no code fences:
     maxTokens: action === "seo-suite" ? 2200 : undefined,
   });
   if (!ai.ok) {
-    return res.status(ai.status).json({ success: false, message: ai.message });
+    return fail(res, ai.message, ai.status);
   }
   const raw = ai.text;
 
@@ -243,7 +230,7 @@ Return ONLY valid JSON, no markdown, no code fences:
     result = tryParseJson(raw);
   }
 
-  return res.status(200).json({ success: true, data: { result } });
+  return ok(res, { result }, undefined, 200);
 });
 
 /**
@@ -259,15 +246,12 @@ Return ONLY valid JSON, no markdown, no code fences:
 const status = asyncHandler(async (_req, res) => {
   const cfg = await resolveAiConfig();
   const enabled = Boolean(cfg.apiKey);
-  res.json({
-    success: true,
-    data: {
-      enabled,
-      model: enabled ? cfg.model : null,
-      reason: enabled
-        ? null
-        : "AI açarı təyin olunmayıb — Tənzimləmələr → AI bölməsindən əlavə edin",
-    },
+  ok(res, {
+    enabled,
+    model: enabled ? cfg.model : null,
+    reason: enabled
+      ? null
+      : "AI açarı təyin olunmayıb — Tənzimləmələr → AI bölməsindən əlavə edin",
   });
 });
 

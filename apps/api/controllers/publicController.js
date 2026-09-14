@@ -1,5 +1,6 @@
 // Public read endpoints — the data the Next.js site renders. All read-only,
 // no auth, only active/published documents.
+
 // Models
 import {
   SiteSetting,
@@ -21,7 +22,7 @@ import {
 } from "#models";
 
 // Utils
-import { asyncHandler } from "#utils";
+import { fail, ok, pageInfo, parsePage, asyncHandler } from "#utils";
 
 // Data
 import { LEGACY_SLUG_OF } from "#data";
@@ -63,21 +64,18 @@ function publicSettings(doc) {
 /** GET /api/site — settings + header/footer menus (one call for the layout). */
 const getSite = asyncHandler(async (_req, res) => {
   const [settings, header, footer] = await Promise.all([
-    SiteSetting.get(),
+    SiteSetting.getCached(),
     MenuItem.tree("header"),
     MenuItem.tree("footer"),
   ]);
-  res.json({
-    success: true,
-    data: { settings: publicSettings(settings), menu: { header, footer } },
-  });
+  ok(res, { settings: publicSettings(settings), menu: { header, footer } });
 });
 
 /** GET /api/menu?location=header */
 const getMenu = asyncHandler(async (req, res) => {
   const location = req.query.location || "header";
   const items = await MenuItem.tree(location);
-  res.json({ success: true, data: { items } });
+  ok(res, { items });
 });
 
 /** GET /api/home — everything the homepage needs, in one payload. */
@@ -94,7 +92,7 @@ const getHome = asyncHandler(async (_req, res) => {
   // demək idi. İndi normal halda hamısı BİR gedişdə paralel gedir.
   const [settings, featuredCourses, partners, advantages, destinations, faqs, featuredText, featuredVideo, featuredTeachers, featuredProjects] =
     await Promise.all([
-      SiteSetting.get(),
+      SiteSetting.getCached(),
       Course.findFeatured(HOME_COURSE_COUNT).populate("category").select(CARD_EXCLUDE),
       Partner.findPublic(),
       Advantage.findPublic(),
@@ -139,14 +137,11 @@ const getHome = asyncHandler(async (_req, res) => {
     if (fallbackVideo) videoTestimonials = fallbackVideo;
   }
 
-  res.json({
-    success: true,
-    data: {
-      settings: publicSettings(settings),
-      courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs,
-      teachers: featuredTeachers,
-      projects: featuredProjects,
-    },
+  ok(res, {
+    settings: publicSettings(settings),
+    courses, testimonials, videoTestimonials, partners, advantages, destinations, faqs,
+    teachers: featuredTeachers,
+    projects: featuredProjects,
   });
 });
 
@@ -155,7 +150,7 @@ const getHome = asyncHandler(async (_req, res) => {
 /** GET /api/categories — the mega-menu tree. */
 const getCategoryTree = asyncHandler(async (_req, res) => {
   const tree = await CourseCategory.findTree();
-  res.json({ success: true, data: { categories: tree } });
+  ok(res, { categories: tree });
 });
 
 /** GET /api/courses?category=<slug> */
@@ -164,11 +159,11 @@ const listCourses = asyncHandler(async (req, res) => {
   if (req.query.category) {
     const cat = await CourseCategory.findOne({ slug: req.query.category, isDeleted: false });
     // Naməlum kateqoriya BÜTÜN kursları qaytarırdı (audit #40).
-    if (!cat) return res.json({ success: true, data: { courses: [] } });
+    if (!cat) return ok(res, { courses: [] });
     filter.category = cat._id;
   }
   const courses = await Course.findPublic(filter).populate("category").select(CARD_EXCLUDE);
-  res.json({ success: true, data: { courses } });
+  ok(res, { courses });
 });
 
 /**
@@ -203,7 +198,7 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   }
 
   if (!course) {
-    return res.status(404).json({ success: false, message: "Kurs tapılmadı" });
+    return fail(res, "Kurs tapılmadı", 404);
   }
   // Baxış sayğacı burada DEYİL — bu GET keşlənir. Brauzerdən sayılır:
   // POST /api/views (eventController.view).
@@ -236,13 +231,10 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
     }
   }
 
-  res.json({
-    success: true,
-    data: {
-      course: dropDangling(course, "pricing", "branch"),
-      teachersByBranch: Object.values(teachersByBranch),
-      related,
-    },
+  ok(res, {
+    course: dropDangling(course, "pricing", "branch"),
+    teachersByBranch: Object.values(teachersByBranch),
+    related,
   });
 });
 
@@ -250,7 +242,7 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
 
 const listBranches = asyncHandler(async (_req, res) => {
   const branches = await Branch.findPublic();
-  res.json({ success: true, data: { branches } });
+  ok(res, { branches });
 });
 
 const getBranchBySlug = asyncHandler(async (req, res) => {
@@ -260,9 +252,9 @@ const getBranchBySlug = asyncHandler(async (req, res) => {
     isDeleted: false,
   });
   if (!branch) {
-    return res.status(404).json({ success: false, message: "Filial tapılmadı" });
+    return fail(res, "Filial tapılmadı", 404);
   }
-  res.json({ success: true, data: { branch } });
+  ok(res, { branch });
 });
 
 /* ---------------- Teachers ---------------- */
@@ -295,10 +287,7 @@ const listTeachers = asyncHandler(async (req, res) => {
     .populate(live("courses", "title slug"))
     .populate(live("assignments.branch", "name slug"))
     .populate(live("assignments.courses", "title slug"));
-  res.json({
-    success: true,
-    data: { teachers: teachers.map((t) => dropDangling(t, "assignments", "branch")) },
-  });
+  ok(res, { teachers: teachers.map((t) => dropDangling(t, "assignments", "branch")) });
 });
 
 const getTeacherBySlug = asyncHandler(async (req, res) => {
@@ -313,7 +302,7 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
     .populate(live("assignments.branch", "name slug"))
     .populate(live("assignments.courses", "title slug"));
   if (!teacher) {
-    return res.status(404).json({ success: false, message: "Müəllim tapılmadı" });
+    return fail(res, "Müəllim tapılmadı", 404);
   }
 
   // Vaxtlı qrafik yalnız təyinat DOLDURULMAYIB isə göstərilir — köhnə
@@ -330,12 +319,9 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
         .populate(live("course", "title slug"))
         .populate(live("branch", "name slug"));
 
-  res.json({
-    success: true,
-    data: {
-      teacher: dropDangling(teacher, "assignments", "branch"),
-      groups: groups.filter((g) => g.course && g.branch),
-    },
+  ok(res, {
+    teacher: dropDangling(teacher, "assignments", "branch"),
+    groups: groups.filter((g) => g.course && g.branch),
   });
 });
 
@@ -345,7 +331,7 @@ const listTestimonials = asyncHandler(async (req, res) => {
   const filter = {};
   if (req.query.type) filter.type = req.query.type;
   const testimonials = await Testimonial.findPublic(filter);
-  res.json({ success: true, data: { testimonials } });
+  ok(res, { testimonials });
 });
 
 /* ---------------- Destinations ---------------- */
@@ -354,7 +340,7 @@ const listDestinations = asyncHandler(async (req, res) => {
   const filter = {};
   if (req.query.scholarship === "true") filter.isScholarship = true;
   const destinations = await Destination.findPublic(filter).select(CARD_EXCLUDE);
-  res.json({ success: true, data: { destinations } });
+  ok(res, { destinations });
 });
 
 const getDestinationBySlug = asyncHandler(async (req, res) => {
@@ -364,9 +350,9 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
     isDeleted: false,
   });
   if (!destination) {
-    return res.status(404).json({ success: false, message: "Ölkə tapılmadı" });
+    return fail(res, "Ölkə tapılmadı", 404);
   }
-  res.json({ success: true, data: { destination } });
+  ok(res, { destination });
 });
 
 /* ---------------- Projects ---------------- */
@@ -374,7 +360,7 @@ const getDestinationBySlug = asyncHandler(async (req, res) => {
 /** GET /api/projects — aktiv layihələr. */
 const listProjects = asyncHandler(async (_req, res) => {
   const projects = await Project.findPublic().select(CARD_EXCLUDE);
-  res.json({ success: true, data: { projects } });
+  ok(res, { projects });
 });
 
 /** GET /api/projects/:slug */
@@ -385,10 +371,10 @@ const getProjectBySlug = asyncHandler(async (req, res) => {
     isDeleted: false,
   });
   if (!project) {
-    return res.status(404).json({ success: false, message: "Layihə tapılmadı" });
+    return fail(res, "Layihə tapılmadı", 404);
   }
   // Baxış sayğacı — statistika səhifəsi üçün (Destination ilə eyni yanaşma).
-  res.json({ success: true, data: { project } });
+  ok(res, { project });
 });
 
 /* ---------------- Schedule (timetable) ---------------- */
@@ -397,7 +383,7 @@ const getProjectBySlug = asyncHandler(async (req, res) => {
 const listSchedule = asyncHandler(async (req, res) => {
   const filter = { isActive: true, isDeleted: false };
   // Naməlum kurs/filial süzgəci bütün cədvəli qaytarırdı (audit #40).
-  const none = () => res.json({ success: true, data: { groups: [] } });
+  const none = () => ok(res, { groups: [] });
   if (req.query.course) {
     const c = await Course.findOne({ slug: req.query.course, ...LIVE });
     if (!c) return none();
@@ -413,15 +399,13 @@ const listSchedule = asyncHandler(async (req, res) => {
     .populate(live("course", "title slug"))
     .populate(live("branch", "name slug"))
     .populate(live("teacher", "fullName slug title photo color"));
-  res.json({ success: true, data: { groups: groups.filter((g) => g.course && g.branch) } });
+  ok(res, { groups: groups.filter((g) => g.course && g.branch) });
 });
 
 /* ---------------- Blog ---------------- */
 
 const listBlog = asyncHandler(async (req, res) => {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 9, 1), 50);
-  const skip = (page - 1) * limit;
+  const { page, limit, skip } = parsePage(req.query, { defaultLimit: 9, maxLimit: 50 });
 
   const filter = { status: "published", isDeleted: false };
   if (req.query.category) {
@@ -441,13 +425,10 @@ const listBlog = asyncHandler(async (req, res) => {
     BlogCategory.findPublic(),
   ]);
 
-  res.json({
-    success: true,
-    data: {
-      posts,
-      categories,
-      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-    },
+  ok(res, {
+    posts,
+    categories,
+    pagination: pageInfo({ page, limit }, total),
   });
 });
 
@@ -460,9 +441,9 @@ const getBlogBySlug = asyncHandler(async (req, res) => {
     .populate("category", "name slug color")
     .populate("author", "firstName lastName avatar");
   if (!post) {
-    return res.status(404).json({ success: false, message: "Yazı tapılmadı" });
+    return fail(res, "Yazı tapılmadı", 404);
   }
-  res.json({ success: true, data: { post } });
+  ok(res, { post });
 });
 
 /* ---------------- Editorial pages ---------------- */
@@ -474,19 +455,19 @@ const getPageBySlug = asyncHandler(async (req, res) => {
     isDeleted: false,
   });
   if (!pageDoc) {
-    return res.status(404).json({ success: false, message: "Səhifə tapılmadı" });
+    return fail(res, "Səhifə tapılmadı", 404);
   }
-  res.json({ success: true, data: { page: pageDoc } });
+  ok(res, { page: pageDoc });
 });
 
 const listPartners = asyncHandler(async (_req, res) => {
   const partners = await Partner.findPublic();
-  res.json({ success: true, data: { partners } });
+  ok(res, { partners });
 });
 
 const listFaqs = asyncHandler(async (_req, res) => {
   const faqs = await Faq.findPublic();
-  res.json({ success: true, data: { faqs } });
+  ok(res, { faqs });
 });
 
 export {

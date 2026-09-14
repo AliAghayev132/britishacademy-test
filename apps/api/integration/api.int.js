@@ -149,6 +149,15 @@ describe.skipIf(!enabled)("API inteqrasiyası", () => {
       expect((await login("sifirla@test.local", "Yeni-Parol-12345")).res.status).toBe(200);
     });
 
+    it("tənzimləmə dəyişikliyi /api/site-da dərhal görünür (oxu keşi təmizlənir)", async () => {
+      const anon = client(api.base);
+      await anon.get("/api/site"); // keşi doldur
+      const { c } = await login("dev@test.local");
+      expect((await c.put("/api/admin/settings", { marquee: { az: "KEŞ SINAĞI" } })).status).toBe(200);
+      const site = await anon.get("/api/site?lang=az");
+      expect(site.data.data.settings.marquee).toBe("KEŞ SINAĞI");
+    });
+
     it("test balı verilən sual sayına bölünür, cavablananlara yox", async () => {
       const { Quiz } = await import("#models");
       const question = (n) => ({

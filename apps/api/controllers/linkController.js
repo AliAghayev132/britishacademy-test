@@ -8,7 +8,7 @@ import { ShortLink, LinkClick } from "#models";
 import { recordClick, logAction } from "#services";
 
 // Utils
-import { asyncHandler, clientIp, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
+import { fail, ok, asyncHandler, clientIp, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
 
 /**
  * POST /api/track/:code   (PUBLIC)
@@ -30,10 +30,7 @@ const track = asyncHandler(async (req, res) => {
     lang: req.headers["accept-language"],
   });
 
-  res.json({
-    success: true,
-    data: { target: result.ok ? result.target : "/", found: result.ok },
-  });
+  ok(res, { target: result.ok ? result.target : "/", found: result.ok });
 });
 
 /** Aqreqasiya sətirlərini {label,count} formasına gətir. */
@@ -49,7 +46,7 @@ const rows = (arr, fallback = "—") =>
 const stats = asyncHandler(async (req, res) => {
   const link = await ShortLink.findById(req.params.id).lean();
   if (!link || link.isDeleted) {
-    return res.status(404).json({ success: false, message: "Link tapılmadı" });
+    return fail(res, "Link tapılmadı", 404);
   }
 
   const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 365);
@@ -91,28 +88,25 @@ const stats = asyncHandler(async (req, res) => {
   const hourMap = new Map(byHour.map((h) => [h._id, h.count]));
   const hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, count: hourMap.get(h) || 0 }));
 
-  res.json({
-    success: true,
-    data: {
-      link: {
-        _id: link._id, code: link.code, title: link.title, target: link.target,
-        isActive: link.isActive, expiresAt: link.expiresAt,
-        clicks: link.clicks, lastClickAt: link.lastClickAt, createdAt: link.createdAt,
-      },
-      days,
-      totals: {
-        clicks: link.clicks || 0,
-        unique: uniq,
-        clicksInWindow: inWindow,
-        uniqueInWindow: uniqWindow,
-      },
-      series,
-      hours,
-      byDevice: rows(byDevice),
-      byBrowser: rows(byBrowser),
-      byOs: rows(byOs),
-      bySource: rows(bySource, "birbaşa"),
+  ok(res, {
+    link: {
+      _id: link._id, code: link.code, title: link.title, target: link.target,
+      isActive: link.isActive, expiresAt: link.expiresAt,
+      clicks: link.clicks, lastClickAt: link.lastClickAt, createdAt: link.createdAt,
     },
+    days,
+    totals: {
+      clicks: link.clicks || 0,
+      unique: uniq,
+      clicksInWindow: inWindow,
+      uniqueInWindow: uniqWindow,
+    },
+    series,
+    hours,
+    byDevice: rows(byDevice),
+    byBrowser: rows(byBrowser),
+    byOs: rows(byOs),
+    bySource: rows(bySource, "birbaşa"),
   });
 });
 
@@ -123,7 +117,7 @@ const stats = asyncHandler(async (req, res) => {
 const resetClicks = asyncHandler(async (req, res) => {
   const link = await ShortLink.findById(req.params.id);
   if (!link || link.isDeleted) {
-    return res.status(404).json({ success: false, message: "Link tapılmadı" });
+    return fail(res, "Link tapılmadı", 404);
   }
   const { deletedCount } = await LinkClick.deleteMany({ link: link._id });
   link.clicks = 0;
@@ -134,7 +128,7 @@ const resetClicks = asyncHandler(async (req, res) => {
     action: "delete", resource: "links",
     summary: `«${link.code}» linkinin ${deletedCount} kliki silindi`,
   });
-  res.json({ success: true, message: `${deletedCount} klik silindi` });
+  ok(res, null, `${deletedCount} klik silindi`);
 });
 
 export { track, stats, resetClicks };

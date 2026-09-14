@@ -18,16 +18,13 @@ import {
 } from "#services";
 
 // Utils
-import { asyncHandler, hasRole } from "#utils";
+import { fail, ok, pageInfo, parsePage, asyncHandler, hasRole } from "#utils";
 
 /** Kitabxana yoxdursa 503 qaytar (hər yerdə eyni mesaj). */
 async function requireLib(res) {
   const lib = await WhatsAppService._load();
   if (!lib) {
-    res.status(503).json({
-      success: false,
-      message: "whatsapp-web.js quraşdırılmayıb — serverdə `npm i whatsapp-web.js qrcode` işə salın",
-    });
+    fail(res, "whatsapp-web.js quraşdırılmayıb — serverdə `npm i whatsapp-web.js qrcode` işə salın", 503);
     return false;
   }
   return true;
@@ -42,14 +39,11 @@ const getStatus = asyncHandler(async (_req, res) => {
     LibVersion.check().catch(() => LibVersion.getState()),
     waLogSummary().catch(() => null),
   ]);
-  res.json({
-    success: true,
-    data: {
-      ...WhatsAppService.getStatus(),
-      queue: BulkQueue.getState(),
-      version,
-      logSummary: summary,
-    },
+  ok(res, {
+    ...WhatsAppService.getStatus(),
+    queue: BulkQueue.getState(),
+    version,
+    logSummary: summary,
   });
 });
 
@@ -61,24 +55,24 @@ const getLogs = asyncHandler(async (req, res) => {
     type: req.query.type,
     level: req.query.level,
   });
-  res.json({ success: true, data });
+  ok(res, data);
 });
 
 /** DELETE /api/admin/whatsapp/logs — jurnalı təmizlə. */
 const removeLogs = asyncHandler(async (req, res) => {
   if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "Jurnalı yalnız admin təmizləyə bilər" });
+    return fail(res, "Jurnalı yalnız admin təmizləyə bilər", 403);
   }
   const n = await clearWaLogs();
   waLog("session", `Jurnal təmizləndi (${n} sətir)`, { level: "warn", actor: req.user });
   await logAction(req, { action: "settings", resource: "whatsapp", summary: `WhatsApp jurnalı təmizləndi: ${n} sətir` });
-  res.json({ success: true, message: `${n} sətir silindi` });
+  ok(res, null, `${n} sətir silindi`);
 });
 
 /** POST /api/admin/whatsapp/version/check — versiyanı İNDİ yoxla. */
 const checkVersion = asyncHandler(async (_req, res) => {
   const data = await LibVersion.check({ force: true });
-  res.json({ success: true, data });
+  ok(res, data);
 });
 
 /**
@@ -89,10 +83,10 @@ const checkVersion = asyncHandler(async (_req, res) => {
  */
 const init = asyncHandler(async (req, res) => {
   if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "WhatsApp qoşulmasını yalnız admin idarə edə bilər" });
+    return fail(res, "WhatsApp qoşulmasını yalnız admin idarə edə bilər", 403);
   }
   if (WhatsAppService.isReady) {
-    return res.json({ success: true, message: "WhatsApp artıq qoşulub", data: WhatsAppService.getStatus() });
+    return ok(res, WhatsAppService.getStatus(), "WhatsApp artıq qoşulub");
   }
   if (!(await requireLib(res))) return;
 
@@ -108,12 +102,12 @@ const init = asyncHandler(async (req, res) => {
 /** GET /api/admin/whatsapp/check?phone=... — nömrə WhatsApp-da varmı */
 const checkNumber = asyncHandler(async (req, res) => {
   const phone = req.query.phone;
-  if (!phone) return res.status(400).json({ success: false, message: "Telefon nömrəsi tələb olunur" });
+  if (!phone) return fail(res, "Telefon nömrəsi tələb olunur", 400);
   try {
     const result = await WhatsAppService.checkNumber(phone);
-    res.json({ success: true, data: result });
+    ok(res, result);
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    fail(res, err.message, 400);
   }
 });
 
@@ -124,7 +118,7 @@ const checkNumber = asyncHandler(async (req, res) => {
 const send = asyncHandler(async (req, res) => {
   const { phone, message, lead, vars } = req.body || {};
   if (!phone || !message) {
-    return res.status(400).json({ success: false, message: "Telefon nömrəsi və mesaj məcburidir" });
+    return fail(res, "Telefon nömrəsi və mesaj məcburidir", 400);
   }
   const body = renderTemplate(message, vars || {});
   const normalized = WhatsAppService.normalizePhone(phone);
@@ -136,7 +130,7 @@ const send = asyncHandler(async (req, res) => {
       phone: normalized, body, status: "failed", error: err.message,
       source: lead ? "lead" : "manual", lead: lead || undefined, sentBy: req.user?._id,
     }).catch(() => {});
-    return res.status(400).json({ success: false, message: err.message });
+    return fail(res, err.message, 400);
   }
 
   await WhatsAppMessage.create({
@@ -147,7 +141,7 @@ const send = asyncHandler(async (req, res) => {
     action: "settings", resource: "whatsapp",
     summary: `WhatsApp mesaj göndərildi: ${normalized}`,
   });
-  res.json({ success: true, message: "Mesaj göndərildi" });
+  ok(res, null, "Mesaj göndərildi");
 });
 
 /**
@@ -164,31 +158,27 @@ const MAX_MEDIA_BYTES = 7 * 1024 * 1024;
 const sendMedia = asyncHandler(async (req, res) => {
   const { phone, base64, mimetype, filename, caption } = req.body || {};
   if (!phone || !base64) {
-    return res.status(400).json({ success: false, message: "Telefon nömrəsi və fayl məcburidir" });
+    return fail(res, "Telefon nömrəsi və fayl məcburidir", 400);
   }
   // base64 uzunluğundan təxmini bayt ölçüsü
   const approxBytes = Math.floor((String(base64).length * 3) / 4);
   if (approxBytes > MAX_MEDIA_BYTES) {
     const mb = Math.round(approxBytes / 1024 / 1024);
     const maxMb = MAX_MEDIA_BYTES / 1024 / 1024;
-    return res.status(413).json({
-      success: false,
-      message:
-        "Fayl çox böyükdür (" + mb + " MB). WhatsApp ilə birbaşa göndəriş üçün maksimum " + maxMb + " MB.",
-    });
+    return fail(res, "Fayl çox böyükdür (" + mb + " MB). WhatsApp ilə birbaşa göndəriş üçün maksimum " + maxMb + " MB.", 413);
   }
   const normalized = WhatsAppService.normalizePhone(phone);
   try {
     await WhatsAppService.sendMedia({ phone: normalized, base64, mimetype, filename, caption });
   } catch (err) {
-    return res.status(400).json({ success: false, message: err.message });
+    return fail(res, err.message, 400);
   }
   await WhatsAppMessage.create({
     phone: normalized, body: caption || "", status: "sent", source: "manual",
     media: { filename, mimetype }, sentBy: req.user?._id,
   }).catch(() => {});
   await logAction(req, { action: "settings", resource: "whatsapp", summary: `WhatsApp fayl göndərildi: ${normalized}` });
-  res.json({ success: true, message: "Fayl göndərildi" });
+  ok(res, null, "Fayl göndərildi");
 });
 
 /*
@@ -200,8 +190,7 @@ const sendMedia = asyncHandler(async (req, res) => {
 
 /** GET /api/admin/whatsapp/messages?page=&limit=&status=&phone= — göndəriş tarixçəsi */
 const listMessages = asyncHandler(async (req, res) => {
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const { page, limit, skip } = parsePage(req.query);
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
   if (req.query.phone) filter.phone = new RegExp(WhatsAppService.normalizePhone(req.query.phone));
@@ -209,37 +198,34 @@ const listMessages = asyncHandler(async (req, res) => {
   const [items, total] = await Promise.all([
     WhatsAppMessage.find(filter)
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
+      .skip(skip)
       .limit(limit)
       .populate("sentBy", "name email")
       .lean(),
     WhatsAppMessage.countDocuments(filter),
   ]);
 
-  res.json({
-    success: true,
-    data: { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } },
-  });
+  ok(res, { items, pagination: pageInfo({ page, limit }, total) });
 });
 
 /** POST /api/admin/whatsapp/disconnect — bağla, sessiyanı SAXLA. */
 const disconnect = asyncHandler(async (req, res) => {
   if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "Yalnız admin bağlaya bilər" });
+    return fail(res, "Yalnız admin bağlaya bilər", 403);
   }
   await WhatsAppService.disconnect();
   await logAction(req, { action: "settings", resource: "whatsapp", summary: "WhatsApp bağlandı" });
-  res.json({ success: true, message: "WhatsApp bağlandı (sessiya saxlanıldı)" });
+  ok(res, null, "WhatsApp bağlandı (sessiya saxlanıldı)");
 });
 
 /** POST /api/admin/whatsapp/logout — cihazı ayır + sessiyanı sil (yeni QR tələb olunur). */
 const logout = asyncHandler(async (req, res) => {
   if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "Yalnız admin bu əməliyyatı edə bilər" });
+    return fail(res, "Yalnız admin bu əməliyyatı edə bilər", 403);
   }
   await WhatsAppService.clearSession();
   await logAction(req, { action: "settings", resource: "whatsapp", summary: "WhatsApp sessiyası silindi" });
-  res.json({ success: true, message: "Sessiya silindi — yenidən QR skan etmək lazımdır" });
+  ok(res, null, "Sessiya silindi — yenidən QR skan etmək lazımdır");
 });
 
 export {

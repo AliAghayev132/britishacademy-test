@@ -38,7 +38,7 @@ describe("GET /api/ai/status", () => {
     // Yalnız `res.json({...})` bloku yoxlanılır — handler-in içində
     // `Boolean(cfg.apiKey)` açarın MÖVCUDLUĞUNU yoxlayır və qanunidir.
     const block = CTRL.slice(CTRL.indexOf("const status = asyncHandler"));
-    const payload = block.slice(block.indexOf("res.json("), block.indexOf("});"));
+    const payload = block.slice(block.indexOf("ok(res,"), block.indexOf("});"));
     expect(payload).not.toMatch(/apiKey/);
     // Cavabda yalnız bunlar olmalıdır.
     expect(payload).toMatch(/enabled/);

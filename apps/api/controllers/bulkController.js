@@ -17,7 +17,7 @@ import {
 } from "#services";
 
 // Utils
-import { asyncHandler, hasRole, canAccessSection } from "#utils";
+import { fail, ok, asyncHandler, hasRole, canAccessSection } from "#utils";
 
 // Local
 import { applyLeadAccess, applyLeadScope } from "./adminController.js";
@@ -66,22 +66,19 @@ const preview = asyncHandler(async (req, res) => {
   // çəkəcəyini göstərə bilsin: 500 alıcı × 6 saniyə = 50 dəqiqə. Admin bunu
   // başlamazdan ƏVVƏL bilməlidir.
   const delaySec = resolveDelaySec(channel, req.body?.delaySec);
-  res.json({
-    success: true,
-    data: {
-      channel,
-      source,
-      total: valid.length,
-      delaySec,
-      etaSec: Math.max(0, valid.length - 1) * delaySec,
-      duplicates,
-      invalid: invalid.slice(0, 50),
-      invalidCount: invalid.length,
-      sample: valid.slice(0, 10).map((r) => ({
-        name: r.name || "",
-        to: channel === "email" ? r.email : r.phone,
-      })),
-    },
+  ok(res, {
+    channel,
+    source,
+    total: valid.length,
+    delaySec,
+    etaSec: Math.max(0, valid.length - 1) * delaySec,
+    duplicates,
+    invalid: invalid.slice(0, 50),
+    invalidCount: invalid.length,
+    sample: valid.slice(0, 10).map((r) => ({
+      name: r.name || "",
+      to: channel === "email" ? r.email : r.phone,
+    })),
   });
 });
 
@@ -95,25 +92,22 @@ const preview = asyncHandler(async (req, res) => {
  */
 const send = asyncHandler(async (req, res) => {
   if (!hasRole(req.user, "admin")) {
-    return res.status(403).json({ success: false, message: "Toplu göndərişi yalnız admin başlada bilər" });
+    return fail(res, "Toplu göndərişi yalnız admin başlada bilər", 403);
   }
 
   const { template, subject, skipDuplicates = true, confirm, delaySec } = req.body || {};
   if (confirm !== true) {
-    return res.status(400).json({ success: false, message: "Təsdiq olunmayıb" });
+    return fail(res, "Təsdiq olunmayıb", 400);
   }
   if (!template?.trim()) {
-    return res.status(400).json({ success: false, message: "Mesaj mətni məcburidir" });
+    return fail(res, "Mesaj mətni məcburidir", 400);
   }
 
   const { channel, source, valid, invalid } = await buildRecipients(req.body, req);
   if (!valid.length) {
-    return res.status(400).json({
-      success: false,
-      message: invalid.length
-        ? `Etibarlı alıcı yoxdur (${invalid.length} sətir yanlışdır)`
-        : "Göndəriləcək alıcı tapılmadı",
-    });
+    return fail(res, invalid.length
+      ? `Etibarlı alıcı yoxdur (${invalid.length} sətir yanlışdır)`
+      : "Göndəriləcək alıcı tapılmadı", 400);
   }
 
   try {
@@ -132,13 +126,9 @@ const send = asyncHandler(async (req, res) => {
       resource: "bulk",
       summary: `Toplu göndəriş (${channel}/${source}): ${state.total} alıcı, ${state.delaySec} san fasilə`,
     });
-    res.json({
-      success: true,
-      message: `Toplu göndəriş başladı — ${state.total} alıcı, ${state.delaySec} san fasilə`,
-      data: { ...state, skipped: invalid.length },
-    });
+    ok(res, { ...state, skipped: invalid.length }, `Toplu göndəriş başladı — ${state.total} alıcı, ${state.delaySec} san fasilə`);
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    fail(res, err.message, 400);
   }
 });
 
@@ -146,16 +136,17 @@ const send = asyncHandler(async (req, res) => {
 const status = asyncHandler(async (_req, res) => {
   // Həddlər cavabla birlikdə gedir — panel slayderin sərhədlərini serverdən
   // öyrənir, əks halda iki yerdə saxlanılıb bir-birindən ayrı düşərdi.
-  res.json({ success: true, data: { ...BulkQueue.getState(), limits: DELAY_LIMITS } });
+  ok(res, { ...BulkQueue.getState(), limits: DELAY_LIMITS });
 });
 
 /** POST /api/admin/bulk/cancel */
 const cancel = asyncHandler(async (req, res) => {
-  const ok = BulkQueue.cancel();
-  if (ok) {
+  // Ad `ok` deyil: #utils-dəki ok() köməkçisini kölgələyərdi.
+  const cancelled = BulkQueue.cancel();
+  if (cancelled) {
     await logAction(req, { action: "settings", resource: "bulk", summary: "Toplu göndəriş dayandırıldı" });
   }
-  res.json({ success: true, message: ok ? "Dayandırılır…" : "İşləyən göndəriş yoxdur" });
+  ok(res, null, cancelled ? "Dayandırılır…" : "İşləyən göndəriş yoxdur");
 });
 
 export { preview, send, status, cancel };
