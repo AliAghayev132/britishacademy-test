@@ -5,10 +5,13 @@
  */
 
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 // Icons
 import { ChevronDown, Type } from 'lucide-react';
+
+// Hooks
+import { useDismiss } from '@/hooks';
 
 // Local
 import { HEADING_OPTIONS } from './constants';
@@ -17,14 +20,7 @@ export default function HeadingDropdown({ editor }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  useDismiss(open, () => setOpen(false), ref);
 
   const current =
     HEADING_OPTIONS.find((h) => h.level > 0 && editor?.isActive('heading', { level: h.level })) ||

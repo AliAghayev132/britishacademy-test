@@ -9,11 +9,17 @@ import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
 // Components
 import { notify, DateRangePicker, Pagination, QueryState } from "@/components";
 
+// Hooks
+import { useDebouncedValue } from "@/hooks";
+
 // Store
 import { useAdminListQuery, useAdminLeadStatusMutation, useAdminLookupsQuery } from "@/store";
 
 // Lib
 import { pickAz } from "@/lib";
+
+// Utils
+import { fmtDate, fmtTime, apiErrorMessage } from "@/utils";
 
 // Local
 import { NativeSelect } from "../_forms/kit";
@@ -37,13 +43,8 @@ const SOURCE_OPTIONS = [
 ];
 const SOURCE_LABEL = Object.fromEntries(SOURCE_OPTIONS.map((s) => [s.value, s.label]));
 
-const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric" });
 /** «Xaricdə təhsil» maraq dəyəri — müraciətdə AZ yazılır (bax ApplyModal). */
 const ABROAD_INTEREST = "Xaricdə təhsil";
-
-const fmtTime = (d) =>
-  new Date(d).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" });
 
 /** Telefonu wa.me üçün rəqəmlərə çevir. */
 const waNumber = (phone) => String(phone || "").replace(/[^\d]/g, "");
@@ -106,11 +107,12 @@ export function LeadsView({ abroadOnly = false }) {
   const panelOpen = filtersOpen || activeCount > 0;
 
   // Backend leads-i həmişə createdAt: -1 (ən yenilər ən yuxarıda) qaytarır.
+  const debouncedSearch = useDebouncedValue(search);
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({
     resource: "leads",
     page,
     limit: 20,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     ...activeFilters,
   });
   const [setStatus] = useAdminLeadStatusMutation();
@@ -122,7 +124,7 @@ export function LeadsView({ abroadOnly = false }) {
     try {
       await setStatus({ id: lead._id, status: next }).unwrap();
     } catch (err) {
-      notify.error(err?.data?.message || "Yenilənmədi");
+      notify.error(apiErrorMessage(err, "Yenilənmədi"));
     }
   };
 

@@ -12,6 +12,9 @@
 // Icons
 import { AlertCircle, RefreshCw, Loader2, Inbox } from "lucide-react";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 /** RTK Query xətasından oxunaqlı mesaj çıxar. */
 export function errorText(error) {
   if (!error) return "Naməlum xəta";
@@ -23,7 +26,7 @@ export function errorText(error) {
   if (typeof error.status === "number" && error.status >= 500) {
     return "Serverdə xəta baş verdi. Bir azdan yenidən cəhd edin.";
   }
-  return error?.data?.message || "Məlumat yüklənmədi";
+  return apiErrorMessage(error, "Məlumat yüklənmədi");
 }
 
 function Shell({ children }) {

@@ -8,13 +8,16 @@
 import { useState } from "react";
 
 // Components
-import { FileUpload } from "@/components";
+import { ColorInput, FileUpload } from "@/components";
 
 // Store
 import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
 // Lib
 import { IMAGE_SPECS, getImageUrl } from "@/lib";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import {
@@ -125,7 +128,7 @@ export function TestimonialForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -218,11 +221,10 @@ export function TestimonialForm({ item, onClose }) {
             />
           </Field>
           <Field label="Rəng" info="Şəkil olmayanda avatar rəngi">
-            <input
-              type="color"
+            <ColorInput
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
+              className="h-10 w-full"
             />
           </Field>
           <Field label="Kurs" className="sm:col-span-1">

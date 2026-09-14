@@ -16,6 +16,9 @@ import { useEffect, useRef, useState } from 'react';
 // Icons
 import { Video, Upload, Check, HelpCircle, ChevronDown, X } from 'lucide-react';
 
+// Hooks
+import { useDismiss } from '@/hooks';
+
 // Local
 import { ToolbarButton } from './Primitives';
 
@@ -36,15 +39,8 @@ export default function VideoMenu({ editor, onVideoUpload }) {
   const simIntervalRef = useRef(null);
   const realProgressRef = useRef(false); // hook progress callback-i çağırdımı?
 
-  /* Click-outside */
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  /* Click-outside / Escape */
+  useDismiss(open, () => setOpen(false), ref);
 
   /* Cleanup */
   useEffect(

@@ -6,8 +6,14 @@
 // React
 import { useState } from "react";
 
+// Components
+import { ColorInput } from "@/components";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import { Overlay, Field, TextInput, NumberInput, SectionTitle } from "./kit";
@@ -54,7 +60,7 @@ export function BlogCategoryForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -95,11 +101,10 @@ export function BlogCategoryForm({ item, onClose }) {
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Rəng" info="Çip rəngi">
-            <input
-              type="color"
+            <ColorInput
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
+              className="h-10 w-full"
             />
           </Field>
           <Field label="Sıra">

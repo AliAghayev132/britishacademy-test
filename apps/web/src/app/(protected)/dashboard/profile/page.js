@@ -20,6 +20,9 @@ import { useGetMeQuery, useUpdateProfileMutation, updateUser } from "@/store";
 // Lib
 import { ROLE_LABELS } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 export default function ProfilePage() {
   const { data, isLoading, isError, error, refetch } = useGetMeQuery();
 
@@ -69,7 +72,7 @@ function ProfileForm({ user }) {
       dispatch(updateUser(res?.data?.user || {}));
       notify.success(res?.message || "Profil yeniləndi");
     } catch (err) {
-      notify.error(err?.data?.message || "Yadda saxlanılmadı");
+      notify.error(apiErrorMessage(err, "Yadda saxlanılmadı"));
     }
   };
 

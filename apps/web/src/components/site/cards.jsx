@@ -4,7 +4,7 @@
 import { useT, getImageUrl } from "@/lib";
 
 // Utils
-import { sanitizeHtml } from "@/utils";
+import { isInlineSvg, svgDataUri } from "@/utils";
 
 // Local
 import { LocaleLink as Link } from "./LocaleLink";
@@ -131,13 +131,12 @@ export function DestinationCard({ dest }) {
           <img src={getImageUrl(dest.image)} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </span>
       ) : dest.flag ? (
-        <span
-          className="ba-flag"
-          aria-hidden="true"
-          /* Admin sərbəst mətn sahəsidir (inline SVG) — sanitizasiyasız render
-             saxlanmış XSS vektoru idi. */
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(dest.flag) }}
-        />
+        <span className="ba-flag" aria-hidden="true">
+          {/* Admin sərbəst mətn sahəsidir (inline SVG). <img> kimi yüklənən
+              SVG-də skript işləmir — sanitizasiya və DOMPurify lazım deyil. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={isInlineSvg(dest.flag) ? svgDataUri(dest.flag) : dest.flag} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        </span>
       ) : (
         <span aria-hidden="true" style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 92, lineHeight: 1, opacity: 0.9, pointerEvents: "none", userSelect: "none", WebkitMaskImage: "linear-gradient(to left, #000 55%, transparent)", maskImage: "linear-gradient(to left, #000 55%, transparent)" }}>{flag}</span>
       )}
@@ -154,10 +153,12 @@ const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
 
 /** Text testimonial card (review wall). */
 export function TestimonialCard({ t }) {
+  const tr = useT();
+  const rating = t.rating || 5;
   return (
     <figure className="ba-review" style={{ "--c": t.color || "#2E6BE6" }}>
       <span className="ba-review-quote" aria-hidden="true">”</span>
-      <span className="ba-stars" aria-label={`${t.rating} ulduz`}>{stars(t.rating || 5)}</span>
+      <span className="ba-stars" role="img" aria-label={tr("review.rating").replace("{n}", rating)}>{stars(rating)}</span>
       <blockquote style={{ margin: "12px 0 0", fontSize: 15.5, lineHeight: 1.75, color: "#3c3c47" }}>{t.quote}</blockquote>
       <figcaption style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 18, paddingTop: 16, borderTop: "1px solid #EFF0F5" }}>
         <span className="ba-av" style={{ "--c": t.color, width: 46, height: 46, fontSize: 18 }}>

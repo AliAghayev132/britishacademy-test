@@ -21,6 +21,9 @@ import { baseApi, useLoginMutation, setCredentials } from '@/store'
 // Lib
 import { safeRedirect } from '@/lib'
 
+// Utils
+import { apiErrorMessage } from '@/utils'
+
 const HIGHLIGHTS = [
   { icon: GraduationCap, text: 'Kurslar, kateqoriyalar və dərs qrafiki' },
   { icon: Users, text: 'Müəllimlər və filiallar' },
@@ -51,7 +54,7 @@ export default function LoginPage() {
       dispatch(setCredentials(res.data))
       router.push(safeRedirect(searchParams.get('from')))
     } catch (err) {
-      setError(err?.data?.message || 'Giriş alınmadı. Məlumatları yoxla.')
+      setError(apiErrorMessage(err, 'Giriş alınmadı. Məlumatları yoxla.'))
     }
   }
 

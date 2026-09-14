@@ -33,6 +33,9 @@ import {
   Maximize2, Move,
 } from 'lucide-react';
 
+// Hooks
+import { useDismiss } from '@/hooks';
+
 // Local
 import { ToolbarButton } from './Primitives';
 import {
@@ -65,15 +68,8 @@ export default function TableMenu({ editor }) {
     };
   }, [editor]);
 
-  /* Click outside */
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (popRef.current && !popRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  /* Click outside / Escape */
+  useDismiss(open, () => setOpen(false), popRef);
 
   if (!editor) return null;
   const inTable = editor.isActive('table');

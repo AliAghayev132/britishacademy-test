@@ -17,7 +17,7 @@ import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } fro
 import { IMAGE_SPECS, getImageUrl } from "@/lib";
 
 // Utils
-import { sanitizeHtml } from "@/utils";
+import { apiErrorMessage, sanitizeHtml } from "@/utils";
 
 // Local
 import {
@@ -114,7 +114,7 @@ export function BlogPostForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 

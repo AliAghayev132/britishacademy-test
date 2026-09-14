@@ -9,6 +9,9 @@ import { useCreateLeadMutation } from "@/store";
 // Lib
 import { useT } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import { SiteSelect } from "./SiteSelect";
 
@@ -61,7 +64,7 @@ export function ContactForm({ branches = [] }) {
       }).unwrap();
       setDone(true);
     } catch (err) {
-      setError(err?.data?.message || t("contact.error"));
+      setError(apiErrorMessage(err, t("contact.error")));
     }
   }, [createLead, form, branch]);
 

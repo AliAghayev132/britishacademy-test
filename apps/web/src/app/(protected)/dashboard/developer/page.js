@@ -46,6 +46,9 @@ import {
   useAdminSeedMutation,
 } from "@/store";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 export default function DeveloperPage() {
   const [migrate, { isLoading: migrating }] = useAdminMigrateI18nMutation();
   const [migrateReport, setMigrateReport] = useState(null);
@@ -88,7 +91,7 @@ export default function DeveloperPage() {
       const res = await importContact({ dryRun }).unwrap();
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(e, "Alınmadı"));
     }
   };
 
@@ -106,7 +109,7 @@ export default function DeveloperPage() {
       setMenuReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(e, "Alınmadı"));
     }
   };
 
@@ -124,7 +127,7 @@ export default function DeveloperPage() {
       setBranchReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "İmport alınmadı");
+      notify.error(apiErrorMessage(e, "İmport alınmadı"));
     }
   };
 
@@ -144,7 +147,7 @@ export default function DeveloperPage() {
       setSlugReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "Miqrasiya alınmadı");
+      notify.error(apiErrorMessage(e, "Miqrasiya alınmadı"));
     }
   };
 
@@ -169,7 +172,7 @@ export default function DeveloperPage() {
       setBlogReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "İmport alınmadı");
+      notify.error(apiErrorMessage(e, "İmport alınmadı"));
     }
   };
 
@@ -192,7 +195,7 @@ export default function DeveloperPage() {
       setPageReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "İmport alınmadı");
+      notify.error(apiErrorMessage(e, "İmport alınmadı"));
     }
   };
 
@@ -213,7 +216,7 @@ export default function DeveloperPage() {
       setQuizReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "İmport alınmadı");
+      notify.error(apiErrorMessage(e, "İmport alınmadı"));
     }
   };
 
@@ -233,7 +236,7 @@ export default function DeveloperPage() {
       setSeedConfirm("");
       notify.success(res?.message || "Yenidən yükləndi");
     } catch (e) {
-      notify.error(e?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(e, "Alınmadı"));
     }
   };
 
@@ -252,7 +255,7 @@ export default function DeveloperPage() {
       setTeacherReport(res.data);
       notify.success(res.message || "Hazırdır");
     } catch (e) {
-      notify.error(e?.data?.message || "İmport alınmadı");
+      notify.error(apiErrorMessage(e, "İmport alınmadı"));
     }
   };
 
@@ -270,7 +273,7 @@ export default function DeveloperPage() {
       setFlagReport(res.data);
       notify.success(res.message || "Bayraqlar endirildi");
     } catch (e) {
-      notify.error(e?.data?.message || "Bayraq importu alınmadı");
+      notify.error(apiErrorMessage(e, "Bayraq importu alınmadı"));
     }
   };
 
@@ -290,7 +293,7 @@ export default function DeveloperPage() {
       setImportReport(res?.data || null);
       notify.success(res?.message || "Tamamlandı");
     } catch (err) {
-      notify.error(err?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(err, "Alınmadı"));
     }
   };
 
@@ -310,7 +313,7 @@ export default function DeveloperPage() {
       setTranslateReport(res?.data?.report || null);
       notify.success(res?.message || "Tərcümə tamamlandı");
     } catch (err) {
-      notify.error(err?.data?.message || "Tərcümə alınmadı");
+      notify.error(apiErrorMessage(err, "Tərcümə alınmadı"));
     }
   };
 
@@ -328,7 +331,7 @@ export default function DeveloperPage() {
       setMigrateReport(res?.data?.report || null);
       notify.success(res?.message || "Miqrasiya tamamlandı");
     } catch (err) {
-      notify.error(err?.data?.message || "Xəta baş verdi");
+      notify.error(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 

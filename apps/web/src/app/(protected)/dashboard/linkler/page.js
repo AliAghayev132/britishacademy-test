@@ -24,6 +24,9 @@ import {
 // Components
 import { QueryState, QrStudio, Modal, confirmDialog, notify } from "@/components";
 
+// Hooks
+import { useFlash } from "@/hooks";
+
 // Store
 import {
   useAdminListQuery,
@@ -33,6 +36,12 @@ import {
   useLinkStatsQuery,
   useResetLinkClicksMutation,
 } from "@/store";
+
+// Lib
+import { copyText } from "@/lib";
+
+// Utils
+import { fmtDateTime, fmtNumber, apiErrorMessage } from "@/utils";
 
 /**
  * İzlənilən kampaniya linkləri.
@@ -100,7 +109,7 @@ function BarList({ title, icon: Icon, rows, empty }) {
               <div className="mb-1 flex items-baseline justify-between gap-3">
                 <span className="min-w-0 truncate text-sm text-gray-700">{r.label}</span>
                 <span className="flex-none text-sm font-bold text-gray-900">
-                  {r.count.toLocaleString("az-AZ")}
+                  {fmtNumber(r.count)}
                 </span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
@@ -215,7 +224,7 @@ function LinkStats({ id }) {
       const res = await resetClicks({ id }).unwrap();
       notify.success(res.message || "Silindi");
     } catch (e) {
-      notify.error(e?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(e, "Alınmadı"));
     }
   };
 
@@ -251,7 +260,7 @@ function LinkStats({ id }) {
               </span>
               <div className="min-w-0">
                 <div className="text-xl font-bold text-gray-900">
-                  {(s.value || 0).toLocaleString("az-AZ")}
+                  {fmtNumber(s.value)}
                 </div>
                 <div className="truncate text-xs text-gray-500">{s.label}</div>
               </div>
@@ -304,7 +313,7 @@ export default function LinksPage() {
 
   const [form, setForm] = useState({ code: "", target: "", title: "", note: "" });
   const [openLink, setOpenLink] = useState(null);
-  const [copied, setCopied] = useState(null);
+  const [copied, flashCopied] = useFlash(null);
   const [qrLink, setQrLink] = useState(null);
 
   const items = useMemo(() => data?.data?.items || [], [data]);
@@ -328,19 +337,14 @@ export default function LinksPage() {
       setForm({ code: "", target: "", title: "", note: "" });
     } catch (err) {
       // Kod təkrarlanırsa Mongo unikal indeks səhvi qaytarır — anlaşılan mesaja çevir.
-      const msg = err?.data?.message || "";
+      const msg = apiErrorMessage(err, "");
       notify.error(/duplicate|E11000/i.test(msg) ? "Bu kod artıq işlənir" : msg || "Yaradıla bilmədi");
     }
   };
 
   const copy = async (code) => {
-    try {
-      await navigator.clipboard.writeText(fullUrl(code));
-      setCopied(code);
-      setTimeout(() => setCopied(null), 1600);
-    } catch {
-      notify.error("Kopyalana bilmədi");
-    }
+    if (await copyText(fullUrl(code))) flashCopied(code);
+    else notify.error("Kopyalana bilmədi");
   };
 
   const toggle = async (link) => {
@@ -351,7 +355,7 @@ export default function LinksPage() {
         data: { isActive: !link.isActive },
       }).unwrap();
     } catch (e) {
-      notify.error(e?.data?.message || "Dəyişdirilə bilmədi");
+      notify.error(apiErrorMessage(e, "Dəyişdirilə bilmədi"));
     }
   };
 
@@ -368,7 +372,7 @@ export default function LinksPage() {
       if (openLink?._id === link._id) setOpenLink(null);
       notify.success("Silindi");
     } catch (e) {
-      notify.error(e?.data?.message || "Silinə bilmədi");
+      notify.error(apiErrorMessage(e, "Silinə bilmədi"));
     }
   };
 
@@ -489,11 +493,11 @@ export default function LinksPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span className="font-bold text-gray-900">
-                      {(l.clicks || 0).toLocaleString("az-AZ")}
+                      {fmtNumber(l.clicks)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
-                    {l.lastClickAt ? new Date(l.lastClickAt).toLocaleString("az-AZ") : "—"}
+                    {fmtDateTime(l.lastClickAt, { seconds: true })}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">

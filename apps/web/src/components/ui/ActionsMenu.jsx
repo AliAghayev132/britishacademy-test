@@ -6,10 +6,13 @@
 // opens on click.
 
 // React
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 // Icons
 import { MoreHorizontal } from "lucide-react";
+
+// Hooks
+import { useDismiss } from "@/hooks";
 
 function toneClasses(tone) {
   if (tone === "danger") return "border-red-200 text-red-600 hover:bg-red-50";
@@ -35,14 +38,7 @@ export function ActionsMenu({ actions = [], max = 3 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => ref.current && !ref.current.contains(e.target) && setOpen(false);
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
-  }, [open]);
+  useDismiss(open, () => setOpen(false), ref);
 
   if (list.length === 0) return null;
 

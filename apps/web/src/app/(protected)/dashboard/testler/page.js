@@ -30,7 +30,7 @@ import {
 import { pickAz } from "@/lib";
 
 // Utils
-import { keyOf, rowKey } from "@/utils";
+import { fmtNumber, apiErrorMessage, keyOf, rowKey } from "@/utils";
 
 // Local
 import {
@@ -243,7 +243,7 @@ function QuizEditor({ item, onBack }) {
       notify.success("Yadda saxlanıldı");
       onBack();
     } catch (e) {
-      const msg = e?.data?.message || "";
+      const msg = apiErrorMessage(e, "");
       notify.error(/duplicate|E11000/i.test(msg) ? "Bu slug artıq işlənir" : msg || "Yadda saxlanılmadı");
     }
   };
@@ -429,7 +429,7 @@ export default function QuizzesPage() {
       await remove({ resource: "quizzes", id: q._id }).unwrap();
       notify.success("Silindi");
     } catch (e) {
-      notify.error(e?.data?.message || "Silinə bilmədi");
+      notify.error(apiErrorMessage(e, "Silinə bilmədi"));
     }
   };
 
@@ -482,7 +482,7 @@ export default function QuizzesPage() {
                   <td className="px-4 py-3 text-right text-gray-700">
                     <span className="inline-flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5 text-gray-400" />
-                      {(q.views || 0).toLocaleString("az-AZ")}
+                      {fmtNumber(q.views)}
                     </span>
                   </td>
                   <td className="px-4 py-3">

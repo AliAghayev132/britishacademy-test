@@ -51,8 +51,13 @@ describe("#29 «yadda saxlanmayıb» xəbərdarlığı", () => {
   it("xüsusi idarəetmələr formanı dəyişmiş kimi işarələyir", () => {
     const kit = read("src/app/(protected)/dashboard/_forms/kit.jsx");
     expect(kit).toMatch(/<FormDirtyContext\.Provider value=\{markDirty\}>/);
-    // NativeSelect, Toggle, MultiSelectChips, AddButton, RemoveButton, DirtyButton
-    expect(kit.split("const markDirty = useMarkDirty();").length - 1).toBe(6);
+    // MultiSelectChips, AddButton, RemoveButton, DirtyButton
+    expect(kit.split("const markDirty = useMarkDirty();").length - 1).toBe(4);
+    // Seçim qutusu, açar, qeyd qutusu və rəng seçici ümumi komponentlərdir.
+    expect(kit).toMatch(/export \{ Select as NativeSelect, Switch as Toggle \} from "@\/components";/);
+    for (const ui of ["Select", "Switch", "Checkbox", "ColorInput"]) {
+      expect(read(`src/components/ui/${ui}.jsx`)).toMatch(/const markDirty = useMarkDirty\(\);/);
+    }
     const loc = read("src/app/(protected)/dashboard/_forms/Localized.jsx");
     expect(loc.split("markDirty();").length - 1).toBeGreaterThanOrEqual(3);
     expect(read("src/components/ui/FileUpload.jsx")).toMatch(/const markDirty = useMarkDirty\(\);/);

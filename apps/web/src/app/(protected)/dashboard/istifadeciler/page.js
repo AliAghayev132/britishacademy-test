@@ -17,6 +17,9 @@ import { Plus, Pencil, Trash2, Search, ShieldCheck } from "lucide-react";
 // Components
 import { Pagination, notify, confirmDialog, ActionsMenu, QueryState } from "@/components";
 
+// Hooks
+import { useDebouncedValue } from "@/hooks";
+
 // Store
 import {
   useAdminUsersQuery,
@@ -27,6 +30,9 @@ import {
 
 // Lib
 import { ROLE_LABELS, SEES_EVERYTHING, SECTIONS, canAssignRole } from "@/lib";
+
+// Utils
+import { fmtDateTime, apiErrorMessage } from "@/utils";
 
 // Local
 import { Overlay, Field, TextInput, NativeSelect } from "../_forms/kit";
@@ -58,11 +64,6 @@ const STATUS_BADGE = {
   suspended: { label: "Dayandırılıb", cls: "bg-amber-100 text-amber-700" },
   pending: { label: "Gözləmədə", cls: "bg-gray-200 text-gray-600" },
 };
-
-const fmt = (d) =>
-  d
-    ? new Date(d).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
-    : "—";
 
 // ── Create / edit modal ──
 function UserForm({ user, onClose }) {
@@ -121,7 +122,7 @@ function UserForm({ user, onClose }) {
       notify.success(editing ? "İstifadəçi yeniləndi" : "İstifadəçi yaradıldı");
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Yadda saxlanmadı");
+      setError(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 
@@ -172,7 +173,8 @@ export default function UsersPage() {
   const [modal, setModal] = useState(null); // null | "create" | user object
   const [perms, setPerms] = useState(null); // icazə modalının hədəf istifadəçisi
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsersQuery({ page, search });
+  const debouncedSearch = useDebouncedValue(search);
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsersQuery({ page, search: debouncedSearch });
   const [del] = useAdminDeleteUserMutation();
 
   const items = data?.data?.items || [];
@@ -195,7 +197,7 @@ export default function UsersPage() {
       await del(user._id).unwrap();
       notify.success("İstifadəçi silindi");
     } catch (err) {
-      notify.error(err?.data?.message || "Silinmədi");
+      notify.error(apiErrorMessage(err, "Silinmədi"));
     }
   };
 
@@ -273,7 +275,7 @@ export default function UsersPage() {
                       <td className="px-4 py-3">
                         <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
                       </td>
-                      <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmt(u.lastLogin)}</td>
+                      <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 md:table-cell">{fmtDateTime(u.lastLogin)}</td>
                       <td className="px-4 py-3">
                         {/* Özündən yüksək/bərabər rütbəli hesab (və özün) burada
                             idarə olunmur — server də rədd edir (audit #24). */}

@@ -21,12 +21,6 @@ export const STATUS_BADGE = {
   cancelled: { label: "Dayandırıldı", cls: "bg-gray-200 text-gray-700" },
 };
 
-export const fmt = (d) => (d ? new Date(d).toLocaleString("az-AZ") : "—");
-
-/** Yalnız saat:dəqiqə:saniyə — canlı axında tarix yer tutur. */
-export const fmtTime = (d) =>
-  d ? new Date(d).toLocaleTimeString("az-AZ", { hour12: false }) : "—";
-
 /**
  * Saniyəni oxunaqlı müddətə çevir: 50 → «50 san», 3720 → «1 saat 2 dəq».
  * Toplu göndəriş saatlarla çəkə bilir — «3720 saniyə» heç nə demir.

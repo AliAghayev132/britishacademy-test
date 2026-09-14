@@ -31,6 +31,9 @@ import {
   useMarkDirty,
 } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 const LOCALES = [
   { key: "az", label: "AZ" },
   { key: "en", label: "EN" },
@@ -224,7 +227,7 @@ function AiBar({ v, onChange, isHtml }) {
         notify.error("AI boş cavab qaytardı");
       }
     } catch (err) {
-      notify.error(err?.data?.message || "AI xətası — Tənzimləmələr → AI-ı yoxlayın");
+      notify.error(apiErrorMessage(err, "AI xətası — Tənzimləmələr → AI-ı yoxlayın"));
     } finally {
       setBusy(null);
     }

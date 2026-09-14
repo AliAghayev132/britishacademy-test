@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 
 // Components
-import { notify, QueryState, FileUpload } from "@/components";
+import { ColorInput, Switch, notify, QueryState, FileUpload } from "@/components";
 
 // Store
 import {
@@ -15,6 +15,9 @@ import {
 
 // Lib
 import { IMAGE_SPECS } from "@/lib";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 // Çoxdilli redaktə (modallardakı ilə eyni sistem)
@@ -191,7 +194,7 @@ export default function SettingsPage() {
       }).unwrap();
       notify.success("Yadda saxlanıldı");
     } catch (err) {
-      notify.error(err?.data?.message || "Yadda saxlanmadı");
+      notify.error(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 
@@ -202,7 +205,7 @@ export default function SettingsPage() {
       const res = await testMail(to).unwrap();
       notify.success(res?.message || "Test məktubu göndərildi");
     } catch (err) {
-      notify.error(err?.data?.message || "Göndərilmədi — əvvəlcə SMTP-ni yadda saxlayın");
+      notify.error(apiErrorMessage(err, "Göndərilmədi — əvvəlcə SMTP-ni yadda saxlayın"));
     }
   };
 
@@ -267,11 +270,10 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className={label}>Tema rəngi</label>
-            <input
-              type="color"
+            <ColorInput
               value={form.brand.themeColor}
               onChange={(e) => set("brand.themeColor", e.target.value)}
-              className="h-10 w-full cursor-pointer rounded-lg border border-gray-200 bg-white p-1"
+              className="h-10 w-full"
             />
             <p className="mt-1 text-xs text-gray-400">Mobil brauzerin ünvan zolağının rəngi.</p>
           </div>
@@ -397,8 +399,7 @@ export default function SettingsPage() {
       {tab === "smtp" && (
         <Section title="SMTP (email göndərişi)">
           <div className="sm:col-span-2 flex items-center gap-2">
-            <input id="smtp-enabled" type="checkbox" checked={form.smtp.enabled} onChange={(e) => set("smtp.enabled", e.target.checked)} className="h-4 w-4" />
-            <label htmlFor="smtp-enabled" className="text-sm font-medium text-gray-700">SMTP aktiv (email göndərişi üçün)</label>
+            <Switch checked={form.smtp.enabled} onChange={(v) => set("smtp.enabled", v)} label="SMTP aktiv (email göndərişi üçün)" />
           </div>
           <div>
             <label className={label}>Host</label>
@@ -409,8 +410,7 @@ export default function SettingsPage() {
             <input type="number" className={input} placeholder="587" value={form.smtp.port} onChange={(e) => set("smtp.port", e.target.value)} />
           </div>
           <div className="flex items-center gap-2 pt-6">
-            <input id="smtp-secure" type="checkbox" checked={form.smtp.secure} onChange={(e) => set("smtp.secure", e.target.checked)} className="h-4 w-4" />
-            <label htmlFor="smtp-secure" className="text-sm font-medium text-gray-700">Secure (SSL — port 465)</label>
+            <Switch checked={form.smtp.secure} onChange={(v) => set("smtp.secure", v)} label="Secure (SSL — port 465)" />
           </div>
           <div>
             <label className={label}>İstifadəçi (user)</label>
@@ -430,8 +430,7 @@ export default function SettingsPage() {
           </div>
           {/* ── Müraciət bildirişi ── */}
           <div className="sm:col-span-2 flex items-center gap-2 border-t border-gray-100 pt-4">
-            <input id="smtp-notify" type="checkbox" checked={form.smtp.notifyLeads} onChange={(e) => set("smtp.notifyLeads", e.target.checked)} className="h-4 w-4" />
-            <label htmlFor="smtp-notify" className="text-sm font-medium text-gray-700">Yeni müraciət gələndə mənə məktub göndər</label>
+            <Switch checked={form.smtp.notifyLeads} onChange={(v) => set("smtp.notifyLeads", v)} label="Yeni müraciət gələndə mənə məktub göndər" />
           </div>
           <div className="sm:col-span-2">
             <label className={label}>Bildiriş ünvanı</label>
@@ -459,8 +458,7 @@ export default function SettingsPage() {
       {tab === "ai" && (
         <Section title="AI köməkçi (OpenRouter)">
           <div className="sm:col-span-2 flex items-center gap-2">
-            <input id="ai-enabled" type="checkbox" checked={form.ai.enabled} onChange={(e) => set("ai.enabled", e.target.checked)} className="h-4 w-4" />
-            <label htmlFor="ai-enabled" className="text-sm font-medium text-gray-700">AI aktiv (modallardakı tərcümə / səliqə düymələri üçün)</label>
+            <Switch checked={form.ai.enabled} onChange={(v) => set("ai.enabled", v)} label="AI aktiv (modallardakı tərcümə / səliqə düymələri üçün)" />
           </div>
           <div className="sm:col-span-2">
             <label className={label}>API açarı {form.ai.hasKey && <span className="text-emerald-600">(təyin olunub)</span>}</label>

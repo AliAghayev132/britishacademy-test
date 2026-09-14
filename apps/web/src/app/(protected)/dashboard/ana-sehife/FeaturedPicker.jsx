@@ -15,6 +15,9 @@ import { useAdminListQuery, useAdminUpdateMutation } from "@/store";
 // Lib
 import { pickAz, thumbOf, isImagePath, getImageUrl } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 /**
  * «Ana səhifədə göstərilənlər» seçicisi.
  *
@@ -62,7 +65,7 @@ export function FeaturedPicker({ resource, limit, filter, titleField = "title", 
         data: { isFeatured: !item.isFeatured },
       }).unwrap();
     } catch (err) {
-      notify.error(err?.data?.message || "Dəyişmədi");
+      notify.error(apiErrorMessage(err, "Dəyişmədi"));
     }
   };
 

@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 
 // Components
-import { confirmDialog, notify, QueryState } from "@/components";
+import { Collapsible, confirmDialog, notify, QueryState } from "@/components";
 
 // Store
 import {
@@ -46,6 +46,9 @@ import {
   useWhatsappCheckVersionMutation,
   useSocket,
 } from "@/store";
+
+// Utils
+import { fmtDateTime, apiErrorMessage } from "@/utils";
 
 // Local
 import { ConnectTab } from "./_components/ConnectTab";
@@ -192,7 +195,7 @@ export default function WhatsAppPage() {
       notify.success(res?.message || okMsg);
       return true;
     } catch (err) {
-      notify.error(err?.data?.message || "Xəta baş verdi");
+      notify.error(apiErrorMessage(err, "Xəta baş verdi"));
       return false;
     }
   };
@@ -322,8 +325,10 @@ export default function WhatsAppPage() {
 
       {/* Diaqnostika — bağlantı kəsiləndə ilk verilən suallar. */}
       {installed && (
-        <details className="rounded-xl border border-gray-200 bg-white px-5 py-3">
-          <summary className="cursor-pointer text-sm font-semibold text-gray-700">
+        <Collapsible
+          className="rounded-xl border border-gray-200 bg-white px-5 py-3"
+          titleClassName="text-sm font-semibold text-gray-700"
+          title={<>
             Diaqnostika
             {s.logSummary?.errors > 0 && (
               <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
@@ -335,7 +340,8 @@ export default function WhatsAppPage() {
                 {s.logSummary.disconnects} kəsilmə
               </span>
             )}
-          </summary>
+          </>}
+        >
           <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
             {[
               ["Sessiya faylı", s.hasSession ? "var" : "yoxdur"],
@@ -346,7 +352,7 @@ export default function WhatsAppPage() {
               ["Platforma", s.platform || "—"],
               ["WhatsApp versiyası", s.waVersion || "—"],
               ["Server açıqdır", fmtUptime(s.serverUptimeSec || 0)],
-              ["Versiya yoxlanıb", s.version?.checkedAt ? new Date(s.version.checkedAt).toLocaleString("az-AZ") : "—"],
+              ["Versiya yoxlanıb", fmtDateTime(s.version?.checkedAt, { seconds: true })],
             ].map(([k, v]) => (
               <div key={k} className="flex gap-2">
                 <dt className="flex-none text-gray-500">{k}:</dt>
@@ -369,7 +375,7 @@ export default function WhatsAppPage() {
               </span>
             )}
           </div>
-        </details>
+        </Collapsible>
       )}
 
       {/* Status sorğusu uğursuzdursa — səbəb + yenidən cəhd */}

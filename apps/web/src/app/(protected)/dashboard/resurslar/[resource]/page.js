@@ -22,6 +22,9 @@ import {
 // Components
 import { Pagination, confirmDialog, notify, ActionsMenu, QueryState } from "@/components";
 
+// Hooks
+import { useDebouncedValue } from "@/hooks";
+
 // Store
 import {
   useAdminListQuery,
@@ -43,6 +46,9 @@ import {
   isImagePath,
   getImageUrl,
 } from "@/lib";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import { NativeSelect } from "../../_forms/kit";
@@ -88,7 +94,8 @@ export default function ResourceBrowserPage({ params }) {
   }, [lookups]);
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
-  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({ resource, search: search || undefined, page, limit: PAGE_SIZE, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
+  const debouncedSearch = useDebouncedValue(search);
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminListQuery({ resource, search: debouncedSearch || undefined, page, limit: PAGE_SIZE, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
   const [createItem] = useAdminCreateMutation();
@@ -152,7 +159,7 @@ export default function ResourceBrowserPage({ params }) {
       setEditing(null);
       notify.success("Yadda saxlanıldı");
     } catch (err) {
-      notify.error(err?.data?.message || "Yadda saxlanmadı");
+      notify.error(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 
@@ -169,7 +176,7 @@ export default function ResourceBrowserPage({ params }) {
       await deleteItem({ resource, id: item._id }).unwrap();
       notify.success("Silindi");
     } catch (err) {
-      notify.error(err?.data?.message || "Silinmədi");
+      notify.error(apiErrorMessage(err, "Silinmədi"));
     }
   };
 
@@ -209,7 +216,7 @@ export default function ResourceBrowserPage({ params }) {
       // `start` — səhifə sürüşməsi; onsuz 2-ci səhifə də 0-dan nömrələnərdi.
       await reorderItems({ resource, ids, start: (page - 1) * PAGE_SIZE }).unwrap();
     } catch (err) {
-      notify.error(err?.data?.message || "Sıra dəyişmədi");
+      notify.error(apiErrorMessage(err, "Sıra dəyişmədi"));
     }
   };
 

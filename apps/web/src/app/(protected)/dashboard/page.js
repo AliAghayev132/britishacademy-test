@@ -24,6 +24,9 @@ import { useAdminStatsQuery } from "@/store";
 // Lib
 import { pickAz } from "@/lib";
 
+// Utils
+import { fmtDateTime } from "@/utils";
+
 const CARDS = [
   { key: "courses", name: "Kurslar", icon: GraduationCap, href: "/dashboard/resurslar/courses", color: "text-blue-700 bg-blue-50" },
   { key: "teachers", name: "Müəllimlər", icon: Users, href: "/dashboard/resurslar/teachers", color: "text-teal-700 bg-teal-50" },
@@ -33,8 +36,6 @@ const CARDS = [
   { key: "destinations", name: "Xaricdə təhsil", icon: Globe2, href: "/dashboard/resurslar/destinations", color: "text-emerald-700 bg-emerald-50" },
   { key: "blog-posts", name: "Bloq yazıları", icon: FileText, href: "/dashboard/resurslar/blog-posts", color: "text-slate-700 bg-slate-100" },
 ];
-
-const fmt = (d) => new Date(d).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
 export default function DashboardHome() {
   const { data, isLoading, isError, error, refetch } = useAdminStatsQuery();
@@ -85,7 +86,7 @@ export default function DashboardHome() {
                     <td className="px-5 py-3 font-semibold text-gray-900">{l.name}</td>
                     <td className="px-5 py-3 text-gray-500">{l.phone}</td>
                     <td className="hidden px-5 py-3 text-gray-500 md:table-cell">{pickAz(l.course?.title) || pickAz(l.interest) || "—"}</td>
-                    <td className="px-5 py-3 text-right text-xs text-gray-400">{fmt(l.createdAt)}</td>
+                    <td className="px-5 py-3 text-right text-xs text-gray-400">{fmtDateTime(l.createdAt, { year: false })}</td>
                   </tr>
                 ))}
               </tbody>

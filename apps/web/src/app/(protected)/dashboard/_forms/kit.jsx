@@ -6,13 +6,16 @@
 // a form library.
 
 // React
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 // Icons
 import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
 
 // Components
 import { InfoTip, confirmDialog } from "@/components";
+
+// Hooks
+import { useDismiss } from "@/hooks";
 
 // Lib
 import { FormDirtyContext, useMarkDirty } from "@/lib";
@@ -37,115 +40,15 @@ export const toId = (v) => (v && typeof v === "object" ? v._id : v) || "";
 const base =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 disabled:bg-gray-100";
 
+// Seçim qutusu və açar ümumi komponentlərdir (components/ui) — kit adları
+// formalarda dəyişməsin deyə saxlanılır.
+export { Select as NativeSelect, Switch as Toggle } from "@/components";
+
 // ── Inputs ──
 export const TextInput = ({ className, ...p }) => <input {...p} className={`${base} ${className || ""}`} />;
 export const NumberInput = ({ className, ...p }) => <input type="number" {...p} className={`${base} ${className || ""}`} />;
 export const TextArea = ({ className, ...p }) => <textarea {...p} className={`${base} ${className || ""}`} />;
 
-// Custom dropdown (keeps the native `onChange={(e)=>e.target.value}` contract so
-// every form keeps working). Options render with a custom design; lists longer
-// than 4 get a search box. Positioned fixed so it never clips inside the modal.
-export function NativeSelect({ options = [], placeholder, value, onChange, disabled, className }) {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const [coords, setCoords] = useState(null);
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-
-  const searchable = options.length > 4;
-  const selected = options.find((o) => String(o.value) === String(value ?? ""));
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (triggerRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
-  }, [open]);
-
-  const toggle = () => {
-    if (disabled) return;
-    if (open) return setOpen(false);
-    const r = triggerRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - r.bottom;
-    const up = spaceBelow < 280 && r.top > spaceBelow;
-    setCoords({ left: r.left, width: r.width, top: up ? undefined : r.bottom + 4, bottom: up ? window.innerHeight - r.top + 4 : undefined });
-    setQ("");
-    setOpen(true);
-  };
-  const markDirty = useMarkDirty();
-  const choose = (v) => {
-    if (String(v) !== String(value ?? "")) markDirty();
-    onChange?.({ target: { value: v } });
-    setOpen(false);
-  };
-
-  const norm = (s) => String(s || "").toLowerCase();
-  const filtered = searchable && q ? options.filter((o) => norm(o.label).includes(norm(q))) : options;
-
-  return (
-    <div className={`relative ${className || ""}`}>
-      <button
-        ref={triggerRef}
-        type="button"
-        disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={toggle}
-        className={`${base} flex items-center justify-between gap-2 bg-white text-left ${disabled ? "opacity-60" : "cursor-pointer"}`}
-      >
-        <span className="flex min-w-0 items-center gap-2">
-          {selected?.color && <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: selected.color }} />}
-          <span className={`truncate ${selected ? "text-gray-900" : "text-gray-400"}`} style={selected?.color ? { color: selected.color, fontWeight: 600 } : undefined}>{selected ? selected.label : (placeholder || "Seç…")}</span>
-        </span>
-        <ChevronDown className={`h-4 w-4 flex-none text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {open && coords && (
-        <div
-          ref={menuRef}
-          style={{ position: "fixed", left: coords.left, width: coords.width, top: coords.top, bottom: coords.bottom, zIndex: 120 }}
-          className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl"
-        >
-          {searchable && (
-            <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
-              <Search className="h-3.5 w-3.5 flex-none text-gray-400" />
-              {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-              <input data-no-dirty autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Axtar…" className="w-full text-sm text-gray-900 outline-none" />
-            </div>
-          )}
-          <div className="max-h-56 overflow-auto py-1">
-            {placeholder !== undefined && (
-              <button type="button" onClick={() => choose("")} className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-400 hover:bg-gray-50">{placeholder}</button>
-            )}
-            {filtered.map((o) => {
-              const on = String(o.value) === String(value ?? "");
-              return (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => choose(o.value)}
-                  className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm ${on ? "bg-blue-50 font-semibold text-[#00157A]" : "text-gray-700 hover:bg-gray-50"}`}
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    {o.color && <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: o.color }} />}
-                    <span className="truncate">{o.label}</span>
-                  </span>
-                  {on && <Check className="h-4 w-4 flex-none text-[#00157A]" />}
-                </button>
-              );
-            })}
-            {filtered.length === 0 && <div className="px-3 py-3 text-center text-sm text-gray-400">Tapılmadı</div>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // Mətn yazılan idarəetmə — label klikində fokuslanacaq element.
 const FIELD_CONTROL =
@@ -193,17 +96,6 @@ export function Field({ label, hint, required, info, children, className, as = "
   );
 }
 
-export function Toggle({ checked, onChange, label }) {
-  const markDirty = useMarkDirty();
-  return (
-    <button type="button" onClick={() => { markDirty(); onChange(!checked); }} className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
-      <span className={`relative h-6 w-11 rounded-full transition ${checked ? "bg-blue-900" : "bg-gray-300"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
-      </span>
-      {label}
-    </button>
-  );
-}
 
 /** Multi-select rendered as toggleable chips. value = array of ids. */
 export function MultiSelectChips({ options = [], value = [], onChange, empty }) {

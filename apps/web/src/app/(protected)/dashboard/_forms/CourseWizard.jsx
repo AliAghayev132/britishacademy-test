@@ -27,7 +27,7 @@ import {
 import { IMAGE_SPECS } from "@/lib";
 
 // Utils
-import { sanitizeHtml } from "@/utils";
+import { apiErrorMessage, sanitizeHtml } from "@/utils";
 
 // Local
 import {
@@ -236,7 +236,7 @@ export function CourseWizard({ item, onClose }) {
       // Show the post-save step (add schedule) instead of closing immediately.
       setSaved({ id, title: locAz(course.title) });
     } catch (err) {
-      setError(err?.data?.message || "Yadda saxlanmadı");
+      setError(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 

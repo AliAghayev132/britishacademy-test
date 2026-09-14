@@ -8,8 +8,11 @@ import { QueryState, Pagination } from "@/components";
 // Store
 import { useWhatsappMessagesQuery } from "@/store";
 
+// Utils
+import { fmtDateTime } from "@/utils";
+
 // Local
-import { STATUS_BADGE, fmt } from "./shared";
+import { STATUS_BADGE } from "./shared";
 
 export function HistoryTab({ page, onPage }) {
   const { data, isFetching, isError, error, refetch } = useWhatsappMessagesQuery({ page, limit: 20 });
@@ -70,7 +73,7 @@ export function HistoryTab({ page, onPage }) {
                         {m.error && <div className="mt-1 text-xs text-red-500">{m.error}</div>}
                       </td>
                       <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 sm:table-cell">
-                        {fmt(m.createdAt)}
+                        {fmtDateTime(m.createdAt, { seconds: true })}
                       </td>
                     </tr>
                   );

@@ -16,6 +16,9 @@ import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 // Lib
 import { IMAGE_SPECS } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import {
   Overlay,
@@ -160,7 +163,7 @@ export function BranchForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 

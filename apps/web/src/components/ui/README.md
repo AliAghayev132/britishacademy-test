@@ -1,38 +1,37 @@
 # components/ui/
 
-## Məqsəd
+Admin panelinin dizayn primitivləri. Biznes məntiqi saxlamır — görünüş və
+prop-larla idarə olunan davranış.
 
-Bu qovluq tətbiqin dizayn sistemini təşkil edən primitiv, stateless UI komponentlərini saxlayır: `Button`, `Input`, `Card`, `Badge`, `Modal`, `Table`, `Select`, `CustomSelect`, `Checkbox`, `Radio`, `Textarea`, `StatCard`, `PageLoader`. Bu komponentlər biznes məntiqi saxlamır — yalnız görünüş və prop-larla idarə olunan davranış təqdim edir.
+## Native element yox, bu komponentlər
 
-## Adlandırma / yazılış konvensiyası
+Brauzerin öz idarəetmələri (`<select>`, `<input type="checkbox|color|range|date|time">`,
+`<details>`) hər brauzerdə fərqli görünür, dili əməliyyat sistemindən götürür və
+admin formasında «dəyişiklik» işarəsi vermir. Yerinə:
 
-- Fayllar **PascalCase** və `.jsx` uzantısı ilə adlandırılır (`Button.jsx`, `CustomSelect.jsx`).
-- Hər komponent **named export**-dur (`export const Button = ...`).
-- Stillər Tailwind class-ları ilə verilir; şərti class-lar üçün `clsx` istifadə olunur.
-- `index.js` barrel hər faylı `export * from './FaylAdı'` ilə re-export edir.
-- Bu primitivlər əsasən prop-driven olduğundan çoxu Server Component kimi işləyir; yalnız daxili state/hook lazım olduqda `'use client'` əlavə olunur.
+| Native | Komponent | Qeyd |
+|---|---|---|
+| `<select>` | `Select` | axtarış (4+ variant), klaviatura ↑↓ Enter, `onChange(e)` müqaviləsi |
+| `type="checkbox"` | `Checkbox` | `role="checkbox"`, `onChange(boolean)` |
+| açar | `Switch` | `role="switch"`, `onChange(boolean)` (kit-də `Toggle` adı ilə) |
+| `type="color"` | `ColorInput` | brend palitrası, HEX sahəsi, `onChange(e)` |
+| `type="range"` | `Slider` | `role="slider"`, ←/→ Home/End, `onChange(e)` |
+| `type="date"` | `DatePicker` / `DateRangePicker` | "YYYY-MM-DD", `onChange(string)` |
+| `type="time"` | `TimeSelect` | 15 dəqiqəlik addım, "HH:MM", `onChange(e)` |
+| `<details>` | `Collapsible` | `aria-expanded` |
 
-## Nümunə
+`onChange(e)` müqaviləsi olanlar `e.target.value` verir — mövcud formalar
+native elementdən keçəndə dəyişmir.
 
-`Button.jsx` variant və ölçü prop-ları qəbul edir və `clsx` ilə class birləşdirir:
+Formada işlənən idarəetmələr `useMarkDirty()` çağırır: Overlay bağlananda
+«yadda saxlanmamış dəyişikliklər» xəbərdarlığı onlara da işləyir.
+
+## İstifadə
 
 ```js
-import { clsx } from 'clsx'
-
-export const Button = ({ children, variant = 'primary', size = 'md', ...props }) => {
-  return (
-    <button className={clsx(baseStyles, variants[variant], sizes[size])} {...props}>
-      {children}
-    </button>
-  )
-}
+// Components
+import { Select, Switch, ColorInput } from "@/components";
 ```
 
-İstifadə: `import { Button } from '@/components/ui'` (və ya `@/components`).
-
-## Yeni fayl necə əlavə olunur
-
-1. `PascalCase.jsx` faylı yaradın (məs. `Tooltip.jsx`).
-2. Komponenti named export kimi yazın və Tailwind class-larını `clsx` ilə birləşdirin.
-3. `index.js`-ə `export * from './Tooltip'` sətrini əlavə edin.
-4. Artıq `import { Tooltip } from '@/components/ui'` ilə istifadə oluna bilər.
+Barrel (`src/components/index.js`) avtomatik yaradılır — yeni fayldan sonra
+`pnpm barrels`.

@@ -21,6 +21,9 @@ import { QueryState } from "@/components";
 // Store
 import { useAdminContentStatsQuery } from "@/store";
 
+// Utils
+import { fmtNumber } from "@/utils";
+
 // Local
 import FunnelTab from "./_components/FunnelTab";
 
@@ -78,7 +81,7 @@ function StatCard({ icon: Icon, label, value, hint, tone = "blue" }) {
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <div className="text-xl font-bold text-gray-900">{value.toLocaleString("az-AZ")}</div>
+          <div className="text-xl font-bold text-gray-900">{fmtNumber(value)}</div>
           <div className="truncate text-xs text-gray-500">{label}</div>
         </div>
       </div>
@@ -108,7 +111,7 @@ function BarList({ title, icon: Icon, rows, labelKey, valueKey = "count", empty,
                   {r[labelKey] || "—"}
                 </span>
                 <span className="flex-none text-sm font-bold text-gray-900">
-                  {(r[valueKey] || 0).toLocaleString("az-AZ")}
+                  {fmtNumber(r[valueKey])}
                   {unit ? <span className="ml-1 text-xs font-normal text-gray-400">{unit}</span> : null}
                 </span>
               </div>

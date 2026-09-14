@@ -10,6 +10,9 @@ import { useState } from "react";
 // Store
 import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import {
   Overlay,
@@ -98,7 +101,7 @@ export function MenuItemForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 

@@ -18,6 +18,9 @@ import { useAdminUpdateUserMutation, useAdminLookupsQuery } from "@/store";
 // Lib
 import { pickAz, SECTIONS, SEES_EVERYTHING, ROLE_LABELS } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import { Overlay } from "../_forms/kit";
 
@@ -77,7 +80,7 @@ export function PermissionsModal({ user, onClose }) {
       notify.success("İcazələr yeniləndi");
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Yadda saxlanmadı");
+      setError(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 

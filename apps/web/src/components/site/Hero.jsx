@@ -252,7 +252,7 @@ export function Hero({ hero, stats = [] }) {
       {/* nth-of-type(10) — content */}
       <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", padding: "78px 28px 66px", textAlign: "center" }}>
         <h1 style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: "clamp(36px,5.2vw,56px)", lineHeight: 1.14, letterSpacing: "-.02em", color: "#fff", margin: 0 }}>
-          {hero?.titlePrefix || "British Academy ilə"}<br />
+          {hero?.titlePrefix || t("hero.defaultTitle")}<br />
           <span style={{ position: "relative", display: "inline-block", height: "1.2em", verticalAlign: "top", minWidth: 1 }}>
             <span
               key={reduced ? "static" : i}
@@ -268,7 +268,7 @@ export function Hero({ hero, stats = [] }) {
           </span>
         </h1>
         <p style={{ fontSize: 19, lineHeight: 1.6, color: "rgba(255,255,255,.9)", maxWidth: 600, margin: "24px auto 0" }}>
-          {hero?.subtitle || "British Academy ilə top universitetlərə qəbul ol."}
+          {hero?.subtitle || t("hero.defaultSubtitle")}
         </p>
 
         {stats.length > 0 && (

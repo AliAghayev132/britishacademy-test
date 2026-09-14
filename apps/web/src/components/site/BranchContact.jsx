@@ -134,7 +134,7 @@ export function BranchContact({ branches = [], fallback = {} }) {
           <Row icon={MapPin} label={t("common.address")}>
             {addressLine(b.address, b.district)}
           </Row>
-          <Row icon={Train} label="Metro">{metroLabel(b.metro, locale)}</Row>
+          <Row icon={Train} label={t("common.metro")}>{metroLabel(b.metro, locale)}</Row>
           <Row icon={Phone} label={t("common.phone")}>
             {b.phone ? <a href={`tel:${String(b.phone).replace(/[^\d+]/g, "")}`}>{b.phone}</a> : null}
           </Row>

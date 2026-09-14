@@ -6,7 +6,10 @@
 // directly. Fixed-positioned menu so it never clips inside a modal.
 
 // React
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+
+// Hooks
+import { useDismiss } from "@/hooks";
 
 // Lib
 import { useT } from "@/lib";
@@ -29,17 +32,7 @@ export function SiteSelect({ value, onChange, options = [], placeholder, style, 
   const searchable = options.length > 5;
   const sel = options.find((o) => String(o.value) === String(value ?? ""));
 
-  useEffect(() => {
-    if (!open) return;
-    const f = (e) => {
-      if (tRef.current?.contains(e.target) || mRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    const k = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", f);
-    document.addEventListener("keydown", k);
-    return () => { document.removeEventListener("mousedown", f); document.removeEventListener("keydown", k); };
-  }, [open]);
+  useDismiss(open, () => setOpen(false), [tRef, mRef]);
 
   const toggle = () => {
     if (open) return setOpen(false);

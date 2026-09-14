@@ -9,6 +9,9 @@
 // React
 import { useMemo, useState } from "react";
 
+// Components
+import { DatePicker, TimeSelect } from "@/components";
+
 // Store
 import {
   useAdminListQuery,
@@ -16,6 +19,9 @@ import {
   useAdminCreateMutation,
   useAdminUpdateMutation,
 } from "@/store";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import {
@@ -184,7 +190,7 @@ export function CourseGroupForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -289,18 +295,10 @@ export function CourseGroupForm({ item, onClose }) {
             />
           </Field>
           <Field label="Başlama tarixi" info="Qrupun ilk dərs günü (istəyə bağlı)">
-            <TextInput
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <DatePicker value={startDate} onChange={setStartDate} max={endDate || undefined} />
           </Field>
           <Field label="Bitmə tarixi" info="Proqramın planlaşdırılan sonu (istəyə bağlı)">
-            <TextInput
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+            <DatePicker value={endDate} onChange={setEndDate} min={startDate || undefined} />
           </Field>
         </div>
       </section>
@@ -337,16 +335,13 @@ export function CourseGroupForm({ item, onClose }) {
                   value={s.weekday}
                   onChange={(e) => setSlot(i, "weekday", e.target.value)}
                 />
-                {/* type="time" — native saat seçici, əl ilə "19:00" yazmaqdan rahatdır */}
-                <TextInput
-                  type="time"
+                <TimeSelect
                   className="w-28"
                   value={s.from}
                   onChange={(e) => setSlot(i, "from", e.target.value)}
                 />
                 <span className="w-4 text-center text-gray-400">–</span>
-                <TextInput
-                  type="time"
+                <TimeSelect
                   className="w-28"
                   value={s.to}
                   onChange={(e) => setSlot(i, "to", e.target.value)}

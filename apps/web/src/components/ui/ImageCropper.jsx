@@ -35,6 +35,9 @@ import {
 // Lib
 import { specSummary } from "@/lib";
 
+// Local
+import { Slider } from "./Slider";
+
 // Çərçivənin ekrandakı maksimum ölçüsü (nisbət spesifikasiyadan gəlir)
 const FRAME_MAX = 460;
 
@@ -286,10 +289,11 @@ export function ImageCropper({ file, spec, onCancel, onDone, busy }) {
                   >
                     <ZoomOut className="h-4 w-4" />
                   </button>
-                  <input
-                    type="range" min="0.2" max="6" step="0.01" value={zoom}
+                  <Slider
+                    min={0.2} max={6} step={0.01} value={zoom}
                     onChange={(e) => setZoom(Number(e.target.value))}
-                    className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-900"
+                    className="flex-1"
+                    ariaLabel="Miqyas"
                   />
                   <button
                     onClick={() => setZoom((z) => clamp(z * 1.15, 0.2, 6))}

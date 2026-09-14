@@ -13,13 +13,16 @@
 import { useState } from "react";
 
 // Components
-import { FileUpload } from "@/components";
+import { ColorInput, FileUpload } from "@/components";
 
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
 // Lib
 import { IMAGE_SPECS } from "@/lib";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import {
@@ -116,7 +119,7 @@ export function ProjectForm({ item, onClose }) {
       else await create({ resource: "projects", data }).unwrap();
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -159,11 +162,10 @@ export function ProjectForm({ item, onClose }) {
             <TextInput value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="yay-dusergesi" />
           </Field>
           <Field label="Rəng" info="Kartın vurğu rəngi">
-            <input
-              type="color"
+            <ColorInput
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
+              className="h-10 w-full"
             />
           </Field>
         </div>

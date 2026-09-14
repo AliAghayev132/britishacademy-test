@@ -131,8 +131,10 @@ describe("#53 / #54", () => {
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 
-  it("aktiv menyu lokallaşdırılmış ünvanda da işləyir; SVG bayraq <img> kimi verilmir", () => {
+  it("aktiv menyu lokallaşdırılmış ünvanda da işləyir; SVG bayraq URL kimi verilmir", () => {
     expect(read("src/components/site/Header.jsx")).toMatch(/const canonical = stripLocale\(pathname\);/);
-    expect(read("src/components/site/ApplyModal.jsx")).toMatch(/\/\^\\s\*<svg\[\\s>\]\/i\.test\(d\.flag\)/);
+    // SVG mətni birbaşa src-ə yazılmır — data URI-yə çevrilir (DOMPurify-sız, skript işləmir).
+    expect(read("src/components/site/ApplyModal.jsx")).toMatch(/isInlineSvg\(d\.flag\) \? svgDataUri\(d\.flag\) : d\.flag/);
+    expect(read("src/components/site/cards.jsx")).not.toMatch(/dangerouslySetInnerHTML/);
   });
 });

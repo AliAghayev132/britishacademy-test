@@ -19,11 +19,17 @@ import { X, ArrowRight, ShieldAlert, FileSearch } from "lucide-react";
 // Components
 import { Pagination, QueryState, Modal, DateRangePicker } from "@/components";
 
+// Hooks
+import { useDebouncedValue } from "@/hooks";
+
 // Store
 import { useAdminLogsQuery, useAdminLogFiltersQuery } from "@/store";
 
 // Lib
 import { resourceLabel } from "@/lib";
+
+// Utils
+import { fmtDateTime } from "@/utils";
 
 // Local
 import { NativeSelect } from "../_forms/kit";
@@ -42,11 +48,6 @@ const ACTIONS = {
   logout: { label: "Çıxış", cls: "bg-gray-100 text-gray-500" },
 };
 const actionOf = (a) => ACTIONS[a] || { label: a, cls: "bg-gray-200 text-gray-600" };
-
-const fmt = (d) =>
-  new Date(d).toLocaleString("az-AZ", {
-    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-  });
 
 /**
  * Xam dəyəri modalda göstərmək üçün mətnə çevir.
@@ -106,7 +107,7 @@ function DetailsModal({ log, onClose }) {
       <div className="space-y-3">
         <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
           <span><b className="text-gray-700">{log.actor?.name || "—"}</b>{log.actor?.role ? ` · ${log.actor.role}` : ""}</span>
-          <span>{fmt(log.createdAt)}</span>
+          <span>{fmtDateTime(log.createdAt)}</span>
           {log.resource && <span>{resourceLabel(log.resource)}</span>}
           {log.ip && <span>IP {log.ip}</span>}
           {log.method && <span className="font-mono">{log.method} {log.path}</span>}
@@ -145,7 +146,9 @@ export default function LogsPage() {
   const active = Object.values(f).filter(Boolean).length;
 
   // Boş dəyərlər sorğuya qoşulmur — server tərəfdə mənasız şərt yaranmasın.
-  const params = { page, limit: 30, ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)) };
+  // Axtarış mətni yazı dayananda sorğuya düşür; digər süzgəclər dərhal.
+  const search = useDebouncedValue(f.search);
+  const params = { page, limit: 30, ...Object.fromEntries(Object.entries({ ...f, search }).filter(([, v]) => v)) };
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminLogsQuery(params);
   const { data: opts } = useAdminLogFiltersQuery();
 
@@ -273,7 +276,7 @@ export default function LogsPage() {
 
                   {/* Sağ sütun: vaxt + «Detallar» */}
                   <div className="flex flex-none flex-col items-end gap-1.5">
-                    <span className="whitespace-nowrap text-xs text-gray-400">{fmt(log.createdAt)}</span>
+                    <span className="whitespace-nowrap text-xs text-gray-400">{fmtDateTime(log.createdAt)}</span>
                     {hasDetails && (
                       <button
                         onClick={() => setOpen(log)}

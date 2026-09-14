@@ -7,6 +7,9 @@ import { createPortal } from "react-dom";
 // Icons
 import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 
+// Hooks
+import { useDismiss } from "@/hooks";
+
 /**
  * Tarix seçici — brend dizaynı ilə.
  *
@@ -85,20 +88,7 @@ export function DatePicker({
   }, [open]);
 
   // Kənara klik və Escape ilə bağlanma.
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e) => {
-      if (popRef.current?.contains(e.target) || btnRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  useDismiss(open, () => setOpen(false), [popRef, btnRef]);
 
   const days = useMemo(() => monthGrid(view.getFullYear(), view.getMonth()), [view]);
   const today = toISO(new Date());

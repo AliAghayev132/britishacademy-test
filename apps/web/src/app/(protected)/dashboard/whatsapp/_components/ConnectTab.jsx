@@ -9,8 +9,11 @@ import { useState } from "react";
 // Icons
 import { MessageSquare, Loader2, Smartphone, KeyRound } from "lucide-react";
 
+// Utils
+import { fmtDateTime } from "@/utils";
+
 // Local
-import { input, label, fmt } from "./shared";
+import { input, label } from "./shared";
 
 function InfoCard({ title, value, mono }) {
   return (
@@ -34,7 +37,7 @@ export function ConnectTab({ status, onInit, initing }) {
       <div className="grid gap-4 rounded-xl border border-gray-200 bg-white p-5 sm:grid-cols-3">
         <InfoCard title="Hesab" value={status.connectedAs} />
         <InfoCard title="Nömrə" value={status.phoneNumber ? `+${status.phoneNumber}` : null} mono />
-        <InfoCard title="Qoşulub" value={fmt(status.readyAt)} />
+        <InfoCard title="Qoşulub" value={fmtDateTime(status.readyAt, { seconds: true })} />
       </div>
     );
   }

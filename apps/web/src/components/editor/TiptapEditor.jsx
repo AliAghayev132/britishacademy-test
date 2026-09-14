@@ -38,6 +38,12 @@ import {
 // UI / components
 import { confirmDialog, notify } from '@/components/ui/feedback';
 
+// Hooks
+import { useFlash } from '@/hooks';
+
+// Lib
+import { copyText } from '@/lib';
+
 // Local
 import { ToolbarButton, Divider } from './parts/Primitives';
 import HeadingDropdown from './parts/HeadingDropdown';
@@ -70,7 +76,7 @@ export default function TiptapEditor({
   /* ------------------------------------------------------------------ */
   const [isPreview, setIsPreview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useFlash(false, 2000);
 
   const fileInputRef = useRef(null);
   const containerRef = useRef(null);
@@ -165,10 +171,9 @@ export default function TiptapEditor({
   /* ------------------------------------------------------------------ */
   const copyContent = useCallback(async () => {
     if (!editor) return;
-    await navigator.clipboard.writeText(editor.getHTML());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [editor]);
+    if (await copyText(editor.getHTML())) flashCopied();
+    else notify.error('Kopyalana bilmədi');
+  }, [editor, flashCopied]);
 
   const clearContent = useCallback(async () => {
     if (!editor) return;

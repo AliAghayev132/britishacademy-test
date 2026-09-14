@@ -18,6 +18,9 @@ import { QueryState } from "@/components";
 // Store
 import { useAdminFunnelStatsQuery } from "@/store";
 
+// Utils
+import { fmtDate, fmtNumber } from "@/utils";
+
 /**
  * «Konversiya» tabı: sayta giriş → forma açıldı → müraciət göndərildi.
  *
@@ -27,7 +30,6 @@ import { useAdminFunnelStatsQuery } from "@/store";
  * dinamika bir qrafikdə deyil, hər göstərici öz miqyası ilə ayrıca göstərilir.
  */
 
-const fmt = (n) => (n || 0).toLocaleString("az-AZ");
 const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
 const pageLabel = (p) => (p === "/" ? "Ana səhifə" : p);
 const DEVICE = { mobile: "Mobil", desktop: "Kompüter", tablet: "Planşet", other: "Digər" };
@@ -66,8 +68,8 @@ function Stat({ icon: Icon, label, value, sub }) {
 function FunnelSteps({ totals }) {
   const steps = [
     { key: "visits", label: "Sayta giriş", icon: Users, value: totals.visits, note: "unikal sessiya" },
-    { key: "opens", label: "Müraciət formunu açdı", icon: MousePointerClick, value: totals.opens, note: `forma cəmi ${fmt(totals.openEvents)} dəfə açılıb` },
-    { key: "submits", label: "Müraciət göndərdi", icon: Send, value: totals.submits, note: `${fmt(totals.submitEvents)} müraciət` },
+    { key: "opens", label: "Müraciət formunu açdı", icon: MousePointerClick, value: totals.opens, note: `forma cəmi ${fmtNumber(totals.openEvents)} dəfə açılıb` },
+    { key: "submits", label: "Müraciət göndərdi", icon: Send, value: totals.submits, note: `${fmtNumber(totals.submitEvents)} müraciət` },
   ];
   const max = Math.max(totals.visits, 1);
   return (
@@ -83,7 +85,7 @@ function FunnelSteps({ totals }) {
                 {s.label}
               </span>
               <span className="text-sm">
-                <b className="text-lg text-gray-900">{fmt(s.value)}</b>
+                <b className="text-lg text-gray-900">{fmtNumber(s.value)}</b>
                 <span className="ml-1.5 text-xs text-gray-400">{s.note}</span>
               </span>
             </div>
@@ -114,7 +116,7 @@ function DailyStrip({ title, series, field }) {
       <div className="mb-1.5 flex items-baseline justify-between text-xs">
         <span className="font-semibold text-gray-700">{title}</span>
         <span className="text-gray-400">
-          cəmi <b className="text-gray-700">{fmt(total)}</b> · ən yüksək gün {fmt(max === 1 && total === 0 ? 0 : max)}
+          cəmi <b className="text-gray-700">{fmtNumber(total)}</b> · ən yüksək gün {fmtNumber(max === 1 && total === 0 ? 0 : max)}
         </span>
       </div>
       <div className="flex h-16 items-end gap-[2px]">
@@ -166,7 +168,7 @@ export default function FunnelTab({ days }) {
   const d = data?.data || {};
   const t = d.totals || {};
   const series = d.series || [];
-  const since = d.trackingSince ? new Date(d.trackingSince).toLocaleDateString("az-AZ") : null;
+  const since = d.trackingSince ? fmtDate(d.trackingSince) : null;
 
   return (
     <div className={isFetching ? "opacity-60 transition-opacity" : "transition-opacity"}>
@@ -181,9 +183,9 @@ export default function FunnelTab({ days }) {
       )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat icon={Users} label="Sayta giriş (sessiya)" value={fmt(t.visits)} />
-        <Stat icon={MousePointerClick} label="Formanı açan" value={fmt(t.opens)} sub={`Girişlərin %${pct(t.opens, t.visits)}-i`} />
-        <Stat icon={Send} label="Müraciət göndərən" value={fmt(t.submits)} sub={`Formanı açanların %${pct(t.submits, t.opens)}-i`} />
+        <Stat icon={Users} label="Sayta giriş (sessiya)" value={fmtNumber(t.visits)} />
+        <Stat icon={MousePointerClick} label="Formanı açan" value={fmtNumber(t.opens)} sub={`Girişlərin %${pct(t.opens, t.visits)}-i`} />
+        <Stat icon={Send} label="Müraciət göndərən" value={fmtNumber(t.submits)} sub={`Formanı açanların %${pct(t.submits, t.opens)}-i`} />
         <Stat icon={TrendingUp} label="Ümumi konversiya" value={`%${pct(t.submits, t.visits)}`} sub="Girişdən müraciətə" />
       </div>
 
@@ -208,14 +210,14 @@ export default function FunnelTab({ days }) {
         <Card title="Forma hansı səhifədən açılır" icon={FileText} hint="Hansı səhifə müraciətə daha yaxşı çevirir">
           <Table
             head={["Səhifə", "Açan", "Göndərən", "Çevrilmə"]}
-            rows={(d.pages || []).map((r) => [pageLabel(r.path), fmt(r.opens), fmt(r.submits), `%${pct(r.submits, r.opens)}`])}
+            rows={(d.pages || []).map((r) => [pageLabel(r.path), fmtNumber(r.opens), fmtNumber(r.submits), `%${pct(r.submits, r.opens)}`])}
             empty="Forma hələ açılmayıb."
           />
         </Card>
         <Card title="Mənbələr" icon={Globe2} hint="Ziyarətçi haradan gəlib (utm_source → reklam → referer)">
           <Table
             head={["Mənbə", "Giriş", "Açan", "Göndərən", "Konversiya"]}
-            rows={(d.sources || []).map((r) => [r.source, fmt(r.visits), fmt(r.opens), fmt(r.submits), `%${pct(r.submits, r.visits)}`])}
+            rows={(d.sources || []).map((r) => [r.source, fmtNumber(r.visits), fmtNumber(r.opens), fmtNumber(r.submits), `%${pct(r.submits, r.visits)}`])}
             empty="Hələ ziyarət yoxdur."
           />
         </Card>
@@ -225,7 +227,7 @@ export default function FunnelTab({ days }) {
         <Card title="Cihazlar" icon={Smartphone} hint="Sayta giriş sessiyaları">
           <Table
             head={["Cihaz", "Sessiya", "Pay"]}
-            rows={(d.devices || []).map((r) => [DEVICE[r.device] || r.device, fmt(r.sessions), `%${pct(r.sessions, t.visits)}`])}
+            rows={(d.devices || []).map((r) => [DEVICE[r.device] || r.device, fmtNumber(r.sessions), `%${pct(r.sessions, t.visits)}`])}
             empty="Hələ ziyarət yoxdur."
           />
         </Card>

@@ -6,6 +6,9 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 // Next
 import { usePathname } from "next/navigation";
 
+// Hooks
+import { useDismiss } from "@/hooks";
+
 // Lib
 import { useT, useLocale, stripLocale, withLocale } from "@/lib";
 
@@ -13,6 +16,7 @@ import { useT, useLocale, stripLocale, withLocale } from "@/lib";
 import { LocaleLink as Link } from "./LocaleLink";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
+import { Disclosure } from "./Disclosure";
 import { SearchOverlay } from "./SearchOverlay";
 import { useDialogFocus } from "./useDialogFocus";
 
@@ -80,26 +84,13 @@ const LanguageSwitcher = memo(function LanguageSwitcher() {
  */
 const LanguageMenu = memo(function LanguageMenu() {
   const { locale, go } = useLangSwitch();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  // Kənara toxunanda və Escape-də bağlan.
-  useEffect(() => {
-    if (!open) return undefined;
-    const onDown = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    // `pointerdown` — `click` gec işləyir və menyu açıq qalmış görünür.
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  // Kənara toxunanda və Escape-də bağlan. `pointerdown` — `click` gec
+  // işləyir və menyu açıq qalmış görünür.
+  useDismiss(open, () => setOpen(false), ref, { event: "pointerdown" });
 
   const current = LANGS.find((l) => l.code === locale) || LANGS[0];
 
@@ -110,7 +101,7 @@ const LanguageMenu = memo(function LanguageMenu() {
         className="ba-langmenu-btn"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Dil: ${current.name}`}
+        aria-label={`${t("common.language")}: ${current.name}`}
         onClick={() => setOpen((o) => !o)}
       >
         <span>{current.label}</span>
@@ -249,36 +240,30 @@ const MobileNavItem = memo(function MobileNavItem({ item, services, destinations
   const label = useNavLabel(item);
   if (item.variant) {
     return (
-      <details className="ba-macc">
-        <summary>{label}</summary>
-        <div className="ba-macc-body">
-          <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{label} — {t("common.all")}</Link>
+      <Disclosure label={label}>
+        <Link className="ba-msub ba-msub--all" href={item.href} onClick={onClose}>{label} — {t("common.all")}</Link>
 
-          {/* Xidmətlər — iç-içə açılan: kateqoriya → kliklə → kursları açılır */}
-          {item.variant === "mega" &&
-            services.map((g) => (
-              <details key={g.category._id} className="ba-macc ba-macc--sub">
-                <summary>{g.category.name}</summary>
-                <div className="ba-macc-body">
-                  <Link className="ba-msub ba-msub--all" href={svcHref(g.category)} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
-                  {g.courses.map((c) => (
-                    <Link key={c._id} className="ba-msub" href={svcHref(c)} onClick={onClose}>{c.title}</Link>
-                  ))}
-                </div>
-              </details>
-            ))}
+        {/* Xidmətlər — iç-içə açılan: kateqoriya → kliklə → kursları açılır */}
+        {item.variant === "mega" &&
+          services.map((g) => (
+            <Disclosure key={g.category._id} className="ba-macc--sub" label={g.category.name}>
+              <Link className="ba-msub ba-msub--all" href={svcHref(g.category)} onClick={onClose}>{g.category.name} — {t("common.all")}</Link>
+              {g.courses.map((c) => (
+                <Link key={c._id} className="ba-msub" href={svcHref(c)} onClick={onClose}>{c.title}</Link>
+              ))}
+            </Disclosure>
+          ))}
 
-          {item.variant === "destinations" &&
-            destinations.map((d) => (
-              <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
-            ))}
+        {item.variant === "destinations" &&
+          destinations.map((d) => (
+            <Link key={d._id} className="ba-msub" href={`/xaricde-tehsil/${d.slug}`} onClick={onClose}>{d.country}</Link>
+          ))}
 
-          {item.variant === "links" &&
-            (item.children || []).map((c) => (
-              <Link key={c.href} className="ba-msub" href={c.href} onClick={onClose}>{c.label}</Link>
-            ))}
-        </div>
-      </details>
+        {item.variant === "links" &&
+          (item.children || []).map((c) => (
+            <Link key={c.href} className="ba-msub" href={c.href} onClick={onClose}>{c.label}</Link>
+          ))}
+      </Disclosure>
     );
   }
   return (

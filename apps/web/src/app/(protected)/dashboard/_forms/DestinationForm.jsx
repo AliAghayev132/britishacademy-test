@@ -8,7 +8,7 @@
 import { useState } from "react";
 
 // Components
-import { FileUpload } from "@/components";
+import { ColorInput, FileUpload } from "@/components";
 
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
@@ -17,7 +17,7 @@ import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 import { IMAGE_SPECS, getImageUrl } from "@/lib";
 
 // Utils
-import { sanitizeHtml } from "@/utils";
+import { apiErrorMessage, sanitizeHtml } from "@/utils";
 
 // Local
 import {
@@ -148,7 +148,7 @@ export function DestinationForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -222,11 +222,10 @@ export function DestinationForm({ item, onClose }) {
             />
           </Field>
           <Field label="Rəng" info="Kartın vurğu rəngi (bayraqdan)">
-            <input
-              type="color"
+            <ColorInput
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
+              className="h-10 w-full"
             />
           </Field>
           <Field label="Şüar (tagline)" info="3 dildə — qısa cəlbedici ifadə">

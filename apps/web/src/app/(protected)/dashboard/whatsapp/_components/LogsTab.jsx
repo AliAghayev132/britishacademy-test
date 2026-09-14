@@ -32,13 +32,16 @@ import {
 } from "lucide-react";
 
 // Components
-import { QueryState, Pagination, confirmDialog, notify } from "@/components";
+import { Collapsible, Select, QueryState, Pagination, confirmDialog, notify } from "@/components";
 
 // Store
 import { useWhatsappLogsQuery, useWhatsappClearLogsMutation, useSocket } from "@/store";
 
+// Utils
+import { fmtDateTime, apiErrorMessage } from "@/utils";
+
 // Local
-import { fmt } from "./shared";
+
 
 /** Hadisə növü → etiket + ikon. Serverdəki WA_LOG_TYPES ilə eynidir. */
 const TYPES = {
@@ -62,8 +65,8 @@ const LEVELS = {
   error: { label: "Xəta", dot: "bg-red-500", text: "text-red-700" },
 };
 
-const select =
-  "rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-blue-500";
+const TYPE_OPTIONS = Object.entries(TYPES).map(([value, t]) => ({ value, label: t.label }));
+const LEVEL_OPTIONS = Object.entries(LEVELS).map(([value, l]) => ({ value, label: l.label }));
 
 export function LogsTab() {
   const [page, setPage] = useState(1);
@@ -128,7 +131,7 @@ export function LogsTab() {
       setLive({ sig, rows: [] });
       notify.success(res.message || "Təmizləndi");
     } catch (e) {
-      notify.error(e?.data?.message || "Alınmadı");
+      notify.error(apiErrorMessage(e, "Alınmadı"));
     }
   };
 
@@ -137,18 +140,22 @@ export function LogsTab() {
       {/* Süzgəclər */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-3">
         <Filter className="h-4 w-4 text-gray-400" />
-        <select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }} className={select}>
-          <option value="">Bütün hadisələr</option>
-          {Object.entries(TYPES).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
-        <select value={level} onChange={(e) => { setLevel(e.target.value); setPage(1); }} className={select}>
-          <option value="">Bütün səviyyələr</option>
-          {Object.entries(LEVELS).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
+        <Select
+          className="w-48"
+          ariaLabel="Hadisə növü"
+          placeholder="Bütün hadisələr"
+          value={type}
+          onChange={(e) => { setType(e.target.value); setPage(1); }}
+          options={TYPE_OPTIONS}
+        />
+        <Select
+          className="w-44"
+          ariaLabel="Səviyyə"
+          placeholder="Bütün səviyyələr"
+          value={level}
+          onChange={(e) => { setLevel(e.target.value); setPage(1); }}
+          options={LEVEL_OPTIONS}
+        />
 
         <span
           className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -191,19 +198,20 @@ export function LogsTab() {
                     <div className="text-sm text-gray-900">{x.message}</div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400">
                       <span className="font-semibold">{t.label}</span>
-                      <span>{fmt(x.createdAt)}</span>
+                      <span>{fmtDateTime(x.createdAt, { seconds: true })}</span>
                       {x.actor?.email && <span>· {x.actor.email}</span>}
                     </div>
                     {/* Texniki təfərrüat gizli qalır — lazım olanda açılır. */}
                     {x.meta && Object.keys(x.meta).length > 0 && (
-                      <details className="mt-1">
-                        <summary className="cursor-pointer text-xs text-gray-400 hover:text-gray-600">
-                          texniki məlumat
-                        </summary>
+                      <Collapsible
+                        className="mt-1"
+                        titleClassName="w-auto text-xs text-gray-400 hover:text-gray-600"
+                        title="texniki məlumat"
+                      >
                         <pre className="mt-1 overflow-x-auto rounded-lg bg-gray-50 p-2 text-[11px] leading-relaxed text-gray-600">
 {JSON.stringify(x.meta, null, 2)}
                         </pre>
-                      </details>
+                      </Collapsible>
                     )}
                   </div>
                 </li>

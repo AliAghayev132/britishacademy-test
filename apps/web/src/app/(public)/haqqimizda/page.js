@@ -14,9 +14,10 @@ import { sanitizeHtml } from "@/utils";
 export async function generateMetadata() {
   const { data } = await apiGetStatus("/pages/haqqimizda");
   const p = data?.page;
+  const t = await getT();
   return metaFromApi(p?.seo || {}, {
-    title: p?.title || "Haqqımızda",
-    description: p?.lead || "British Academy — 2014-cü ildən dünya dillərini Azərbaycana öyrədən, English UK akkreditasiyalı dil mərkəzi.",
+    title: p?.title || t("page.about.title"),
+    description: p?.lead || t("meta.aboutDesc"),
     path: "/haqqimizda",
   });
 }

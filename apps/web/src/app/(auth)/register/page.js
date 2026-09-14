@@ -24,6 +24,9 @@ import {
   setCredentials,
 } from '@/store'
 
+// Utils
+import { apiErrorMessage } from '@/utils'
+
 export default function RegisterPage() {
   const router = useRouter()
   const dispatch = useDispatch()
@@ -56,7 +59,7 @@ export default function RegisterPage() {
       await register(form).unwrap()
       setStep('otp')
     } catch (err) {
-      setError(err?.data?.message || 'Registration failed. Please try again.')
+      setError(apiErrorMessage(err, 'Registration failed. Please try again.'))
     }
   }
 
@@ -69,7 +72,7 @@ export default function RegisterPage() {
       dispatch(setCredentials(res.data))
       router.push('/dashboard')
     } catch (err) {
-      setError(err?.data?.message || 'Invalid or expired code.')
+      setError(apiErrorMessage(err, 'Invalid or expired code.'))
     }
   }
 
@@ -78,7 +81,7 @@ export default function RegisterPage() {
     try {
       await resendOTP({ email: form.email, type: 'register' }).unwrap()
     } catch (err) {
-      setError(err?.data?.message || 'Could not resend the code.')
+      setError(apiErrorMessage(err, 'Could not resend the code.'))
     }
   }
 

@@ -18,6 +18,9 @@ import { X, Download, Copy, Check, QrCode, Upload, AlertTriangle, RotateCcw } fr
 // Components
 import { notify } from "@/components/ui/feedback";
 
+// Hooks
+import { useFlash } from "@/hooks";
+
 // Store
 import { useAdminGetSettingsQuery } from "@/store";
 
@@ -35,6 +38,11 @@ import {
   downloadBlob,
   getImageUrl,
 } from "@/lib";
+
+// Local
+import { Checkbox } from "./Checkbox";
+import { ColorInput } from "./ColorInput";
+import { Slider } from "./Slider";
 
 // Tənzimləmələr brauzerdə saxlanılır: bir kampaniyada onlarla link olur və
 // hər dəfə rəngi, formanı yenidən seçmək əziyyətdir.
@@ -162,7 +170,7 @@ export function QrStudio({ value, name, title, onClose }) {
   const logoData =
     o.logoKey === "none" ? "" : o.logoKey === "custom" ? customData : builtinData;
   const logoBusy = Boolean(LOGO_SOURCES[o.logoKey]) && loadedKey !== o.logoKey;
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useFlash(false);
   const [busy, setBusy] = useState("");
   const fileRef = useRef(null);
 
@@ -281,8 +289,7 @@ export function QrStudio({ value, name, title, onClose }) {
     try {
       const blob = await raster("image/png", "copy");
       await navigator.clipboard.write([new window.ClipboardItem({ "image/png": blob })]);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
+      flashCopied();
     } catch {
       notify.error("Brauzer şəkil kopyalamağı dəstəkləmir — faylı endir");
     }
@@ -404,13 +411,13 @@ export function QrStudio({ value, name, title, onClose }) {
                 <Choice options={SIZES} value={o.size} onChange={(v) => set("size", v)} />
               </Row>
               <Row label="Kənar boşluq" hint="Standart 4 moduldur; azaldılsa skan çətinləşir.">
-                <input
-                  type="range"
+                <Slider
                   min={0}
                   max={8}
                   value={o.margin}
                   onChange={(e) => set("margin", Number(e.target.value))}
-                  className="w-full accent-[#00157A]"
+                  className="w-full"
+                  ariaLabel="Kənar boşluq"
                 />
               </Row>
             </div>
@@ -430,11 +437,11 @@ export function QrStudio({ value, name, title, onClose }) {
 
             <Row label="Rəng" hint="Tünd rəng açıq fonda olmalıdır — əks halda skaner kodu tanımır.">
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="color"
+                <ColorInput
                   value={o.dark}
                   onChange={(e) => set("dark", e.target.value)}
-                  className="h-9 w-14 cursor-pointer rounded-lg border border-gray-300 bg-white p-1"
+                  className="h-9 w-14"
+                  ariaLabel="QR rəngi"
                 />
                 {SWATCHES.map((c) => (
                   <button
@@ -456,22 +463,19 @@ export function QrStudio({ value, name, title, onClose }) {
             <div className="grid gap-4 sm:grid-cols-2">
               <Row label="Fon">
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
+                  <ColorInput
                     value={o.light}
                     onChange={(e) => set("light", e.target.value)}
                     disabled={o.transparent}
-                    className="h-9 w-14 cursor-pointer rounded-lg border border-gray-300 bg-white p-1 disabled:opacity-40"
+                    className="h-9 w-14"
+                    ariaLabel="Fon rəngi"
                   />
-                  <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={o.transparent}
-                      onChange={(e) => set("transparent", e.target.checked)}
-                      className="h-4 w-4 accent-[#00157A]"
-                    />
-                    Şəffaf (PNG/SVG)
-                  </label>
+                  <Checkbox
+                    checked={o.transparent}
+                    onChange={(v) => set("transparent", v)}
+                    label="Şəffaf (PNG/SVG)"
+                    className="text-xs font-semibold text-gray-600"
+                  />
                 </div>
               </Row>
               <Row label="Alt yazı" hint="Şəklin altına yazılır — afişada nə üçün olduğu bilinsin.">
@@ -534,13 +538,13 @@ export function QrStudio({ value, name, title, onClose }) {
                   label={`Logo ölçüsü — ${Math.round(Math.min(o.logoScale, logoMax) * 100)}%`}
                   hint={`Təhlükəsiz hədd ${Math.round(logoSafe * 100)}%.`}
                 >
-                  <input
-                    type="range"
+                  <Slider
                     min={8}
                     max={Math.round(logoMax * 100)}
                     value={Math.round(Math.min(o.logoScale, logoMax) * 100)}
                     onChange={(e) => set("logoScale", Number(e.target.value) / 100)}
-                    className="w-full accent-[#00157A]"
+                    className="w-full"
+                    ariaLabel="Logo ölçüsü"
                   />
                 </Row>
                 <Row label="Logo altlığı">

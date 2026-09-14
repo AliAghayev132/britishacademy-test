@@ -16,6 +16,9 @@ import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 // Lib
 import { IMAGE_SPECS, getImageUrl } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import { Overlay, Field, TextInput, NumberInput, SectionTitle } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
@@ -68,7 +71,7 @@ export function PartnerForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 

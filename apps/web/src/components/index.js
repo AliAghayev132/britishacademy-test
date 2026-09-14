@@ -20,6 +20,7 @@ export { CodeInjection } from "./site/CodeInjection";
 export { ContactForm } from "./site/ContactForm";
 export { ContentBlocks } from "./site/ContentBlocks";
 export { CtaBand } from "./site/CtaBand";
+export { Disclosure } from "./site/Disclosure";
 export { FaqAccordion } from "./site/FaqAccordion";
 export { GtmNoScript, GtmScript } from "./site/GoogleTagManager";
 export { Header } from "./site/Header";
@@ -51,10 +52,11 @@ export { useDialogFocus } from "./site/useDialogFocus";
 
 // Ui
 export { ActionsMenu } from "./ui/ActionsMenu";
-export { Badge } from "./ui/Badge";
 export { Button } from "./ui/Button";
 export { Card } from "./ui/Card";
 export { Checkbox } from "./ui/Checkbox";
+export { Collapsible } from "./ui/Collapsible";
+export { ColorInput } from "./ui/ColorInput";
 export { DatePicker } from "./ui/DatePicker";
 export { DateRangePicker } from "./ui/DateRangePicker";
 export { FileUpload } from "./ui/FileUpload";
@@ -67,11 +69,12 @@ export { PageLoader } from "./ui/PageLoader";
 export { Pagination } from "./ui/Pagination";
 export { QrStudio } from "./ui/QrStudio";
 export { EmptyState, ErrorState, LoadingState, QueryState, errorText } from "./ui/QueryState";
-export { Radio } from "./ui/Radio";
 export { Select } from "./ui/Select";
+export { Slider } from "./ui/Slider";
 export { StatCard } from "./ui/StatCard";
+export { Switch } from "./ui/Switch";
 export { Table } from "./ui/Table";
-export { Textarea } from "./ui/Textarea";
+export { TimeSelect } from "./ui/TimeSelect";
 export {
   FeedbackHost,
   alertDialog,

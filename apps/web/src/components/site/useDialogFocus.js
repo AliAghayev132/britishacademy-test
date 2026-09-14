@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 
 const FOCUSABLE =
-  'a[href], summary, button:not([disabled]), input:not([disabled]):not([type="hidden"]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Modal dialoqun klaviatura davranışı (audit #34):

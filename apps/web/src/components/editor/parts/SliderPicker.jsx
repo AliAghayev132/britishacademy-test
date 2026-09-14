@@ -19,7 +19,7 @@
  * ===================================================================== */
 
 // React
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 // Icons

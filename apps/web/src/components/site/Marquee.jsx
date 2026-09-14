@@ -1,5 +1,8 @@
 "use client";
 
+// Lib
+import { useT } from "@/lib";
+
 // Utils
 import { toList } from "@/utils";
 
@@ -7,16 +10,6 @@ import { toList } from "@/utils";
 // live in globals.css under `body.ba-home .ba-mqband` — the homepage already
 // sets `ba-home`, so this only needs the matching markup (id="ba-mq" with
 // direct <span> children, each holding an inner <span> star).
-const WORDS = [
-  "İNGİLİS DİLİ",
-  "IELTS 8.5",
-  "DUOLINGO",
-  "DANIŞIQ KLUBU",
-  "XARİCDƏ TƏHSİL",
-  "RUS DİLİ",
-  "ALMAN DİLİ",
-  "BİZNES İNGİLİS",
-];
 
 const wordStyle = {
   display: "inline-flex",
@@ -32,11 +25,13 @@ const wordStyle = {
 /**
  * Horizontal infinite-scroll strip of course keywords (CSS-animated loop).
  * `words` admin panelindən gəlir (Tənzimləmələr → Ana səhifə, 3 dildə);
- * boş olarsa yuxarıdakı defolt siyahı işlənir.
+ * boş olarsa dilə uyğun defolt siyahı (marquee.default) işlənir — əvvəl
+ * defolt yalnız AZ idi və /en, /ru-da da azərbaycanca görünürdü.
  */
 export default function Marquee({ words }) {
+  const t = useT();
   const list = toList(words);
-  const source = list.length ? list : WORDS;
+  const source = list.length ? list : toList(t("marquee.default"));
   // Duplicate the list so translateX(-50%) loops seamlessly.
   const items = [...source, ...source];
   return (

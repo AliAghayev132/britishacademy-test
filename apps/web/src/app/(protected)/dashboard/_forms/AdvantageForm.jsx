@@ -7,8 +7,14 @@
 // React
 import { useState } from "react";
 
+// Components
+import { ColorInput } from "@/components";
+
 // Store
 import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Utils
+import { apiErrorMessage } from "@/utils";
 
 // Local
 import { Overlay, Field, TextInput, NumberInput, TextArea, SectionTitle } from "./kit";
@@ -65,7 +71,7 @@ export function AdvantageForm({ item, onClose }) {
       }
       onClose();
     } catch (err) {
-      setError(err?.data?.message || "Xəta baş verdi");
+      setError(apiErrorMessage(err, "Xəta baş verdi"));
     }
   };
 
@@ -118,11 +124,10 @@ export function AdvantageForm({ item, onClose }) {
           </Field>
           <Field label="Rəng" info="Kartın vurğu rəngi">
             <div className="flex items-center gap-3">
-              <input
-                type="color"
+              <ColorInput
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="h-10 w-14 cursor-pointer rounded-lg border border-gray-300"
+                className="h-10 w-14"
               />
               <TextInput
                 value={color}

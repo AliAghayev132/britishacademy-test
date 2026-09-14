@@ -26,6 +26,9 @@ import { useAiProcessMutation } from "@/store";
 // Lib
 import { IMAGE_SPECS } from "@/lib";
 
+// Utils
+import { apiErrorMessage } from "@/utils";
+
 // Local
 import { SectionTitle, Field, TextInput, Toggle } from "./kit";
 import { LocalizedInput, AiBtn } from "./Localized";
@@ -140,7 +143,7 @@ export function SeoFields({ value = {}, onChange, context }) {
       notify.success("SEO sahələri üç dildə dolduruldu");
     } catch (err) {
       notify.error(
-        err?.data?.message || "AI xətası — Tənzimləmələr → AI-ı yoxlayın",
+        apiErrorMessage(err, "AI xətası — Tənzimləmələr → AI-ı yoxlayın"),
       );
     } finally {
       setBusy(false);

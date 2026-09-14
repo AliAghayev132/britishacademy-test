@@ -11,10 +11,13 @@
  */
 
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 // Icons
 import { Palette, Highlighter } from 'lucide-react';
+
+// Hooks
+import { useDismiss } from '@/hooks';
 
 // Local
 import { ToolbarButton } from './Primitives';
@@ -25,14 +28,7 @@ export default function ColorPickerPopover({ editor, variant = 'text' }) {
   const [hex, setHex] = useState(variant === 'text' ? '#2C4B62' : '#FEF3C7');
   const ref = useRef(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  useDismiss(open, () => setOpen(false), ref);
 
   const palette = variant === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS;
   const Icon = variant === 'text' ? Palette : Highlighter;

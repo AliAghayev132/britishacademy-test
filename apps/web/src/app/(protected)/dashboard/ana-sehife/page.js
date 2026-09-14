@@ -16,7 +16,7 @@ import { useAdminGetSettingsQuery, useAdminUpdateSettingsMutation } from "@/stor
 import { resolveSections } from "@/lib";
 
 // Utils
-import { rowKey } from "@/utils";
+import { apiErrorMessage, rowKey } from "@/utils";
 
 // Local
 import {
@@ -172,7 +172,7 @@ export default function HomeAdminPage() {
       notify.success("Ana səhifə yeniləndi");
       setDirty(false);
     } catch (err) {
-      notify.error(err?.data?.message || "Yadda saxlanmadı");
+      notify.error(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 

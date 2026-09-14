@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 // Components
-import { notify } from "@/components";
+import { Checkbox, Select, notify } from "@/components";
 
 // Store
 import { useBulkPreviewMutation, useBulkSendMutation } from "@/store";
@@ -34,9 +34,12 @@ import { useBulkPreviewMutation, useBulkSendMutation } from "@/store";
 // Lib
 import { parseSpreadsheet, parseLines } from "@/lib";
 
+// Utils
+import { fmtDateTime, fmtTime, apiErrorMessage } from "@/utils";
+
 // Local
 import { ConfirmSend } from "./ConfirmSend";
-import { input, label, LEAD_STATUSES, fmt, fmtTime, fmtDuration, STATUS_BADGE } from "./shared";
+import { input, label, LEAD_STATUSES, fmtDuration, STATUS_BADGE } from "./shared";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle, hint: "Nömrələrə mesaj" },
@@ -100,7 +103,7 @@ function LiveFeed({ feed = [] }) {
                   )}
                 </td>
                 <td className="w-16 py-2 pr-3 text-right font-mono text-xs text-gray-400">
-                  {fmtTime(e.at)}
+                  {fmtTime(e.at, { seconds: true })}
                 </td>
               </tr>
             );
@@ -197,7 +200,7 @@ function LastRun({ queue }) {
       {queue.skipped > 0 && (
         <>, <span className="text-amber-600">{queue.skipped} ötürüldü</span></>
       )}{" "}
-      <span className="text-gray-400">({fmt(queue.finishedAt)})</span>
+      <span className="text-gray-400">({fmtDateTime(queue.finishedAt, { seconds: true })})</span>
       {queue.errors?.length > 0 && (
         <ul className="mt-2 max-h-40 space-y-1 overflow-auto text-xs text-gray-500">
           {queue.errors.map((e, i) => (
@@ -307,7 +310,7 @@ export function BulkTab({ queue = {}, isReady, onCancel, live = false }) {
       }
       setPreview(data);
     } catch (err) {
-      notify.error(err?.data?.message || "Önizləmə alınmadı");
+      notify.error(apiErrorMessage(err, "Önizləmə alınmadı"));
     }
   };
 
@@ -323,7 +326,7 @@ export function BulkTab({ queue = {}, isReady, onCancel, live = false }) {
       notify.success(res?.message || "Göndəriş başladı");
       setPreview(null);
     } catch (err) {
-      notify.error(err?.data?.message || "Göndəriş başlamadı");
+      notify.error(apiErrorMessage(err, "Göndəriş başlamadı"));
     }
   };
 
@@ -366,11 +369,7 @@ export function BulkTab({ queue = {}, isReady, onCancel, live = false }) {
       {source === "leads" && (
         <div>
           <label className={label}>Müraciət statusu</label>
-          <select value={leadStatus} onChange={(e) => setLeadStatus(e.target.value)} className={input}>
-            {LEAD_STATUSES.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+          <Select value={leadStatus} onChange={(e) => setLeadStatus(e.target.value)} options={LEAD_STATUSES} ariaLabel="Müraciət statusu" />
           <p className="mt-1 text-xs text-gray-400">
             {isEmail
               ? "E-poçtu olmayan müraciətlər avtomatik ötürülür."
@@ -508,15 +507,11 @@ export function BulkTab({ queue = {}, isReady, onCancel, live = false }) {
         </p>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          checked={skipDuplicates}
-          onChange={(e) => setSkipDuplicates(e.target.checked)}
-          className="h-4 w-4"
-        />
-        Son 24 saatda mesaj alan alıcıları ötür
-      </label>
+      <Checkbox
+        checked={skipDuplicates}
+        onChange={setSkipDuplicates}
+        label="Son 24 saatda mesaj alan alıcıları ötür"
+      />
 
       <button
         onClick={openConfirm}

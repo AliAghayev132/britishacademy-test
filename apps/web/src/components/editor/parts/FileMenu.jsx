@@ -21,6 +21,9 @@ import {
   FileText, Upload, Check, X, HelpCircle, ChevronDown, Paperclip,
 } from 'lucide-react';
 
+// Hooks
+import { useDismiss } from '@/hooks';
+
 // Local
 import { ToolbarButton } from './Primitives';
 
@@ -80,17 +83,8 @@ export default function FileMenu({ editor, onFileUpload }) {
   const simIntervalRef = useRef(null);
   const realProgressRef = useRef(false);
 
-  /* Click-outside */
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        if (!uploading) setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open, uploading]);
+  /* Click-outside / Escape — yükləmə gedərkən bağlanmır */
+  useDismiss(open && !uploading, () => setOpen(false), ref);
 
   /* Cleanup */
   useEffect(() => () => stopSim(), []);

@@ -13,6 +13,7 @@ export {
   resourceLabel,
   thumbOf,
 } from "./adminResources";
+export { copyText } from "./clipboard";
 export { FormDirtyContext, useMarkDirty } from "./formDirty";
 export {
   DEFAULT_NEWS_IMAGE,

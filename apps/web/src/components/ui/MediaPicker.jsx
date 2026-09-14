@@ -10,7 +10,6 @@
 //   · qovluq üzrə süzgəc (bayraqlar, ümumi, video…) — say ilə
 //   · ad/teq/qovluq üzrə axtarış (server tərəfdə, AZ-tolerant fuzzyRegex ilə)
 //   · şəkil şəbəkəsi (grid), seçim, ölçü/tarix məlumatı
-//   · səhifələmə
 //   · seçilmiş şəklin qovluğunu və teqlərini yerindəcə redaktə etmək
 //   · modalın içindən YENİ fayl yükləmək (qalereyaya da düşür)
 
@@ -35,6 +34,9 @@ import { useAdminListQuery, useMediaFoldersQuery, useMediaUpdateMutation } from 
 // Lib
 import { API_URL, getImageUrl, uploadWithProgress } from "@/lib";
 
+// Utils
+import { fmtDate, apiErrorMessage } from "@/utils";
+
 // Local
 import { QueryState } from "./QueryState";
 import { notify } from "./feedback";
@@ -42,7 +44,6 @@ import { notify } from "./feedback";
 const PAGE_SIZE = 24;
 
 const fmtKb = (b) => (b ? `${Math.round(b / 1024)} KB` : "—");
-const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("az-AZ") : "");
 
 export function MediaPicker({ onClose, onSelect, defaultFolder = "", fit = "cover" }) {
   const [folder, setFolder] = useState(defaultFolder);
@@ -107,7 +108,7 @@ export function MediaPicker({ onClose, onSelect, defaultFolder = "", fit = "cove
       notify.success("Yadda saxlanıldı");
       refetch();
     } catch (err) {
-      notify.error(err?.data?.message || "Yadda saxlanmadı");
+      notify.error(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
   };
 
@@ -259,7 +260,7 @@ export function MediaPicker({ onClose, onSelect, defaultFolder = "", fit = "cove
               </p>
               <p className="text-xs text-gray-400">
                 {fmtKb(selected.sizeBytes)}
-                {selected.createdAt ? ` · ${fmtDate(selected.createdAt)}` : ""}
+                {selected.createdAt ? ` · ${fmtDate(selected.createdAt, "")}` : ""}
               </p>
 
               {selected._id && (

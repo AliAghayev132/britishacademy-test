@@ -1,31 +1,45 @@
-// Libraries
-import { clsx } from 'clsx'
+"use client";
 
-export const Checkbox = ({
-  label,
-  checked,
-  onChange,
-  disabled = false,
-  className,
-  ...props
-}) => {
+// Icons
+import { Check } from "lucide-react";
+
+// Lib
+import { useMarkDirty } from "@/lib";
+
+/**
+ * Brend dizaynlı qeyd qutusu — native `<input type="checkbox">` əvəzi.
+ *
+ * Native qutu brauzerə görə fərqli çəkilir, rəngi yalnız `accent-color` ilə
+ * (hər yerdə yox) dəyişir və admin formasında «dəyişiklik» işarəsi vermirdi.
+ * `role="checkbox"` + `aria-checked` ilə ekran oxuyucu onu qutu kimi elan edir,
+ * Boşluq/Enter düymə kimi işləyir.
+ *
+ * @param {(checked: boolean) => void} onChange
+ */
+export function Checkbox({ checked, onChange, label, disabled = false, className = "", id }) {
+  const markDirty = useMarkDirty();
   return (
-    <label
-      className={clsx(
-        'flex items-center gap-2 cursor-pointer',
-        disabled && 'cursor-not-allowed opacity-50',
-        className
-      )}
+    <button
+      id={id}
+      type="button"
+      role="checkbox"
+      aria-checked={Boolean(checked)}
+      disabled={disabled}
+      onClick={() => {
+        markDirty();
+        onChange?.(!checked);
+      }}
+      className={`inline-flex items-center gap-2 text-left text-sm text-gray-700 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     >
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        disabled={disabled}
-        className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0"
-        {...props}
-      />
-      {label && <span className="text-sm text-gray-700">{label}</span>}
-    </label>
-  )
+      <span
+        aria-hidden="true"
+        className={`grid h-4 w-4 flex-none place-items-center rounded border transition ${
+          checked ? "border-[#00157A] bg-[#00157A] text-white" : "border-gray-300 bg-white"
+        }`}
+      >
+        {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+      </span>
+      {label && <span>{label}</span>}
+    </button>
+  );
 }

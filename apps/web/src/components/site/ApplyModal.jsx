@@ -10,7 +10,7 @@ import { useCreateLeadMutation } from "@/store";
 import { playSfx, getSid, trackLeadSuccess, useT, t as translate } from "@/lib";
 
 // Utils
-import { sanitizeHtml } from "@/utils";
+import { apiErrorMessage, isInlineSvg, svgDataUri } from "@/utils";
 
 // Local
 import { useDialogFocus } from "./useDialogFocus";
@@ -133,20 +133,18 @@ const DestinationPicker = memo(function DestinationPicker({ destinations, select
                 transition: "all .18s",
               }}
             >
-              {d.flag && (/^\s*<svg[\s>]/i.test(d.flag) ? (
-                // Bayraq çox vaxt inline SVG mətnidir (ölkə kartı da belə göstərir).
-                // Əvvəl həmişə <img src> kimi verilirdi — SVG mətni URL sayılır,
-                // qırıq sorğu gedir və bayraq görünmürdü (audit #54).
-                <span
-                  aria-hidden="true"
-                  className="ba-am-flag"
-                  style={{ width: 18, height: 13, borderRadius: 2, overflow: "hidden", display: "block", flex: "none" }}
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(d.flag) }}
-                />
-              ) : (
+              {d.flag && (
+                // Bayraq çox vaxt inline SVG mətnidir — data URI ilə <img> kimi
+                // (skript işləmir, DOMPurify client bundle-a düşmür; audit #54).
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={d.flag} alt="" width={18} height={13} style={{ borderRadius: 2, display: "block" }} />
-              ))}
+                <img
+                  src={isInlineSvg(d.flag) ? svgDataUri(d.flag) : d.flag}
+                  alt=""
+                  width={18}
+                  height={13}
+                  style={{ borderRadius: 2, display: "block", flex: "none", objectFit: "cover" }}
+                />
+              )}
               {d.country}
             </button>
           );
@@ -277,7 +275,7 @@ export function ApplyModal({ open, onClose, preset, project, destination, branch
       playSfx("success");
       trackLeadSuccess({ interest });
     } catch (err) {
-      setError(err?.data?.message || t("apply.error"));
+      setError(apiErrorMessage(err, t("apply.error")));
     }
   }, [createLead, form, interest, branch, picked, project, t]);
 
