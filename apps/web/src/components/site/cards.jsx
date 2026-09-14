@@ -1,9 +1,13 @@
 "use client";
 
+// Lib
+import { useT, getImageUrl } from "@/lib";
+
+// Utils
+import { sanitizeHtml } from "@/utils";
+
+// Local
 import { LocaleLink as Link } from "./LocaleLink";
-import { useT } from "@/lib/i18n/useT";
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { getImageUrl } from "@/utils/getImageUrl";
 
 /**
  * Kurs kartlarının vurğu rəngi.

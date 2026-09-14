@@ -1,7 +1,7 @@
 // Models
 import { WhatsAppMessage } from "#models";
 
-// Services
+// Local
 import { WhatsAppService } from "./WhatsAppService.js";
 import { MailService } from "./MailService.js";
 import socketService from "./SocketService.js";

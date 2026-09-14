@@ -7,21 +7,39 @@
 // from the legacy generator) so this works inside the standalone server repo.
 //
 // ⚠️ seedDatabase() WIPES the BA content collections before inserting.
-import { TEACHERS as TEACHER_ROWS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
-import { triName } from "../data/teacherNames.mjs";
-import { BRANCHES } from "../data/branchData.mjs";
-import { tri, FAQS } from "../data/translations.mjs";
-import { QUIZZES } from "../data/quizData.mjs";
-
 // Models
 import {
-  SiteSetting, Branch, Teacher, CourseCategory, Course, CourseGroup,
-  Testimonial, Destination, MenuItem, Partner, Advantage, Page, Faq, Quiz,
+  SiteSetting,
+  Branch,
+  Teacher,
+  CourseCategory,
+  Course,
+  CourseGroup,
+  Testimonial,
+  Destination,
+  MenuItem,
+  Partner,
+  Advantage,
+  Page,
+  Faq,
+  Quiz,
 } from "#models";
+
+// Data
+import {
+  TEACHERS as TEACHER_ROWS,
+  COURSE_ALIASES,
+  BRANCH_KEYWORDS,
+  triName,
+  BRANCHES,
+  tri,
+  FAQS,
+  QUIZZES,
+  COURSE_CONTENT,
+} from "#data";
 
 // Local
 import { SlugService } from "./SlugService.js";
-import { COURSE_CONTENT } from "../data/courseContent.mjs";
 
 // ── Source data (from the static build) ──
 // Filial məlumatları ayrıca data faylındadır (import ilə gəlir).

@@ -1,6 +1,7 @@
 "use client";
 
-import { toList } from "@/utils/toList";
+// Utils
+import { toList } from "@/utils";
 
 // Static "running text" band. The gradient background + per-word star colors
 // live in globals.css under `body.ba-home .ba-mqband` — the homepage already

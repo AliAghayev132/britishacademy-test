@@ -6,22 +6,12 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Store
+import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
 // Local
-import {
-  Overlay,
-  Field,
-  TextInput,
-  NumberInput,
-  NativeSelect,
-  SectionTitle,
-  toId,
-} from "./kit";
+import { Overlay, Field, TextInput, NumberInput, NativeSelect, SectionTitle, toId } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function CourseCategoryForm({ item, onClose }) {

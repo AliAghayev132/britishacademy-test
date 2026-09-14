@@ -7,24 +7,30 @@
 
 // React
 import { useState } from "react";
+
+// Libraries
 import { useSelector } from "react-redux";
-import { Pagination } from "@/components/ui/Pagination";
-// UI / kit
-import { Overlay, Field, TextInput, NativeSelect } from "../_forms/kit";
-import { notify, confirmDialog } from "@/components/ui/feedback";
-import { ActionsMenu } from "@/components/ui/ActionsMenu";
-import { PermissionsModal } from "./PermissionsModal";
-import { ROLE_LABELS, SEES_EVERYTHING, SECTIONS, canAssignRole } from "@/lib/permissions";
+
 // Icons
 import { Plus, Pencil, Trash2, Search, ShieldCheck } from "lucide-react";
-// Data (RTK Query)
+
+// Components
+import { Pagination, notify, confirmDialog, ActionsMenu, QueryState } from "@/components";
+
+// Store
 import {
   useAdminUsersQuery,
   useAdminCreateUserMutation,
   useAdminUpdateUserMutation,
   useAdminDeleteUserMutation,
-} from "@/store/api/adminApi";
-import { QueryState } from "@/components/ui/QueryState";
+} from "@/store";
+
+// Lib
+import { ROLE_LABELS, SEES_EVERYTHING, SECTIONS, canAssignRole } from "@/lib";
+
+// Local
+import { Overlay, Field, TextInput, NativeSelect } from "../_forms/kit";
+import { PermissionsModal } from "./PermissionsModal";
 
 // ── Constants ──
 // Rol siyahısı komponent daxilində filtrlənir: kimsə ÖZÜNDƏN yüksək və ya

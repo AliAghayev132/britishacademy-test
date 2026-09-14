@@ -2,9 +2,13 @@
 
 // ── Göndəriş tarixçəsi ──
 
-import { QueryState } from "@/components/ui/QueryState";
-import { Pagination } from "@/components/ui/Pagination";
-import { useWhatsappMessagesQuery } from "@/store/api/adminApi";
+// Components
+import { QueryState, Pagination } from "@/components";
+
+// Store
+import { useWhatsappMessagesQuery } from "@/store";
+
+// Local
 import { STATUS_BADGE, fmt } from "./shared";
 
 export function HistoryTab({ page, onPage }) {

@@ -5,7 +5,10 @@
 // (each says what it does). More than that collapse into a "⋯" dropdown that
 // opens on click.
 
+// React
 import { useEffect, useRef, useState } from "react";
+
+// Icons
 import { MoreHorizontal } from "lucide-react";
 
 function toneClasses(tone) {

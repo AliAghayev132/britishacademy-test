@@ -1,8 +1,8 @@
-// RTK Query
+// Libraries
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-// Session
-import { refreshSession, redirectToLogin } from '@/lib/session'
+// Lib
+import { refreshSession, redirectToLogin } from '@/lib'
 
 // Resolve the API base URL from the public env var. Next.js inlines
 // NEXT_PUBLIC_* variables at build time so this works in the browser.

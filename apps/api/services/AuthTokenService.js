@@ -1,4 +1,7 @@
+// Lib
 import { jwt } from "#lib";
+
+// Config
 import { config } from "#config";
 
 /**

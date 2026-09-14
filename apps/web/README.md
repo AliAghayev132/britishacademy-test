@@ -99,14 +99,58 @@ Sadə tək alias — `jsconfig.json`:
 { "compilerOptions": { "baseUrl": ".", "paths": { "@/*": ["./src/*"] } } }
 ```
 
-İstifadə:
+### İmport qaydaları
+
+**1. Qovluğa alt yolla deyil, barrel-ə import et:**
 
 ```js
-import { store } from '@/store'
-import { buildMetadata, SITE_NAME } from '@/lib/seo'
-import { StatCard, Card } from '@/components/ui'
-import { JsonLd } from '@/components/JsonLd'
+// Components
+import { ApplyButton, PageLoader, notify } from "@/components";
+
+// Store
+import { useAdminListQuery, setCredentials } from "@/store";
+
+// Lib
+import { buildPath, getImageUrl, useT } from "@/lib";
+
+// Utils
+import { fold, sanitizeHtml } from "@/utils";
 ```
+
+| Barrel | İçində | Qeyd |
+|---|---|---|
+| `@/components` | site, ui, ai, sidebar | client-təhlükəsiz |
+| `@/components/server` | `PageBanner`, `Footer` | yalnız server komponentlərindən (`fs`, `getT`) |
+| `@/components/editor` | TipTap redaktoru | ağırdır (TipTap + CSS), ayrıca saxlanılır |
+| `@/lib` | i18n, session, variables, getImageUrl, upload … | client-təhlükəsiz |
+| `@/lib/server` | `apiGet`, `getT`, SEO metadata | `next/headers` işlədir — client-dən import etmə |
+| `@/utils` | təmiz köməkçilər (fold, toList, sanitizeHtml) | başqa qatdan asılı deyil |
+| `@/store` | RTK Query hook-ları, slice-lar, store | |
+| `@/hooks` | ümumi custom hook-lar | |
+
+**2. Qatlar aşağıdan yuxarı:** `utils` ← `lib` ← `store` ← `hooks` ← `components` ← `app`.
+Aşağı qat yuxarını import etmir (məs. `lib` → `@/components` qadağandır) —
+barrel-lər arasında dövri import yaranır və modul yüklənəndə funksiyalar
+`undefined` olur.
+
+**3. Barrel-in öz qovluğunun içində** fayllar bir-birini nisbi yolla import edir
+(`./LocaleLink`), barrel-dən yox — eyni səbəbdən.
+
+**4. İmport bloku şərhli qruplara bölünür**, bu ardıcıllıqla:
+`// React`, `// Next`, `// Libraries`, `// Icons`, `// Components`,
+`// Hooks`, `// Store`, `// Lib`, `// Utils`, `// Styles`, `// Local`.
+
+**Barrel-lər əl ilə yazılmır.** Yeni komponent, util və ya hook əlavə edəndə:
+
+```bash
+pnpm barrels         # barrel-ləri yenilə, importları qaydaya sal
+pnpm barrels:check   # yoxla (tests/barrels.test.js da işlədir)
+```
+
+**Bundle ölçüsü:** `package.json`-da `"sideEffects": ["*.css"]` var — bundler
+barrel-dən istifadə olunmayan ixracları atır. Onsuz hər səhifə bütün barrel-i
+yükləyirdi (ölçüldü: ana səhifə 792 → 1007 KB). Modul səviyyəsində yan təsiri
+olan (import olunan kimi nəsə edən) kod yazma.
 
 > Next.js `@/*` alias-ını `jsconfig.json`-dan avtomatik oxuyur — React template-dəki kimi ayrıca bundler konfiqurasiyası lazım deyil.
 

@@ -78,6 +78,24 @@ export function canonicalPath(path) {
   return "/" + [CANONICAL[head] || head, ...rest].join("/");
 }
 
+/**
+ * Kanonik (AZ) daxili path → cari dildəki public URL (prefiks + slug tərcüməsi).
+ *   withLocale("en", "/elaqe") → "/en/contact"
+ */
+export function withLocale(locale, href) {
+  if (!href || typeof href !== "string" || !href.startsWith("/")) return href;
+  return buildPath(href, locale);
+}
+
+/**
+ * Public path → kanonik AZ path (dil prefiksi və slug tərcüməsi götürülür).
+ * Dil seçicisi bunu alıb withLocale ilə hədəf dilə çevirir:
+ *   /en/contact → /ru/kontakty
+ */
+export function stripLocale(pathname) {
+  return canonicalPath(splitLocale(pathname).path);
+}
+
 /** Path-dan dil prefiksini ayır: "/en/contact" → { locale:"en", path:"/contact" } */
 export function splitLocale(pathname) {
   const seg = split(pathname)[0];

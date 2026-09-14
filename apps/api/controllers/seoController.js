@@ -1,7 +1,7 @@
 // SEO data endpoints. The Next.js app owns /robots.txt and /sitemap.xml, but it
 // pulls the editable content (admin-managed robots body) and the URL list from
 // here so the API stays the single source of truth.
-import { asyncHandler } from "#utils";
+// Models
 import {
   SiteSetting,
   Course,
@@ -9,10 +9,14 @@ import {
   Branch,
   Teacher,
   Destination,
-  BlogPost, Quiz,
+  BlogPost,
+  Quiz,
   Page,
   Project,
 } from "#models";
+
+// Utils
+import { asyncHandler } from "#utils";
 
 /**
  * Səhifə sənədi (Page) → saytdakı marşrut. Page kolleksiyasındakı hər sənədin

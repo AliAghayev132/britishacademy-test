@@ -124,9 +124,24 @@ Bu template **nisbi import-lardan (`../../services/...`) tamamilə imtina edir**
   "#templates": "./templates/index.js",
   "#constants": "./constants/index.js",
   "#middlewares": "./middlewares/index.js",
-  "#controllers": "./controllers/index.js"
+  "#controllers": "./controllers/index.js",
+  "#data": "./data/index.js"
 }
 ```
+
+### İmport qaydaları
+
+- **Qovluqdan kənara barrel ilə:** `import { initialPermissions } from "#utils"` —
+  `../utils/roles.js` yox. Data faylları da: `import { BRANCHES } from "#data"`.
+- **Eyni qovluğun içində nisbi yol:** `services/` içindəki fayl başqa servisi
+  `./SocketService.js` ilə import edir — `#services` barrel-i öz içinə import
+  olunsa dövri asılılıq yaranır.
+- **Şərhli qruplar**, bu ardıcıllıqla: `// Node`, `// Packages`, `// Lib`,
+  `// Config`, `// Constants`, `// Models`, `// Services`, `// Controllers`,
+  `// Middlewares`, `// Routes`, `// Utils`, `// Data`, `// Local`.
+- Node ESM uzantı tələb edir — barrel-lərdə `./file.js` / `./file.mjs` tam yazılır.
+- Qaydaya salmaq (monorepodan, web-in parserini işlədir):
+  `node ../web/scripts/imports-codemod.cjs api --root=../api` (`--check` ilə yoxlama).
 
 İki mexanizm var:
 

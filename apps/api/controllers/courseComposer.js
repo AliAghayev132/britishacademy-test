@@ -8,9 +8,14 @@
 // with cleanup — if group creation fails, the just-created course is removed so
 // we don't leave a half-built course behind.
 
-import { asyncHandler, destinationScope, branchScope } from "#utils";
+// Models
 import { Course, CourseGroup, Branch, Teacher, CourseCategory, Destination } from "#models";
+
+// Services
 import { logAction } from "#services";
+
+// Utils
+import { asyncHandler, destinationScope, branchScope } from "#utils";
 
 // ── Helpers ──
 

@@ -1,6 +1,6 @@
 // Public read endpoints — the data the Next.js site renders. All read-only,
 // no auth, only active/published documents.
-import { asyncHandler } from "#utils";
+// Models
 import {
   SiteSetting,
   MenuItem,
@@ -19,8 +19,12 @@ import {
   Faq,
   Project,
 } from "#models";
+
+// Utils
+import { asyncHandler } from "#utils";
+
 // Data
-import { LEGACY_SLUG_OF } from "../data/slugAliases.mjs";
+import { LEGACY_SLUG_OF } from "#data";
 
 /**
  * Silinmiş və ya deaktiv edilmiş əlaqəli sənəd populate-da çıxmasın

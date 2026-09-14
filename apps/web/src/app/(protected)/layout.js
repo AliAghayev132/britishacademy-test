@@ -1,4 +1,5 @@
-import { SocketProvider } from "@/store/context/SocketContext";
+// Store
+import { SocketProvider } from "@/store";
 
 /**
  * Admin paneli üçün klient provayderləri.

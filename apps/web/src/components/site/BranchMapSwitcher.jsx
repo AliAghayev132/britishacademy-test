@@ -2,10 +2,12 @@
 
 // React
 import { useState } from "react";
+
 // Icons
 import { ExternalLink, MapPin } from "lucide-react";
-// i18n
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 /**
  * Filiallar səhifəsindəki xəritə — filial seçilə bilir.

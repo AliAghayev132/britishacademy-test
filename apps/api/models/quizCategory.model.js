@@ -1,7 +1,9 @@
 // Constants
 import { Schema, Model } from "#constants";
+
 // Services
 import { SlugService } from "#services";
+
 // Utils
 import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
 

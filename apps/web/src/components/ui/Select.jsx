@@ -1,4 +1,7 @@
+// Libraries
 import { clsx } from 'clsx'
+
+// Icons
 import { ChevronDown } from 'lucide-react'
 
 export const Select = ({

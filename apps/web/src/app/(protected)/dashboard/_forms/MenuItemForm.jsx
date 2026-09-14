@@ -6,12 +6,10 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Store
+import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
 // Local
 import {
   Overlay,

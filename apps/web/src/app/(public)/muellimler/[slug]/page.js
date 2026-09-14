@@ -1,21 +1,26 @@
 // Next
 import { notFound } from "next/navigation";
-import { ViewBeacon } from "@/components/site/ViewBeacon";
-import { ldJson } from "@/lib/jsonLd";
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-
-// Data
-import { apiGetStatus, isMissing } from "@/lib/api";
 
 // Components
-import { ApplyButton } from "@/components/site/ApplyButton";
+import { ViewBeacon, LocaleLink as Link, ApplyButton } from "@/components";
 
-// Utils / SEO
+// Lib
+import { ldJson } from "@/lib";
+import {
+  getT,
+  getLocale,
+  apiGetStatus,
+  isMissing,
+  metaFromApi,
+  SITE_URL,
+  SITE_NAME,
+  absUrl,
+} from "@/lib/server";
+
+// Utils
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { metaFromApi, SITE_URL, SITE_NAME, absUrl } from "@/lib/seo";
+import { sanitizeHtml } from "@/utils";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {

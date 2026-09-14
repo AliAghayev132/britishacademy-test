@@ -1,15 +1,9 @@
-// Data
-import { apiGet } from "@/lib/api";
-
 // Components
-import { SectionHead } from "@/components/site/cards";
-import { ContactForm } from "@/components/site/ContactForm";
-import { BranchContact } from "@/components/site/BranchContact";
-import { PageBanner } from "@/components/site/PageBanner";
+import { SectionHead, ContactForm, BranchContact } from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { buildMetadata } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
+// Lib
+import { apiGet, buildMetadata, getT } from "@/lib/server";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə

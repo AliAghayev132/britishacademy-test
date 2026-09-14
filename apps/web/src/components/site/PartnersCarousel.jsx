@@ -3,6 +3,7 @@
 // Swiper — davamlı (loop) hərəkətli tərəfdaş loqoları lenti.
 // Struktur istənilən sayda loqonu qəbul edir; sonradan yeni tərəfdaşlar
 // əlavə olunduqca avtomatik işləyəcək.
+// Libraries
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode } from "swiper/modules";
 import "swiper/css";

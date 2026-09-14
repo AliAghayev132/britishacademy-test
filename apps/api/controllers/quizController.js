@@ -1,10 +1,11 @@
 // ── Testlər (public) ──
 // Sual siyahısının verilməsi və cavabların qiymətləndirilməsi.
 
-// Utils
-import { asyncHandler, parseLocale } from "#utils";
 // Models
 import { Quiz, QuizAttempt } from "#models";
+
+// Utils
+import { asyncHandler, parseLocale } from "#utils";
 
 /**
  * TƏHLÜKƏSİZLİK QAYDASI:

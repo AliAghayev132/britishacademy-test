@@ -24,7 +24,7 @@ const HOST = "https://cdn.example.com";
 beforeAll(async () => {
   vi.stubEnv("NEXT_PUBLIC_IMAGE_URL", HOST);
   vi.resetModules(); // bütün qraf təzədən qurulsun
-  ({ getImageUrl } = await import("@/utils/getImageUrl"));
+  ({ getImageUrl } = await import("@/lib/getImageUrl"));
   ({ IMAGE_URL } = await import("@/lib/variables"));
 });
 

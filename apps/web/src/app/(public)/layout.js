@@ -1,21 +1,23 @@
 // React
 import { Suspense } from "react";
+
+// Next
 import { headers } from "next/headers";
 
-// Data
-import { apiGet } from "@/lib/api";
-
 // Components
-import { SiteProvider } from "@/components/site/SiteProvider";
-import { LocaleProvider } from "@/components/site/LocaleProvider";
-import { Header } from "@/components/site/Header";
-import { Footer } from "@/components/site/Footer";
-import { RouteLoader } from "@/components/site/RouteLoader";
-import { GtmScript, GtmNoScript } from "@/components/site/GoogleTagManager";
-import { CodeInjection } from "@/components/site/CodeInjection";
+import {
+  SiteProvider,
+  LocaleProvider,
+  Header,
+  RouteLoader,
+  GtmScript,
+  GtmNoScript,
+  CodeInjection,
+} from "@/components";
+import { Footer } from "@/components/server";
 
-// Utils
-import { getT } from "@/lib/i18n/serverT";
+// Lib
+import { apiGet, getT } from "@/lib/server";
 
 /**
  * Public marketing shell. Fetches the site chrome data server-side (SSR nav +

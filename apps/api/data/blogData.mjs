@@ -44,6 +44,7 @@ export const BLOG_CATEGORIES = [
 // Kurs və ölkə səhifələrinin HƏR BİRİ üçün ayrıca yazı — mövzuya görə
 // ayrı fayllardadır ki, bu fayl oxunmaz uzunluğa çatmasın. Hamısı aşağıda
 // `BLOG_POSTS`-a birləşir; import servisi yalnız o siyahını görür.
+// Local
 import { LANGUAGE_POSTS_A } from "./blog/languagesA.mjs";
 import { LANGUAGE_POSTS_B } from "./blog/languagesB.mjs";
 import { EXAM_POSTS } from "./blog/exams.mjs";

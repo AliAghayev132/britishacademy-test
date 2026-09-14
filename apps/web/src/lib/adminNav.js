@@ -17,15 +17,37 @@
 
 // Icons
 import {
-  FileText, User, LayoutDashboard, Inbox, GraduationCap, Users, Building2,
-  CalendarClock, MessageSquareQuote, MessageCircle, Globe2, Settings,
-  Database, ShieldCheck, ScrollText, BarChart3, Home, Tags, HelpCircle,
-  Sparkles, Handshake, Menu as MenuIcon, Image as ImageIcon, FileStack,
-  Link2, ClipboardList, Rocket,
+  FileText,
+  User,
+  LayoutDashboard,
+  Inbox,
+  GraduationCap,
+  Users,
+  Building2,
+  CalendarClock,
+  MessageSquareQuote,
+  MessageCircle,
+  Globe2,
+  Settings,
+  Database,
+  ShieldCheck,
+  ScrollText,
+  BarChart3,
+  Home,
+  Tags,
+  HelpCircle,
+  Sparkles,
+  Handshake,
+  Menu as MenuIcon,
+  Image as ImageIcon,
+  FileStack,
+  Link2,
+  ClipboardList,
+  Rocket,
 } from "lucide-react";
 
 // Utils
-import { fold } from "@/utils/fold";
+import { fold } from "@/utils";
 
 export const NAV_TOP = [
   {

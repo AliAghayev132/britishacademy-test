@@ -1,7 +1,8 @@
 // Models
 import { Branch } from "#models";
+
 // Data
-import { BRANCHES } from "../data/branchData.mjs";
+import { BRANCHES } from "#data";
 
 /**
  * Filial əlaqə məlumatlarının importu.

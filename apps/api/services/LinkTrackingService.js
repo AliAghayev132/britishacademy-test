@@ -1,6 +1,9 @@
+// Node
 import crypto from "node:crypto";
+
 // Config
 import { config } from "#config";
+
 // Models
 import { ShortLink, LinkClick } from "#models";
 

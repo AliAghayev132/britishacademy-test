@@ -3,8 +3,13 @@
 // ── Qoşulma tabı ──
 // Üç vəziyyət: qoşulub · QR/kod gözlənilir · qoşulmayıb (başlatma formaları).
 
+// React
 import { useState } from "react";
+
+// Icons
 import { MessageSquare, Loader2, Smartphone, KeyRound } from "lucide-react";
+
+// Local
 import { input, label, fmt } from "./shared";
 
 function InfoCard({ title, value, mono }) {

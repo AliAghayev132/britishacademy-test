@@ -6,24 +6,19 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
+import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS, getImageUrl } from "@/lib";
+
 // Local
-import {
-  Overlay,
-  Field,
-  TextInput,
-  NumberInput,
-  SectionTitle,
-} from "./kit";
+import { Overlay, Field, TextInput, NumberInput, SectionTitle } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-// Utils
-import { getImageUrl } from "@/utils/getImageUrl";
 
 export function PartnerForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);

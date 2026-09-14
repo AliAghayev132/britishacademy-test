@@ -15,6 +15,7 @@
 
 // Kurs səhifələrinin uzun mətnləri ayrıca fayldadır — bu faylda qısa etiketlər
 // (menyu, kateqoriya, üstünlük) qalır ki, axtarmaq asan olsun.
+// Local
 import { COURSE_T } from "./courseTranslations.mjs";
 
 /** AZ mətn → { en, ru } */

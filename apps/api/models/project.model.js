@@ -1,10 +1,13 @@
 // Constants
 import { Schema, Model } from "#constants";
+
 // Services
 import { SlugService } from "#services";
+
 // Utils
 import { localizedField, i18nPlugin, LOCALIZED_FIELDS } from "#utils";
-// Shared sub-schemas
+
+// Local
 import { seoSchema, contentBlockSchema, factSchema, faqItemSchema } from "./shared.schemas.js";
 
 /**

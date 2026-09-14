@@ -2,17 +2,21 @@
 
 // React
 import { useEffect, useState } from "react";
-// UI / kit
-import { notify } from "@/components/ui/feedback";
-import { QueryState } from "@/components/ui/QueryState";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-// Data (RTK Query)
+
+// Components
+import { notify, QueryState, FileUpload } from "@/components";
+
+// Store
 import {
   useAdminGetSettingsQuery,
   useAdminUpdateSettingsMutation,
   useAdminTestMailMutation,
-} from "@/store/api/adminApi";
+} from "@/store";
+
+// Lib
+import { IMAGE_SPECS } from "@/lib";
+
+// Local
 // Çoxdilli redaktə (modallardakı ilə eyni sistem)
 import {
   LocalizedFormProvider,

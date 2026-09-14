@@ -3,8 +3,15 @@ import { Router, adminRoles } from "#constants";
 
 // Controllers
 import {
-  adminController, leadController, courseComposer, devController,
-  userAdminController, whatsappController, bulkController, statsController, linkController,
+  adminController,
+  leadController,
+  courseComposer,
+  devController,
+  userAdminController,
+  whatsappController,
+  bulkController,
+  statsController,
+  linkController,
 } from "#controllers";
 
 // Middlewares

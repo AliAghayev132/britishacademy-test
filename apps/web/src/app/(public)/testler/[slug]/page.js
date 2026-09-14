@@ -1,9 +1,11 @@
+// Next
 import { notFound } from "next/navigation";
 
-import { apiGetStatus, isMissing } from "@/lib/api";
-import { getLocale, getT } from "@/lib/i18n/serverT";
-import { buildMetadata, metaFromApi } from "@/lib/seo";
-import { QuizRunner } from "@/components/site/QuizRunner";
+// Components
+import { QuizRunner } from "@/components";
+
+// Lib
+import { apiGetStatus, isMissing, getLocale, getT, buildMetadata, metaFromApi } from "@/lib/server";
 
 /**
  * Bir testin səhifəsi.

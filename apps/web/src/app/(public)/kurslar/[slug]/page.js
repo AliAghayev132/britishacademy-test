@@ -1,26 +1,36 @@
 // Next
 import { notFound } from "next/navigation";
-import { ViewBeacon } from "@/components/site/ViewBeacon";
-import { ldJson } from "@/lib/jsonLd";
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
-// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-
-// Data
-import { apiGet, apiGetStatus, isMissing } from "@/lib/api";
 
 // Components
-import { ContentBlocks } from "@/components/site/ContentBlocks";
-import { PriceCards } from "@/components/site/PriceCards";
-import { FaqAccordion } from "@/components/site/FaqAccordion";
-import { CourseCard } from "@/components/site/cards";
-import { ApplyButton } from "@/components/site/ApplyButton";
-import { PageBanner } from "@/components/site/PageBanner";
+import {
+  ViewBeacon,
+  LocaleLink as Link,
+  ContentBlocks,
+  PriceCards,
+  FaqAccordion,
+  CourseCard,
+  ApplyButton,
+} from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { metaFromApi, buildMetadata, SITE_URL, absUrl } from "@/lib/seo";
+// Lib
+import { ldJson } from "@/lib";
+import {
+  getT,
+  getLocale,
+  apiGet,
+  apiGetStatus,
+  isMissing,
+  metaFromApi,
+  buildMetadata,
+  SITE_URL,
+  absUrl,
+} from "@/lib/server";
+
+// Utils
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils";
 
 const wrap = { maxWidth: 1200, margin: "0 auto", padding: "0 28px" };
 

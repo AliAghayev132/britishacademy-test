@@ -16,6 +16,7 @@
 // Bu iki şərt pozulsa kod OXUNMUR — çap olunmuş materialda bunu geri qaytarmaq
 // mümkün olmur, ona görə həddlər koda yazılıb.
 
+// Libraries
 import QRCode from "qrcode";
 
 /**

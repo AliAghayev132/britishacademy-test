@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useEffect } from "react";
-import { trackVisit } from "@/lib/track";
+
+// Lib
+import { trackVisit } from "@/lib";
 
 /** Sayta girişi qeyd edir (sessiyada bir dəfə). Heç nə göstərmir. */
 export function SiteTracker() {

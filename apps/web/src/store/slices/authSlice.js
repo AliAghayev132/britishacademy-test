@@ -1,4 +1,4 @@
-// Redux Toolkit
+// Libraries
 import { createSlice } from '@reduxjs/toolkit'
 
 // Key used for the persisted profile blob in localStorage.

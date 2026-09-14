@@ -1,19 +1,15 @@
-// Data
-import { apiGetStatus, apiGet } from "@/lib/api";
+// Components
+import { ContentBlocks, FaqAccordion, ApplyButton } from "@/components";
+import { PageBanner } from "@/components/server";
+
+// Lib
+import { apiGetStatus, apiGet, metaFromApi, getT } from "@/lib/server";
+import { getImageUrl } from "@/lib";
+
+// Utils
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-
-// Components
-import { ContentBlocks } from "@/components/site/ContentBlocks";
-import { FaqAccordion } from "@/components/site/FaqAccordion";
-import { ApplyButton } from "@/components/site/ApplyButton";
-import { PageBanner } from "@/components/site/PageBanner";
-
-// Utils / SEO
-import { metaFromApi } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
-import { getImageUrl } from "@/utils/getImageUrl";
+import { sanitizeHtml } from "@/utils";
 
 export async function generateMetadata() {
   const { data } = await apiGetStatus("/pages/haqqimizda");

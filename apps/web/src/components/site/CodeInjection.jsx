@@ -16,6 +16,7 @@
 // ⚠️ Təhlükəsizlik: bu, sayta ixtiyari JS yerləşdirmək deməkdir. Sahələri
 // yalnız `admin` rolu redaktə edə bilər (bax adminController.ADMIN_ONLY_SETTING_FIELDS).
 
+// React
 import { useEffect } from "react";
 
 /** HTML sətrini parse edib hədəf node-a əlavə et (script-lər icra olunacaq şəkildə). */

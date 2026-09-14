@@ -1,5 +1,6 @@
 "use client";
 
+// React
 import { useEffect } from "react";
 
 const RAW = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");

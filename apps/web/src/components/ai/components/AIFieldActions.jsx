@@ -1,5 +1,6 @@
 'use client';
 
+// Icons
 import { Languages, Wand2, Loader2 } from 'lucide-react';
 
 export default function AIFieldActions({ fieldKey, isLoading, onTranslate, onPolish, size = 'sm' }) {

@@ -4,14 +4,37 @@
 // İki kanal (WhatsApp / e-poçt) × üç mənbə (müraciətlər / Excel / əl ilə siyahı).
 // Göndərmədən əvvəl server `preview` verir, sonra iki mərhələli təsdiq alınır.
 
+// React
 import { useState } from "react";
+
+// Icons
 import {
-  Loader2, StopCircle, Users, MessageCircle, Mail, FileSpreadsheet,
-  ListPlus, Upload, X, Timer, CheckCircle2, XCircle, SkipForward, Radio,
+  Loader2,
+  StopCircle,
+  Users,
+  MessageCircle,
+  Mail,
+  FileSpreadsheet,
+  ListPlus,
+  Upload,
+  X,
+  Timer,
+  CheckCircle2,
+  XCircle,
+  SkipForward,
+  Radio,
 } from "lucide-react";
-import { notify } from "@/components/ui/feedback";
-import { useBulkPreviewMutation, useBulkSendMutation } from "@/store/api/adminApi";
-import { parseSpreadsheet, parseLines } from "@/lib/recipientParser";
+
+// Components
+import { notify } from "@/components";
+
+// Store
+import { useBulkPreviewMutation, useBulkSendMutation } from "@/store";
+
+// Lib
+import { parseSpreadsheet, parseLines } from "@/lib";
+
+// Local
 import { ConfirmSend } from "./ConfirmSend";
 import { input, label, LEAD_STATUSES, fmt, fmtTime, fmtDuration, STATUS_BADGE } from "./shared";
 

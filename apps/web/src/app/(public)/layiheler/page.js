@@ -1,15 +1,10 @@
-// Data
-import { apiGet } from "@/lib/api";
-
 // Components
-import { PageBanner } from "@/components/site/PageBanner";
-import { CtaBand } from "@/components/site/CtaBand";
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
+import { PageBanner } from "@/components/server";
+import { CtaBand, LocaleLink as Link } from "@/components";
 
-// Utils / SEO
-import { buildMetadata } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
-import { getImageUrl } from "@/utils/getImageUrl";
+// Lib
+import { apiGet, buildMetadata, getT } from "@/lib/server";
+import { getImageUrl } from "@/lib";
 
 export async function generateMetadata() {
   const t = await getT();

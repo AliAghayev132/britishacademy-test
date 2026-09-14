@@ -10,12 +10,21 @@
 //
 // confirmLocalized: submit-dən öncə AZ mütləqdir, EN/RU boşdursa təsdiq alır.
 
+// React
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
-import { confirmDialog, notify } from "@/components/ui/feedback";
-import { useMarkDirty } from "@/lib/formDirty";
-import { useAiProcessMutation, useAiStatusQuery } from "@/store/api/adminApi";
-import TiptapEditor from "@/components/editor/TiptapEditor";
+
+// Icons
 import { Languages, Wand2, Loader2 } from "lucide-react";
+
+// Components
+import { confirmDialog, notify } from "@/components";
+import { TiptapEditor } from "@/components/editor";
+
+// Store
+import { useAiProcessMutation, useAiStatusQuery } from "@/store";
+
+// Lib
+import { useMarkDirty } from "@/lib";
 
 const LOCALES = [
   { key: "az", label: "AZ" },

@@ -1,11 +1,11 @@
+// Config
+import { config } from "#config";
+
 // Models
 import { User } from "#models";
 
 // Services
 import { HashService } from "#services";
-
-// Config
-import { config } from "#config";
 
 /**
  * Standart (hamının bildiyi) parolla hesab yaratmaq.

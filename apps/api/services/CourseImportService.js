@@ -2,7 +2,7 @@
 import { Course, Branch } from "#models";
 
 // Data
-import { COURSE_IMPORT } from "../data/courseImport.mjs";
+import { COURSE_IMPORT } from "#data";
 
 /**
  * Müştəridən gələn kurs məlumatlarını (3 dildə mətn, SEO, filial qiymətləri)

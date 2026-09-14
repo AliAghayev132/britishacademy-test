@@ -11,8 +11,16 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store/api/adminApi";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
+import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS } from "@/lib";
+
 // Local
 import {
   Overlay,
@@ -24,10 +32,15 @@ import {
   AddButton,
   RemoveButton,
 } from "./kit";
-import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
+import {
+  LocalizedInput,
+  LocalizedEditor,
+  toLoc,
+  trimLoc,
+  locAz,
+  confirmLocalized,
+} from "./Localized";
 import { SeoFields } from "./SeoFields";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
 
 const emptyFact = () => ({ label: toLoc(""), value: toLoc("") });
 

@@ -1,12 +1,14 @@
-// Config / constants
-import { Router, adminRoles } from "#constants";
+// Config
 import { config } from "#config";
 
-// Controllers
-import { mediaController } from "#controllers";
+// Constants
+import { Router, adminRoles } from "#constants";
 
 // Models
 import { SiteSetting } from "#models";
+
+// Controllers
+import { mediaController } from "#controllers";
 
 // Middlewares
 import { authenticate, requireRole, uploadLimit, receiveFiles } from "#middlewares";

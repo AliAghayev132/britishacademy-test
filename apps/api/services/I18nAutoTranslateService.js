@@ -1,8 +1,10 @@
-// Utils
-import { LOCALIZED_FIELDS, looksLocalized } from "#utils";
 // Lib
 import { mongoose } from "#lib";
-// Services
+
+// Utils
+import { LOCALIZED_FIELDS, looksLocalized } from "#utils";
+
+// Local
 import { translateFields } from "./AiService.js";
 
 /**

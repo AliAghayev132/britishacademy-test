@@ -1,28 +1,24 @@
-// Next
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getImageUrl } from "@/utils/getImageUrl";
-
-// Data
-import { apiGet } from "@/lib/api";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-import { formatDate } from "@/lib/i18n/date";
-
 // Components
-import { Hero } from "@/components/site/Hero";
-import { DestinationCard, TestimonialCard, SectionHead } from "@/components/site/cards";
-import { ApplyButton } from "@/components/site/ApplyButton";
-import { HomeBodyClass } from "@/components/site/HomeBodyClass";
-import { FaqAccordion } from "@/components/site/FaqAccordion";
-import Marquee from "@/components/site/Marquee";
-import RevealOnScroll from "@/components/site/RevealOnScroll";
-import PartnersCarousel from "@/components/site/PartnersCarousel";
-import ServicesShowcase from "@/components/site/ServicesShowcase";
-import VideoSwiper from "@/components/site/VideoSwiper";
-import TeacherSwiper from "@/components/site/TeacherSwiper";
-import { sectionEnabled } from "@/lib/homeSections";
+import {
+  LocaleLink as Link,
+  Hero,
+  DestinationCard,
+  TestimonialCard,
+  SectionHead,
+  ApplyButton,
+  HomeBodyClass,
+  FaqAccordion,
+  Marquee,
+  RevealOnScroll,
+  PartnersCarousel,
+  ServicesShowcase,
+  VideoSwiper,
+  TeacherSwiper,
+} from "@/components";
 
-// Utils / SEO
-import { buildMetadata } from "@/lib/seo";
+// Lib
+import { apiGet, getT, getLocale, buildMetadata } from "@/lib/server";
+import { formatDate, sectionEnabled, getImageUrl } from "@/lib";
 
 export async function generateMetadata() {
   return buildMetadata({ path: "/" });

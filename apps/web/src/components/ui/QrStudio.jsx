@@ -11,9 +11,17 @@
 
 // React
 import { useEffect, useMemo, useRef, useState } from "react";
-// Data
-import { useAdminGetSettingsQuery } from "@/store/api/adminApi";
-// Local
+
+// Icons
+import { X, Download, Copy, Check, QrCode, Upload, AlertTriangle, RotateCcw } from "lucide-react";
+
+// Components
+import { notify } from "@/components/ui/feedback";
+
+// Store
+import { useAdminGetSettingsQuery } from "@/store";
+
+// Lib
 import {
   QR_DEFAULTS,
   LOGO_MAX,
@@ -25,13 +33,8 @@ import {
   loadImage,
   fetchAsDataUrl,
   downloadBlob,
-} from "@/lib/qr";
-import { getImageUrl } from "@/utils/getImageUrl";
-import { notify } from "@/components/ui/feedback";
-// Icons
-import {
-  X, Download, Copy, Check, QrCode, Upload, AlertTriangle, RotateCcw,
-} from "lucide-react";
+  getImageUrl,
+} from "@/lib";
 
 // Tənzimləmələr brauzerdə saxlanılır: bir kampaniyada onlarla link olur və
 // hər dəfə rəngi, formanı yenidən seçmək əziyyətdir.

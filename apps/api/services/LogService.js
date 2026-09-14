@@ -1,7 +1,10 @@
 // ── Log service ──
 // «Tut-unut» audit jurnalı. HEÇ VAXT sorğu axınına xəta atmır.
 
+// Models
 import { AuditLog } from "#models";
+
+// Utils
 import { clientIp } from "#utils";
 
 /** Jurnala DÜŞMƏYƏCƏK sahələr — hər yazıda dəyişir, məlumat vermir. */

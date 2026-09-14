@@ -1,8 +1,10 @@
-// Utils
+// Lib
 import { fs, path, crypto } from "#lib";
 
-// Config / constants
+// Config
 import { config, securityConfig } from "#config";
+
+// Constants
 import { uploadPaths } from "#constants";
 
 /**

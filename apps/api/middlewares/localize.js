@@ -1,6 +1,7 @@
 // ── Localize response middleware (public) ──
 // Public cavablardakı { az, en, ru } sahələrini seçilmiş dilə görə düz mətnə
 // çevirir (AZ fallback). Dil `?lang=` query və ya `x-lang` header-dən gəlir.
+// Utils
 import { deepLocalize, parseLocale } from "#utils";
 
 export function localizeResponse(req, res, next) {

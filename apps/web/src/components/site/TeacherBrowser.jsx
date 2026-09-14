@@ -2,11 +2,16 @@
 
 // React
 import { memo, useCallback, useState } from "react";
-import { useT } from "@/lib/i18n/useT";
-// Next
+
+// Components
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
-// Data (RTK Query)
-import { useGetTeachersQuery } from "@/store/api/publicApi";
+
+// Store
+import { useGetTeachersQuery } from "@/store";
+
+// Lib
+import { useT } from "@/lib";
+
 // Local
 import { SiteSelect } from "./SiteSelect";
 

@@ -1,7 +1,8 @@
 // Models
 import { BlogPost, BlogCategory } from "#models";
+
 // Data
-import { BLOG_CATEGORIES, BLOG_POSTS } from "../data/blogData.mjs";
+import { BLOG_CATEGORIES, BLOG_POSTS } from "#data";
 
 /**
  * Bloq məzmununun importu.

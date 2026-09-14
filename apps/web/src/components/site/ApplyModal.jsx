@@ -2,16 +2,19 @@
 
 // React
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { useDialogFocus } from "./useDialogFocus";
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-// Data (RTK Query)
-import { useCreateLeadMutation } from "@/store/api/leadApi";
-import { playSfx } from "@/lib/sfx";
-import { getSid, trackLeadSuccess } from "@/lib/track";
+
+// Store
+import { useCreateLeadMutation } from "@/store";
+
+// Lib
+import { playSfx, getSid, trackLeadSuccess, useT, t as translate } from "@/lib";
+
+// Utils
+import { sanitizeHtml } from "@/utils";
+
 // Local
+import { useDialogFocus } from "./useDialogFocus";
 import { SiteSelect } from "./SiteSelect";
-import { useT } from "@/lib/i18n/useT";
-import { t as translate } from "@/lib/i18n/strings";
 
 // ── Constants ──
 // Maraq siyahısı tərcümə açarlarındandır — dəyər kimi AZ mətn göndərilir

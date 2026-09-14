@@ -1,5 +1,8 @@
+// Next
 import Link from "next/link";
-import { ADMIN_RESOURCES } from "@/lib/adminResources";
+
+// Lib
+import { ADMIN_RESOURCES } from "@/lib";
 
 export const metadata = { title: "Resurslar" };
 

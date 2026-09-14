@@ -1,5 +1,6 @@
 // /manifest.webmanifest — PWA manifest, brand-driven from SiteSetting.
-import { getSiteSettings, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
+// Lib
+import { getSiteSettings, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/server";
 
 export const revalidate = 3600;
 

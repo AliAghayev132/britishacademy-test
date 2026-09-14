@@ -1,8 +1,13 @@
 "use client";
 
+// React
 import { useEffect, useRef, useState } from "react";
+
+// Next
 import { usePathname, useSearchParams } from "next/navigation";
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 /**
  * Client navigation loader — a "walking" mascot overlay shown while moving

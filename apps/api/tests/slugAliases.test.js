@@ -55,7 +55,9 @@ describe("slug alias xəritəsi", () => {
       path.join(ROOT, "services/SlugMigrationService.js"),
       "utf8",
     );
-    expect(src).toContain("data/slugAliases.mjs");
+    // #data barrel-i data/slugAliases.mjs-dən oxuyur — mənbə yenə tək fayldır.
+    expect(src).toMatch(/import \{ SLUG_RENAMES \} from "#data"/);
+    expect(fs.readFileSync(path.join(ROOT, "data/index.js"), "utf8")).toMatch(/export \{ LEGACY_SLUG_OF, SLUG_RENAMES \} from "\.\/slugAliases\.mjs"/);
     expect(src).not.toMatch(/SLUG_RENAMES\s*=\s*\{/);
   });
 });

@@ -2,11 +2,20 @@
 
 // React
 import { useEffect, useState } from "react";
-// Data
-import { useAdminGetSettingsQuery, useAdminUpdateSettingsMutation } from "@/store/api/adminApi";
-// UI
-import { notify } from "@/components/ui/feedback";
-import { QueryState } from "@/components/ui/QueryState";
+
+// Icons
+import { ArrowDown, ArrowUp, Eye, EyeOff, Lock, Save } from "lucide-react";
+
+// Components
+import { notify, QueryState } from "@/components";
+
+// Store
+import { useAdminGetSettingsQuery, useAdminUpdateSettingsMutation } from "@/store";
+
+// Lib
+import { resolveSections } from "@/lib";
+
+// Local
 import {
   LocalizedInput,
   LocalizedFormProvider,
@@ -16,10 +25,7 @@ import {
   trimLoc,
   locAz,
 } from "../_forms/Localized";
-import { resolveSections } from "@/lib/homeSections";
 import { FeaturedPicker } from "./FeaturedPicker";
-// Icons
-import { ArrowDown, ArrowUp, Eye, EyeOff, Lock, Save } from "lucide-react";
 
 /**
  * Ana səhifə idarəetməsi — HAMISI BİR YERDƏ.

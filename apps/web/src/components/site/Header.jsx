@@ -2,15 +2,18 @@
 
 // React
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+
 // Next
 import { usePathname } from "next/navigation";
+
+// Lib
+import { useT, useLocale, stripLocale, withLocale } from "@/lib";
+
 // Local
 import { LocaleLink as Link } from "./LocaleLink";
-import { useLocale, stripLocale, withLocale } from "./LocaleProvider";
 import { useApply } from "./SiteProvider";
 import { ScrollProgress } from "./ScrollProgress";
 import { SearchOverlay } from "./SearchOverlay";
-import { useT } from "@/lib/i18n/useT";
 import { useDialogFocus } from "./useDialogFocus";
 
 // ── Dillər ──

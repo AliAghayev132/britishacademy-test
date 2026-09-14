@@ -1,9 +1,14 @@
 'use client'
 
+// React
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
+
+// Libraries
 import { io } from 'socket.io-client'
 import { useSelector } from 'react-redux'
-import { refreshSession } from '@/lib/session'
+
+// Lib
+import { refreshSession } from '@/lib'
 
 const SocketContext = createContext(null)
 

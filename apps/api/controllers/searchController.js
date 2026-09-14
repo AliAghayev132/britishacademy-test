@@ -13,9 +13,7 @@
 // axtarış pəncərəsi saniyələrlə boş qalardı.
 
 // Models
-import {
-  Course, BlogPost, Project, Quiz, Destination, Teacher, Branch, Page,
-} from "#models";
+import { Course, BlogPost, Project, Quiz, Destination, Teacher, Branch, Page } from "#models";
 
 // Utils
 import { asyncHandler, fuzzyRegex } from "#utils";

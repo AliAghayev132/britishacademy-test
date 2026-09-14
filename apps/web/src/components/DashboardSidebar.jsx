@@ -7,13 +7,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
-// Data
+// Libraries
 import { useSelector, useDispatch } from 'react-redux'
-
-// Local
-import { canSee } from '@/lib/permissions'
-
-// UI / components
 
 // Icons
 import {
@@ -26,12 +21,18 @@ import {
   CornerDownLeft,
 } from 'lucide-react'
 
-// Utils
-import { logout, updateUser } from '@/store/slices/authSlice'
-import { baseApi, useLogoutMutation, useGetMeQuery } from '@/store/api'
-import { useAdminStatsQuery } from '@/store/api/adminApi'
-import { ADMIN_RESOURCES } from '@/lib/adminResources'
-import { NAV_TOP, NAV_GROUPS, NAV_BOTTOM, searchNav } from '@/lib/adminNav'
+// Store
+import {
+  logout,
+  updateUser,
+  baseApi,
+  useLogoutMutation,
+  useGetMeQuery,
+  useAdminStatsQuery,
+} from '@/store'
+
+// Lib
+import { canSee, ADMIN_RESOURCES, NAV_TOP, NAV_GROUPS, NAV_BOTTOM, searchNav } from '@/lib'
 
 
 

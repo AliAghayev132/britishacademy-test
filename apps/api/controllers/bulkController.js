@@ -8,10 +8,18 @@
 import { Lead } from "#models";
 
 // Services
-import { BulkQueue, normalizeRecipients, logAction, resolveDelaySec, DELAY_LIMITS } from "#services";
+import {
+  BulkQueue,
+  normalizeRecipients,
+  logAction,
+  resolveDelaySec,
+  DELAY_LIMITS,
+} from "#services";
 
 // Utils
 import { asyncHandler, hasRole, canAccessSection } from "#utils";
+
+// Local
 import { applyLeadAccess, applyLeadScope } from "./adminController.js";
 
 /** Müraciətlərdən alıcı siyahısı qur. */

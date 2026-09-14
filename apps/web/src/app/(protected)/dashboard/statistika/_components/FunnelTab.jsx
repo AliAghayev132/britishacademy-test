@@ -1,11 +1,22 @@
 "use client";
 
-// Data
-import { useAdminFunnelStatsQuery } from "@/store/api/adminApi";
-// UI
-import { QueryState } from "@/components/ui/QueryState";
 // Icons
-import { Users, MousePointerClick, Send, TrendingUp, Globe2, Smartphone, FileText, Info } from "lucide-react";
+import {
+  Users,
+  MousePointerClick,
+  Send,
+  TrendingUp,
+  Globe2,
+  Smartphone,
+  FileText,
+  Info,
+} from "lucide-react";
+
+// Components
+import { QueryState } from "@/components";
+
+// Store
+import { useAdminFunnelStatsQuery } from "@/store";
 
 /**
  * «Konversiya» tabı: sayta giriş → forma açıldı → müraciət göndərildi.

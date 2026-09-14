@@ -1,4 +1,4 @@
-// Utils
+// Lib
 import { nodemailer } from "#lib";
 
 // Config
@@ -7,7 +7,7 @@ import { config } from "#config";
 // Models
 import { SiteSetting } from "#models";
 
-// Templates
+// Local
 import { otpTemplate, welcomeTemplate } from "#templates";
 
 /**

@@ -1,7 +1,10 @@
 'use client';
 
+// Icons
 import { Check, X, Undo2, Loader2 } from 'lucide-react';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
+
+// Utils
+import { sanitizeHtml } from '@/utils';
 
 export default function AISuggestion({ suggestion, isLoading, onAccept, onReject, onRevert, hasOriginal }) {
   if (isLoading) {

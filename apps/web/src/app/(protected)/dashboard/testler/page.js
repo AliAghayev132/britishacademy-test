@@ -2,22 +2,51 @@
 
 // React
 import { useState } from "react";
-// Data
+
+// Icons
+import {
+  ClipboardList,
+  Plus,
+  Trash2,
+  Pencil,
+  Eye,
+  ArrowLeft,
+  Check,
+  GripVertical,
+} from "lucide-react";
+
+// Components
+import { QueryState, confirmDialog, notify } from "@/components";
+
+// Store
 import {
   useAdminListQuery,
   useAdminCreateMutation,
   useAdminUpdateMutation,
   useAdminDeleteMutation,
-} from "@/store/api/adminApi";
-// UI
-import { QueryState } from "@/components/ui/QueryState";
-import { confirmDialog, notify } from "@/components/ui/feedback";
-// Form kit
-import { Field, TextInput, NumberInput, NativeSelect, Toggle, SectionTitle, AddButton, RemoveButton } from "../_forms/kit";
-import { pickAz } from "@/lib/adminResources";
-import { LocalizedInput, LocalizedFormProvider, LocaleSwitcher, toLoc, locAz } from "../_forms/Localized";
-// Icons
-import { ClipboardList, Plus, Trash2, Pencil, Eye, ArrowLeft, Check, GripVertical } from "lucide-react";
+} from "@/store";
+
+// Lib
+import { pickAz } from "@/lib";
+
+// Local
+import {
+  Field,
+  TextInput,
+  NumberInput,
+  NativeSelect,
+  Toggle,
+  SectionTitle,
+  AddButton,
+  RemoveButton,
+} from "../_forms/kit";
+import {
+  LocalizedInput,
+  LocalizedFormProvider,
+  LocaleSwitcher,
+  toLoc,
+  locAz,
+} from "../_forms/Localized";
 
 /**
  * Testlərin idarəsi.

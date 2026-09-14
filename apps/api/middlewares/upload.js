@@ -1,8 +1,12 @@
+// Node
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+// Lib
 import { fileUpload } from "#lib";
+
+// Config
 import { config } from "#config";
 
 /**

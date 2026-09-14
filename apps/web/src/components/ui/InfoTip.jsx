@@ -5,8 +5,11 @@
 // explanation. Tooltip is rendered in a portal with fixed positioning so it is
 // never clipped by a modal's `overflow-hidden`/`overflow-auto` container.
 
+// React
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
+// Icons
 import { Info } from "lucide-react";
 
 export function InfoTip({ text }) {

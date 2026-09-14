@@ -2,14 +2,18 @@
 
 // React
 import { useEffect, useState } from "react";
+
 // Next
 import { usePathname } from "next/navigation";
-// Data
+
+// Libraries
 import { useSelector } from "react-redux";
+
 // Icons
 import { ShieldAlert } from "lucide-react";
-// Local
-import { canSee, sectionForPath } from "@/lib/permissions";
+
+// Lib
+import { canSee, sectionForPath } from "@/lib";
 
 /**
  * Bölmə səviyyəsində route mühafizəsi.

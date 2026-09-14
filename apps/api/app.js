@@ -1,13 +1,15 @@
-// ============ EXTERNAL PACKAGES ============
+// Lib
 import { http, cors, helmet, express, compression } from "#lib";
-import { setUploadHeaders } from "#middlewares";
 
-// ============ INTERNAL IMPORTS ============
+// Config
 import { config, corsConfig, securityConfig } from "#config";
 
 // Services
 import {
-  MailService, WhatsAppService, LibVersion, BulkQueue,
+  MailService,
+  WhatsAppService,
+  LibVersion,
+  BulkQueue,
   socketService,
   mongoDBService,
   bootstrapAdmin,
@@ -16,6 +18,7 @@ import {
 
 // Middlewares
 import {
+  setUploadHeaders,
   noCookies,
   apiRateLimiter,
   securityHeaders,
@@ -25,13 +28,7 @@ import {
 } from "#middlewares";
 
 // Routes
-import {
-  AuthRouter,
-  MediaRouter,
-  AIRouter,
-  PublicRouter,
-  AdminRouter,
-} from "#routes";
+import { AuthRouter, MediaRouter, AIRouter, PublicRouter, AdminRouter } from "#routes";
 
 // ============ APP INSTANCE ============
 const app = express();

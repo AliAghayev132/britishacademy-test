@@ -1,7 +1,10 @@
 'use client'
 
+// React
 import { useEffect } from 'react'
-import { Button } from '@/components/ui'
+
+// Components
+import { Button } from '@/components'
 
 // Global error boundary for the route segment. Must be a Client Component.
 export default function Error({ error, reset }) {

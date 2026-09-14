@@ -1,5 +1,6 @@
 // Server-side API helper. Used by Server Components (pages/layout) to fetch from
 // the Express API during SSR. Client interactivity uses RTK Query (store/api).
+// Next
 import { headers } from "next/headers";
 
 // SSR MÜTLƏQ ünvan tələb edir — server tərəfdə nisbi yol ilə `fetch` işləmir.

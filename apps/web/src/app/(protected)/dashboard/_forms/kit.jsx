@@ -7,13 +7,18 @@
 
 // React
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FormDirtyContext, useMarkDirty } from "@/lib/formDirty";
-// UI / kit
-import { InfoTip } from "@/components/ui/InfoTip";
-import { confirmDialog } from "@/components/ui/feedback";
-import { LocalizedFormProvider, LocaleSwitcher, GlobalAiBar } from "./Localized";
+
 // Icons
 import { X, Eye, Pencil, ChevronDown, Check, Search } from "lucide-react";
+
+// Components
+import { InfoTip, confirmDialog } from "@/components";
+
+// Lib
+import { FormDirtyContext, useMarkDirty } from "@/lib";
+
+// Local
+import { LocalizedFormProvider, LocaleSwitcher, GlobalAiBar } from "./Localized";
 
 // ── Constants ──
 export const WEEKDAYS = [

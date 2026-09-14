@@ -1,4 +1,6 @@
+// Constants
 import { Schema, contentBlockTypes } from "#constants";
+
 // Utils
 import { localizedField } from "#utils";
 

@@ -1,6 +1,9 @@
+// Next
 import Link from "next/link";
-import { getLocale, getT } from "@/lib/i18n/serverT";
-import { buildPath } from "@/lib/i18n/routes";
+
+// Lib
+import { getLocale, getT } from "@/lib/server";
+import { buildPath } from "@/lib";
 
 /**
  * 404 — tapılmayan səhifə.

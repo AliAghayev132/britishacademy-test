@@ -4,12 +4,28 @@
 // operations here additionally require the "admin" role (editors can't manage
 // users). Passwords are hashed with HashService; password is never returned.
 
-import { asyncHandler, fuzzyRegex, hasRole, cleanIds, isObjectId, dateRange } from "#utils";
-import { initialPermissions } from "../utils/roles.js";
-import { canAssignRole } from "#middlewares";
-import { User, AuditLog } from "#models";
-import { HashService, logAction, diffDocs, socketService } from "#services";
+// Constants
 import { adminRoles, adminSections } from "#constants";
+
+// Models
+import { User, AuditLog } from "#models";
+
+// Services
+import { HashService, logAction, diffDocs, socketService } from "#services";
+
+// Middlewares
+import { canAssignRole } from "#middlewares";
+
+// Utils
+import {
+  asyncHandler,
+  fuzzyRegex,
+  hasRole,
+  cleanIds,
+  isObjectId,
+  dateRange,
+  initialPermissions,
+} from "#utils";
 
 /**
  * İstifadəçi idarəsi üçün minimum səlahiyyət.

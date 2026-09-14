@@ -10,12 +10,17 @@
 // qursaydı React hidratasiya uyğunsuzluğu verərdi (#418). Ona görə ilk render
 // serverdəki sıradadır, effekt işləyəndən sonra qarışır.
 
+// React
 import { useEffect, useState } from "react";
+
+// Libraries
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
+// Local
 import { TeacherCard } from "./TeacherBrowser";
 
 /** Bu həddən azdırsa swiper əvəzinə adi grid — boş slayd yeri qalmasın. */

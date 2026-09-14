@@ -13,15 +13,22 @@
 
 // React
 import { useState } from "react";
-// Data
-import { useAiProcessMutation } from "@/store/api/adminApi";
+
+// Icons
+import { Sparkles } from "lucide-react";
+
+// Components
+import { FileUpload, confirmDialog, notify } from "@/components";
+
+// Store
+import { useAiProcessMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS } from "@/lib";
+
 // Local
 import { SectionTitle, Field, TextInput, Toggle } from "./kit";
 import { LocalizedInput, AiBtn } from "./Localized";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-import { confirmDialog, notify } from "@/components/ui/feedback";
-import { Sparkles } from "lucide-react";
 
 /** HTML-i mətnə çevir — modelə teq yox, məna lazımdır (token da yeyir). */
 function stripHtml(s) {

@@ -18,12 +18,22 @@
 
 // React
 import { useCallback, useEffect, useRef, useState } from "react";
-// UI
+
+// Icons
 import {
-  X, ZoomIn, ZoomOut, RotateCw, RotateCcw, Check, Maximize2, Crop as CropIcon, Loader2,
+  X,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  RotateCcw,
+  Check,
+  Maximize2,
+  Crop as CropIcon,
+  Loader2,
 } from "lucide-react";
-// Utils
-import { specSummary } from "@/lib/imageSpecs";
+
+// Lib
+import { specSummary } from "@/lib";
 
 // Çərçivənin ekrandakı maksimum ölçüsü (nisbət spesifikasiyadan gəlir)
 const FRAME_MAX = 460;

@@ -2,8 +2,13 @@
 
 // ── Tək mesaj modalı ──
 
+// React
 import { useState } from "react";
+
+// Icons
 import { X, Send, Loader2 } from "lucide-react";
+
+// Local
 import { input, label } from "./shared";
 
 export function SendModal({ onClose, onSend, sending }) {

@@ -3,6 +3,7 @@
  * bu siyahını istifadə edir. Kateqoriyalar ayrıca fayllardadır ki, redaktə
  * zamanı böyük bir faylda itməyəsiniz.
  */
+// Local
 import { COURSE_PAGES_LANGUAGES } from "./coursesLanguages.mjs";
 import { COURSE_PAGES_EXAMS } from "./coursesExams.mjs";
 import { COURSE_PAGES_CAREER_KIDS } from "./coursesCareerKids.mjs";

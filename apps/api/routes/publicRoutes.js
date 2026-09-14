@@ -4,8 +4,12 @@ import { Router } from "#constants";
 // Controllers
 import {
   publicController,
-  leadController, linkController, quizController,
-  seoController, searchController, eventController,
+  leadController,
+  linkController,
+  quizController,
+  seoController,
+  searchController,
+  eventController,
 } from "#controllers";
 
 // Middlewares

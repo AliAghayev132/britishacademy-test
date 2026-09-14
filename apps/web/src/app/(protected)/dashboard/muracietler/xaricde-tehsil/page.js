@@ -7,6 +7,7 @@
 // dəyişdirmə ümumi müraciətlərlə eynidir, ona görə komponent təkrar yazılmır —
 // `LeadsView` sabit süzgəclə render olunur.
 
+// Local
 import { LeadsView } from "../page";
 
 export default function AbroadLeadsPage() {

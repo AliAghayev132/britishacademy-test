@@ -9,10 +9,27 @@
 
 // React
 import { useState } from "react";
-// UI
-import { confirmDialog, notify } from "@/components/ui/feedback";
-import { TriangleAlert, Languages, Sparkles, BookOpen, Flag, GraduationCap, MapPin, Database, Route, ClipboardList, FileText, Menu as MenuIcon } from "lucide-react";
-// Data
+
+// Icons
+import {
+  TriangleAlert,
+  Languages,
+  Sparkles,
+  BookOpen,
+  Flag,
+  GraduationCap,
+  MapPin,
+  Database,
+  Route,
+  ClipboardList,
+  FileText,
+  Menu as MenuIcon,
+} from "lucide-react";
+
+// Components
+import { confirmDialog, notify } from "@/components";
+
+// Store
 import {
   useAdminMigrateI18nMutation,
   useAdminAutoTranslateMutation,
@@ -27,7 +44,7 @@ import {
   useImportBlogMutation,
   useImportPageContentMutation,
   useAdminSeedMutation,
-} from "@/store/api/adminApi";
+} from "@/store";
 
 export default function DeveloperPage() {
   const [migrate, { isLoading: migrating }] = useAdminMigrateI18nMutation();

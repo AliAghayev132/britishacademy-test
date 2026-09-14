@@ -1,16 +1,13 @@
-// Data
-import { apiGet } from "@/lib/api";
-import { ldJson } from "@/lib/jsonLd";
-import { BranchMapSwitcher } from "@/components/site/BranchMapSwitcher";
-
 // Components
-import { PageBanner } from "@/components/site/PageBanner";
-import { CtaBand } from "@/components/site/CtaBand";
+import { BranchMapSwitcher, CtaBand } from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { buildMetadata, SITE_NAME } from "@/lib/seo";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-import { addressLine, metroLabel, districtAdds } from "@/utils/branch";
+// Lib
+import { apiGet, buildMetadata, SITE_NAME, getT, getLocale } from "@/lib/server";
+import { ldJson } from "@/lib";
+
+// Utils
+import { addressLine, metroLabel, districtAdds } from "@/utils";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə

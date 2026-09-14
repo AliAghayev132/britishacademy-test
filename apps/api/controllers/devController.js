@@ -1,10 +1,31 @@
 // ── Developer tools ──
 // Admin-only maintenance endpoints. Currently: reseed the demo/content data.
 
+// Services
+import {
+  seedDatabase,
+  logAction,
+  migrateI18n,
+  autoTranslate,
+  importCourseData,
+  importFlags,
+  importTeacherAssignments,
+  importBranchData,
+  migrateCourseSlugs,
+  importQuizzes,
+  importBlog,
+  importPageContent,
+  MailService,
+  importHeaderMenu,
+  importContactI18n,
+  HEADER_MENU,
+} from "#services";
+
+// Utils
 import { asyncHandler } from "#utils";
-import { seedDatabase, logAction, migrateI18n, autoTranslate, importCourseData, importFlags, importTeacherAssignments, importBranchData, migrateCourseSlugs, importQuizzes, importBlog, importPageContent, MailService, importHeaderMenu, importContactI18n } from "#services";
-import { HEADER_MENU } from "../services/SeedService.js";
-import { tri } from "../data/translations.mjs";
+
+// Data
+import { tri } from "#data";
 
 /**
  * POST /api/admin/dev/seed

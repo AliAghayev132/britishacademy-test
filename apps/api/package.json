@@ -45,6 +45,7 @@
     "#*": "./*",
     "#lib": "./lib/index.js",
     "#utils": "./utils/index.js",
+    "#data": "./data/index.js",
     "#models": "./models/index.js",
     "#routes": "./routes/index.js",
     "#config": "./config/index.js",

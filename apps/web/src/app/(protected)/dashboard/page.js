@@ -2,12 +2,27 @@
 
 // Next
 import Link from "next/link";
-import { pickAz } from "@/lib/adminResources";
-// Data (RTK Query)
-import { useAdminStatsQuery } from "@/store/api/adminApi";
-import { QueryState } from "@/components/ui/QueryState";
+
 // Icons
-import { Inbox, GraduationCap, Users, Building2, CalendarClock, MessageSquareQuote, Globe2, FileText } from "lucide-react";
+import {
+  Inbox,
+  GraduationCap,
+  Users,
+  Building2,
+  CalendarClock,
+  MessageSquareQuote,
+  Globe2,
+  FileText,
+} from "lucide-react";
+
+// Components
+import { QueryState } from "@/components";
+
+// Store
+import { useAdminStatsQuery } from "@/store";
+
+// Lib
+import { pickAz } from "@/lib";
 
 const CARDS = [
   { key: "courses", name: "Kurslar", icon: GraduationCap, href: "/dashboard/resurslar/courses", color: "text-blue-700 bg-blue-50" },

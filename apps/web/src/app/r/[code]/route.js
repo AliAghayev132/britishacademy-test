@@ -1,6 +1,9 @@
+// Next
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { withUtm } from "@/lib/utm";
+
+// Lib
+import { withUtm } from "@/lib";
 
 /**
  * /r/<kod> — izlənilən kampaniya linki.

@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useEffect } from "react";
-import { playSfx } from "@/lib/sfx";
+
+// Lib
+import { playSfx } from "@/lib";
 
 /**
  * Drives the homepage scroll reveals. The reveal CSS already lives in

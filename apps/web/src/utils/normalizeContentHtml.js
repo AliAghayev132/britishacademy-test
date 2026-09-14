@@ -13,6 +13,7 @@
  * SSR-də də işləyir (yalnız sətir əməliyyatları, DOM lazım deyil).
  */
 
+// Utils
 import { LEGACY_IMAGE_HOSTS } from "@/utils/legacyHosts";
 
 let cachedRegex = null;

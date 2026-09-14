@@ -1,12 +1,16 @@
 "use client";
 
+// React
 import { createContext, useCallback, useContext, useState } from "react";
+
+// Lib
+import { playSfx, trackModalOpen } from "@/lib";
+
+// Local
 import { ApplyModal } from "./ApplyModal";
 import { WhatsAppWidget } from "./WhatsAppWidget";
 import { SoundToggle } from "./SoundToggle";
 import { SiteTracker } from "./SiteTracker";
-import { playSfx } from "@/lib/sfx";
-import { trackModalOpen } from "@/lib/track";
 
 const ApplyCtx = createContext(null);
 

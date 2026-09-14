@@ -1,24 +1,24 @@
 // Next
 import { notFound } from "next/navigation";
-import { ViewBeacon } from "@/components/site/ViewBeacon";
-import { ldJson } from "@/lib/jsonLd";
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
-// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-
-// Data
-import { apiGetStatus, isMissing } from "@/lib/api";
 
 // Components
-import { ContentBlocks } from "@/components/site/ContentBlocks";
-import { FaqAccordion } from "@/components/site/FaqAccordion";
-import { ApplyButton } from "@/components/site/ApplyButton";
-import { PageBanner } from "@/components/site/PageBanner";
+import {
+  ViewBeacon,
+  LocaleLink as Link,
+  ContentBlocks,
+  FaqAccordion,
+  ApplyButton,
+} from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { metaFromApi, absUrl } from "@/lib/seo";
+// Lib
+import { ldJson } from "@/lib";
+import { getT, getLocale, apiGetStatus, isMissing, metaFromApi, absUrl } from "@/lib/server";
+
+// Utils
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils";
 
 // ── Metadata ──
 export async function generateMetadata({ params }) {

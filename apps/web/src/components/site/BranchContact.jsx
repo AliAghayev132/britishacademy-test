@@ -13,11 +13,17 @@
 //   3) branch.address     — Google Maps axtarış embed-i (açar tələb etmir)
 // Beləcə yalnız ünvan olan filiallarda da xəritə işləyir.
 
+// React
 import { useState } from "react";
+
+// Icons
 import { MapPin, Phone, Mail, Clock, Train, MessageCircle, ExternalLink } from "lucide-react";
-import { useT } from "@/lib/i18n/useT";
-import { useLocale } from "@/components/site/LocaleProvider";
-import { addressLine, metroLabel } from "@/utils/branch";
+
+// Lib
+import { useLocale, useT } from "@/lib";
+
+// Utils
+import { addressLine, metroLabel } from "@/utils";
 
 /** Seçilmiş filial üçün embed URL-i qur. */
 function mapSrc(b) {

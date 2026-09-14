@@ -1,9 +1,16 @@
 "use client";
 
+// React
 import { useEffect, useRef, useState } from "react";
-import { toList } from "@/utils/toList";
+
+// Lib
+import { useT } from "@/lib";
+
+// Utils
+import { toList } from "@/utils";
+
+// Local
 import { ApplyButton } from "./ApplyButton";
-import { useT } from "@/lib/i18n/useT";
 import { LocaleLink } from "./LocaleLink";
 
 /** Floating glass chips — direct children divs of the hero so the per-position

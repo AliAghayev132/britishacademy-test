@@ -1,7 +1,10 @@
 "use client";
 
+// Lib
+import { useT } from "@/lib";
+
+// Local
 import { ApplyButton } from "./ApplyButton";
-import { useT } from "@/lib/i18n/useT";
 
 /**
  * Shared "Hazırsan? Elə bu gün başla." dark CTA band (mirrors the static

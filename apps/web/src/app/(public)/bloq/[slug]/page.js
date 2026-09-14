@@ -1,21 +1,25 @@
 // Next
 import { notFound } from "next/navigation";
-import { ViewBeacon } from "@/components/site/ViewBeacon";
-import { ldJson } from "@/lib/jsonLd";
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-import { getT } from "@/lib/i18n/serverT";
 
-// Data
-import { apiGetStatus, isMissing } from "@/lib/api";
+// Components
+import { ViewBeacon, LocaleLink as Link } from "@/components";
 
-// Utils / SEO
+// Lib
+import { ldJson, formatDate } from "@/lib";
+import {
+  getT,
+  apiGetStatus,
+  isMissing,
+  metaFromApi,
+  SITE_URL,
+  absUrl,
+  getLocale,
+} from "@/lib/server";
+
+// Utils
 // Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
 // görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-import { metaFromApi, SITE_URL, absUrl } from "@/lib/seo";
-import { formatDate } from "@/lib/i18n/date";
-import { toList } from "@/utils/toList";
-import { getLocale } from "@/lib/i18n/serverT";
+import { sanitizeHtml, toList } from "@/utils";
 
 // Mütləq URL (şəkil relativdirsə SITE_URL əlavə et).
 const abs = (u) => (!u ? undefined : u.startsWith("http") ? u : `${SITE_URL}${u}`);

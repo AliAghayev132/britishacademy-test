@@ -1,16 +1,10 @@
-// Next
-import { LocaleLink as Link } from "@/components/site/LocaleLink";
-
-// Data
-import { apiGet } from "@/lib/api";
-
 // Components
-import { PageBanner } from "@/components/site/PageBanner";
+import { LocaleLink as Link } from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { buildMetadata } from "@/lib/seo";
-import { getT, getLocale } from "@/lib/i18n/serverT";
-import { formatDate } from "@/lib/i18n/date";
+// Lib
+import { apiGet, buildMetadata, getT, getLocale } from "@/lib/server";
+import { formatDate } from "@/lib";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə

@@ -2,23 +2,24 @@
 
 // React
 import { useState } from 'react'
-import { safeRedirect } from '@/lib/safeRedirect'
 
 // Next
 import { useRouter, useSearchParams } from 'next/navigation'
 
-// Data
+// Libraries
 import { useDispatch } from 'react-redux'
 
 // Icons
 import { Mail, Lock, GraduationCap, Users, Building2 } from 'lucide-react'
 
-// UI / components
-import { Button, Input } from '@/components/ui'
+// Components
+import { Button, Input } from '@/components'
 
 // Store
-import { baseApi, useLoginMutation } from '@/store/api'
-import { setCredentials } from '@/store/slices/authSlice'
+import { baseApi, useLoginMutation, setCredentials } from '@/store'
+
+// Lib
+import { safeRedirect } from '@/lib'
 
 const HIGHLIGHTS = [
   { icon: GraduationCap, text: 'Kurslar, kateqoriyalar və dərs qrafiki' },

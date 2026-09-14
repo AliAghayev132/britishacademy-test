@@ -1,6 +1,8 @@
+// Next
 import { NextResponse } from 'next/server'
-import { buildPath, canonicalPath, localeOfPath, splitLocale } from '@/lib/i18n/routes'
-import { legacyTarget } from '@/lib/legacyRoutes'
+
+// Lib
+import { buildPath, canonicalPath, localeOfPath, splitLocale, legacyTarget } from '@/lib'
 
 // Sessiya göstəriciləri — API girişdə HttpOnly cookie kimi yazır
 // (apps/api/utils/authCookies.js). `__starter_s` tokensizdir və refresh ilə

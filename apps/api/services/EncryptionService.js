@@ -1,4 +1,7 @@
+// Lib
 import { crypto } from "#lib";
+
+// Config
 import { config } from "#config";
 
 /**

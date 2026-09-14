@@ -1,22 +1,17 @@
 // Next
 import { notFound } from "next/navigation";
-import { ViewBeacon } from "@/components/site/ViewBeacon";
-// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
-// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
-
-// Data
-import { apiGetStatus, isMissing } from "@/lib/api";
 
 // Components
-import { ContentBlocks } from "@/components/site/ContentBlocks";
-import { FaqAccordion } from "@/components/site/FaqAccordion";
-import { ApplyButton } from "@/components/site/ApplyButton";
-import { PageBanner } from "@/components/site/PageBanner";
+import { ViewBeacon, ContentBlocks, FaqAccordion, ApplyButton } from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { metaFromApi } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
+// Lib
+import { apiGetStatus, isMissing, metaFromApi, getT } from "@/lib/server";
+
+// Utils
+// Standart təmizləyici YouTube/Vimeo iframe-lərini silirdi — videolar saytda
+// görünmürdü. sanitizeHtml onları icazəli hostlarla saxlayır.
+import { sanitizeHtml } from "@/utils";
 
 /**
  * Bir layihənin səhifəsi.

@@ -8,13 +8,15 @@
 
 // React
 import { useMemo, useState } from "react";
-// Data (RTK Query)
+
+// Store
 import {
   useAdminListQuery,
   useAdminLookupsQuery,
   useAdminCreateMutation,
   useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+} from "@/store";
+
 // Local
 import {
   Overlay,

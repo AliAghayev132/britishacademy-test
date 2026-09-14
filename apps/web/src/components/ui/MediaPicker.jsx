@@ -16,22 +16,28 @@
 
 // React
 import { useMemo, useState } from "react";
-// UI
+
+// Icons
+import {
+  X,
+  Search,
+  Upload,
+  Check,
+  FolderOpen,
+  Loader2,
+  Tag,
+  Image as ImageIcon,
+} from "lucide-react";
+
+// Store
+import { useAdminListQuery, useMediaFoldersQuery, useMediaUpdateMutation } from "@/store";
+
+// Lib
+import { API_URL, getImageUrl, uploadWithProgress } from "@/lib";
+
+// Local
 import { QueryState } from "./QueryState";
 import { notify } from "./feedback";
-import {
-  X, Search, Upload, Check, FolderOpen, Loader2, Tag, Image as ImageIcon,
-} from "lucide-react";
-// Data
-import {
-  useAdminListQuery,
-  useMediaFoldersQuery,
-  useMediaUpdateMutation,
-} from "@/store/api/adminApi";
-// Utils
-import { getImageUrl } from "@/utils/getImageUrl";
-import { uploadWithProgress } from "@/utils/uploadWithProgress";
-import { API_URL } from "@/lib/variables";
 
 const PAGE_SIZE = 24;
 

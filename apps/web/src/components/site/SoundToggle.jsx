@@ -2,9 +2,9 @@
 
 // React
 import { useEffect, useSyncExternalStore } from "react";
-// Local
-import { isSfxOn, setSfxOn, subscribeSfx, unlockSfx, playSfx } from "@/lib/sfx";
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { isSfxOn, setSfxOn, subscribeSfx, unlockSfx, playSfx, useT } from "@/lib";
 
 const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchend"];
 

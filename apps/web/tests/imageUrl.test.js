@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getImageUrl } from "@/utils/getImageUrl";
+import { getImageUrl } from "@/lib/getImageUrl";
 import { IMAGE_URL } from "@/lib/variables";
 
 // REGRESSİYA QORUMASI.

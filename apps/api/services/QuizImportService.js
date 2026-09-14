@@ -1,7 +1,8 @@
 // Models
 import { Quiz } from "#models";
+
 // Data
-import { QUIZZES } from "../data/quizData.mjs";
+import { QUIZZES } from "#data";
 
 /**
  * Testlərin importu.

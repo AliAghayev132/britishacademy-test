@@ -7,22 +7,22 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-// Data
+// Libraries
 import { useDispatch } from 'react-redux'
 
 // Icons
 import { Mail, Lock, User } from 'lucide-react'
 
-// UI / components
-import { Button, Input, Card } from '@/components/ui'
+// Components
+import { Button, Input, Card } from '@/components'
 
 // Store
 import {
   useRegisterMutation,
   useVerifyOTPMutation,
   useResendOTPMutation,
-} from '@/store/api'
-import { setCredentials } from '@/store/slices/authSlice'
+  setCredentials,
+} from '@/store'
 
 export default function RegisterPage() {
   const router = useRouter()

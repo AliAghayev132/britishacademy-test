@@ -2,8 +2,10 @@
 
 // React
 import { useEffect } from 'react'
-// Utils
+
+// Libraries
 import { clsx } from 'clsx'
+
 // Icons
 import { X } from 'lucide-react'
 

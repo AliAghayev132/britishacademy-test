@@ -1,5 +1,8 @@
 // Server komponentlər üçün tərcümə: getT() → t("key") funksiyası (cari dil).
+// Next
 import { headers } from "next/headers";
+
+// Local
 import { t as translate } from "./strings";
 
 export async function getLocale() {

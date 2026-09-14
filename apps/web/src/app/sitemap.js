@@ -1,6 +1,6 @@
-import { SITE_URL } from "@/lib/seo";
-import { apiGet } from "@/lib/api";
-import { buildPath, LOCALES } from "@/lib/i18n/routes";
+// Lib
+import { SITE_URL, apiGet } from "@/lib/server";
+import { buildPath, LOCALES } from "@/lib";
 
 // /sitemap.xml — built from the API's URL list so new courses/posts/branches
 // appear automatically. Falls back to the static core routes if the API is down.

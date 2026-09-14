@@ -1,5 +1,8 @@
-import { mongoDBService } from "#services";
+// Models
 import { User, OTP } from "#models";
+
+// Services
+import { mongoDBService } from "#services";
 
 /**
  * Reset Database Script

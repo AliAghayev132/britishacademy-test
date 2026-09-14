@@ -1,6 +1,5 @@
-import { DashboardSidebar } from '@/components/DashboardSidebar'
-import { SectionGuard } from '@/components/SectionGuard'
-import { FeedbackHost } from '@/components/ui/feedback'
+// Components
+import { DashboardSidebar, SectionGuard, FeedbackHost } from '@/components'
 
 // The dashboard is private — keep it out of search indexes.
 export const metadata = {

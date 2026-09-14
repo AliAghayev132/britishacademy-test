@@ -2,13 +2,27 @@
 
 // React
 import { useState } from "react";
-// Data
-import { useAdminContentStatsQuery } from "@/store/api/adminApi";
-// UI
-import { QueryState } from "@/components/ui/QueryState";
-import FunnelTab from "./_components/FunnelTab";
+
 // Icons
-import { Eye, Inbox, FileText, GraduationCap, Users, Globe2, Building2, TrendingUp } from "lucide-react";
+import {
+  Eye,
+  Inbox,
+  FileText,
+  GraduationCap,
+  Users,
+  Globe2,
+  Building2,
+  TrendingUp,
+} from "lucide-react";
+
+// Components
+import { QueryState } from "@/components";
+
+// Store
+import { useAdminContentStatsQuery } from "@/store";
+
+// Local
+import FunnelTab from "./_components/FunnelTab";
 
 /**
  * Məzmun statistikası.

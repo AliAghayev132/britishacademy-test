@@ -17,6 +17,7 @@
 
 // Müqayisə üçün normallaşdırma (böyük/kiçik hərf + AZ diakritikləri) ortaq
 // modula köçürüldü — eyni məntiq admin panelin naviqasiya axtarışında da lazımdır.
+// Local
 import { fold } from "./fold";
 
 /** Dil üzrə metro affiksi: mövcudluq yoxlaması + tamamlama. */

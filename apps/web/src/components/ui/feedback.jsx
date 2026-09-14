@@ -9,7 +9,10 @@
 // React
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
+// Libraries
 import DOMPurify from "isomorphic-dompurify";
+
 // Icons
 import { CheckCircle2, XCircle, Info, AlertTriangle, HelpCircle, X } from "lucide-react";
 

@@ -6,9 +6,14 @@
 // çəkib orada saymaq 27 kurs üçün işləsə də, müraciət sayı artdıqca
 // yavaşlayardı.
 
-import { asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
+// Models
 import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models";
+
+// Services
 import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
+
+// Utils
+import { asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
 
 /** Lokallaşdırılmış dəyərdən AZ mətni götür (admin paneli AZ-dır). */
 const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v || "");

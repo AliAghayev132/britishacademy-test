@@ -13,17 +13,16 @@
 
 // React
 import { useRef, useState } from "react";
-import { useMarkDirty } from "@/lib/formDirty";
-// UI
-import { ImageCropper } from "./ImageCropper";
-import { MediaPicker } from "./MediaPicker";
-// Utils
-import { uploadWithProgress } from "@/utils/uploadWithProgress";
-import { getImageUrl } from "@/utils/getImageUrl";
-import { API_URL } from "@/lib/variables";
-import { specSummary } from "@/lib/imageSpecs";
+
 // Icons
 import { UploadCloud, X, Crop, Info, FolderOpen } from "lucide-react";
+
+// Lib
+import { useMarkDirty, API_URL, specSummary, uploadWithProgress, getImageUrl } from "@/lib";
+
+// Local
+import { ImageCropper } from "./ImageCropper";
+import { MediaPicker } from "./MediaPicker";
 
 /**
  * @param {object} p

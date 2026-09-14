@@ -9,6 +9,7 @@
 //   1) Sarğı kimi:  <QueryState {...q} isEmpty={!items.length}><table/></QueryState>
 //   2) Erkən çıxış: const s = queryGuard({...}); if (s) return s;
 
+// Icons
 import { AlertCircle, RefreshCw, Loader2, Inbox } from "lucide-react";
 
 /** RTK Query xətasından oxunaqlı mesaj çıxar. */

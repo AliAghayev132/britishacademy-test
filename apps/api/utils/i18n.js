@@ -2,6 +2,7 @@
 // Məzmun sahələri { az, en, ru } obyekti kimi saxlanılır. Public API cavabları
 // seçilmiş dilə görə düz mətnə "yastılanır" (AZ fallback). Admin API isə tam
 // { az, en, ru } obyektini qaytarır ki, forma 3 dili redaktə edə bilsin.
+// Lib
 import { mongoose } from "#lib";
 
 const { Mixed } = mongoose.Schema.Types;

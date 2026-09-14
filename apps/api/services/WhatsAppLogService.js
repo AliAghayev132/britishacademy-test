@@ -1,6 +1,7 @@
 // Models
 import { WhatsAppLog } from "#models";
-// Services
+
+// Local
 import socketService from "./SocketService.js";
 
 /**

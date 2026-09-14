@@ -7,6 +7,7 @@
 // SheetJS rəsmi CDN-dən quraşdırılıb (0.20.3) — npm-dəki 0.18.5-də məlum
 // prototype-pollution və ReDoS zəiflikləri var.
 
+// Libraries
 import * as XLSX from "xlsx";
 
 /** Başlıq adlarını tanımaq üçün sinonimlər (kiçik hərflə müqayisə olunur). */

@@ -1,11 +1,9 @@
 'use client';
 
 // Local
+import { API_URL } from './variables';
 import { uploadWithProgress } from './uploadWithProgress';
 import { getImageUrl } from './getImageUrl';
-
-// Utils
-import { API_URL } from '@/lib/variables';
 
 /**
  * Upload a document (PDF, Word, Excel, etc.) for the Tiptap editor.

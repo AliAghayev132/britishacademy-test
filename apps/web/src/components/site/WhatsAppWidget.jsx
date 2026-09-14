@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 // İstənilən sabit filial sırası (ada görə açar sözlə uyğunlaşdırılır).
 const BRANCH_ORDER = ["caspian", "akademiya", "nərimanov", "əhmədli"];

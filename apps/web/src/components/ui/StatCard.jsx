@@ -1,4 +1,7 @@
+// Libraries
 import { clsx } from 'clsx'
+
+// Icons
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export const StatCard = ({

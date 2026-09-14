@@ -1,5 +1,6 @@
 // ── Block renderers ──
-import { toList } from "@/utils/toList";
+// Utils
+import { toList } from "@/utils";
 function ListBlock({ block }) {
   return (
     <ul role="list" style={{ margin: "0 0 18px", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>

@@ -1,5 +1,8 @@
+// Lib
+import { getT } from "@/lib/server";
+
+// Local
 import { LocaleLink as Link } from "./LocaleLink";
-import { getT } from "@/lib/i18n/serverT";
 
 const col = (title, links) => (
   <div>

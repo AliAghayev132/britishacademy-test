@@ -8,26 +8,55 @@
 
 // React
 import { useEffect, useMemo, useState } from "react";
-// Data (RTK Query)
+
+// Icons
+import { Check } from "lucide-react";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
 import {
   useAdminLookupsQuery,
   useAdminCourseFullQuery,
   useAdminCreateCourseFullMutation,
   useAdminUpdateCourseFullMutation,
-} from "@/store/api/adminApi";
+} from "@/store";
+
+// Lib
+import { IMAGE_SPECS } from "@/lib";
+
+// Utils
+import { sanitizeHtml } from "@/utils";
+
 // Local
 import {
-  Overlay, Field, SectionTitle, TextInput, NumberInput, TextArea,
-  NativeSelect, Toggle, MultiSelectChips, AddButton, RemoveButton,
-  WEEKDAYS, LEVELS, FORMATS, toId,
+  Overlay,
+  Field,
+  SectionTitle,
+  TextInput,
+  NumberInput,
+  TextArea,
+  NativeSelect,
+  Toggle,
+  MultiSelectChips,
+  AddButton,
+  RemoveButton,
+  WEEKDAYS,
+  LEVELS,
+  FORMATS,
+  toId,
 } from "./kit";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
-import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
+import {
+  LocalizedInput,
+  LocalizedEditor,
+  toLoc,
+  trimLoc,
+  locAz,
+  confirmLocalized,
+} from "./Localized";
 import { CourseGroupForm } from "./CourseGroupForm";
-import { Check } from "lucide-react";
 
 // ── Defaults / helpers ──
 const emptyCourse = () => ({

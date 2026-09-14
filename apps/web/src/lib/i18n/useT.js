@@ -1,7 +1,8 @@
 "use client";
 
 // Client komponentlər üçün tərcümə hook-u: t("key") cari dildə mətn qaytarır.
-import { useLocale } from "@/components/site/LocaleProvider";
+// Local
+import { useLocale } from "./localeContext";
 import { t as translate } from "./strings";
 
 export function useT() {

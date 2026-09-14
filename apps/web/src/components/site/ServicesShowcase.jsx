@@ -2,12 +2,17 @@
 
 // Homepage "Kurslarımız" bölməsi — əvvəlki CourseCard dizaynı, Swiper loop
 // carousel-də fırlanır. Sağ yuxarıda "Bütün xidmətlər" düyməsi.
-import { LocaleLink as Link } from "./LocaleLink";
+// Libraries
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
+
+// Lib
+import { useT } from "@/lib";
+
+// Local
+import { LocaleLink as Link } from "./LocaleLink";
 import { CourseCard } from "./cards";
-import { useT } from "@/lib/i18n/useT";
 
 const wrap = { maxWidth: 1240, margin: "0 auto", padding: "0 28px" };
 

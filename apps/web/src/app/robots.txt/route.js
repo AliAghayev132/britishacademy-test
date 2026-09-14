@@ -1,6 +1,7 @@
 // /robots.txt — served from the admin-editable SiteSetting.robotsTxt when set,
 // otherwise a sensible default (allow all, block the dashboard, link sitemap).
-import { getSiteSettings, SITE_URL } from "@/lib/seo";
+// Lib
+import { getSiteSettings, SITE_URL } from "@/lib/server";
 
 export const revalidate = 3600;
 

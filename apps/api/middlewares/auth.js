@@ -1,4 +1,4 @@
-// Utils
+// Lib
 import { jwt } from "#lib";
 
 // Config

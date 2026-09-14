@@ -1,4 +1,5 @@
-import { ldJson } from "@/lib/jsonLd";
+// Lib
+import { ldJson } from "@/lib";
 
 /**
  * Renders a JSON-LD structured-data <script> tag.

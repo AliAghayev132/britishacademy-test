@@ -1,9 +1,13 @@
 "use client";
 
+// Lib
+import { useLocale, useT } from "@/lib";
+
+// Utils
+import { metroLabel } from "@/utils";
+
+// Local
 import { LocaleLink as Link } from "./LocaleLink";
-import { useT } from "@/lib/i18n/useT";
-import { useLocale } from "@/components/site/LocaleProvider";
-import { metroLabel } from "@/utils/branch";
 
 // ── Constants ──
 const CC = ["#2E6BE6", "#12B5A5", "#7C4DFF", "#E0533D"];

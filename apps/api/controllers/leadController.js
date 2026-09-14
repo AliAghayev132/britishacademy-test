@@ -1,8 +1,15 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
-import { asyncHandler, isObjectId, cleanIds } from "#utils";
-import { leadInReach } from "./adminController.js";
+// Models
 import { Lead } from "#models";
+
+// Services
 import { MailService, logAction, diffDocs, recordLeadSubmit } from "#services";
+
+// Utils
+import { asyncHandler, isObjectId, cleanIds } from "#utils";
+
+// Local
+import { leadInReach } from "./adminController.js";
 
 /**
  * POST /api/leads — public. Rate-limited at the route.

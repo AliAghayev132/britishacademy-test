@@ -5,7 +5,8 @@ import path from "node:path";
 
 // Models
 import { WhatsAppMessage } from "#models";
-// Services
+
+// Local
 import { waLog } from "./WhatsAppLogService.js";
 import { installedVersion } from "./LibVersionService.js";
 

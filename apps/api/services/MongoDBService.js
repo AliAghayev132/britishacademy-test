@@ -1,4 +1,7 @@
+// Lib
 import { mongoose } from "#lib";
+
+// Config
 import { config } from "#config";
 
 /**

@@ -4,11 +4,14 @@
 // 4 və daha az video olanda adi grid (swiper-ə ehtiyac yoxdur — oxlar boş yerə
 // görünürdü), 4-dən çox olanda LOOPSUZ swiper. Həm ana səhifədə, həm
 // Tələbələrimiz səhifəsində istifadə olunur.
+// Libraries
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
+// Local
 import VideoCard from "./VideoCard";
 
 // Bu həddən sonra swiper-ə keçilir.

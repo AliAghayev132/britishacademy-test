@@ -6,12 +6,19 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminLookupsQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
+import { useAdminLookupsQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS, getImageUrl } from "@/lib";
+
+// Utils
+import { sanitizeHtml } from "@/utils";
+
 // Local
 import {
   Overlay,
@@ -26,13 +33,15 @@ import {
   RemoveButton,
   toId,
 } from "./kit";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { SeoFields } from "./SeoFields";
-import { LocalizedInput, LocalizedEditor, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
-// Utils
-import { getImageUrl } from "@/utils/getImageUrl";
+import {
+  LocalizedInput,
+  LocalizedEditor,
+  toLoc,
+  trimLoc,
+  locAz,
+  confirmLocalized,
+} from "./Localized";
 
 export function TeacherForm({ item, onClose }) {
   const isEdit = Boolean(item?._id);

@@ -2,12 +2,15 @@
 
 // React
 import { useMemo, useState } from "react";
+
 // Next
 import Link from "next/link";
+
 // Icons
 import { Check, X, ChevronLeft, ChevronRight, RotateCcw, Award } from "lucide-react";
-// i18n
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 /**
  * Testin interaktiv hissəsi.

@@ -29,12 +29,12 @@ describe("authSlice tokensizdir", () => {
 
 describe("sorğular cookie ilə gedir", () => {
   it("heç bir yerdə Authorization başlığı qurulmur", () => {
-    for (const f of ["src/store/api/baseApi.js", "src/utils/uploadWithProgress.js", "src/store/context/SocketContext.jsx"]) {
+    for (const f of ["src/store/api/baseApi.js", "src/lib/uploadWithProgress.js", "src/store/context/SocketContext.jsx"]) {
       const src = read(f);
       expect(src, f).not.toMatch(/Authorization|accessToken|refreshToken/);
     }
     expect(read("src/store/context/SocketContext.jsx")).toMatch(/withCredentials: true/);
-    expect(read("src/utils/uploadWithProgress.js")).toMatch(/xhr\.withCredentials = true/);
+    expect(read("src/lib/uploadWithProgress.js")).toMatch(/xhr\.withCredentials = true/);
   });
 
   it("proxy tokensiz sessiya göstəricisinə baxır", () => {

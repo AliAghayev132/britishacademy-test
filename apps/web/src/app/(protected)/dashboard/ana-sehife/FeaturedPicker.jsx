@@ -2,15 +2,18 @@
 
 // React
 import { useState } from "react";
-// Data
-import { useAdminListQuery, useAdminUpdateMutation } from "@/store/api/adminApi";
-// UI
-import { notify } from "@/components/ui/feedback";
-import { QueryState } from "@/components/ui/QueryState";
-import { pickAz, thumbOf, isImagePath } from "@/lib/adminResources";
-import { getImageUrl } from "@/utils/getImageUrl";
+
 // Icons
 import { Check, Search, FileVideo } from "lucide-react";
+
+// Components
+import { notify, QueryState } from "@/components";
+
+// Store
+import { useAdminListQuery, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { pickAz, thumbOf, isImagePath, getImageUrl } from "@/lib";
 
 /**
  * «Ana səhifədə göstərilənlər» seçicisi.

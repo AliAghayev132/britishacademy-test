@@ -1,7 +1,10 @@
 "use client";
 
+// Lib
+import { useT } from "@/lib";
+
+// Local
 import { useApply } from "./SiteProvider";
-import { useT } from "@/lib/i18n/useT";
 
 /** A "Müraciət et" button usable from any (server-rendered) page. */
 export function ApplyButton({ interest, project, children, className, style }) {

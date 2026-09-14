@@ -1,7 +1,16 @@
+// Lib
 import { SocketServer, jwt } from "#lib";
+
+// Config
 import { config, corsConfig } from "#config";
+
+// Constants
 import { adminRoles } from "#constants";
+
+// Models
 import { User } from "#models";
+
+// Utils
 import { readCookie, canAccessSection } from "#utils";
 
 /**

@@ -1,7 +1,10 @@
 "use client";
 
+// React
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 // ── helpers ──
 function fmt(sec) {

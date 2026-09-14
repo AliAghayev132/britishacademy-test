@@ -10,19 +10,12 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Store
+import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
 // Local
-import {
-  Overlay,
-  Field,
-  TextInput,
-  NumberInput,
-  SectionTitle,
-} from "./kit";
+import { Overlay, Field, TextInput, NumberInput, SectionTitle } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
 export function QuizCategoryForm({ item, onClose }) {

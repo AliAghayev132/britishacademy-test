@@ -4,10 +4,15 @@
 // page merges its own `seo` sub-doc on top. Falls back to the constants below if
 // the API is unreachable.
 
+// Lib
 import { apiGet } from "@/lib/api";
+
+// Utils
+import { toList } from "@/utils";
+
+// Local
 import { buildPath } from "./i18n/routes";
 import { getLocale } from "./i18n/serverT";
-import { toList } from "@/utils/toList";
 
 export const SITE_NAME = "British Academy";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";

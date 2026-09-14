@@ -3,8 +3,11 @@
  * Backend şəkil URL-lərini düzgün formatda almaq üçün
  */
 
-import { IMAGE_URL as API_URL } from "@/lib/variables";
-import { stripLegacyHost } from "@/utils/legacyHosts";
+// Utils
+import { stripLegacyHost } from "@/utils";
+
+// Local
+import { IMAGE_URL as API_URL } from "./variables";
 
 /**
  * Şəkil URL-ini düzgün formatda al

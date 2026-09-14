@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 // Models
 import { Destination } from "#models";
 
-// Services
+// Local
 import { registerMedia } from "./MediaLibraryService.js";
 
 /**

@@ -1,3 +1,9 @@
+// Config
+import { config } from "#config";
+
+// Constants
+import { uploadPaths } from "#constants";
+
 // Models
 import { OTP, User } from "#models";
 
@@ -19,12 +25,6 @@ import {
   setAuthCookies,
   clearAuthCookies,
 } from "#utils";
-
-// Config
-import { config } from "#config";
-
-// Constants
-import { uploadPaths } from "#constants";
 
 /**
  * Build the public-safe user object returned to clients.

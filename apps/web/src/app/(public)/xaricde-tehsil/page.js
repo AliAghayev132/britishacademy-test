@@ -1,14 +1,9 @@
-// Data
-import { apiGet } from "@/lib/api";
-
 // Components
-import { DestinationCard, SectionHead } from "@/components/site/cards";
-import { PageBanner } from "@/components/site/PageBanner";
-import { CtaBand } from "@/components/site/CtaBand";
+import { DestinationCard, SectionHead, CtaBand } from "@/components";
+import { PageBanner } from "@/components/server";
 
-// Utils / SEO
-import { buildMetadata } from "@/lib/seo";
-import { getT } from "@/lib/i18n/serverT";
+// Lib
+import { apiGet, buildMetadata, getT } from "@/lib/server";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə

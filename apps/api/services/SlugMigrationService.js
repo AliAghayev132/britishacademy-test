@@ -1,7 +1,8 @@
 // Models
 import { Course } from "#models";
+
 // Data
-import { SLUG_RENAMES } from "../data/slugAliases.mjs";
+import { SLUG_RENAMES } from "#data";
 
 /**
  * Kurs slug-larının köhnə saytın ünvanlarına uyğunlaşdırılması.
@@ -25,7 +26,7 @@ import { SLUG_RENAMES } from "../data/slugAliases.mjs";
 
 // Xəritə ortaq data faylındadır — publicController-dəki ehtiyat axtarış da
 // eyni mənbədən oxuyur ki, iki yerdə ayrılmasınlar.
-export { SLUG_RENAMES } from "../data/slugAliases.mjs";
+export { SLUG_RENAMES } from "#data";
 
 /**
  * @param {object} opts

@@ -14,8 +14,13 @@
 //
 // Serverdə üçüncü qapı var: `confirm: true` olmayan sorğu rədd edilir.
 
+// React
 import { useState } from "react";
+
+// Icons
 import { AlertTriangle, Loader2, Send, X, ArrowRight, Timer } from "lucide-react";
+
+// Local
 import { fmtDuration } from "./shared";
 
 export function ConfirmSend({ preview, channel, template, subject, onCancel, onConfirm, sending }) {

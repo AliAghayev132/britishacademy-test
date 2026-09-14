@@ -1,5 +1,6 @@
 'use client';
 
+// Icons
 import { Languages, Sparkles, Wand2, CheckCheck, Loader2 } from 'lucide-react';
 
 export default function AIToolbar({

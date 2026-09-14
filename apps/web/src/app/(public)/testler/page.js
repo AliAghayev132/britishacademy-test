@@ -1,10 +1,12 @@
+// Next
 import Link from "next/link";
+
+// Icons
 import { ClipboardList, Clock, ChevronRight } from "lucide-react";
 
-import { apiGet } from "@/lib/api";
-import { getLocale, getT } from "@/lib/i18n/serverT";
-import { buildPath } from "@/lib/i18n/routes";
-import { buildMetadata } from "@/lib/seo";
+// Lib
+import { apiGet, getLocale, getT, buildMetadata } from "@/lib/server";
+import { buildPath } from "@/lib";
 
 /**
  * Testlərin siyahısı.

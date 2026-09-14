@@ -27,14 +27,14 @@
  * Parol dəyişdirildikdə `tokenVersion` artırılır — bütün köhnə sessiyalar düşür.
  */
 
-// Services
-import { mongoDBService, HashService } from "#services";
+// Config
+import { config } from "#config";
 
 // Models
 import { User } from "#models";
 
-// Config
-import { config } from "#config";
+// Services
+import { mongoDBService, HashService } from "#services";
 
 const arg = (name) => {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));

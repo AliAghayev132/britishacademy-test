@@ -5,8 +5,11 @@
 // design; lists longer than 5 get a search box. onChange receives the value
 // directly. Fixed-positioned menu so it never clips inside a modal.
 
+// React
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n/useT";
+
+// Lib
+import { useT } from "@/lib";
 
 const optStyle = {
   display: "block", width: "100%", textAlign: "left", padding: "11px 15px",

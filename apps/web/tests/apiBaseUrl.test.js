@@ -79,14 +79,14 @@ describe("getImageUrl nisbi bazada", () => {
   it("nisbi /uploads yolu qaytarır", async () => {
     vi.resetModules();
     for (const k of ENV_KEYS) vi.stubEnv(k, "");
-    const { getImageUrl } = await import("@/utils/getImageUrl");
+    const { getImageUrl } = await import("@/lib/getImageUrl");
     expect(getImageUrl("/uploads/flags/tr.png")).toBe("/uploads/flags/tr.png");
   });
 
   it("mütləq ünvana toxunmur", async () => {
     vi.resetModules();
     for (const k of ENV_KEYS) vi.stubEnv(k, "");
-    const { getImageUrl } = await import("@/utils/getImageUrl");
+    const { getImageUrl } = await import("@/lib/getImageUrl");
     expect(getImageUrl("https://cdn.x.az/a.png")).toBe("https://cdn.x.az/a.png");
   });
 });

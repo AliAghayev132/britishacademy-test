@@ -1,4 +1,5 @@
-import { PageLoader } from '@/components/ui'
+// Components
+import { PageLoader } from '@/components'
 
 // Route-level loading UI shown during navigation / streaming.
 export default function Loading() {

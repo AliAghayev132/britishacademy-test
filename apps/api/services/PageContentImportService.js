@@ -1,8 +1,8 @@
 // Models
 import { Course, Destination } from "#models";
+
 // Data
-import { COURSE_PAGES } from "../data/pageContent/courses.mjs";
-import { DESTINATION_PAGES } from "../data/pageContent/destinations.mjs";
+import { COURSE_PAGES, DESTINATION_PAGES } from "#data";
 
 /**
  * Kurs və ölkə SƏHİFƏLƏRİNİN məzmununun importu.

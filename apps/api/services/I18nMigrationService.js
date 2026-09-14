@@ -1,7 +1,8 @@
-// Utils
-import { LOCALIZED_FIELDS, LIST_LOCALIZED_FIELDS, looksLocalized } from "#utils";
 // Lib
 import { mongoose } from "#lib";
+
+// Utils
+import { LOCALIZED_FIELDS, LIST_LOCALIZED_FIELDS, looksLocalized } from "#utils";
 
 /**
  * Köhnə (tək dilli) məzmunu { az, en, ru } formasına gətirir.

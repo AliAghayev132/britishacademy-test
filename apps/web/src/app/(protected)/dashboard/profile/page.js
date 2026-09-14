@@ -7,16 +7,18 @@
 
 // React
 import { useState } from "react";
+
+// Libraries
 import { useDispatch } from "react-redux";
-// UI / kit
-import { Button, Input, Card, PageLoader } from "@/components/ui";
-import { ErrorState } from "@/components/ui/QueryState";
-import { notify } from "@/components/ui/feedback";
-// Data (RTK Query)
-import { useGetMeQuery, useUpdateProfileMutation } from "@/store/api";
-import { updateUser } from "@/store/slices/authSlice";
-// Local
-import { ROLE_LABELS } from "@/lib/permissions";
+
+// Components
+import { Button, Input, Card, PageLoader, ErrorState, notify } from "@/components";
+
+// Store
+import { useGetMeQuery, useUpdateProfileMutation, updateUser } from "@/store";
+
+// Lib
+import { ROLE_LABELS } from "@/lib";
 
 export default function ProfilePage() {
   const { data, isLoading, isError, error, refetch } = useGetMeQuery();

@@ -2,7 +2,29 @@
 
 // React
 import { useMemo, useState } from "react";
-// Data
+
+// Icons
+import {
+  Link2,
+  Plus,
+  Copy,
+  Check,
+  Trash2,
+  BarChart3,
+  Power,
+  QrCode,
+  Smartphone,
+  Monitor,
+  Globe,
+  Clock,
+  Users,
+  MousePointerClick,
+} from "lucide-react";
+
+// Components
+import { QueryState, QrStudio, Modal, confirmDialog, notify } from "@/components";
+
+// Store
 import {
   useAdminListQuery,
   useAdminCreateMutation,
@@ -10,17 +32,7 @@ import {
   useAdminDeleteMutation,
   useLinkStatsQuery,
   useResetLinkClicksMutation,
-} from "@/store/api/adminApi";
-// UI
-import { QueryState } from "@/components/ui/QueryState";
-import { QrStudio } from "@/components/ui/QrStudio";
-import { Modal } from "@/components/ui/Modal";
-import { confirmDialog, notify } from "@/components/ui/feedback";
-// Icons
-import {
-  Link2, Plus, Copy, Check, Trash2, BarChart3, Power, QrCode,
-  Smartphone, Monitor, Globe, Clock, Users, MousePointerClick,
-} from "lucide-react";
+} from "@/store";
 
 /**
  * İzlənilən kampaniya linkləri.

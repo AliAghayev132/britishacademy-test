@@ -2,17 +2,21 @@
 
 // React
 import { useState } from "react";
-// UI / kit
-import { notify } from "@/components/ui/feedback";
-import { NativeSelect } from "../_forms/kit";
-import { DateRangePicker } from "@/components/ui/DateRangePicker";
-import { Pagination } from "@/components/ui/Pagination";
-// Data (RTK Query)
-import { useAdminListQuery, useAdminLeadStatusMutation, useAdminLookupsQuery } from "@/store/api/adminApi";
-import { QueryState } from "@/components/ui/QueryState";
-import { pickAz } from "@/lib/adminResources";
+
 // Icons
 import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
+
+// Components
+import { notify, DateRangePicker, Pagination, QueryState } from "@/components";
+
+// Store
+import { useAdminListQuery, useAdminLeadStatusMutation, useAdminLookupsQuery } from "@/store";
+
+// Lib
+import { pickAz } from "@/lib";
+
+// Local
+import { NativeSelect } from "../_forms/kit";
 
 const STATUS = [
   { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },

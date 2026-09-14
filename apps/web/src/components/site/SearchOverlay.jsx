@@ -1,10 +1,14 @@
 "use client";
 
+// React
 import { useEffect, useRef, useState } from "react";
+
+// Lib
+import { useT, useLocale } from "@/lib";
+
+// Local
 import { useDialogFocus } from "./useDialogFocus";
-import { useT } from "@/lib/i18n/useT";
 import { LocaleLink as Link } from "./LocaleLink";
-import { useLocale } from "./LocaleProvider";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 

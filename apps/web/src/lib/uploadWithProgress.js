@@ -12,7 +12,8 @@
  *    // data — the server JSON response
  * ===================================================================== */
 
-import { refreshSession, redirectToLogin } from '@/lib/session';
+// Local
+import { refreshSession, redirectToLogin } from './session';
 
 function xhrUpload(url, formData, onProgress) {
   return new Promise((resolve, reject) => {

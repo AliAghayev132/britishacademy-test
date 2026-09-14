@@ -1,5 +1,8 @@
+// Libraries
 import fs from "node:fs";
 import path from "node:path";
+
+// Components
 import { LocaleLink as Link } from "@/components/site/LocaleLink";
 
 /**

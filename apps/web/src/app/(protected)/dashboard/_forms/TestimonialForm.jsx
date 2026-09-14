@@ -6,12 +6,16 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import {
-  useAdminListQuery,
-  useAdminCreateMutation,
-  useAdminUpdateMutation,
-} from "@/store/api/adminApi";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
+import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS, getImageUrl } from "@/lib";
+
 // Local
 import {
   Overlay,
@@ -25,10 +29,6 @@ import {
   toId,
 } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
-// Utils
-import { getImageUrl } from "@/utils/getImageUrl";
 
 const TYPE_OPTIONS = [
   { value: "text", label: "Mətn" },

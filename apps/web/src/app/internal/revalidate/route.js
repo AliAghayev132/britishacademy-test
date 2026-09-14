@@ -1,5 +1,8 @@
-import crypto from "node:crypto";
+// Next
 import { revalidatePath } from "next/cache";
+
+// Libraries
+import crypto from "node:crypto";
 
 /**
  * POST /internal/revalidate — API admin dəyişikliyindən sonra çağırır (audit #37).

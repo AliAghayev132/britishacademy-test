@@ -1,7 +1,8 @@
 // Models
 import { Teacher, Branch, Course } from "#models";
+
 // Data
-import { TEACHERS, COURSE_ALIASES, BRANCH_KEYWORDS } from "../data/teacherAssignments.mjs";
+import { TEACHERS, COURSE_ALIASES, BRANCH_KEYWORDS } from "#data";
 
 /**
  * Müəllim → filial → dərs təyinatlarının importu.

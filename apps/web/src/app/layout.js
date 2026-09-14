@@ -1,13 +1,22 @@
-import "../styles/globals.css";
-import { ldJson } from "@/lib/jsonLd";
-
-import { Providers } from "./providers";
+// Lib
+import { ldJson } from "@/lib";
 import {
-  SITE_NAME, SITE_URL, DEFAULT_IMAGE, defaultsFor,
+  SITE_NAME,
+  SITE_URL,
+  DEFAULT_IMAGE,
+  defaultsFor,
   getSiteSettings,
-} from "@/lib/seo";
-import { toList } from "@/utils/toList";
-import { getLocale } from "@/lib/i18n/serverT";
+  getLocale,
+} from "@/lib/server";
+
+// Utils
+import { toList } from "@/utils";
+
+// Styles
+import "../styles/globals.css";
+
+// Local
+import { Providers } from "./providers";
 
 const abs = (u) => (!u ? `${SITE_URL}${DEFAULT_IMAGE}` : u.startsWith("http") ? u : `${SITE_URL}${u}`);
 

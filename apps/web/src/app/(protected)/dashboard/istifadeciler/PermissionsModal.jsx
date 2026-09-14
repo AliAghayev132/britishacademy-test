@@ -2,16 +2,24 @@
 
 // React
 import { useState } from "react";
-// Data
+
+// Libraries
 import { useSelector } from "react-redux";
-import { pickAz } from "@/lib/adminResources";
-import { useAdminUpdateUserMutation, useAdminLookupsQuery } from "@/store/api/adminApi";
-// UI
-import { Overlay } from "../_forms/kit";
-import { notify } from "@/components/ui/feedback";
-import { SECTIONS, SEES_EVERYTHING, ROLE_LABELS } from "@/lib/permissions";
+
 // Icons
 import { Check, ShieldCheck, Info } from "lucide-react";
+
+// Components
+import { notify } from "@/components";
+
+// Store
+import { useAdminUpdateUserMutation, useAdminLookupsQuery } from "@/store";
+
+// Lib
+import { pickAz, SECTIONS, SEES_EVERYTHING, ROLE_LABELS } from "@/lib";
+
+// Local
+import { Overlay } from "../_forms/kit";
 
 /**
  * Bölmə icazələri modalı.

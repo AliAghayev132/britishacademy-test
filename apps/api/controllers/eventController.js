@@ -1,7 +1,12 @@
 // Sayt hadisələri — «müraciət hunisi» (bax SiteEventService).
-import { asyncHandler } from "#utils";
-import { recordClientEvent, parseUA } from "#services";
+// Models
 import { Course, Teacher, Destination, Project, BlogPost } from "#models";
+
+// Services
+import { recordClientEvent, parseUA } from "#services";
+
+// Utils
+import { asyncHandler } from "#utils";
 
 /** Səhifənin öz domeni — daxili keçidi «birbaşa» saymaq üçün. */
 const pageHost = (req) => {

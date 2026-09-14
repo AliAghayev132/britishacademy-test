@@ -7,13 +7,19 @@
 
 // React
 import { useState } from "react";
-// Data (RTK Query)
-import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store/api/adminApi";
+
+// Components
+import { FileUpload } from "@/components";
+
+// Store
+import { useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
+
+// Lib
+import { IMAGE_SPECS } from "@/lib";
+
 // Local
 import { Overlay, Field, TextInput, NativeSelect } from "./kit";
 import { LocalizedInput, toLoc, trimLoc } from "./Localized";
-import { FileUpload } from "@/components/ui/FileUpload";
-import { IMAGE_SPECS } from "@/lib/imageSpecs";
 
 const TYPE_OPTIONS = [
   { value: "image", label: "Şəkil" },
