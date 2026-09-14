@@ -20,3 +20,4 @@ export * from "./authCookies.js";
 export * from "./clientIp.js";
 export * from "./bakuTime.js";
 export { pageInfo, parsePage } from "./pagination.js";
+export { normTitle, courseTitleIndex, rankLeadInterests } from "./leadCourse.js";

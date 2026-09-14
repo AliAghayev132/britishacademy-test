@@ -1,13 +1,26 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
 
 // Models
-import { Lead } from "#models";
+import { Course, Lead } from "#models";
 
 // Services
 import { MailService, logAction, diffDocs, recordLeadSubmit, leadInReach } from "#services";
 
 // Utils
-import { fail, ok, asyncHandler, isObjectId, cleanIds } from "#utils";
+import { fail, ok, asyncHandler, isObjectId, cleanIds, courseTitleIndex, normTitle } from "#utils";
+
+/**
+ * Müraciətin kursu: sayt id göndəribsə o, göndərməyibsə `interest` mətni
+ * kurs adına (AZ/EN/RU) uyğun gəlirsə həmin kurs. Köhnə keşlənmiş səhifələr
+ * və kurs adını seçib göndərən formalar da beləcə kursa bağlanır.
+ */
+async function resolveCourse(course, interest) {
+  if (isObjectId(course)) return course;
+  const text = normTitle(interest);
+  if (!text) return undefined;
+  const courses = await Course.find({ isDeleted: false }).select("title").lean();
+  return courseTitleIndex(courses).get(text)?._id;
+}
 
 /**
  * POST /api/leads — public. Rate-limited at the route.
@@ -35,7 +48,9 @@ const createLead = asyncHandler(async (req, res) => {
     name,
     phone,
     email,
-    course: course || undefined,
+    // Əvvəl `course || undefined` idi və sayt heç vaxt id göndərmirdi —
+    // statistikada «kursa bağlı müraciət yoxdur» görünürdü.
+    course: await resolveCourse(course, interest),
     branch: branch || undefined,
     interest,
     message,

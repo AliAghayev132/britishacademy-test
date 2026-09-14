@@ -111,7 +111,7 @@ function InfoSidebar({ course, tr }) {
           <span style={{ color: "#16161C", fontWeight: 600 }}>{r.value}</span>
         </div>
       ))}
-      <ApplyButton interest={course.title} className="ba-btn-primary" style={{ width: "100%", marginTop: 20, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: 14, borderRadius: 13, cursor: "pointer" }} />
+      <ApplyButton interest={course.title} course={course._id} className="ba-btn-primary" style={{ width: "100%", marginTop: 20, background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, padding: 14, borderRadius: 13, cursor: "pointer" }} />
     </aside>
   );
 }
@@ -250,7 +250,7 @@ export default async function CoursePage({ params }) {
         ]}
       >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-          <ApplyButton interest={course.title} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
+          <ApplyButton interest={course.title} course={course._id} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
           <Link href="/elaqe" style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)", color: "#fff", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99 }}>{tr("course.contactSave")}</Link>
         </div>
       </PageBanner>
@@ -305,7 +305,7 @@ export default async function CoursePage({ params }) {
         <div style={{ background: "#00103D", borderRadius: 28, padding: "52px 40px", textAlign: "center" }}>
           <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(26px,3.4vw,36px)", color: "#fff", margin: 0 }}>{tr("cta.title")}</h2>
           <p style={{ fontSize: 16, color: "#B9BAD0", margin: "14px auto 26px", maxWidth: 520, lineHeight: 1.6 }}>{tr("cta.text")}</p>
-          <ApplyButton interest={course.title} style={{ background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 99, cursor: "pointer" }} />
+          <ApplyButton interest={course.title} course={course._id} style={{ background: "var(--accent)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 99, cursor: "pointer" }} />
         </div>
       </section>
     </>

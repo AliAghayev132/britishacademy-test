@@ -187,7 +187,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
   );
 });
 
-export function ApplyModal({ open, onClose, preset, project, destination, branches = [], destinations = [] }) {
+export function ApplyModal({ open, onClose, preset, project, destination, course, branches = [], destinations = [] }) {
   const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
@@ -265,6 +265,9 @@ export function ApplyModal({ open, onClose, preset, project, destination, branch
         destinations: interest === ABROAD && picked.length ? picked : undefined,
         // Layihə səhifəsindən açılıbsa müraciət ona bağlanır.
         project: project || undefined,
+        // Kurs səhifəsindən açılıb və ziyarətçi marağı dəyişməyibsə müraciət
+        // həmin kursa bağlanır — statistika və admin süzgəci buna baxır.
+        course: course && interest === preset ? course : undefined,
         source: "apply-modal",
         // Anonim sessiya kodu — server müraciəti hunidə həmin sessiyanın
         // ziyarəti və mənbəyi ilə bağlayır.
@@ -277,7 +280,7 @@ export function ApplyModal({ open, onClose, preset, project, destination, branch
     } catch (err) {
       setError(apiErrorMessage(err, t("apply.error")));
     }
-  }, [createLead, form, interest, branch, picked, project, t]);
+  }, [createLead, form, interest, branch, picked, project, course, preset, t]);
 
   const onOverlayClick = useCallback((e) => {
     if (e.target === e.currentTarget) requestClose();

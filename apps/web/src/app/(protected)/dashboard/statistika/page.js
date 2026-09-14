@@ -209,13 +209,18 @@ function ContentTab({ days }) {
           unit="baxış"
           empty="Hələ baxış qeydə alınmayıb. Sayğac kurs səhifəsi açılanda işləyir."
         />
+        {/* Kursa bağlanmayan müraciətlər maraq mətni ilə göstərilir
+            (məs. «İngilis dili» ümumi seçimi) — kurs deyil, «maraq» nişanı. */}
         <BarList
-          title="Ən çox müraciət gətirən kurslar"
+          title="Ən çox müraciət gətirən kurslar və maraqlar"
           icon={Inbox}
-          rows={d.leadsByCourse || []}
-          labelKey="title"
+          rows={(d.leadsByCourse || []).map((r) => ({
+            ...r,
+            label: r.kind === "interest" ? `${r.title} · maraq` : r.title,
+          }))}
+          labelKey="label"
           unit="müraciət"
-          empty="Kursa bağlı müraciət yoxdur."
+          empty="Hələ müraciət yoxdur."
         />
       </div>
 

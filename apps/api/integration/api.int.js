@@ -125,6 +125,27 @@ describe.skipIf(!enabled)("API inteqrasiyası", () => {
   });
 
   describe("audit düzəlişləri", () => {
+    it("müraciət kursa bağlanır və statistikada görünür (id və ya kurs adı ilə)", async () => {
+      const { Course, CourseCategory } = await import("#models");
+      const category = await CourseCategory.create({ name: { az: "Statistika kateqoriyası" }, isActive: true });
+      const course = await Course.create({ title: { az: "Statistika Sınaq Kursu", en: "Stats Test Course" }, category: category._id, isActive: true });
+      const anon = client(api.base);
+      const byId = await anon.post("/api/leads", { name: "İd ilə", phone: "+994500000011", course: String(course._id), interest: "Statistika Sınaq Kursu" });
+      const byTitle = await anon.post("/api/leads", { name: "Adla", phone: "+994500000012", interest: "Stats Test Course" });
+      expect(byId.status).toBe(201);
+      expect(byTitle.status).toBe(201);
+
+      const { Lead } = await import("#models");
+      const saved = await Lead.findById(byTitle.data.data.id).lean();
+      expect(String(saved.course)).toBe(String(course._id));
+
+      const { c } = await login("dev@test.local");
+      const stats = await c.get("/api/admin/stats/content");
+      expect(stats.status).toBe(200);
+      const row = stats.data.data.leadsByCourse.find((r) => r.title === "Statistika Sınaq Kursu");
+      expect(row).toMatchObject({ kind: "course", count: 2 });
+    });
+
     it("yanlış ObjectId 500 yox, 400 qaytarır", async () => {
       const { c } = await login("dev@test.local");
       const res = await c.get("/api/admin/faqs/bu-id-deyil");

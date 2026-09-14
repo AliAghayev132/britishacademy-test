@@ -13,7 +13,7 @@ import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models
 import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
 
 // Utils
-import { ok, asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE } from "#utils";
+import { ok, asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE, rankLeadInterests } from "#utils";
 
 /** Lokallaşdırılmış dəyərdən AZ mətni götür (admin paneli AZ-dır). */
 const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v || "");
@@ -55,15 +55,18 @@ const contentStats = asyncHandler(async (req, res) => {
     topByViews(Destination, "country"),
 
     // Hansı kurs daha çox müraciət gətirir — baxışdan daha dəyərli göstərici.
-    Lead.aggregate([
-      { $match: { isDeleted: false, course: { $ne: null } } },
-      { $group: { _id: "$course", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-      { $lookup: { from: "courses", localField: "_id", foreignField: "_id", as: "c" } },
-      { $unwind: "$c" },
-      { $project: { _id: 0, count: 1, title: "$c.title", slug: "$c.slug" } },
-    ]),
+    // Kurs VƏ maraq mətni üzrə qruplaşdırılır: köhnə müraciətlərdə `course`
+    // boşdur, kurs yalnız `interest` mətnində (kurs adı) yazılıb. Uyğunlaşdırma
+    // aşağıda rankLeadInterests ilə edilir.
+    Promise.all([
+      Lead.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: { course: "$course", interest: "$interest" }, count: { $sum: 1 } } },
+      ]),
+      Course.find({ isDeleted: false }).select("title slug").lean(),
+    ]).then(([groups, courses]) =>
+      rankLeadInterests(groups.map((g) => ({ ...g._id, count: g.count })), courses),
+    ),
 
     Lead.aggregate([
       { $match: { isDeleted: false } },
@@ -133,7 +136,7 @@ const contentStats = asyncHandler(async (req, res) => {
     topPosts: clean(topPosts, "title"),
     topTeachers: clean(topTeachers, "fullName"),
     topDestinations: clean(topDestinations, "country"),
-    leadsByCourse: clean(leadsByCourse, "title"),
+    leadsByCourse,
     leadsByBranch: clean(leadsByBranch, "name"),
     leadsBySource: leadsBySource.map((r) => ({ source: r._id || "other", count: r.count })),
     leadsByStatus: leadsByStatus.map((r) => ({ status: r._id || "new", count: r.count })),

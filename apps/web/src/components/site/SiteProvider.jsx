@@ -30,11 +30,13 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
   // Layihə səhifəsindən açılanda müraciət həmin layihəyə bağlanır.
   const [presetProject, setPresetProject] = useState(null);
   const [presetDestination, setPresetDestination] = useState(null);
+  const [presetCourse, setPresetCourse] = useState(null);
 
   const open = useCallback((interest, extra) => {
     setPreset(interest || null);
     setPresetProject(extra?.project || null);
     setPresetDestination(extra?.destination || null);
+    setPresetCourse(extra?.course || null);
     setApplyOpen(true);
     playSfx("open");
     trackModalOpen({ interest });
@@ -50,6 +52,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
         preset={preset}
         project={presetProject}
         destination={presetDestination}
+        course={presetCourse}
         branches={branches}
         destinations={destinations}
       />

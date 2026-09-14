@@ -11,11 +11,11 @@ import { useApply } from "./SiteProvider";
  * `destination` — ölkə səhifəsindən: maraq «Xaricdə təhsil» olur və həmin
  * ölkə seçilmiş gəlir.
  */
-export function ApplyButton({ interest, project, destination, children, className, style }) {
+export function ApplyButton({ interest, project, destination, course, children, className, style }) {
   const { open } = useApply();
   const t = useT();
   return (
-    <button onClick={() => open(interest, { project, destination })} className={className} style={style}>
+    <button onClick={() => open(interest, { project, destination, course })} className={className} style={style}>
       {children ?? t("cta.apply")}
     </button>
   );
