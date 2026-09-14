@@ -9,7 +9,15 @@
 // we don't leave a half-built course behind.
 
 // Models
-import { Course, CourseGroup, Branch, Teacher, CourseCategory, Destination } from "#models";
+import {
+  Course,
+  CourseGroup,
+  Branch,
+  Teacher,
+  CourseCategory,
+  Destination,
+  mergeAssignments,
+} from "#models";
 
 // Services
 import { logAction } from "#services";
@@ -66,14 +74,24 @@ async function syncTeacherLinks(courseId, branches) {
     });
   });
   await Promise.all(
-    [...perTeacher.entries()].map(([teacher, branchSet]) =>
-      Teacher.findByIdAndUpdate(teacher, {
+    [...perTeacher.entries()].map(async ([teacherId, branchSet]) => {
+      const teacher = await Teacher.findById(teacherId).select("assignments");
+      if (!teacher) return;
+      // Təyinatlı müəllim: mənbə təyinatlardır (bax mergeAssignments).
+      if (teacher.assignments?.length && branchSet.size) {
+        await Teacher.findByIdAndUpdate(teacherId, {
+          $set: { assignments: mergeAssignments(teacher.assignments, courseId, [...branchSet]) },
+        });
+        return;
+      }
+      // Köhnə (təyinatsız) müəllim — törəmə sahələr hələ əsas mənbədir.
+      await Teacher.findByIdAndUpdate(teacherId, {
         $addToSet: {
           courses: courseId,
           branches: { $each: [...branchSet] },
         },
-      }),
-    ),
+      });
+    }),
   );
 }
 

@@ -115,7 +115,7 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
             <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-2">
               <Search className="h-3.5 w-3.5 flex-none text-gray-400" />
               {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-              <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Axtar…" className="w-full text-sm text-gray-900 outline-none" />
+              <input data-no-dirty autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Axtar…" className="w-full text-sm text-gray-900 outline-none" />
             </div>
           )}
           <div className="max-h-56 overflow-auto py-1">
@@ -147,6 +147,23 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
   );
 }
 
+// Mətn yazılan idarəetmə — label klikində fokuslanacaq element.
+const FIELD_CONTROL =
+  'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, select';
+
+/**
+ * `<label>` klikini brauzer İLK «label-ə bağlana bilən» elementə ötürür —
+ * `<button>` da onlardandır. Nəticədə başlığa klik InfoTip-i açırdı, AI
+ * düyməsini basırdı və ya çip siyahısında birinci çipi seçirdi. Başlığa (və
+ * sahənin boş yerinə) klikdə defolt ötürməni ləğv edib mətn sahəsini özümüz
+ * fokuslayırıq; real idarəetmələrə klik toxunulmaz qalır.
+ */
+function focusFieldControl(e) {
+  if (e.target.closest("button, a, input, textarea, select, [contenteditable='true']")) return;
+  e.preventDefault();
+  e.currentTarget.querySelector(FIELD_CONTROL)?.focus();
+}
+
 /**
  * @param {"label"|"div"} [as]
  *   Sahə adətən `<label>`-dir — başlığa vurmaq içindəki input-u fokuslayır.
@@ -165,7 +182,7 @@ export function NativeSelect({ options = [], placeholder, value, onChange, disab
 export function Field({ label, hint, required, info, children, className, as = "label" }) {
   const Tag = as;
   return (
-    <Tag className={`block ${className || ""}`}>
+    <Tag className={`block ${className || ""}`} onClick={as === "label" ? focusFieldControl : undefined}>
       <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
         {label}{required && <span className="text-red-500">*</span>}
         {info && <InfoTip text={info} />}
@@ -263,6 +280,12 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
   const [showPreview, setShowPreview] = useState(false);
   const [dirty, setDirty] = useState(false);
   const markDirty = useCallback(() => setDirty(true), []);
+  // DOM input/change hadisələri formanı «dəyişib» sayır — amma axtarış
+  // qutuları (seçim siyahısı, media kitabxanası) form məlumatı deyil.
+  // Onlar `data-no-dirty` ilə işarələnir.
+  const onFieldEvent = (e) => {
+    if (!e.target.closest?.("[data-no-dirty]")) setDirty(true);
+  };
   // Fonda bağlama yalnız basma da fonda BAŞLAYIBSA. Əvvəl sahədə mətn seçib
   // siçanı fonda buraxmaq «klik» sayılır və pəncərə bağlanırdı (audit #29).
   const downOnBackdrop = useRef(false);
@@ -314,7 +337,7 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
               <GlobalAiBar />
             </div>
           )}
-          <div className="flex-1 space-y-6 overflow-auto p-6" onInput={() => setDirty(true)} onChange={() => setDirty(true)}>{children}</div>
+          <div className="flex-1 space-y-6 overflow-auto p-6" onInput={onFieldEvent} onChange={onFieldEvent}>{children}</div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-6 py-4">
             <div className="flex flex-wrap items-center gap-3">
               {onActiveChange && (
@@ -363,6 +386,16 @@ export function Overlay({ title, subtitle, onClose, onSave, saving, error, wide,
     </LocalizedFormProvider>
     </FormDirtyContext.Provider>
   );
+}
+
+/**
+ * Formanı «dəyişib» işarələyən adi düymə. Forma komponenti Overlay-i özü
+ * render edir, ona görə öz gövdəsində `useMarkDirty()` boş kontekst alır —
+ * işarələmə Overlay-in İÇİNDƏ render olunan komponentdə olmalıdır.
+ */
+export function DirtyButton({ onClick, type = "button", ...props }) {
+  const markDirty = useMarkDirty();
+  return <button type={type} {...props} onClick={(e) => { markDirty(); onClick?.(e); }} />;
 }
 
 /** Small "+ add" / remove helpers for repeatable rows. */

@@ -23,6 +23,17 @@ import { SiteSelect } from "./SiteSelect";
  *  müraciətlər tək dildə oxunsun; istifadəçi öz dilində etiket görür. */
 const tAz = (key) => translate("az", key);
 
+/**
+ * Maraq seçimləri. Səhifədən gələn maraq (kurs adı, «Müəllim: …») siyahıda
+ * yoxdursa başa əlavə olunur — əks halda seçim boş görünür, amma dəyər yenə
+ * göndərilirdi və ziyarətçi nə seçdiyini bilmirdi.
+ */
+function interestOptions(current, t) {
+  const opts = INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }));
+  if (current && !opts.some((o) => o.value === current)) opts.unshift({ value: current, label: current });
+  return opts;
+}
+
 const INTEREST_KEYS = [
   "apply.int.english",
   "apply.int.exams",
@@ -156,7 +167,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
         <input className="ba-field" name="phone" type="tel" required aria-label={t("apply.phone")} autoComplete="tel" placeholder={t("apply.phone")} value={form.phone} onChange={onChange} style={{ ...field, minWidth: 0 }} />
         <input className="ba-field" name="email" type="email" aria-label={t("apply.email")} autoComplete="email" placeholder={t("apply.email")} value={form.email} onChange={onChange} style={{ ...field, minWidth: 0 }} />
       </div>
-      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} ariaLabel={t("apply.interest")} style={field} options={INTEREST_KEYS.map((k) => ({ value: tAz(k), label: t(k) }))} />
+      <SiteSelect value={interest} onChange={setInterest} placeholder={t("apply.interest")} ariaLabel={t("apply.interest")} style={field} options={interestOptions(interest, t)} />
 
       {/* Ölkələr yalnız «Xaricdə təhsil» seçiləndə görünür — digər hallarda
           forma lüzumsuz uzanardı. */}
@@ -178,7 +189,7 @@ const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch,
   );
 });
 
-export function ApplyModal({ open, onClose, preset, project, branches = [], destinations = [] }) {
+export function ApplyModal({ open, onClose, preset, project, destination, branches = [], destinations = [] }) {
   const t = useT();
   // ── Data / state ──
   const [createLead, { isLoading }] = useCreateLeadMutation();
@@ -216,11 +227,15 @@ export function ApplyModal({ open, onClose, preset, project, branches = [], dest
       // eslint-disable-next-line react-hooks/set-state-in-effect -- modal açılanda forma vəziyyəti sıfırlanır (prop dəyişikliyinə reaksiya)
       setDone(false);
       setError("");
-      setInterest(preset || "");
+      // Ölkə səhifəsindən: maraq «Xaricdə təhsil», ölkə seçilmiş. Əvvəl
+      // «Xaricdə təhsil — Almaniya» mətni gəlirdi — siyahıda olmadığı üçün
+      // seçim boş görünür, ölkə seçicisi açılmır, filial seçicisi açılırdı.
+      const known = destination && destinations.some((x) => x._id === destination);
+      setInterest(known ? ABROAD : preset || "");
       setBranch("");
-      setPicked([]);
+      setPicked(known ? [destination] : []);
     }
-  }, [open, preset]);
+  }, [open, preset, destination, destinations]);
 
   // Fokus tələsi, Escape, arxa fonun kilidi, fokusun qaytarılması (audit #34).
   const dialogRef = useDialogFocus(open, { onEscape: requestClose });

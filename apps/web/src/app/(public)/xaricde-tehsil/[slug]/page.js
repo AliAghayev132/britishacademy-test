@@ -114,7 +114,7 @@ export default async function DestinationPage({ params }) {
           { label: d.country },
         ]}
       >
-        <ApplyButton interest={`Xaricdə təhsil — ${d.country}`} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
+        <ApplyButton destination={d._id} className="ba-btn-primary" style={{ background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 15, padding: "14px 26px", borderRadius: 99, cursor: "pointer" }} />
       </PageBanner>
 
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 28px 0" }}>

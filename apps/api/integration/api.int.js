@@ -124,6 +124,51 @@ describe.skipIf(!enabled)("API inteqrasiyası", () => {
     });
   });
 
+  describe("audit düzəlişləri", () => {
+    it("yanlış ObjectId 500 yox, 400 qaytarır", async () => {
+      const { c } = await login("dev@test.local");
+      const res = await c.get("/api/admin/faqs/bu-id-deyil");
+      expect(res.status).toBe(400);
+    });
+
+    it("silinmiş sənəd id ilə açılmır, ikinci dəfə silinmir", async () => {
+      const { c } = await login("dev@test.local");
+      const id = (await c.post("/api/admin/faqs", { question: { az: "Silinəcək?" }, answer: { az: "Bəli" } })).data.data.item._id;
+      expect((await c.del(`/api/admin/faqs/${id}`)).status).toBe(200);
+      expect((await c.get(`/api/admin/faqs/${id}`)).status).toBe(404);
+      expect((await c.del(`/api/admin/faqs/${id}`)).status).toBe(404);
+    });
+
+    it("parol sıfırlama tokeni birdəfəlikdir", async () => {
+      const user = await createUser({ email: "sifirla@test.local", role: "editor", permissions: ["dashboard"] });
+      const { AuthTokenService } = await import("#services");
+      const token = AuthTokenService.generateResetToken({ email: user.email, userId: user._id, tv: user.tokenVersion || 0 });
+      const anon = client(api.base);
+      expect((await anon.post("/api/auth/reset-password", { resetToken: token, newPassword: "Yeni-Parol-12345" })).status).toBe(200);
+      expect((await anon.post("/api/auth/reset-password", { resetToken: token, newPassword: "Oğru-Parol-12345" })).status).toBe(401);
+      expect((await login("sifirla@test.local", "Yeni-Parol-12345")).res.status).toBe(200);
+    });
+
+    it("test balı verilən sual sayına bölünür, cavablananlara yox", async () => {
+      const { Quiz } = await import("#models");
+      const question = (n) => ({
+        text: { az: `Sual ${n}` },
+        options: [{ text: { az: "Düz" } }, { text: { az: "Səhv" } }],
+        correctIndex: 0,
+      });
+      const quiz = await Quiz.create({
+        slug: "inteqrasiya-bal", title: { az: "Bal testi" }, isActive: true,
+        questions: [1, 2, 3, 4].map(question),
+      });
+      const q0 = quiz.questions[0];
+      const res = await client(api.base).post("/api/quizzes/inteqrasiya-bal/submit", {
+        answers: [{ questionId: String(q0._id), optionId: String(q0.options[0]._id) }],
+      });
+      expect(res.status).toBe(200);
+      expect(res.data.data).toMatchObject({ score: 1, total: 4, percent: 25 });
+    });
+  });
+
   describe("təhlükəsizlik başlıqları", () => {
     it("yad origin CORS almır, /api/posts yoxdur", async () => {
       const res = await client(api.base).get("/api/site", { headers: { Origin: "https://evil.example" } });

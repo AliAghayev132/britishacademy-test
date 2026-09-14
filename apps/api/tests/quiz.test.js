@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreAnswers } from "#controllers/quizController.js";
+import { scoreAnswers, servedCount } from "#controllers/quizController.js";
 import { QUIZZES } from "../data/quizData.mjs";
 
 /**
@@ -75,6 +75,22 @@ describe("sual bankı", () => {
       expect(t.startsWith("/kurslar/"), `${t} kurs ünvanı deyil`).toBe(true);
       expect(t).not.toMatch(/\/kurslar\/(ielts|sat|ingilis-dili-kursu)$/);
     }
+  });
+});
+
+describe("verilən sual sayı (bal məxrəci)", () => {
+  const q = (isActive = true) => ({ isActive });
+
+  it("questionCount 0 olanda bütün aktiv suallar", () => {
+    expect(servedCount({ questionCount: 0, questions: [q(), q(), q(false)] })).toBe(2);
+  });
+
+  it("questionCount bankdan kiçikdirsə onunla məhdudlaşır", () => {
+    expect(servedCount({ questionCount: 2, questions: [q(), q(), q(), q()] })).toBe(2);
+  });
+
+  it("questionCount bankdan böyükdürsə aktiv sual sayı", () => {
+    expect(servedCount({ questionCount: 10, questions: [q(), q(false), q()] })).toBe(2);
   });
 });
 

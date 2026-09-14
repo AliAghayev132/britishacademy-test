@@ -182,10 +182,10 @@ export default function FileMenu({ editor, onFileUpload }) {
       const html = `
         <p>
           <a
-            href="${result.url}"
+            href="${escapeHtml(result.url)}"
             target="_blank"
             rel="noopener noreferrer"
-            download="${visibleName}"
+            download="${escapeHtml(visibleName)}"
             class="bdu-file-link"
             data-file-link="true"
             style="
@@ -215,7 +215,7 @@ export default function FileMenu({ editor, onFileUpload }) {
               font-weight: 700;
               font-size: 0.65rem;
               letter-spacing: 0.05em;
-            ">${ext}</span>
+            ">${escapeHtml(ext)}</span>
             <span style="font-weight: 600;">${escapeHtml(visibleName)}</span>
             ${sizeStr ? `<span style="color:#6b7280; font-size:0.75rem;">(${sizeStr})</span>` : ''}
           </a>

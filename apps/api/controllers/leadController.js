@@ -83,7 +83,7 @@ const createLead = asyncHandler(async (req, res) => {
 const updateLeadStatus = asyncHandler(async (req, res) => {
   const { status, note } = req.body;
   const lead = await Lead.findById(req.params.id);
-  if (!lead) {
+  if (!lead || lead.isDeleted) {
     return res.status(404).json({ success: false, message: "Müraciət tapılmadı" });
   }
   // Statusu dəyişmək müraciəti görmək deməkdir. Adi müraciətlərə baxan adam

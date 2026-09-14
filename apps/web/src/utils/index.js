@@ -7,5 +7,6 @@ export { fold } from "./fold";
 export { getOriginalImageUrl, hasOriginalVariant } from "./getOriginalImageUrl";
 export { LEGACY_IMAGE_HOSTS, stripLegacyHost } from "./legacyHosts";
 export { normalizeContentHtml } from "./normalizeContentHtml";
+export { keyOf, rowKey } from "./rowKey";
 export { sanitizeHtml } from "./sanitizeHtml";
 export { toList } from "./toList";

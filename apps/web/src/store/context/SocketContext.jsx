@@ -8,12 +8,13 @@ import { io } from 'socket.io-client'
 import { useSelector } from 'react-redux'
 
 // Lib
-import { refreshSession } from '@/lib'
+import { API_ORIGIN, refreshSession } from '@/lib'
 
 const SocketContext = createContext(null)
 
-// The socket server is the API root (Next inlines NEXT_PUBLIC_* at build time).
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+// Socket serveri API köküdür. Boşdursa (undefined) eyni origin — nginx
+// `/socket.io/`-nu ötürür; dev-də .env.development mütləq ünvan verir.
+const SOCKET_URL = API_ORIGIN || undefined
 const MAX_RECONNECT_ATTEMPTS = 5
 
 export const SocketProvider = ({ children }) => {

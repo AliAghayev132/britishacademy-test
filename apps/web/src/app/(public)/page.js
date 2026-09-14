@@ -1,3 +1,6 @@
+// React
+import { Fragment } from "react";
+
 // Components
 import {
   LocaleLink as Link,
@@ -18,7 +21,7 @@ import {
 
 // Lib
 import { apiGet, getT, getLocale, buildMetadata } from "@/lib/server";
-import { formatDate, sectionEnabled, getImageUrl } from "@/lib";
+import { formatDate, resolveSections, getImageUrl } from "@/lib";
 
 export async function generateMetadata() {
   return buildMetadata({ path: "/" });
@@ -97,168 +100,173 @@ export default async function HomePage() {
     ? adminFaqs
     : [1, 2, 3, 4, 5, 6].map((n) => ({ question: t(`hfaq.q${n}`), answer: t(`hfaq.a${n}`) }));
 
-  // Bölmə admin paneldən bağlanıbmı? Boş konfiq = hamısı açıq.
-  const on = (key) => sectionEnabled(s.homeSections, key);
+  // Bölmələr açarla. Sıra və görünmə admin paneldən gəlir (Ana səhifə →
+  // Bölmələr). Əvvəl JSX sabit ardıcıllıqla yazılmışdı: admin sıranı dəyişib
+  // saxlayırdı, amma saytda heç nə dəyişmirdi — yalnız açıb-bağlama işləyirdi.
+  const blocks = {
+    hero: <Hero hero={s.hero} stats={s.stats} />,
+
+    /* Marquee */
+    marquee: <Marquee words={s.marquee} />,
+
+    /* Courses / services — interaktiv Swiper (kliklə yuxarıda inline açılır) */
+    courses: (
+      <div id="kurslar">
+        <ServicesShowcase courses={courses} />
+      </div>
+    ),
+
+    /* Advantages */
+    advantages: advantages.length > 0 && (
+    <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+      <SectionHead title={t("home.adv.title")} sub={t("home.adv.sub")} />
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+        {advantages.map((a, i) => <AdvantageCard key={a._id} advantage={a} index={i} />)}
+      </div>
+    </section>
+    ),
+
+    /* Study abroad */
+    destinations: destinations.length > 0 && (
+      <section className="ba-reveal" style={{ background: "linear-gradient(165deg,#F4F7FF,#FDF6F0 55%,#F3FAF6)", marginTop: 84 }}>
+        <div style={{ ...wrap, padding: "80px 28px" }}>
+          <SectionHead title={t("home.abroad.title")} sub={t("home.abroad.sub")} />
+          <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+            {destinations.map((d) => <DestinationCard key={d._id} dest={d} />)}
+            <Link href="/xaricde-tehsil" className="ba-fdest ba-fdest-all" style={{ "--cc": "#fff" }}>
+              <span className="ba-fdest-body"><span className="ba-fdest-tag" style={{ display: "block" }}>{t("home.abroad.tag")}</span><span className="ba-fdest-name" style={{ display: "block" }}>{t("home.abroad.all")}</span></span>
+            </Link>
+          </div>
+        </div>
+      </section>
+    ),
+
+    /* Layihələr — seçilmişlər. Müraciət düyməsi BURADA yoxdur: müraciət
+        yalnız layihənin öz səhifəsindən edilir. */
+    projects: (home?.projects || []).length > 0 && (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+        <SectionHead title={t("page.projects.title")} sub={t("page.projects.sub")} />
+        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
+          {home.projects.map((p) => (
+            <Link
+              key={p._id}
+              href={`/layiheler/${p.slug}`}
+              className="mt-card"
+              style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 22, overflow: "hidden", "--accent": p.color || "#00157A" }}
+            >
+              <div style={{ aspectRatio: "16 / 9", background: p.color || "#00157A", overflow: "hidden" }}>
+                {p.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={getImageUrl(p.image)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                )}
+              </div>
+              <div style={{ padding: "18px 20px 20px" }}>
+                <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 18, margin: 0, color: "#17171F" }}>{p.title}</h3>
+                {p.tagline && <div style={{ fontSize: 13.5, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{p.tagline}</div>}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    ),
+
+    /* Student videos — Swiper (loopsuz) */
+    videos: videoTestimonials.length > 0 && (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+        <SectionHead title={t("page.students.speak")} sub={t("page.students.speakSub")} />
+        <VideoSwiper videos={videoTestimonials} />
+      </section>
+    ),
+
+    /* Müəllimlər — seçilmişlər, sıra hər açılışda qarışır (TeacherSwiper) */
+    teachers: (home?.teachers || []).length > 0 && (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
+        <SectionHead title={t("common.teachers")} sub={t("home.teachers.sub")} />
+        <TeacherSwiper teachers={home.teachers} />
+      </section>
+    ),
+
+    /* Testimonials */
+    testimonials: testimonials.length > 0 && (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+        <SectionHead title={t("home.reviews.title")} sub={t("home.reviews.sub")} />
+        <div className="ba-wall">
+          {testimonials.map((t) => <TestimonialCard key={t._id} t={t} />)}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 30 }}>
+          <Link href="/telebelerimiz" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.reviews.all")}</Link>
+        </div>
+      </section>
+    ),
+
+    /* Blog / news */
+    /* Yazı varsa son 3 yazı, yoxdursa bloqa keçid zolağı — ana səhifədən
+        bloqa keçid hər halda qalır. */
+    blog: posts.length > 0 ? (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 40 }}>
+          <SectionHead title={t("home.blog.title")} sub={t("home.blog.sub")} />
+          <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.blog.all")}</Link>
+        </div>
+        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
+          {posts.map((p) => <NewsCard key={p._id} post={p} locale={locale} />)}
+        </div>
+      </section>
+    ) : (
+      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+        <Link
+          href="/bloq"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", padding: "28px 32px", borderRadius: 24, background: "#00157A", color: "#fff" }}
+        >
+          <div style={{ minWidth: 0, flex: "1 1 280px" }}>
+            <div style={{ fontSize: 26, fontWeight: 800 }}>{t("home.blog.title")}</div>
+            <div style={{ marginTop: 6, fontSize: 15, opacity: 0.85, lineHeight: 1.5 }}>{t("home.blog.cta")}</div>
+          </div>
+          <span style={{ flex: "none", padding: "12px 22px", borderRadius: 999, background: "#fff", color: "#00157A", fontWeight: 700, fontSize: 15 }}>
+            {t("home.blog.ctaBtn")}
+          </span>
+        </Link>
+      </section>
+    ),
+
+    /* FAQ */
+    faq: (
+    <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
+      <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
+      <FaqAccordion items={faqItems} />
+    </section>
+    ),
+
+    /* Partners */
+    partners: partners.length > 0 && (
+      <section className="ba-reveal ba-partners" style={{ background: "#F6F7FA", marginTop: 84, borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2" }}>
+        <div style={{ ...wrap, padding: "70px 28px" }}>
+          <SectionHead title={t("home.partners.title")} sub={t("home.partners.sub")} />
+          <PartnersCarousel partners={partners} />
+        </div>
+      </section>
+    ),
+
+    /* CTA */
+    cta: (
+    <section className="ba-reveal" style={{ ...wrap, padding: "80px 28px 20px" }}>
+      <div style={{ background: "linear-gradient(115deg, var(--accent) 0%, #7C4DFF 52%, #C13DBF 115%)", borderRadius: 28, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,40px)", color: "#fff", margin: 0, letterSpacing: "-.02em" }}>{t("home.cta.title")}</h2>
+        <p style={{ fontSize: 17, color: "rgba(255,255,255,.9)", margin: "14px auto 0", maxWidth: 520, lineHeight: 1.6 }}>{t("home.cta.text")}</p>
+        <ApplyButton style={{ marginTop: 26, background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 13, cursor: "pointer" }} />
+      </div>
+    </section>
+    ),
+  };
 
   // ── render ──
   return (
     <>
       <HomeBodyClass />
       <RevealOnScroll />
-      <Hero hero={s.hero} stats={s.stats} />
-
-      {/* Marquee */}
-      {on("marquee") && <Marquee words={s.marquee} />}
-
-      {/* Courses / services — interaktiv Swiper (kliklə yuxarıda inline açılır) */}
-      {on("courses") && (
-        <div id="kurslar">
-          <ServicesShowcase courses={courses} />
-        </div>
-      )}
-
-      {/* Advantages */}
-      {on("advantages") && advantages.length > 0 && (
-      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-        <SectionHead title={t("home.adv.title")} sub={t("home.adv.sub")} />
-        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
-          {advantages.map((a, i) => <AdvantageCard key={a._id} advantage={a} index={i} />)}
-        </div>
-      </section>
-      )}
-
-      {/* Study abroad */}
-      {on("destinations") && destinations.length > 0 && (
-        <section className="ba-reveal" style={{ background: "linear-gradient(165deg,#F4F7FF,#FDF6F0 55%,#F3FAF6)", marginTop: 84 }}>
-          <div style={{ ...wrap, padding: "80px 28px" }}>
-            <SectionHead title={t("home.abroad.title")} sub={t("home.abroad.sub")} />
-            <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-              {destinations.map((d) => <DestinationCard key={d._id} dest={d} />)}
-              <Link href="/xaricde-tehsil" className="ba-fdest ba-fdest-all" style={{ "--cc": "#fff" }}>
-                <span className="ba-fdest-body"><span className="ba-fdest-tag" style={{ display: "block" }}>{t("home.abroad.tag")}</span><span className="ba-fdest-name" style={{ display: "block" }}>{t("home.abroad.all")}</span></span>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Layihələr — seçilmişlər. Müraciət düyməsi BURADA yoxdur: müraciət
-          yalnız layihənin öz səhifəsindən edilir. */}
-      {on("projects") && (home?.projects || []).length > 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
-          <SectionHead title={t("page.projects.title")} sub={t("page.projects.sub")} />
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
-            {home.projects.map((p) => (
-              <Link
-                key={p._id}
-                href={`/layiheler/${p.slug}`}
-                className="mt-card"
-                style={{ display: "block", background: "#fff", border: "1px solid #ECEDF2", borderRadius: 22, overflow: "hidden", "--accent": p.color || "#00157A" }}
-              >
-                <div style={{ aspectRatio: "16 / 9", background: p.color || "#00157A", overflow: "hidden" }}>
-                  {p.image && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={getImageUrl(p.image)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                  )}
-                </div>
-                <div style={{ padding: "18px 20px 20px" }}>
-                  <h3 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 18, margin: 0, color: "#17171F" }}>{p.title}</h3>
-                  {p.tagline && <div style={{ fontSize: 13.5, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>{p.tagline}</div>}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Student videos — Swiper (loopsuz) */}
-      {on("videos") && videoTestimonials.length > 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
-          <SectionHead title={t("page.students.speak")} sub={t("page.students.speakSub")} />
-          <VideoSwiper videos={videoTestimonials} />
-        </section>
-      )}
-
-      {/* Müəllimlər — seçilmişlər, sıra hər açılışda qarışır (TeacherSwiper) */}
-      {on("teachers") && (home?.teachers || []).length > 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 0" }}>
-          <SectionHead title={t("common.teachers")} sub={t("home.teachers.sub")} />
-          <TeacherSwiper teachers={home.teachers} />
-        </section>
-      )}
-
-      {/* Testimonials */}
-      {on("testimonials") && testimonials.length > 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-          <SectionHead title={t("home.reviews.title")} sub={t("home.reviews.sub")} />
-          <div className="ba-wall">
-            {testimonials.map((t) => <TestimonialCard key={t._id} t={t} />)}
-          </div>
-          <div style={{ textAlign: "center", marginTop: 30 }}>
-            <Link href="/telebelerimiz" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.reviews.all")}</Link>
-          </div>
-        </section>
-      )}
-
-      {/* Blog / news */}
-      {/* Yazı varsa son 3 yazı, yoxdursa bloqa keçid zolağı — ana səhifədən
-          bloqa keçid hər halda qalır. */}
-      {on("blog") && posts.length > 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 40 }}>
-            <SectionHead title={t("home.blog.title")} sub={t("home.blog.sub")} />
-            <Link href="/bloq" style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15 }}>{t("home.blog.all")}</Link>
-          </div>
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }}>
-            {posts.map((p) => <NewsCard key={p._id} post={p} locale={locale} />)}
-          </div>
-        </section>
-      )}
-      {on("blog") && posts.length === 0 && (
-        <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-          <Link
-            href="/bloq"
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap", padding: "28px 32px", borderRadius: 24, background: "#00157A", color: "#fff" }}
-          >
-            <div style={{ minWidth: 0, flex: "1 1 280px" }}>
-              <div style={{ fontSize: 26, fontWeight: 800 }}>{t("home.blog.title")}</div>
-              <div style={{ marginTop: 6, fontSize: 15, opacity: 0.85, lineHeight: 1.5 }}>{t("home.blog.cta")}</div>
-            </div>
-            <span style={{ flex: "none", padding: "12px 22px", borderRadius: 999, background: "#fff", color: "#00157A", fontWeight: 700, fontSize: 15 }}>
-              {t("home.blog.ctaBtn")}
-            </span>
-          </Link>
-        </section>
-      )}
-
-      {/* FAQ */}
-      {on("faq") && (
-      <section className="ba-reveal" style={{ ...wrap, padding: "84px 28px 20px" }}>
-        <SectionHead title={t("home.faq.title")} sub={t("home.faq.sub")} />
-        <FaqAccordion items={faqItems} />
-      </section>
-      )}
-
-      {/* Partners */}
-      {on("partners") && partners.length > 0 && (
-        <section className="ba-reveal ba-partners" style={{ background: "#F6F7FA", marginTop: 84, borderTop: "1px solid #ECEDF2", borderBottom: "1px solid #ECEDF2" }}>
-          <div style={{ ...wrap, padding: "70px 28px" }}>
-            <SectionHead title={t("home.partners.title")} sub={t("home.partners.sub")} />
-            <PartnersCarousel partners={partners} />
-          </div>
-        </section>
-      )}
-
-      {/* CTA */}
-      {on("cta") && (
-      <section className="ba-reveal" style={{ ...wrap, padding: "80px 28px 20px" }}>
-        <div style={{ background: "linear-gradient(115deg, var(--accent) 0%, #7C4DFF 52%, #C13DBF 115%)", borderRadius: 28, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(28px,4vw,40px)", color: "#fff", margin: 0, letterSpacing: "-.02em" }}>{t("home.cta.title")}</h2>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,.9)", margin: "14px auto 0", maxWidth: 520, lineHeight: 1.6 }}>{t("home.cta.text")}</p>
-          <ApplyButton style={{ marginTop: 26, background: "#fff", color: "var(--accent)", border: "none", fontWeight: 700, fontSize: 16, padding: "15px 30px", borderRadius: 13, cursor: "pointer" }} />
-        </div>
-      </section>
-      )}
+      {resolveSections(s.homeSections)
+        .filter((sec) => sec.enabled)
+        .map((sec) => <Fragment key={sec.key}>{blocks[sec.key]}</Fragment>)}
     </>
   );
 }

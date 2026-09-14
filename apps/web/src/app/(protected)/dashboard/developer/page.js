@@ -241,7 +241,7 @@ export default function DeveloperPage() {
     if (!dryRun) {
       const ok = await confirmDialog({
         title: "Müəllim təyinatları tətbiq olunsun?",
-        message:
+        text:
           "Siyahıdakı müəllimlər bazaya yazılacaq: mövcud olanlar adına görə tapılıb yenilənəcək, olmayanlar yaradılacaq. Mövcud filial/dərs təyinatları əvəz olunur.",
         confirmText: "Tətbiq et",
       });
@@ -259,7 +259,7 @@ export default function DeveloperPage() {
   const runImportFlags = async (overwrite) => {
     const ok = await confirmDialog({
       title: overwrite ? "Bütün bayraqlar yenilənsin?" : "Bayraqlar endirilsin?",
-      message: overwrite
+      text: overwrite
         ? "Şəkli OLAN ölkələrin də bayrağı yenidən endirilib əvəz olunacaq."
         : "Şəkli olmayan ölkələrə flagcdn.com-dan bayraq endirilib «bayraqlar» qovluğuna yazılacaq.",
       confirmText: "Başlat",

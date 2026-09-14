@@ -117,7 +117,9 @@ export function MediaPicker({ onClose, onSelect, defaultFolder = "", fit = "cove
   };
 
   return (
-    <div className="ba-fade fixed inset-0 z-[65] flex items-center justify-center bg-black/60 p-3 sm:p-4">
+    // data-no-dirty: axtarış/qovluq yazısı açıq formanı «dəyişib» saymasın —
+    // seçim özü onChange → markDirty ilə işarələnir.
+    <div data-no-dirty className="ba-fade fixed inset-0 z-[65] flex items-center justify-center bg-black/60 p-3 sm:p-4">
       <div className="ba-pop flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Başlıq */}
         <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">

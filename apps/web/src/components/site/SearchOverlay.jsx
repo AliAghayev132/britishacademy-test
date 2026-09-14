@@ -4,13 +4,12 @@
 import { useEffect, useRef, useState } from "react";
 
 // Lib
-import { useT, useLocale } from "@/lib";
+import { API_URL, useT, useLocale } from "@/lib";
 
 // Local
 import { useDialogFocus } from "./useDialogFocus";
 import { LocaleLink as Link } from "./LocaleLink";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
  * Tam ekran axtarış pəncərəsi.
@@ -47,7 +46,7 @@ export function SearchOverlay({ open, onClose }) {
     if (!open || term.length < 2) return undefined;
     let alive = true;
     const id = setTimeout(() => {
-      fetch(`${API_URL}/api/search?q=${encodeURIComponent(term)}&lang=${locale}`, {
+      fetch(`${API_URL}/search?q=${encodeURIComponent(term)}&lang=${locale}`, {
         headers: { Accept: "application/json" },
       })
         .then((r) => r.json())

@@ -22,7 +22,11 @@ import { withUtm } from "@/lib";
  * linkə görə adamı itirmək, onu ana səhifəyə göndərməkdən pisdir.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// Server tərəfi — lib/api.js ilə eyni sıra: daxili ünvan nginx-dən keçmir.
+const API_URL =
+  process.env.API_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
 
 // SSR sorğuları API-nin IP limitinə düşməsin.
 const INTERNAL_HEADERS = process.env.INTERNAL_API_KEY

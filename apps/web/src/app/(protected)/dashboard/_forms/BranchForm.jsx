@@ -29,7 +29,7 @@ import {
   RemoveButton,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
-import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
+import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized, hasLoc } from "./Localized";
 
 const emptyHour = { days: "", from: "", to: "" };
 
@@ -131,10 +131,11 @@ export function BranchForm({ item, onClose }) {
       workingHours: workingHours
         .map((h) => ({
           days: trimLoc(h.days),
-          from: h.from.trim(),
-          to: h.to.trim(),
+          from: (h.from || "").trim(),
+          to: (h.to || "").trim(),
         }))
-        .filter((h) => h.days || h.from || h.to),
+        // trimLoc həmişə obyekt qaytarır — `h.days` həmişə doğru idi.
+        .filter((h) => hasLoc(h.days) || h.from || h.to),
       // Prune blank URLs.
       images: images.map((u) => u.trim()).filter(Boolean),
     };

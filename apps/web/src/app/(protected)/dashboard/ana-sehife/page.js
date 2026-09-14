@@ -15,6 +15,9 @@ import { useAdminGetSettingsQuery, useAdminUpdateSettingsMutation } from "@/stor
 // Lib
 import { resolveSections } from "@/lib";
 
+// Utils
+import { rowKey } from "@/utils";
+
 // Local
 import {
   LocalizedInput,
@@ -87,13 +90,14 @@ export default function HomeAdminPage() {
         chipsRight: toLoc(s.hero?.chipsRight),
         pills: toLoc(s.hero?.pills),
         pillLinks: (s.hero?.pillLinks || []).map((x) => ({
+          _key: rowKey(),
           label: toLoc(x.label),
           href: x.href || "",
         })),
         colors: (s.hero?.colors || []).join(", "),
       },
       marquee: toLoc(Array.isArray(s.marquee) ? s.marquee.join(", ") : s.marquee),
-      stats: (s.stats || []).map((x) => ({ label: toLoc(x.label), value: toLoc(x.value) })),
+      stats: (s.stats || []).map((x) => ({ _key: rowKey(), label: toLoc(x.label), value: toLoc(x.value) })),
     });
   }, [data, form]);
 
@@ -357,7 +361,7 @@ export default function HomeAdminPage() {
               <label className={label}>Hero düymələri — link ilə</label>
               <button
                 onClick={() =>
-                  set("hero.pillLinks", [...(form.hero.pillLinks || []), { label: toLoc(""), href: "" }])
+                  set("hero.pillLinks", [...(form.hero.pillLinks || []), { _key: rowKey(), label: toLoc(""), href: "" }])
                 }
                 className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
               >
@@ -375,7 +379,7 @@ export default function HomeAdminPage() {
             )}
             <div className="space-y-3">
               {(form.hero.pillLinks || []).map((row, i) => (
-                <div key={i} className="flex items-start gap-3">
+                <div key={row._key} className="flex items-start gap-3">
                   {/* Sıra — saytda göründüyü ardıcıllıq */}
                   <div className="mt-6 flex flex-none flex-col">
                     <button
@@ -447,7 +451,7 @@ export default function HomeAdminPage() {
             <div className="mb-3 flex items-center justify-between">
               <label className={label}>Statistika (məs. 20 000+ · məzun)</label>
               <button
-                onClick={() => set("stats", [...form.stats, { label: toLoc(""), value: toLoc("") }])}
+                onClick={() => set("stats", [...form.stats, { _key: rowKey(), label: toLoc(""), value: toLoc("") }])}
                 className="rounded-lg border border-dashed border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-700"
               >
                 + Göstərici
@@ -456,7 +460,7 @@ export default function HomeAdminPage() {
             {form.stats.length === 0 && <p className="text-sm text-gray-400">Göstərici əlavə edilməyib</p>}
             <div className="space-y-3">
               {form.stats.map((row, i) => (
-                <div key={i} className="flex items-start gap-3">
+                <div key={row._key} className="flex items-start gap-3">
                   <div className="flex-1">
                     <label className={label}>Dəyər</label>
                     <LocalizedInput value={row.value} onChange={(v) => set(`stats.${i}.value`, v)} placeholder="20 000+" />

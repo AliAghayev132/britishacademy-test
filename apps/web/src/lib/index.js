@@ -63,10 +63,14 @@ export {
   trackModalOpen,
   trackVisit,
 } from "./track";
-export { uploadDocumentForEditor } from "./uploadDocumentForEditor";
+export {
+  uploadDocumentForEditor,
+  uploadImageForEditor,
+  uploadVideoForEditor,
+} from "./uploadDocumentForEditor";
 export { uploadWithProgress } from "./uploadWithProgress";
 export { withUtm } from "./utm";
-export { API_URL, IMAGE_URL, SITE_URL, default as variables } from "./variables";
+export { API_ORIGIN, API_URL, IMAGE_URL, SITE_URL, default as variables } from "./variables";
 
 // I18n
 export { formatDate } from "./i18n/date";

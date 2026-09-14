@@ -18,67 +18,70 @@ export function HistoryTab({ page, onPage }) {
   const firstLoad = isFetching && items.length === 0;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      {firstLoad || isError || items.length === 0 ? (
-        <QueryState
-          isLoading={firstLoad && !isError}
-          isError={isError}
-          error={error}
-          onRetry={refetch}
-          isEmpty={items.length === 0}
-          emptyText="Hələ mesaj göndərilməyib."
-        />
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Alıcı</th>
-                <th className="hidden px-4 py-3 md:table-cell">Mesaj</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="hidden px-4 py-3 sm:table-cell">Tarix</th>
-              </tr>
-            </thead>
-            <tbody className={isFetching ? "opacity-60" : ""}>
-              {items.map((m, i) => {
-                const b = STATUS_BADGE[m.status] || STATUS_BADGE.sent;
-                return (
-                  <tr
-                    key={m._id}
-                    className="ba-row border-t border-gray-100"
-                    style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
-                  >
-                    {/* Kanala görə: e-poçt sətirlərində nömrə yoxdur və
-                        əvvəl xanada tək «+» qalırdı. */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <span className="font-mono text-gray-900">
-                        {m.channel === "email" ? m.email : m.phone ? `+${m.phone}` : "—"}
-                      </span>
-                      {m.name && <div className="text-xs text-gray-500">{m.name}</div>}
-                    </td>
-                    <td className="hidden max-w-md px-4 py-3 text-gray-500 md:table-cell">
-                      <div className="truncate">
-                        {m.subject && <b className="text-gray-700">{m.subject} · </b>}
-                        {m.body || (m.media?.filename ? `📎 ${m.media.filename}` : "—")}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${b.cls}`}>
-                        {b.label}
-                      </span>
-                      {m.error && <div className="mt-1 text-xs text-red-500">{m.error}</div>}
-                    </td>
-                    <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 sm:table-cell">
-                      {fmt(m.createdAt)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div>
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        {firstLoad || isError || items.length === 0 ? (
+          <QueryState
+            isLoading={firstLoad && !isError}
+            isError={isError}
+            error={error}
+            onRetry={refetch}
+            isEmpty={items.length === 0}
+            emptyText="Hələ mesaj göndərilməyib."
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-4 py-3">Alıcı</th>
+                  <th className="hidden px-4 py-3 md:table-cell">Mesaj</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="hidden px-4 py-3 sm:table-cell">Tarix</th>
+                </tr>
+              </thead>
+              <tbody className={isFetching ? "opacity-60" : ""}>
+                {items.map((m, i) => {
+                  const b = STATUS_BADGE[m.status] || STATUS_BADGE.sent;
+                  return (
+                    <tr
+                      key={m._id}
+                      className="ba-row border-t border-gray-100"
+                      style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
+                    >
+                      {/* Kanala görə: e-poçt sətirlərində nömrə yoxdur və
+                          əvvəl xanada tək «+» qalırdı. */}
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className="font-mono text-gray-900">
+                          {m.channel === "email" ? m.email : m.phone ? `+${m.phone}` : "—"}
+                        </span>
+                        {m.name && <div className="text-xs text-gray-500">{m.name}</div>}
+                      </td>
+                      <td className="hidden max-w-md px-4 py-3 text-gray-500 md:table-cell">
+                        <div className="truncate">
+                          {m.subject && <b className="text-gray-700">{m.subject} · </b>}
+                          {m.body || (m.media?.filename ? `📎 ${m.media.filename}` : "—")}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${b.cls}`}>
+                          {b.label}
+                        </span>
+                        {m.error && <div className="mt-1 text-xs text-red-500">{m.error}</div>}
+                      </td>
+                      <td className="hidden whitespace-nowrap px-4 py-3 text-gray-500 sm:table-cell">
+                        {fmt(m.createdAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
+      {/* overflow-hidden konteynerin İÇİNDƏ sticky işləmir — kənarda saxlanılır. */}
       <Pagination
         page={pagination?.page || 1}
         pages={pagination?.pages || 1}

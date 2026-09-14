@@ -32,6 +32,9 @@ import {
 import { ToolbarButton } from './Primitives';
 import { SLIDER_DEFAULTS } from './ImageSliderExtension';
 
+// Components
+import { notify } from '@/components/ui/feedback';
+
 const SPV_OPTIONS = [1, 2, 3, 4];
 
 export default function SliderPicker({ editor, onImageUpload }) {
@@ -133,6 +136,7 @@ export default function SliderPicker({ editor, onImageUpload }) {
         setSlides((prev) => [...prev, ...newSlides]);
       } catch (err) {
         console.error('Slider upload failed:', err);
+        notify.error(err?.message || 'Şəkil yüklənmədi');
       } finally {
         setBusy(false);
       }

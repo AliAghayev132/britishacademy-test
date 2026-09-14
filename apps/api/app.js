@@ -180,6 +180,15 @@ const setupErrorHandlers = (app) => {
       });
     }
 
+    // Yanlış formatlı ObjectId (məs. /api/admin/courses/abc) — əvvəl 500
+    // «Server error» qaytarırdı və loglarda xəta kimi görünürdü.
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: `Yanlış dəyər: «${err.path}»`,
+      });
+    }
+
     // Mongoose duplicate key
     // Hansı sahə və hansı dəyər — mesaja YAZILIR. Əvvəl yalnız «This record
     // already exists» qaytarılırdı: seed 409 verəndə nə modelin, nə sahənin,

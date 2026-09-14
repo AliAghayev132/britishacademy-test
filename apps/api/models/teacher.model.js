@@ -122,6 +122,29 @@ export function syncDerived(doc) {
   doc.courses = [...c];
 }
 
+/**
+ * Kursu müəllimin təyinatlarına əlavə et (kurs sihirbazı üçün, saf funksiya).
+ *
+ * Təyinatları olan müəllimdə `branches`/`courses` törəmədir — oraya birbaşa
+ * `$addToSet` ilə yazılan kurs növbəti saxlanışda syncDerived tərəfindən
+ * SİLİNİRDİ. Mənbə təyinatlardır, ona görə kurs oraya yazılır.
+ *
+ * @returns {Array} yeni təyinat siyahısı (giriş dəyişdirilmir)
+ */
+export function mergeAssignments(assignments, courseId, branchIds) {
+  const out = (assignments || []).map((a) => ({
+    branch: a.branch,
+    courses: [...(a.courses || [])],
+  }));
+  const course = String(courseId);
+  for (const branch of branchIds || []) {
+    const hit = out.find((a) => String(a.branch) === String(branch));
+    if (!hit) out.push({ branch, courses: [courseId] });
+    else if (!hit.courses.some((c) => String(c) === course)) hit.courses.push(courseId);
+  }
+  return out;
+}
+
 teacherSchema.pre("save", async function () {
   syncDerived(this);
 

@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 
 // UI / components
-import { confirmDialog } from '@/components/ui/feedback';
+import { confirmDialog, notify } from '@/components/ui/feedback';
 
 // Local
 import { ToolbarButton, Divider } from './parts/Primitives';
@@ -154,6 +154,7 @@ export default function TiptapEditor({
         }
       } catch (err) {
         console.error('Image upload failed:', err);
+        notify.error(err?.message || 'Şəkil yüklənmədi');
       }
     },
     [editor, onImageUpload]

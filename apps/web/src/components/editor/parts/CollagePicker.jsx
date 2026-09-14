@@ -30,6 +30,9 @@ import { ToolbarButton } from './Primitives';
 import { COLLAGE_LAYOUTS } from './ImageCollageExtension';
 import CollageCropDialog from './CollageCropDialog';
 
+// Components
+import { notify } from '@/components/ui/feedback';
+
 const ASPECTS = [
   { value: '4/3',  label: '4 : 3' },
   { value: '16/9', label: '16 : 9' },
@@ -257,6 +260,7 @@ export default function CollagePicker({ editor, onImageUpload }) {
       }
     } catch (err) {
       console.error('Collage upload failed:', err);
+      notify.error(err?.message || 'Şəkil yüklənmədi');
     } finally {
       setLoadingIdx(-1);
       setPendingFile(null);

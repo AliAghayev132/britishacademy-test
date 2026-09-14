@@ -48,7 +48,7 @@ const rows = (arr, fallback = "—") =>
  */
 const stats = asyncHandler(async (req, res) => {
   const link = await ShortLink.findById(req.params.id).lean();
-  if (!link) {
+  if (!link || link.isDeleted) {
     return res.status(404).json({ success: false, message: "Link tapılmadı" });
   }
 
@@ -122,7 +122,7 @@ const stats = asyncHandler(async (req, res) => {
  */
 const resetClicks = asyncHandler(async (req, res) => {
   const link = await ShortLink.findById(req.params.id);
-  if (!link) {
+  if (!link || link.isDeleted) {
     return res.status(404).json({ success: false, message: "Link tapılmadı" });
   }
   const { deletedCount } = await LinkClick.deleteMany({ link: link._id });

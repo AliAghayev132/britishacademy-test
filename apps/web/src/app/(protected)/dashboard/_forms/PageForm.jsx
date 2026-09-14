@@ -36,6 +36,7 @@ import {
   LocalizedEditor,
   toLoc,
   trimLoc,
+  hasLoc,
   locAz,
   confirmLocalized,
 } from "./Localized";
@@ -132,10 +133,10 @@ export function PageForm({ item, onClose }) {
       content: blocks
         .map((b) => ({
           type: "paragraph",
-          heading: b.heading.trim(),
-          body: b.body.trim(),
+          heading: trimLoc(b.heading),
+          body: trimLoc(b.body),
         }))
-        .filter((b) => b.heading || b.body),
+        .filter((b) => hasLoc(b.heading) || hasLoc(b.body)),
     };
 
     // Slug is optional — the API generates one when omitted.

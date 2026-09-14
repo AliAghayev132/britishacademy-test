@@ -24,7 +24,12 @@ import { TiptapEditor } from "@/components/editor";
 import { useAiProcessMutation, useAiStatusQuery } from "@/store";
 
 // Lib
-import { useMarkDirty } from "@/lib";
+import {
+  uploadDocumentForEditor,
+  uploadImageForEditor,
+  uploadVideoForEditor,
+  useMarkDirty,
+} from "@/lib";
 
 const LOCALES = [
   { key: "az", label: "AZ" },
@@ -47,6 +52,12 @@ export function toLoc(v) {
 export function trimLoc(v) {
   const o = toLoc(v);
   return { az: o.az.trim(), en: o.en.trim(), ru: o.ru.trim() };
+}
+
+/** Hər hansı dildə mətn varmı? (boş sətirləri atmaq üçün) */
+export function hasLoc(v) {
+  const o = toLoc(v);
+  return Boolean(o.az.trim() || o.en.trim() || o.ru.trim());
 }
 
 /** AZ variantı (preview üçün). */
@@ -331,7 +342,17 @@ export function LocalizedEditor({ value, onChange, ...rest }) {
   return (
     <div>
       {/* key={locale} — dil dəyişəndə editor həmin dilin məzmunu ilə remount olur */}
-      <TiptapEditor key={locale} content={v[locale]} onChange={set} {...rest} />
+      {/* Yükləmə funksiyaları verilməsə redaktor şəkil/kolaj/slayder/fayl
+          düymələrini ümumiyyətlə göstərmir — əvvəl heç bir formada yox idi. */}
+      <TiptapEditor
+        key={locale}
+        content={v[locale]}
+        onChange={set}
+        onImageUpload={uploadImageForEditor}
+        onVideoUpload={uploadVideoForEditor}
+        onFileUpload={uploadDocumentForEditor}
+        {...rest}
+      />
       <AiBar v={v} onChange={onChange} isHtml />
       <EmptyWarn value={v} />
     </div>

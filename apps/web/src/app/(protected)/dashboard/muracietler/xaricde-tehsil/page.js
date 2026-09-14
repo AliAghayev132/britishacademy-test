@@ -8,7 +8,7 @@
 // `LeadsView` sabit süzgəclə render olunur.
 
 // Local
-import { LeadsView } from "../page";
+import { LeadsView } from "../LeadsView";
 
 export default function AbroadLeadsPage() {
   return <LeadsView abroadOnly />;

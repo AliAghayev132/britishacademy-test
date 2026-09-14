@@ -39,6 +39,7 @@ import {
   trimLoc,
   locAz,
   confirmLocalized,
+  hasLoc,
 } from "./Localized";
 
 export function DestinationForm({ item, onClose }) {
@@ -129,11 +130,11 @@ export function DestinationForm({ item, onClose }) {
       isActive,
       seo,
       facts: facts
-        .filter((f) => f.label.trim() && f.value.trim())
-        .map((f) => ({ label: f.label.trim(), value: f.value.trim() })),
+        .filter((f) => hasLoc(f.label) && hasLoc(f.value))
+        .map((f) => ({ label: trimLoc(f.label), value: trimLoc(f.value) })),
       universities: universities
-        .filter((u) => u.name.trim())
-        .map((u) => ({ name: u.name.trim(), city: u.city.trim(), url: u.url.trim() })),
+        .filter((u) => hasLoc(u.name))
+        .map((u) => ({ name: trimLoc(u.name), city: trimLoc(u.city), url: (u.url || "").trim() })),
     };
 
     // Slug only when set — server auto-generates otherwise.

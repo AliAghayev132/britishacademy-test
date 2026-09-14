@@ -456,6 +456,8 @@ const verifyResetOTP = asyncHandler(async (req, res) => {
   const resetToken = AuthTokenService.generateResetToken({
     email: email.toLowerCase(),
     userId: user._id,
+    // Parol dəyişəndə tokenVersion artır — token təkrar işlədilə bilmir.
+    tv: user.tokenVersion || 0,
   });
 
   res.json({

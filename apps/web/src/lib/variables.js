@@ -41,6 +41,12 @@ export const API_URL = !RAW_API_URL
     : `${RAW_API_URL}/api`
 
 /**
+ * API serverinin kökü (`/api` olmadan) — socket.io üçün. Boşdursa socket
+ * səhifə ilə eyni origin-ə qoşulur (nginx `/socket.io/`-nu Express-ə ötürür).
+ */
+export const API_ORIGIN = RAW_API_URL.endsWith('/api') ? RAW_API_URL.slice(0, -4) : RAW_API_URL
+
+/**
  * Image host root (e.g. https://cdn.example.com). Relative `/uploads/...`
  * paths returned by the server are appended to this base.
  */

@@ -5,6 +5,39 @@ import { API_URL } from './variables';
 import { uploadWithProgress } from './uploadWithProgress';
 import { getImageUrl } from './getImageUrl';
 
+/** Server cavabından mütləq URL — uğursuzluqda istisna. */
+function editorUrl(result, fallback) {
+  if (!result?.success || !result?.data?.url) {
+    throw new Error(result?.message || fallback);
+  }
+  return getImageUrl(result.data.url);
+}
+
+/**
+ * Redaktora şəkil yüklə (qalereyaya da düşür).
+ * @param {File} file
+ * @returns {Promise<string>} şəklin URL-i
+ */
+export async function uploadImageForEditor(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  const result = await uploadWithProgress(`${API_URL}/media/upload-image`, formData);
+  return editorUrl(result, 'Şəkil yüklənmədi');
+}
+
+/**
+ * Redaktora video yüklə.
+ * @param {File} file
+ * @param {(percent:number)=>void} [onProgress]
+ * @returns {Promise<string>} videonun URL-i
+ */
+export async function uploadVideoForEditor(file, onProgress) {
+  const formData = new FormData();
+  formData.append('video', file);
+  const result = await uploadWithProgress(`${API_URL}/media/upload-video`, formData, onProgress);
+  return editorUrl(result, 'Video yüklənmədi');
+}
+
 /**
  * Upload a document (PDF, Word, Excel, etc.) for the Tiptap editor.
  * @param {File} file

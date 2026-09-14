@@ -31,6 +31,7 @@ import {
   SectionTitle,
   AddButton,
   RemoveButton,
+  DirtyButton,
   toId,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
@@ -41,6 +42,7 @@ import {
   trimLoc,
   locAz,
   confirmLocalized,
+  hasLoc,
 } from "./Localized";
 
 export function TeacherForm({ item, onClose }) {
@@ -172,15 +174,15 @@ export function TeacherForm({ item, onClose }) {
         .filter((a) => a.branch)
         .map((a) => ({ branch: a.branch, courses: a.courses.filter(Boolean) })),
       certificates: certificates
-        .filter((c) => c.title.trim())
+        .filter((c) => hasLoc(c.title))
         .map((c) => ({
-          title: c.title.trim(),
-          image: c.image.trim(),
+          title: trimLoc(c.title),
+          image: (c.image || "").trim(),
           year: c.year === "" ? undefined : Number(c.year),
         })),
       stats: stats
-        .filter((s) => s.label.trim() || s.value.trim())
-        .map((s) => ({ label: s.label.trim(), value: s.value.trim() })),
+        .filter((s) => hasLoc(s.label) || hasLoc(s.value))
+        .map((s) => ({ label: trimLoc(s.label), value: trimLoc(s.value) })),
       socials: {
         instagram: instagram.trim(),
         linkedin: linkedin.trim(),
@@ -338,13 +340,12 @@ export function TeacherForm({ item, onClose }) {
                     )}
                   />
                 </div>
-                <button
-                  type="button"
+                <DirtyButton
                   onClick={() => removeAssignment(i)}
                   className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-500 transition hover:border-red-200 hover:text-red-600"
                 >
                   Sil
-                </button>
+                </DirtyButton>
               </div>
 
               <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">

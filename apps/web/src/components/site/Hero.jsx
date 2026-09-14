@@ -71,7 +71,10 @@ function HeroPill({ label, href }) {
   if (to.startsWith("/")) {
     return <LocaleLink href={to} className="ba-pill-cat" style={PILL_BASE}>{label}</LocaleLink>;
   }
-  const external = /^https?:///i.test(to);
+  // Əvvəl `/^https?:///i` idi: JS onu `/^https?:/` regex-i + `//` şərhi kimi
+  // oxuyurdu, `external` həmişə doğru olurdu və `#lövbər`/`tel:` də yeni
+  // pəncərədə açılırdı.
+  const external = /^https?:\/\//i.test(to);
   return (
     <a
       href={to}

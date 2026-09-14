@@ -29,6 +29,7 @@ export default function VideoMenu({ editor, onVideoUpload }) {
   const [progress, setProgress] = useState(0); // 0..100
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState('');
+  const [ytError, setYtError] = useState('');
 
   const ref = useRef(null);
   const fileRef = useRef(null);
@@ -77,13 +78,21 @@ export default function VideoMenu({ editor, onVideoUpload }) {
   const insertYoutube = () => {
     const url = youtubeUrl.trim();
     if (!url) return;
+    // setYoutubeVideo səhv linkdə istisna ATMIR — false qaytarır. Əvvəl
+    // catch heç vaxt işləmirdi, menyu bağlanırdı və heç nə əlavə olunmurdu.
+    let ok = false;
     try {
-      editor.commands.setYoutubeVideo({ src: url });
-      setYoutubeUrl('');
-      setOpen(false);
+      ok = editor.commands.setYoutubeVideo({ src: url });
     } catch {
-      setError('YouTube linki düzgün deyil');
+      ok = false;
     }
+    if (!ok) {
+      setYtError('YouTube linki düzgün deyil');
+      return;
+    }
+    setYtError('');
+    setYoutubeUrl('');
+    setOpen(false);
   };
 
   const handleFile = async (e) => {
@@ -121,7 +130,7 @@ export default function VideoMenu({ editor, onVideoUpload }) {
           .chain()
           .focus()
           .insertContent(
-            `<div data-video-wrapper="true"><video controls src="${url}" style="max-width:100%; height:auto;"></video></div>`
+            `<div data-video-wrapper="true"><video controls src="${escapeAttr(url)}" style="max-width:100%; height:auto;"></video></div>`
           )
           .run();
       }
@@ -159,7 +168,7 @@ export default function VideoMenu({ editor, onVideoUpload }) {
               <input
                 type="text"
                 value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
+                onChange={(e) => { setYoutubeUrl(e.target.value); setYtError(''); }}
                 onKeyDown={(e) => {
                   e.stopPropagation();
                   if (e.key === 'Enter') insertYoutube();
@@ -178,6 +187,9 @@ export default function VideoMenu({ editor, onVideoUpload }) {
                 <Check size={14} /> Əlavə et
               </button>
             </div>
+            {ytError && (
+              <p role="alert" className="mt-1.5 text-xs text-red-600">{ytError}</p>
+            )}
             <Help title="YouTube videosu necə əlavə edilir?">
               <ul className="space-y-1 list-disc pl-4">
                 <li>YouTube videosunun ünvan zolağındakı linki kopyalayın.</li>
@@ -301,4 +313,13 @@ function Help({ title, children }) {
       )}
     </div>
   );
+}
+
+/** Atribut dəyərini HTML-ə təhlükəsiz qoy (dırnaq, <, &). */
+function escapeAttr(s = '') {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }

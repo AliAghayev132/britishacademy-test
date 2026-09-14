@@ -29,6 +29,9 @@ import {
 // Lib
 import { pickAz } from "@/lib";
 
+// Utils
+import { keyOf, rowKey } from "@/utils";
+
 // Local
 import {
   Field,
@@ -67,6 +70,7 @@ const ORDER_OPTIONS = [
 
 /** Boş sual şablonu — dörd variant ən çox işlənən formatdır. */
 const emptyQuestion = () => ({
+  _key: rowKey(),
   text: toLoc(""),
   options: [toLoc(""), toLoc(""), toLoc(""), toLoc("")].map((text) => ({ text })),
   correctIndex: 0,
@@ -230,7 +234,7 @@ function QuizEditor({ item, onBack }) {
       order: Number(form.order) || 0,
       // Boş sətir ObjectId kimi yazıla bilməz — sahə ümumiyyətlə göndərilmir.
       category: form.category || null,
-      questions: form.questions.map((q, i) => ({ ...q, order: i })),
+      questions: form.questions.map(({ _key, ...q }, i) => ({ ...q, order: i })),
     };
 
     try {
@@ -368,7 +372,7 @@ function QuizEditor({ item, onBack }) {
             )}
             {form.questions.map((q, i) => (
               <QuestionCard
-                key={i}
+                key={keyOf(q)}
                 q={q}
                 index={i}
                 onChange={(nq) => setQuestion(i, nq)}

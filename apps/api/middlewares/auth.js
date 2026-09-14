@@ -146,6 +146,16 @@ const authenticateResetToken = async (req, res, next) => {
       });
     }
 
+    // Birdəfəlik: parol sıfırlananda tokenVersion artır. Əvvəl token 10 dəqiqə
+    // ərzində istənilən qədər işlənə bilirdi — ələ keçən token parolu yenidən
+    // dəyişməyə imkan verirdi (həm də sıfırlamadan sonra).
+    if (decoded.tv !== (user.tokenVersion || 0)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
     req.resetData = { email: decoded.email, userId: decoded.userId };
     req.user = user;
     next();

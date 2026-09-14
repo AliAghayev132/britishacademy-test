@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Check, X, ChevronLeft, ChevronRight, RotateCcw, Award } from "lucide-react";
 
 // Lib
-import { useT } from "@/lib";
+import { API_URL, useT } from "@/lib";
 
 /**
  * Testin interaktiv hissəsi.
@@ -25,9 +25,9 @@ import { useT } from "@/lib";
 
 const ACCENT = "var(--accent)";
 
-// API ayrı portdadır (Next 30001, Express 30002) və heç bir rewrite yoxdur,
-// ona görə nisbi "/api/..." işləməz — tam ünvan lazımdır.
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// API_URL (@/lib): dəyişən boşdursa nisbi `/api` — nginx eyni domendə
+// Express-ə ötürür. Əvvəl burada `localhost:5000` defoltu vardı və dəyişən
+// unudulanda quiz nəticəsi ziyarətçinin öz kompüterinə göndərilirdi.
 
 /** Nəticə ekranı — bal, səviyyə və cavabların təhlili. */
 function Result({ data, questions, onRetry, t }) {
@@ -235,7 +235,7 @@ export function QuizRunner({ quiz }) {
     setSending(true);
     setError("");
     try {
-      const res = await fetch(`${API_URL}/api/quizzes/${quiz.slug}/submit?lang=${quiz.lang || "az"}`, {
+      const res = await fetch(`${API_URL}/quizzes/${quiz.slug}/submit?lang=${quiz.lang || "az"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

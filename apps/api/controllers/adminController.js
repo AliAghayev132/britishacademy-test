@@ -305,7 +305,8 @@ const getOne = asyncHandler(async (req, res) => {
     entry.model.findById(req.params.id),
     entry.populate,
   );
-  if (!item) {
+  // Silinmiş sənəd siyahıda görünmür — id ilə də açılmamalıdır.
+  if (!item || item.isDeleted) {
     return res.status(404).json({ success: false, message: "Not found" });
   }
   // Siyahı məhduddursa tək sənəd də məhdud olmalıdır — əks halda id-ni
@@ -448,6 +449,11 @@ const remove = asyncHandler(async (req, res) => {
   // Silinməzdən əvvəl adını götür — sonra sənəd tapılmır və jurnalda
   // yalnız id qalırdı, yəni «nə silindi» sualına cavab yox idi.
   const doomed = await entry.model.findById(req.params.id).lean();
+  // Olmayan və ya artıq silinmiş sənəd — əvvəl «silindi» cavabı verilir və
+  // jurnala boş qeyd düşürdü.
+  if (!doomed || doomed.isDeleted) {
+    return res.status(404).json({ success: false, message: "Not found" });
+  }
 
   if (entry.softDelete === false) {
     await entry.model.findByIdAndDelete(req.params.id);

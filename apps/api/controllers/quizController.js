@@ -52,6 +52,15 @@ function publicQuestion(q, shuffleOptions) {
  * @param {Array} questions  testin sualları (düzgün cavabla birlikdə)
  * @param {Array} answers    [{ questionId, optionId }]
  */
+/**
+ * Ziyarətçiyə neçə sual verilir — getQuiz ilə EYNİ hesab (aktiv suallar,
+ * `questionCount` ilə məhdud; 0 = hamısı).
+ */
+export function servedCount(quiz) {
+  const active = (quiz?.questions || []).filter((q) => q.isActive !== false).length;
+  return quiz?.questionCount > 0 ? Math.min(quiz.questionCount, active) : active;
+}
+
 export function scoreAnswers(questions, answers) {
   const byId = new Map((questions || []).map((q) => [String(q._id), q]));
 
@@ -154,8 +163,7 @@ const getQuiz = asyncHandler(async (req, res) => {
 
   // `questionCount` sual bankından neçəsinin göstəriləcəyini müəyyən edir.
   // 0 və ya bankdan böyükdürsə hamısı verilir.
-  const limit = quiz.questionCount > 0 ? Math.min(quiz.questionCount, questions.length) : questions.length;
-  questions = questions.slice(0, limit);
+  questions = questions.slice(0, servedCount(quiz));
 
   res.json({
     success: true,
@@ -196,9 +204,13 @@ const submitQuiz = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "Cavab göndərilməyib" });
   }
 
-  const { score, wrongIds, results } = scoreAnswers(quiz.questions, answers);
+  const active = (quiz.questions || []).filter((q) => q.isActive !== false);
+  const { score, wrongIds, results } = scoreAnswers(active, answers);
 
-  const total = results.length;
+  // Məxrəc VERİLƏN sual sayıdır, cavablananların sayı yox. Əvvəl
+  // `results.length` idi: 28 sualdan birinə düzgün cavab verib göndərən
+  // 100% və ən yüksək səviyyəni alırdı. Cavabsız sual səhv sayılır.
+  const total = Math.max(servedCount(quiz), results.length);
   const percent = total > 0 ? Math.round((score / total) * 100) : 0;
   const level = quiz.levelFor(percent);
 

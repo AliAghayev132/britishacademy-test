@@ -211,14 +211,15 @@ export function LogsTab() {
             })}
           </ul>
         )}
-
-        <Pagination
-          page={pagination?.page || 1}
-          pages={pagination?.pages || 1}
-          total={pagination?.total}
-          onChange={setPage}
-        />
       </div>
+
+      {/* overflow-hidden konteynerin İÇİNDƏ sticky işləmir — kənarda saxlanılır. */}
+      <Pagination
+        page={pagination?.page || 1}
+        pages={pagination?.pages || 1}
+        total={pagination?.total}
+        onChange={setPage}
+      />
     </div>
   );
 }
