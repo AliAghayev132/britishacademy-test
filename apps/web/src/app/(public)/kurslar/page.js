@@ -3,7 +3,8 @@ import { LocaleLink as Link, CourseCard, SectionHead, CtaBand } from "@/componen
 import { PageBanner } from "@/components/server";
 
 // Lib
-import { apiGet, buildMetadata, getT } from "@/lib/server";
+import { ldJson } from "@/lib";
+import { apiGet, buildMetadata, getT, getLocale, absUrl } from "@/lib/server";
 
 export async function generateMetadata() {
   // Başlıq/təsvir seçilmiş dildə — əvvəl sabit azərbaycanca idi, ona görə
@@ -62,9 +63,38 @@ export default async function CoursesHubPage() {
     }
   }
 
+  // ── JSON-LD ──
+  // Hub səhifəsində struktur məlumat yox idi: Google kurs siyahısını adi mətn
+  // kimi görürdü. ItemList kataloqun tərkibini, BreadcrumbList isə səhifənin
+  // saytdakı yerini bildirir.
+  const locale = await getLocale();
+  const ld = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: tr("page.courses.title"),
+      numberOfItems: courses.length,
+      itemListElement: courses.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.title,
+        url: absUrl(`/kurslar/${c.slug}`, locale),
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: tr("common.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: tr("page.courses.title"), item: absUrl("/kurslar", locale) },
+      ],
+    },
+  ];
+
   // ── render ──
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       <PageBanner
         title={tr("page.courses.title")}
         subtitle={tr("page.courses.sub")}

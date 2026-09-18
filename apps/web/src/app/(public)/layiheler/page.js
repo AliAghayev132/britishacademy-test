@@ -10,7 +10,8 @@ export async function generateMetadata() {
   const t = await getT();
   return buildMetadata({
     title: t("page.projects.title"),
-    description: t("page.projects.sub"),
+    // Səhifə alt yazısı qısadır — meta üçün ayrıca açar işlənir.
+    description: t("meta.projects.desc"),
     path: "/layiheler",
   });
 }

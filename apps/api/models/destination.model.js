@@ -34,6 +34,9 @@ const destinationSchema = new Schema(
     // Accent colour taken from the flag (card border/hover)
     color: { type: String, trim: true, default: "#2E6BE6" },
 
+    // Səhifənin hero başlığı. Boşdursa `country` işlənir — amma tək ölkə adı
+    // («Almaniya») axtarış sorğusunu daşımır, ona görə SEO mətni buradadır.
+    h1: localizedField(),
     lead: localizedField(),
     tagline: localizedField(), // "Ödənişsiz universitetlər"
 

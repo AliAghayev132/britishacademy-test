@@ -17,6 +17,7 @@ export const COURSE_PAGES_EXAMS = [
   {
     // Səhifədə mətn, lead və təsvir var — yalnız qısa məlumat, FAQ və SEO.
     slug: "ielts-kurslari",
+    h1: az("IELTS Hazırlıq Kursu — Bakı"),
     info: [
       row("Müddət", "3 ay"),
       row("Dərs rejimi", "Həftədə 2 dəfə · 90 dəq + Practice"),
@@ -40,6 +41,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "toefl",
+    h1: az("TOEFL Hazırlıq Kursu — Rəsmi İmtahan Mərkəzi"),
     lead: az("Rəsmi TOEFL imtahan mərkəzində hazırlıq — dörd bacarıq, imtahan formatı və vaxtlı sınaqlar."),
     excerpt: az("TOEFL iBT və Pre-TOEFL hazırlığı: oxu, dinləmə, danışıq və yazı üzrə məqsədyönlü proqram. İmtahanı elə bizim mərkəzdə verə bilərsiniz."),
     contentHtml: az(`
@@ -79,6 +81,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "oet",
+    h1: az("OET Hazırlıq Kursu — Tibb İşçiləri üçün"),
     lead: az("Həkim, tibb bacısı, əczaçı və digər tibb işçiləri üçün peşəyə yönəlmiş ingilis dili imtahanına hazırlıq."),
     excerpt: az("OET (Occupational English Test) hazırlığı: tibbi kontekstdə dinləmə, oxu, yazı və pasiyentlə danışıq."),
     contentHtml: az(`
@@ -118,6 +121,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "toeic",
+    h1: az("TOEIC İmtahanı və Hazırlıq Kursu"),
     lead: az("İşgüzar ingilis dilinin beynəlxalq ölçüsü — hazırlıq və imtahan eyni mərkəzdə."),
     excerpt: az("TOEIC hazırlığı və rəsmi imtahan: iş mühitində ingilis dili bacarığını təsdiqləyən beynəlxalq sertifikat."),
     contentHtml: az(`
@@ -155,6 +159,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "sat-kurslari",
+    h1: az("SAT və Pre-SAT Hazırlıq Kursu"),
     lead: az("ABŞ və digər ölkələrdə bakalavr qəbulu üçün SAT hazırlığı — riyaziyyat, oxu və yazı."),
     excerpt: az("SAT və Pre-SAT hazırlığı: Math və Reading & Writing bölmələri, imtahan strategiyası və sınaq testləri."),
     contentHtml: az(`
@@ -194,6 +199,7 @@ export const COURSE_PAGES_EXAMS = [
   {
     // Səhifədə mətn var — lead, təsvir, məlumat, FAQ və SEO.
     slug: "duolingo",
+    h1: az("Duolingo English Test Hazırlıq Kursu"),
     lead: az("Onlayn verilən, universitetlərin getdikcə daha çox qəbul etdiyi ingilis dili imtahanına hazırlıq."),
     excerpt: az("Duolingo English Test (DET) hazırlığı: həftədə 2 dəfə 90 dəqiqə, minimum B1+ səviyyə."),
     info: [row("İmtahan", "Duolingo English Test"), row("Dərs rejimi", "Həftədə 2 dəfə · 90 dəq"), row("Minimum səviyyə", "B1+"), row("Məqsəd", "Universitet qəbulu")],
@@ -212,6 +218,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "toles",
+    h1: az("TOLES — Hüquqi İngilis Dili İmtahanı Kursu"),
     lead: az("Hüquqi ingilis dili üzrə beynəlxalq sertifikat — hüquqşünaslar və hüquq tələbələri üçün hazırlıq."),
     excerpt: az("TOLES (Test of Legal English Skills) hazırlığı: hüquqi terminologiya, müqavilə dili və hüquqi yazı."),
     contentHtml: az(`
@@ -247,6 +254,7 @@ export const COURSE_PAGES_EXAMS = [
 
   {
     slug: "tefl-kurslari",
+    h1: az("TEFL Sertifikat Kursu — İngilis Dili Müəllimləri üçün"),
     lead: az("İngilis dilini xarici dil kimi tədris etmək üçün beynəlxalq müəllim sertifikatı proqramı."),
     excerpt: az("TEFL: ingilis dili müəllimləri və müəllim olmaq istəyənlər üçün metodika, dərs planlaşdırma və sinif idarəçiliyi."),
     contentHtml: az(`

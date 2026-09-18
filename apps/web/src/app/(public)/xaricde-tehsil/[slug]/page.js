@@ -106,7 +106,10 @@ export default async function DestinationPage({ params }) {
       <ViewBeacon type="destination" slug={d.slug} />
 
       <PageBanner
-        title={d.country}
+        // h1 varsa o işlənir: tək «Almaniya» sözü axtarış sorğusunu daşımır,
+        // «Almaniyada Təhsil — Ödənişsiz Dövlət Universitetləri» daşıyır.
+        // Breadcrumb və başlıq etiketi ölkə adı olaraq qalır.
+        title={d.h1 || d.country}
         subtitle={d.lead || d.tagline}
         mascot="destinations"
         breadcrumb={[

@@ -99,7 +99,9 @@ describe("sxemə uyğunluq — səssiz itki olmasın", () => {
 
   it("data-da servisin tanımadığı açar yoxdur", () => {
     // Tanınmayan açar (məs. `body`, `seo.title`) import zamanı səssizcə atılardı.
-    const known = { course: ["slug", "lead", "excerpt", "contentHtml", "info", "faq", "seo"], destination: ["slug", "lead", "contentHtml", "facts", "faq", "seo"] };
+    // `h1` — hero başlığı; servisin FIELDS siyahısında var (bax
+    // PageContentImportService), ona görə burada da tanınmalıdır.
+    const known = { course: ["slug", "h1", "lead", "excerpt", "contentHtml", "info", "faq", "seo"], destination: ["slug", "h1", "lead", "contentHtml", "facts", "faq", "seo"] };
     const seoKeys = ["metaTitle", "metaDescription", "keywords"];
     for (const [kind, list] of [["course", COURSE_PAGES], ["destination", DESTINATION_PAGES]]) {
       for (const p of list) {

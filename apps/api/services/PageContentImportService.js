@@ -40,6 +40,11 @@ const isEmptyList = (v) => !Array.isArray(v) || v.length === 0;
  */
 const FIELDS = {
   course: [
+    // h1 — hero başlığı. Boş qalanda səhifə `title`-a düşür, o da bir sıra
+    // kursda tək sözdür («IELTS», «TOEFL», «Duolingo»). Auditdə 27 kursdan
+    // 19-unun h1-i boş çıxdı: ən dəyərli sorğularda əsas başlıq açar söz
+    // daşımırdı.
+    ["h1", "h1", isEmptyText],
     ["lead", "lead", isEmptyText],
     ["excerpt", "excerpt", isEmptyText],
     ["contentHtml", "contentHtml", isEmptyText],
@@ -50,6 +55,8 @@ const FIELDS = {
     ["seo.keywords", "seo.keywords", isEmptyText],
   ],
   destination: [
+    // Kurslardakı ilə eyni səbəb: boş h1 səhifəni tək ölkə adına salır.
+    ["h1", "h1", isEmptyText],
     ["lead", "lead", isEmptyText],
     ["contentHtml", "contentHtml", isEmptyText],
     ["facts", "facts", isEmptyList],

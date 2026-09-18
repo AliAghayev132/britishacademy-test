@@ -98,8 +98,9 @@ export function LeadsView({ abroadOnly = false }) {
     ...(to ? { to } : {}),
   };
   const hasFilter = Boolean(search || status || source || branch || course || destination || from || to);
+  // Ölkə süzgəci ümumi siyahıda göstərilmir, ona görə sayğacda da yer almır.
   // Düymədəki rəqəm — neçə süzgəc aktivdir (axtarış ayrıca sahədir, sayılmır).
-  const activeCount = [status, source, branch, course, destination, from, to].filter(Boolean).length;
+  const activeCount = [status, source, branch, course, ...(abroadOnly ? [destination] : []), from, to].filter(Boolean).length;
   // Filtr aktivdirsə panel açıq qalır — gizli süzgəc nəticəni dəyişir,
   // amma səbəbi görünmür və bu, çaşdırıcıdır.
   const panelOpen = filtersOpen || activeCount > 0;
@@ -236,9 +237,11 @@ export function LeadsView({ abroadOnly = false }) {
               </div>
             )}
 
-            {/* Siyahı istifadəçinin ölkə əhatəsinə görə serverdə süzülür —
+            {/* Ölkə süzgəci YALNIZ xaricdə təhsil bölməsindədir: ümumi
+                siyahıda kurs müraciətlərində ölkə olmur, boş filtr çaşdırırdı.
+                Siyahı istifadəçinin ölkə əhatəsinə görə serverdə süzülür —
                 icazəsi olmayan ölkə burada ümumiyyətlə görünmür. */}
-            {destinationOptions.length > 0 && (
+            {abroadOnly && destinationOptions.length > 0 && (
               <div className="w-52">
                 <NativeSelect
                   placeholder="Bütün ölkələr"

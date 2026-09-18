@@ -56,6 +56,7 @@ export const COURSE_PAGES_LANGUAGES = [
 
   {
     slug: "huquqsunaslar-ingilis-dili-kursu",
+    h1: az("Hüquqşünaslar üçün İngilis Dili Kursu"),
     lead: az("Hüquqi terminologiya, müqavilə dili və hüquqi yazışma — hüquqşünaslar üçün peşəkar ingilis dili."),
     excerpt: az("Hüquqşünaslar və hüquq tələbələri üçün ingilis dili: terminologiya, müqavilə dili, hüquqi yazışma və TOLES-ə hazırlıq."),
     contentHtml: az(`
@@ -148,6 +149,7 @@ export const COURSE_PAGES_LANGUAGES = [
 
   {
     slug: "beynelxalq-sertifikatli-alman-dili-kursu",
+    h1: az("Beynəlxalq Sertifikatlı Alman Dili Kursu"),
     lead: az("Goethe, telc və TestDaF kimi rəsmi alman dili imtahanlarına məqsədyönlü hazırlıq."),
     excerpt: az("Viza, universitet qəbulu və iş üçün tələb olunan rəsmi alman dili sertifikatlarına hazırlıq proqramı."),
     contentHtml: az(`
@@ -243,6 +245,7 @@ export const COURSE_PAGES_LANGUAGES = [
 
   {
     slug: "fransiz-dili-kursu",
+    h1: az("Fransız Dili Kursları"),
     lead: az("Fransız dilini sıfırdan öyrənin — CEFR səviyyələri üzrə proqram, danışıq və tələffüzə xüsusi diqqət."),
     excerpt: az("Fransız dili kursu: A1–C2 səviyyələri, tələffüz və danışıq üzərində iş, DELF/DALF sertifikatlarına istiqamət."),
     contentHtml: az(`
@@ -301,6 +304,7 @@ export const COURSE_PAGES_LANGUAGES = [
 
   {
     slug: "workshop",
+    h1: az("Workshop — İngilis Dili Mövzu Təkrarı Dərsləri"),
     lead: az("Kurs zamanı qaranlıq qalan mövzular üçün təkrar dərsləri — tələbələrimiz üçün ödənişsiz."),
     excerpt: az("Workshop: tam başa düşülməyən və ya zəif qalan mövzular üzrə dəstək dərsləri. Təhsil paketinə daxildir."),
     contentHtml: az(`

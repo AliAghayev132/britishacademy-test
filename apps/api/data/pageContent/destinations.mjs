@@ -27,6 +27,7 @@ const COST_Q = (where) => qa(`${where} təhsil nə qədər başa gəlir?`, "Xər
 export const DESTINATION_PAGES = [
   {
     slug: "almaniya",
+    h1: az("Almaniyada Təhsil"),
     lead: az("Əksər dövlət universitetlərində təhsil haqqı yoxdur, diplom bütün dünyada tanınır — Almaniya xaricdə təhsilin ən populyar istiqamətlərindən biridir."),
     contentHtml: az(`
 <p>Almaniya güclü mühəndislik, texnologiya, tibb və iqtisadiyyat məktəbləri ilə tanınır. Ölkənin əsas üstünlüyü: <strong>əksər dövlət universitetlərində bakalavr və magistr təhsili üçün təhsil haqqı alınmır</strong> — tələbə yalnız semestr haqqı ödəyir. (Bəzi federal əyalətlər AB-dən kənar tələbələrdən təhsil haqqı alır — proqram seçiləndə bu yoxlanılır.)</p>
@@ -61,6 +62,7 @@ ${HELP("Almaniya")}
 
   {
     slug: "turkiye",
+    h1: az("Türkiyədə Təhsil"),
     lead: az("Mədəni yaxınlıq, dil rahatlığı və geniş universitet seçimi — Türkiyədə bakalavr və magistr təhsili."),
     contentHtml: az(`
 <p>Türkiyə azərbaycanlı tələbələr üçün ən rahat istiqamətlərdən biridir: dil maneəsi azdır, mədəniyyət tanışdır, uçuş qısadır. Ölkədə çox sayda <strong>dövlət</strong> və <strong>vəqf (özəl)</strong> universiteti fəaliyyət göstərir.</p>
@@ -99,6 +101,7 @@ ${HELP("Türkiyə")}
 
   {
     slug: "ingiltere",
+    h1: az("İngiltərədə Təhsil"),
     lead: az("Dünyanın ən tanınmış universitetləri, qısa və intensiv proqramlar — İngiltərədə təhsil."),
     contentHtml: az(`
 <p>Böyük Britaniya universitetləri beynəlxalq reytinqlərin yuxarı sıralarında yer alır və diplomları bütün dünyada tanınır. Əsas üstünlüklərdən biri <strong>proqramların qısa olmasıdır</strong>.</p>
@@ -137,6 +140,7 @@ ${HELP("İngiltərə")}
 
   {
     slug: "kanada",
+    h1: az("Kanadada Təhsil"),
     lead: az("Yüksək həyat keyfiyyəti, tanınmış diplom və təhsildən sonra iş imkanları — Kanadada bakalavr, magistr və dil proqramları."),
     contentHtml: az(`
 <p>Kanada təhlükəsiz, çoxmədəniyyətli və beynəlxalq tələbələrə açıq ölkədir. Burada həm <strong>universitetlər</strong>, həm də peşə yönümlü <strong>kolleclər</strong> geniş seçim təklif edir.</p>
@@ -176,6 +180,7 @@ ${HELP("Kanada")}
 
   {
     slug: "polsa",
+    h1: az("Polşada Təhsil"),
     lead: az("Avropa diplomu əlçatan qiymətə — Polşada ingilis dilində bakalavr və magistr proqramları."),
     contentHtml: az(`
 <p>Polşa Avropa İttifaqında təhsil almaq istəyənlər üçün ən sərfəli istiqamətlərdən biridir. Ölkədə köklü dövlət universitetləri ilə yanaşı müasir özəl universitetlər də fəaliyyət göstərir, diplomlar bütün AB-də tanınır.</p>
@@ -213,6 +218,7 @@ ${HELP("Polşa")}
 
   {
     slug: "latviya",
+    h1: az("Latviyada Təhsil"),
     lead: az("Baltikyanı ölkədə Avropa diplomu — Latviyada ingilis dilində bakalavr və magistr təhsili."),
     contentHtml: az(`
 <p>Latviya Avropa İttifaqı və Şengen zonasının üzvüdür. Riqa universitetləri beynəlxalq tələbələrə ingilis dilində geniş proqram seçimi təklif edir, diplom isə bütün AB-də tanınır.</p>
@@ -250,6 +256,7 @@ ${HELP("Latviya")}
 
   {
     slug: "macaristan",
+    h1: az("Macarıstanda Təhsil"),
     lead: az("Stipendium Hungaricum dövlət təqaüdü və güclü tibb proqramları ilə Macarıstanda təhsil."),
     contentHtml: az(`
 <p>Macarıstan Avropanın mərkəzində, AB və Şengen zonasında yerləşir. Ölkə xüsusən <strong>Stipendium Hungaricum</strong> dövlət təqaüdü və ingilis dilində <strong>tibb, stomatologiya və əczaçılıq</strong> proqramları ilə tanınır.</p>
@@ -289,6 +296,7 @@ ${HELP("Macarıstan")}
 
   {
     slug: "litva",
+    h1: az("Litvada Təhsil"),
     lead: az("Müasir kampuslar, ingilisdilli proqramlar və əlçatan xərclər — Litvada Avropa təhsili."),
     contentHtml: az(`
 <p>Litva AB və Şengen zonasının üzvüdür. Vilnüs və Kaunas universitetləri beynəlxalq tələbələrə bakalavr və magistr səviyyəsində ingilis dilində proqramlar təklif edir.</p>
@@ -326,6 +334,7 @@ ${HELP("Litva")}
 
   {
     slug: "rusiya",
+    h1: az("Rusiyada Təhsil"),
     lead: az("Köklü universitetlər, güclü texniki və tibb məktəbləri, dövlət kvotası ilə təqaüd imkanı — Rusiyada təhsil."),
     contentHtml: az(`
 <p>Rusiya uzun akademik ənənəyə malik universitetləri ilə tanınır. Mühəndislik, fundamental elmlər, tibb və incəsənət sahələrində güclü məktəblər var. Azərbaycandan olan tələbələr üçün dil və mədəni yaxınlıq əlavə rahatlıqdır.</p>
@@ -359,6 +368,7 @@ ${HELP("Rusiya")}
 
   {
     slug: "gurcustan",
+    h1: az("Gürcüstanda Təhsil"),
     lead: az("Qonşu ölkədə ingilis dilində tibb və universitet təhsili — yaxın məsafə, rahat şərtlər."),
     contentHtml: az(`
 <p>Gürcüstan Azərbaycana yaxınlığı, sərfəli yaşayış xərcləri və ingilis dilində proqramları ilə son illər xüsusən <strong>tibb təhsili</strong> üçün populyar istiqamətə çevrilib.</p>
@@ -396,6 +406,7 @@ ${HELP("Gürcüstan")}
 
   {
     slug: "estoniya",
+    h1: az("Estoniyada Təhsil"),
     lead: az("Dünyanın ən rəqəmsal ölkələrindən birində İT, texnologiya və biznes təhsili."),
     contentHtml: az(`
 <p>Estoniya kiçik, lakin texnologiyada qabaqcıl ölkədir: dövlət xidmətlərinin böyük hissəsi onlayndır, startap mühiti güclüdür. Ölkə AB və Şengen zonasının üzvüdür, universitetləri ingilis dilində geniş proqram təklif edir.</p>
@@ -433,6 +444,7 @@ ${HELP("Estoniya")}
 
   {
     slug: "teqaud-proqramlari",
+    h1: az("Xaricdə Təhsil üçün Təqaüd Proqramları"),
     lead: az("Tam və qismən təqaüdlər — xaricdə təhsilin xərcini azaltmağın ən real yolları."),
     contentHtml: az(`
 <p>Xaricdə təhsil həmişə baha olmaq məcburiyyətində deyil. Bir çox dövlət, universitet və beynəlxalq təşkilat təhsil haqqını, yaşayış xərclərini və ya hər ikisini qarşılayan təqaüdlər təklif edir.</p>

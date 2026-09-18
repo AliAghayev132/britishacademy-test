@@ -20,7 +20,9 @@ export async function generateMetadata() {
   const t = await getT();
   return buildMetadata({
     title: t("quiz.listTitle"),
-    description: t("quiz.listSub"),
+    // `quiz.listSub` interfeys alt yazısıdır («biliyini 10 dəqiqəyə yoxla») —
+    // meta təsvir kimi 26 simvol qalırdı. Meta üçün ayrıca açar var.
+    description: t("meta.tests.desc"),
     path: "/testler",
   });
 }

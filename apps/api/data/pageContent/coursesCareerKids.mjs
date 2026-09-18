@@ -17,6 +17,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
   {
     // Səhifədə mətn, lead və təsvir var — məlumat, FAQ və SEO.
     slug: "ms-office",
+    h1: az("MS Office Kursu — Word, Excel və PowerPoint"),
     info: [row("Müddət", "3 ay"), row("Dərs rejimi", "Həftədə 2 dəfə · 90 dəq"), row("Proqramlar", "Windows · Word · Excel · PowerPoint"), row("Qrup", "Kiçik qruplar")],
     faq: [
       qa("Kurs hansı proqramları əhatə edir?", "Windows, Microsoft Word, Excel və PowerPoint."),
@@ -34,6 +35,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
 
   {
     slug: "pesekar-excel-kursu",
+    h1: az("Peşəkar Excel Kursu"),
     lead: az("Formullardan pivot cədvəllərə və hesabatlara qədər — Excel-i iş aləti kimi öyrənin."),
     excerpt: az("Peşəkar Excel kursu: funksiyalar, məlumatların təhlili, pivot cədvəllər, qrafiklər və avtomatlaşdırılmış hesabatlar."),
     contentHtml: az(`
@@ -71,6 +73,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
 
   {
     slug: "muhasibatliq-1c-kursu",
+    h1: az("Mühasibatlıq və 1C Proqramı Kursu"),
     lead: az("Mühasibat uçotunun əsaslarından 1C proqramında praktik işə qədər — karyeraya hazır bacarıq."),
     excerpt: az("Mühasibatlıq və 1C kursu: uçot prinsipləri, ilkin sənədlər, əməliyyatların 1C-də əks olunması və hesabatlar."),
     contentHtml: az(`
@@ -107,6 +110,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
 
   {
     slug: "hr-karguzarliq-kursu",
+    h1: az("HR və Kargüzarlıq Kursu"),
     lead: az("Kadr uçotu, əmək qanunvericiliyi və sənəd dövriyyəsi — HR və kargüzarlıq üzrə praktik bacarıqlar."),
     excerpt: az("HR & Kargüzarlıq kursu: işə qəbul, əmək müqaviləsi, əmrlər, məzuniyyət, kadr sənədləri və idarə sənəd dövriyyəsi."),
     contentHtml: az(`
@@ -173,6 +177,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
 
   {
     slug: "usaq-rus-dili",
+    h1: az("Uşaqlar üçün Rus Dili Kursu"),
     lead: az("Uşaqlar üçün danışıq yönümlü rus dili — oyun, dialoq və yaşa uyğun materiallarla."),
     excerpt: az("Uşaqlar üçün rus dili kursu: yaşa uyğun interaktiv dərslər, danışıq, oxu və yazı bacarıqlarının inkişafı."),
     contentHtml: az(`
@@ -206,6 +211,7 @@ export const COURSE_PAGES_CAREER_KIDS = [
 
   {
     slug: "usaq-mentiq",
+    h1: az("Uşaqlar üçün Məntiq və Zəka Kursu"),
     lead: az("Diqqət, yaddaş və problem həll etmə bacarığını inkişaf etdirən məntiq dərsləri."),
     excerpt: az("Uşaqlar üçün məntiq kursu: məntiqi və analitik düşüncə, diqqət, yaddaş və tapşırıqları mərhələli həll etmə bacarığı."),
     contentHtml: az(`

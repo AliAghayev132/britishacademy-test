@@ -151,6 +151,18 @@ export function Hero({ hero, stats = [] }) {
   const t = useT();
   const wordList = toList(hero?.words);
   const words = wordList.length ? wordList : toList(t("hero.defaultWords"));
+
+  // Başlıq: «prefiks + fırlanan söz». Azərbaycancada söz sırası belədir
+  // («British Academy ilə ingiliscə danış»), ingilis və rus dilində isə
+  // tərsinədir — «Speak English with British Academy». Prefiksdə `{word}`
+  // işarəsi varsa, fırlanan söz MƏHZ ORAYA qoyulur; yoxdursa köhnə davranış
+  // saxlanılır (prefiks, sonra söz). Beləcə hər dil öz sırasını paneldən
+  // təyin edir və komponentə toxunmaq lazım gəlmir.
+  const rawTitle = hero?.titlePrefix || t("hero.defaultTitle");
+  const titleParts = rawTitle.includes("{word}")
+    ? { before: rawTitle.split("{word}")[0].trim(), after: rawTitle.split("{word}")[1].trim() }
+    : { before: rawTitle, after: "" };
+
   const colors = hero?.colors?.length ? hero.colors : ["#001478"];
   const [i, setI] = useState(0);
   const [reduced, setReduced] = useState(false);
@@ -252,7 +264,8 @@ export function Hero({ hero, stats = [] }) {
       {/* nth-of-type(10) — content */}
       <div style={{ position: "relative", maxWidth: 1000, margin: "0 auto", padding: "78px 28px 66px", textAlign: "center" }}>
         <h1 style={{ fontFamily: "'Poppins'", fontWeight: 800, fontSize: "clamp(36px,5.2vw,56px)", lineHeight: 1.14, letterSpacing: "-.02em", color: "#fff", margin: 0 }}>
-          {hero?.titlePrefix || t("hero.defaultTitle")}<br />
+          {titleParts.before}
+          {titleParts.before !== "" && <br />}
           <span style={{ position: "relative", display: "inline-block", height: "1.2em", verticalAlign: "top", minWidth: 1 }}>
             <span
               key={reduced ? "static" : i}
@@ -266,6 +279,7 @@ export function Hero({ hero, stats = [] }) {
               {words[i]}
             </span>
           </span>
+          {titleParts.after && <><br />{titleParts.after}</>}
         </h1>
         <p style={{ fontSize: 19, lineHeight: 1.6, color: "rgba(255,255,255,.9)", maxWidth: 600, margin: "24px auto 0" }}>
           {hero?.subtitle || t("hero.defaultSubtitle")}
