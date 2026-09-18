@@ -124,6 +124,70 @@ describe.skipIf(!enabled)("API inteqrasiyası", () => {
     });
   });
 
+  describe("kurs ↔ müəllim (dərs qrafiki olmadan)", () => {
+    it("kursda seçilən müəllim hər iki ictimai səhifədə görünür", async () => {
+      const { Course, CourseCategory, Teacher } = await import("#models");
+      const [category, teacher] = await Promise.all([
+        CourseCategory.create({ name: { az: "Əlaqə kateqoriyası" }, isActive: true }),
+        Teacher.create({ fullName: { az: "Sınaq Müəllim" }, isActive: true }),
+      ]);
+      const course = await Course.create({
+        title: { az: "Əlaqə Sınaq Kursu" },
+        category: category._id,
+        teachers: [teacher._id],
+        isActive: true,
+      });
+
+      const anon = client(api.base);
+      const coursePage = await anon.get(`/api/courses/${course.slug}?lang=az`);
+      expect(coursePage.status).toBe(200);
+      expect(coursePage.data.data.course.teachers.map((t) => t.fullName)).toContain("Sınaq Müəllim");
+      // Qrafik sistemi çıxarıldı — cavabda filial üzrə müəllim bölgüsü yoxdur.
+      expect(coursePage.data.data.teachersByBranch).toBeUndefined();
+
+      const teacherPage = await anon.get(`/api/teachers/${teacher.slug}?lang=az`);
+      expect(teacherPage.status).toBe(200);
+      expect(teacherPage.data.data.courses.map((c) => c.title)).toContain("Əlaqə Sınaq Kursu");
+      expect(teacherPage.data.data.groups).toBeUndefined();
+
+      // Kurs süzgəci: müəllim siyahısı kursun `teachers` sahəsindən süzülür.
+      const filtered = await anon.get(`/api/teachers?course=${course.slug}&lang=az`);
+      expect(filtered.data.data.teachers.map((t) => t.fullName)).toEqual(["Sınaq Müəllim"]);
+    });
+
+    it("dərs qrafiki marşrutu yoxdur", async () => {
+      expect((await client(api.base).get("/api/schedule")).status).toBe(404);
+    });
+  });
+
+  describe("müraciət siyahıları", () => {
+    it("xaricdə təhsil müraciətləri ümumi siyahıda görünmür, öz siyahısında görünür", async () => {
+      const anon = client(api.base);
+      await anon.post("/api/leads", { name: "Xarici Sınaq", phone: "+994500000021", interest: "Xaricdə təhsil" });
+      await anon.post("/api/leads", { name: "Kurs Sınaq", phone: "+994500000022", interest: "IELTS" });
+
+      const { c } = await login("dev@test.local");
+      const general = await c.get("/api/admin/leads?limit=100");
+      const names = general.data.data.items.map((l) => l.name);
+      expect(names).toContain("Kurs Sınaq");
+      expect(names).not.toContain("Xarici Sınaq");
+
+      const abroad = await c.get("/api/admin/leads?limit=100&abroad=1");
+      const abroadNames = abroad.data.data.items.map((l) => l.name);
+      expect(abroadNames).toContain("Xarici Sınaq");
+      expect(abroadNames).not.toContain("Kurs Sınaq");
+    });
+
+    it("«gözləmədə» statusu qəbul olunur", async () => {
+      const anon = client(api.base);
+      const id = (await anon.post("/api/leads", { name: "Gözləyən", phone: "+994500000023", interest: "IELTS" })).data.data.id;
+      const { c } = await login("dev@test.local");
+      expect((await c.patch(`/api/admin/leads/${id}/status`, { status: "waiting" })).status).toBe(200);
+      const { Lead } = await import("#models");
+      expect((await Lead.findById(id).lean()).status).toBe("waiting");
+    });
+  });
+
   describe("audit düzəlişləri", () => {
     it("müraciət kursa bağlanır və statistikada görünür (id və ya kurs adı ilə)", async () => {
       const { Course, CourseCategory } = await import("#models");

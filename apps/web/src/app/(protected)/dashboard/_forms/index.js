@@ -6,7 +6,6 @@ import { TeacherForm } from "./TeacherForm";
 import { BranchForm } from "./BranchForm";
 import { CourseWizard } from "./CourseWizard";
 import { CourseCategoryForm } from "./CourseCategoryForm";
-import { CourseGroupForm } from "./CourseGroupForm";
 import { DestinationForm } from "./DestinationForm";
 import { ProjectForm } from "./ProjectForm";
 import { TestimonialForm } from "./TestimonialForm";
@@ -25,7 +24,6 @@ export const BESPOKE_FORMS = {
   branches: BranchForm,
   courses: CourseWizard,
   "course-categories": CourseCategoryForm,
-  "course-groups": CourseGroupForm,
   destinations: DestinationForm,
   projects: ProjectForm,
   testimonials: TestimonialForm,

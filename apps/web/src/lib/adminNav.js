@@ -24,7 +24,6 @@ import {
   GraduationCap,
   Users,
   Building2,
-  CalendarClock,
   MessageSquareQuote,
   MessageCircle,
   Globe2,
@@ -88,10 +87,6 @@ export const NAV_GROUPS = [
       {
         name: "Kurs kateqoriyaları", href: "/dashboard/resurslar/course-categories", icon: Tags, section: "courses",
         tags: ["qrup", "bölmə", "dil kursları", "kompüter", "rəng"],
-      },
-      {
-        name: "Dərs qrafiki", href: "/dashboard/resurslar/course-groups", icon: CalendarClock, section: "course-groups",
-        tags: ["cədvəl", "saat", "gün", "qrup", "başlanğıc tarixi", "yer sayı", "açıq qrup"],
       },
       {
         name: "Müəllimlər", href: "/dashboard/resurslar/teachers", icon: Users, section: "teachers",
@@ -221,7 +216,7 @@ export const NAV_BOTTOM = [
  *   0 — ad sorğunun EYNİSİ
  *   1 — etiket sorğunun EYNİSİ            («qr» → WhatsApp)
  *   2 — ad sorğu ilə başlayır             («tənzim» → Tənzimləmələr)
- *   3 — addakı hansısa SÖZ sorğu ilə başlayır («qraf» → Dərs qrafiki)
+ *   3 — addakı hansısa SÖZ sorğu ilə başlayır («link» → İzlənilən linklər)
  *   4 — etiket sorğu ilə başlayır         («endir» → Kurslar)
  *   5 — ad sorğunu söz ortasında saxlayır
  *   6 — etiket sorğunu içində saxlayır
@@ -246,8 +241,8 @@ export function matchNavItem(item, query, groupLabel = "") {
   if (exact !== -1) return { score: 1, tagIndex: exact, tag: tags[exact] };
 
   if (name.startsWith(q)) return { score: 2, tagIndex: 0, tag: null };
-  // Söz başlanğıcı söz ortasından güclüdür: «qraf» → «Dərs qrafiki» mənalıdır,
-  // «raf» → eyni nəticə isə təsadüfi uyğunluqdur.
+  // Söz başlanğıcı söz ortasından güclüdür: «link» → «İzlənilən linklər»
+  // mənalıdır, «ink» → eyni nəticə isə təsadüfi uyğunluqdur.
   if (name.split(/\s+/).some((w) => w.startsWith(q))) return { score: 3, tagIndex: 0, tag: null };
 
   const pre = folded.findIndex((f) => f.startsWith(q));

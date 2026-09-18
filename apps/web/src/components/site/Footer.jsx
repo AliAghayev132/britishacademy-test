@@ -30,7 +30,9 @@ export async function Footer({ site }) {
           də pozulmur (admin başqa ölçüdə şəkil yükləsə belə). */}
       <div style={{ position: "absolute", top: 0, left: "50%", transform: "translate(-50%,-50%)", zIndex: 5, width: 120, height: 120, borderRadius: "50%", background: "#fff", border: "7px solid #00103D", display: "grid", placeItems: "center", boxShadow: "0 14px 36px rgba(0,0,0,.45)", overflow: "hidden", padding: 5 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={s.brand?.badge || "/assets/badge11.png"} alt={t("common.badgeAlt")} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+        {/* scale(1.2): emblem dairənin içində kiçik görünürdü — 20% böyüdülür.
+            `contain` + overflow:hidden olduğu üçün kənarları kəsilmir. */}
+        <img src={s.brand?.badge || "/assets/badge11.png"} alt={t("common.badgeAlt")} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", transform: "scale(1.2)" }} />
       </div>
       <div className="footer-grid" style={{ position: "relative", zIndex: 2, maxWidth: 1240, margin: "0 auto", padding: "64px 28px 20px", display: "grid", gridTemplateColumns: "1.7fr 1fr 1fr 1fr", gap: 36 }}>
         <div>

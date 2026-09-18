@@ -26,7 +26,6 @@ const adminSections = [
   "courses",       // Kurslar
   "teachers",      // Müəllimlər
   "branches",      // Filiallar
-  "course-groups", // Dərs qrafiki
   "testimonials",  // Rəylər
   "destinations",  // Xaricdə təhsil (məzmun səhifələri)
   "projects",      // Layihələr
@@ -58,17 +57,8 @@ const otpTypes = ["register", "reset-password", "verify-email"];
 // CEFR levels used by every language course
 const cefrLevels = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
-// How a lesson is delivered
-const lessonFormats = ["group", "individual"];
-
-// Day tariff vs. the after-17:00 tariff (evening carries a surcharge)
-const timeSlots = ["day", "evening"];
-
 // How a course price is presented on the course page
 const pricingModes = ["branch", "custom"];
-
-// Lifecycle of a scheduled study group
-const groupStatus = ["open", "full", "ongoing", "finished", "cancelled"];
 
 // Testimonials are either a talking-head video or a written review
 const testimonialTypes = ["video", "text"];
@@ -77,7 +67,9 @@ const testimonialTypes = ["video", "text"];
 const menuTypes = ["link", "dropdown", "mega"];
 
 // Application (Lead) pipeline
-const leadStatus = ["new", "contacted", "enrolled", "rejected"];
+// «waiting» — əlaqə saxlanılıb, cavab/qərar gözlənilir. Sıra panelin
+// süzgəcindəki ardıcıllıqdır.
+const leadStatus = ["new", "contacted", "waiting", "enrolled", "rejected"];
 
 // Where a lead came from
 const leadSources = [
@@ -109,10 +101,7 @@ export {
   postStatus,
   otpTypes,
   cefrLevels,
-  lessonFormats,
-  timeSlots,
   pricingModes,
-  groupStatus,
   testimonialTypes,
   menuTypes,
   leadStatus,

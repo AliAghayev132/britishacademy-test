@@ -4,7 +4,6 @@ import { Course, Lead } from "#models";
 import { view } from "../controllers/eventController.js";
 import { stripSystemFields } from "../controllers/admin/crudController.js";
 import { leadInReach } from "../services/LeadAccessService.js";
-import { planGroupSync } from "../controllers/courseComposer.js";
 
 /**
  * FAZA 2 — auditin məlumat itkisi və düzgünlük tapıntıları (API).
@@ -101,32 +100,19 @@ describe("#9 müraciət əhatəsi", () => {
   });
 });
 
-describe("#11 kurs qrupları yenilənir, silinmir", () => {
-  it("id-si olan qrup yenilənir, id-siz yaradılır, çıxarılan soft-delete olur", () => {
-    const a = { _id: "a", status: "closed" };
-    const b = { _id: "b" };
-    const plan = planGroupSync([a, b], [
-      { _id: "a", teacher: "t1", level: "B1", capacity: undefined },
-      { teacher: "t2", level: "A1" },
-    ]);
-    expect(plan.updates).toHaveLength(1);
-    expect(plan.updates[0].doc).toBe(a);
-    // Göndərilməyən (undefined) sahə mövcud dəyəri silmir.
-    expect(plan.updates[0].fields).toEqual({ teacher: "t1", level: "B1" });
-    expect(plan.creates).toEqual([{ teacher: "t2", level: "A1" }]);
-    expect(plan.removed).toEqual(["b"]);
+describe("dərs qrafiki sistemi qalmadı", () => {
+  // Qrafik (kurs + filial + müəllim + saat) çıxarıldı. Təsadüfən geri
+  // qayıtmasın: nə model, nə marşrut, nə də sihirbazda qrup məntiqi olmamalıdır.
+  it("model, marşrut və sihirbazda qrup izi yoxdur", () => {
+    expect(fs.existsSync("models/courseGroup.model.js")).toBe(false);
+    expect(read("routes/publicRoutes.js")).not.toMatch(/schedule/);
+    expect(read("controllers/courseComposer.js")).not.toMatch(/CourseGroup|planGroupSync|schedule/);
+    expect(read("models/index.js")).not.toMatch(/CourseGroup/);
   });
 
-  it("eyni id iki dəfə gəlsə ikincisi yeni qrup olur", () => {
-    const plan = planGroupSync([{ _id: "a" }], [{ _id: "a", teacher: "t1" }, { _id: "a", teacher: "t2" }]);
-    expect(plan.updates).toHaveLength(1);
-    expect(plan.creates).toEqual([{ teacher: "t2" }]);
-  });
-
-  it("controller qrupları silib yaratmır", () => {
-    const src = read("controllers/courseComposer.js");
-    expect(src).not.toMatch(/CourseGroup\.deleteMany\(\{ course: doc\._id \}\)/);
-    expect(src).toMatch(/planGroupSync\(existing, incoming\)/);
+  it("əlaqə tək yerdədir: kursda müəllimlər", () => {
+    expect(read("models/course.model.js")).toMatch(/teachers: \[\{ type: Schema\.Types\.ObjectId, ref: "Teacher" \}\]/);
+    expect(read("models/teacher.model.js")).not.toMatch(/assignments|courses: \[/);
   });
 });
 

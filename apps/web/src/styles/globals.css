@@ -675,11 +675,6 @@ body.ba-home #qeydiyyat > div {
 .ba-ptable tbody tr:last-child th, .ba-ptable tbody tr:last-child td { border-bottom: 0; }
 .ba-ptable th:first-child, .ba-ptable td:first-child { padding-left: 0; }
 
-.ba-pricecard-t { margin-top: 16px; padding-top: 15px; border-top: 1px dashed #E4E6EF; display: flex; flex-direction: column; gap: 9px; }
-.ba-pricecard-tlabel { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #63636E; }
-.ba-pricecard-t a { transition: background .18s, transform .18s; }
-.ba-pricecard-t a:hover { background: color-mix(in srgb, var(--c) 14%, #fff) !important; transform: translateY(-1px); }
-
 @media (max-width: 380px) {
   .ba-ptable th, .ba-ptable td { padding: 9px 6px; }
   .ba-ptable tbody td { font-size: 15px; }

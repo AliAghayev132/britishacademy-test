@@ -9,5 +9,9 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.js"],
+    // 5 s defolt az idi: sitemap testi `@/app/sitemap.js`-i dinamik import
+    // edir və onunla bütün komponent ağacı yüklənir. Tək işləyəndə ~2 s,
+    // 38 fayl paralel gedəndə (və CI-ın zəif maşınında) limitə çatırdı.
+    testTimeout: 20_000,
   },
 });

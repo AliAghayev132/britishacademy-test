@@ -3,9 +3,6 @@
 // React
 import { use, useMemo, useState } from "react";
 
-// Next
-import { useRouter, useSearchParams } from "next/navigation";
-
 // Components
 import { Pagination, confirmDialog, notify } from "@/components";
 
@@ -44,11 +41,6 @@ export default function ResourceBrowserPage({ params }) {
   const { resource } = use(params);
   const cfg = ADMIN_RESOURCES[resource];
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  // "Dərs qrafiki" düyməsindən gələn kurs filtri (?course=<id>) — course-groups üçün.
-  const courseParam = searchParams.get("course") || "";
-
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({}); // { isActive:"true", status:"open", ... }
@@ -57,7 +49,7 @@ export default function ResourceBrowserPage({ params }) {
   // Only send non-empty filter values.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== "" && v != null));
   const debouncedSearch = useDebouncedValue(search);
-  const listQuery = useAdminListQuery({ resource, search: debouncedSearch || undefined, page, limit: PAGE_SIZE, ...activeFilters, ...(courseParam ? { course: courseParam } : {}) });
+  const listQuery = useAdminListQuery({ resource, search: debouncedSearch || undefined, page, limit: PAGE_SIZE, ...activeFilters });
   const { data } = listQuery;
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
@@ -138,7 +130,6 @@ export default function ResourceBrowserPage({ params }) {
     toggleActive,
     toggleFeatured,
     move,
-    schedule: (item) => router.push(`/dashboard/resurslar/course-groups?course=${item._id}`),
   };
 
   return (
@@ -151,8 +142,6 @@ export default function ResourceBrowserPage({ params }) {
         onFilter={setFilter}
         hasActiveFilters={Object.keys(activeFilters).length > 0}
         onClearFilters={() => { setFilters({}); setPage(1); }}
-        courseParam={courseParam}
-        onClearCourse={() => router.push(`/dashboard/resurslar/${resource}`)}
         onNew={() => setEditing({})}
       />
 

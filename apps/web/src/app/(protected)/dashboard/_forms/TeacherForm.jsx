@@ -29,12 +29,10 @@ import {
   TextInput,
   NumberInput,
   MultiSelectChips,
-  NativeSelect,
   Toggle,
   SectionTitle,
   AddButton,
   RemoveButton,
-  DirtyButton,
   toId,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
@@ -56,10 +54,6 @@ export function TeacherForm({ item, onClose }) {
     value: b._id,
     label: locAz(b.name),
   }));
-  const courseOptions = (lookups?.data?.courses || []).map((c) => ({
-    value: c._id,
-    label: locAz(c.title),
-  }));
 
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
@@ -75,29 +69,10 @@ export function TeacherForm({ item, onClose }) {
   const [color, setColor] = useState(item?.color || "#2E6BE6");
   const [bio, setBio] = useState(toLoc(item?.bio));
 
-  // ── Filial üzrə dərslər ──
-  // Dərs SAATI qəsdən yoxdur: müəllim səhifəsində vaxt cədvəli saxlamaq
-  // qrafik dəyişəndə iki yerdə yeniləmə tələb edirdi. Burada yalnız
-  // «hansı filialda hansı dərsi keçir» qeyd olunur.
-  //
-  // Köhnə qeydlərdə yalnız `branches` massivi var — onları dərssiz təyinat
-  // kimi açırıq ki, məlumat itməsin.
-  const assignmentList = useRowList(() => {
-    const existing = (item?.assignments || []).map((a) => ({
-      branch: toId(a.branch),
-      courses: (a.courses || []).map(toId),
-    }));
-    if (existing.length) return existing;
-    return (item?.branches || []).map((b) => ({ branch: toId(b), courses: [] }));
-  });
-
-  const assignments = assignmentList.rows;
-  const addAssignment = () => assignmentList.add({ branch: "", courses: [] });
-  const removeAssignment = assignmentList.remove;
-  const patchAssignment = assignmentList.update;
-
-  // Bir filial iki dəfə seçilməsin — artıq işlədilənləri gizlədirik.
-  const usedBranches = new Set(assignments.map((a) => a.branch).filter(Boolean));
+  // ── Filiallar ──
+  // Müəllimin HANSI KURSLARI keçdiyi artıq kursun özündə saxlanılır
+  // (kurs formasındaki «Müəllimlər») — burada yalnız işlədiyi filiallar var.
+  const [branches, setBranches] = useState((item?.branches || []).map(toId));
 
   // ── Certificates ──
   const certificateList = useRowList(() =>
@@ -165,10 +140,7 @@ export function TeacherForm({ item, onClose }) {
       photo: photo.trim(),
       color: color || "#2E6BE6",
       bio: trimLoc(bio),
-      // Filialsız sətirlər atılır; branches/courses serverdə bundan törəyir.
-      assignments: assignments
-        .filter((a) => a.branch)
-        .map((a) => ({ branch: a.branch, courses: a.courses.filter(Boolean) })),
+      branches: branches.filter(Boolean),
       certificates: certificates
         .filter((c) => hasLoc(c.title))
         .map((c) => ({
@@ -306,55 +278,19 @@ export function TeacherForm({ item, onClose }) {
         </Field>
       </div>
 
-      {/* ── Filial üzrə dərslər ── */}
+      {/* ── Filiallar ── */}
       <div className="space-y-4">
-        <SectionTitle right={<AddButton onClick={addAssignment}>Filial</AddButton>}>
-          Filiallar və dərslər
-        </SectionTitle>
+        <SectionTitle>Filiallar</SectionTitle>
         <p className="text-xs text-gray-400">
-          Müəllimin hansı filialda hansı dərsləri apardığını qeyd edin.
-          <b> Dərs saatı tələb olunmur</b> — vaxtlı qrafik lazımdırsa «Dərs qrafiki»
-          bölməsindən idarə olunur.
+          Müəllimin işlədiyi filiallar. Hansı kursları keçdiyi isə kursun öz
+          formasında («Müəllimlər») seçilir.
         </p>
-
-        {assignments.length === 0 && (
-          <p className="text-sm text-gray-400">Filial əlavə edilməyib</p>
-        )}
-
-        <div className="space-y-3">
-          {assignments.map((a, i) => (
-            <div key={assignmentList.keys[i]} className="rounded-xl border border-gray-200 bg-gray-50/60 p-4">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex-1">
-                  <NativeSelect
-                    placeholder="Filial seçin"
-                    value={a.branch}
-                    onChange={(e) => patchAssignment(i, { branch: e.target.value })}
-                    options={branchOptions.filter(
-                      (o) => o.value === a.branch || !usedBranches.has(o.value),
-                    )}
-                  />
-                </div>
-                <DirtyButton
-                  onClick={() => removeAssignment(i)}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-500 transition hover:border-red-200 hover:text-red-600"
-                >
-                  Sil
-                </DirtyButton>
-              </div>
-
-              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-500">
-                Bu filialda keçdiyi dərslər
-              </div>
-              <MultiSelectChips
-                options={courseOptions}
-                value={a.courses}
-                onChange={(v) => patchAssignment(i, { courses: v })}
-                empty="Kurs tapılmadı"
-              />
-            </div>
-          ))}
-        </div>
+        <MultiSelectChips
+          options={branchOptions}
+          value={branches}
+          onChange={setBranches}
+          empty="Filial tapılmadı"
+        />
       </div>
 
       {/* ── Sertifikatlar ── */}

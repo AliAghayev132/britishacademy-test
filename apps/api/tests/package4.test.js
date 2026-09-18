@@ -52,10 +52,12 @@ describe("#30 sitemap URL siyahısı", () => {
 });
 
 describe("#51 kurs səhifəsi", () => {
-  it("qruplar və əlaqəli kurslar paralel, kartlar yüngül", () => {
+  it("əlaqəli kurslar yüngül kart kimi çəkilir, qrafik sorğusu yoxdur", () => {
     const src = fs.readFileSync("controllers/public/courseController.js", "utf8");
-    const fn = src.slice(src.indexOf("const getCourseBySlug"), src.indexOf("/* ---------------- Schedule"));
-    expect(fn).toMatch(/const \[groups, related\] = await Promise\.all\(/);
+    const fn = src.slice(src.indexOf("const getCourseBySlug"));
+    // Qrafik sistemi çıxarıldı — müəllimlər kursun özündən gəlir.
+    expect(fn).not.toMatch(/CourseGroup/);
+    expect(src).toMatch(/populate\(live\("teachers", "fullName slug title photo color"\)\)/);
     expect(fn).toMatch(/\.limit\(6\)\s*\n\s*\.select\(CARD_EXCLUDE\)/);
   });
 });

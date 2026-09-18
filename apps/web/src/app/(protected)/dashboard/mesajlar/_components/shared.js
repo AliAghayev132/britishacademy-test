@@ -8,6 +8,7 @@ export const LEAD_STATUSES = [
   { value: "all", label: "Hamısı" },
   { value: "new", label: "Yeni" },
   { value: "contacted", label: "Əlaqə saxlanılıb" },
+  { value: "waiting", label: "Gözləmədə" },
   { value: "enrolled", label: "Qeydiyyatdan keçib" },
 ];
 

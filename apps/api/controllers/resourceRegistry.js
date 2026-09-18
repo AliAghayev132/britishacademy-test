@@ -13,7 +13,6 @@ import {
   Teacher,
   CourseCategory,
   Course,
-  CourseGroup,
   Testimonial,
   Destination,
   BlogCategory,
@@ -41,8 +40,7 @@ export const RESOURCES = {
     model: Teacher,
     search: ["fullName", "title"],
     sort: { order: 1, fullName: 1 },
-    // assignments.* — redaktə formasının filial üzrə dərsləri göstərməsi üçün.
-    populate: ["branches", "courses", "assignments.branch", "assignments.courses"],
+    populate: ["branches"],
   },
   "course-categories": {
     model: CourseCategory,
@@ -54,13 +52,7 @@ export const RESOURCES = {
     model: Course,
     search: ["title", "h1", "lead"],
     sort: { order: 1, title: 1 },
-    populate: ["category", "pricing.branch"],
-  },
-  "course-groups": {
-    model: CourseGroup,
-    search: ["code"],
-    sort: { startDate: 1 },
-    populate: ["course", "branch", "teacher"],
+    populate: ["category", "pricing.branch", "teachers"],
   },
   testimonials: {
     model: Testimonial,
@@ -167,7 +159,6 @@ export const RESOURCE_SECTION = {
 
   courses: "courses",
   "course-categories": "courses",
-  "course-groups": "course-groups",
   teachers: "teachers",
   branches: "branches",
   quizzes: "quizzes",
@@ -203,7 +194,6 @@ export const RESOURCE_SECTION = {
 export const RESOURCE_LABELS = {
   courses: "Kurslar",
   "course-categories": "Kurs kateqoriyaları",
-  "course-groups": "Dərs qrafiki",
   teachers: "Müəllimlər",
   branches: "Filiallar",
   quizzes: "Testlər",

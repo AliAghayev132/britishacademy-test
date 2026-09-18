@@ -10,7 +10,7 @@ import { TEACHER_COLORS } from "./sourceData.js";
 
 /**
  * Müəllimlər: eyni ad birdən çox filialda ola bilər, ona görə ada görə
- * qruplaşdırılır. Təyinatlar kurslardan sonra doldurulur (assignTeachers).
+ * qruplaşdırılır. Filial və kurs əlaqəsi kurslardan sonra qurulur (linkTeachers).
  */
 export function buildTeachers() {
   const teacherRowsByName = new Map();
@@ -33,11 +33,12 @@ export function buildTeachers() {
 }
 
 /**
- * ── Müəllim təyinatları: filial → dərs ──
- * Kurslar və filiallar hazır olduqdan sonra qurulur. Dərs SAATI yazılmır —
- * müəllim səhifəsi vaxt cədvəli saxlamır; qrafik CourseGroup-dadır.
+ * ── Müəllim ↔ filial və kurs ↔ müəllim əlaqəsi ──
+ * Kurslar və filiallar hazır olduqdan sonra qurulur. Saat və həftə günü
+ * saxlanılmır: müəllimdə işlədiyi FİLİALLAR, kursda isə onu keçən
+ * MÜƏLLİMLƏR yazılır (əlaqə tək yerdədir).
  */
-export function assignTeachers({ teachers, teacherRowsByName, courses, branches }) {
+export function linkTeachers({ teachers, teacherRowsByName, courses, branches }) {
   const normKey = (v) =>
     String(v || "")
       .normalize("NFD")
@@ -53,28 +54,31 @@ export function assignTeachers({ teachers, teacherRowsByName, courses, branches 
     return kw ? branches.find((b) => normKey(b.name).includes(kw)) : null;
   };
 
+  const addTeacher = (course, teacherId) => {
+    course.teachers = course.teachers || [];
+    if (!course.teachers.some((id) => String(id) === String(teacherId))) {
+      course.teachers.push(teacherId);
+    }
+  };
+
   for (const t of teachers) {
     const rows = teacherRowsByName.get(t.fullName) || [];
-    const assignments = [];
+    const branchIds = new Set();
 
     for (const row of rows) {
       const branch = findBranch(row.branch);
-      if (!branch) continue;
+      if (branch) branchIds.add(String(branch._id));
 
-      const courseIds = [];
       for (const label of row.courses) {
         const slug = COURSE_ALIASES[label.toLowerCase()];
         // Bazada qarşılığı olmayan adlar (Cambridge English, Aptis) ötürülür.
         if (!slug || slug.startsWith("__UNMAPPED")) continue;
         const c = courseBySlug.get(slug);
-        // Pre-IELTS və IELTS eyni kursa düşür — təkrar əlavə etmirik.
-        if (c && !courseIds.some((id) => String(id) === String(c._id))) courseIds.push(c._id);
+        // Pre-IELTS və IELTS eyni kursa düşür — təkrar əlavə olunmur.
+        if (c) addTeacher(c, t._id);
       }
-      assignments.push({ branch: branch._id, courses: courseIds });
     }
 
-    t.assignments = assignments;
-    t.branches = [...new Set(assignments.map((a) => String(a.branch)))];
-    t.courses = [...new Set(assignments.flatMap((a) => a.courses.map(String)))];
+    t.branches = [...branchIds];
   }
 }

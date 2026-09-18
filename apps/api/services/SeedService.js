@@ -12,8 +12,8 @@
 // Local
 import { HEADER_MENU } from "./seed/sourceData.js";
 import { buildSite, buildBranches } from "./seed/site.js";
-import { buildCategories, buildCourses, buildGroups } from "./seed/courses.js";
-import { buildTeachers, assignTeachers } from "./seed/teachers.js";
+import { buildCategories, buildCourses } from "./seed/courses.js";
+import { buildTeachers, linkTeachers } from "./seed/teachers.js";
 import {
   buildDestinations,
   buildTestimonials,
@@ -36,10 +36,8 @@ export function buildGraph() {
   const { categories, catByKey } = buildCategories();
   const { teachers, teacherRowsByName } = buildTeachers();
   const courses = buildCourses(catByKey);
-  const groups = buildGroups(courses, branches, teachers);
-
-  // Təyinatlar kurslar və filiallar hazır olduqdan SONRA — kurs id-ləri lazımdır.
-  assignTeachers({ teachers, teacherRowsByName, courses, branches });
+  // Əlaqə kurslar və filiallar hazır olduqdan SONRA — kurs id-ləri lazımdır.
+  linkTeachers({ teachers, teacherRowsByName, courses, branches });
 
   const destinations = buildDestinations();
   const testimonials = buildTestimonials();
@@ -50,7 +48,7 @@ export function buildGraph() {
   const quizzes = buildQuizzes();
   const pages = buildPages();
 
-  return { site, branches, categories, teachers, courses, groups, destinations, testimonials, advantages, partners, menu, pages, faqs, quizzes };
+  return { site, branches, categories, teachers, courses, destinations, testimonials, advantages, partners, menu, pages, faqs, quizzes };
 }
 
 /**

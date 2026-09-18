@@ -15,7 +15,7 @@ const read = (f) => fs.readFileSync(path.join(DIR, f), "utf8");
 
 const FORMS = [
   "AdvantageForm.jsx", "BlogCategoryForm.jsx", "BranchForm.jsx", "CourseCategoryForm.jsx",
-  "CourseGroupForm.jsx", "CourseWizard.jsx", "DestinationForm.jsx", "FaqForm.jsx",
+  "CourseWizard.jsx", "DestinationForm.jsx", "FaqForm.jsx",
   "PageForm.jsx", "PartnerForm.jsx", "ProjectForm.jsx", "QuizCategoryForm.jsx",
   "TeacherForm.jsx", "TestimonialForm.jsx",
 ];

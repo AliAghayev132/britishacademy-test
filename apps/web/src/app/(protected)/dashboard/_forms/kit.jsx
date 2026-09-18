@@ -24,15 +24,7 @@ import { FormDirtyContext, useMarkDirty } from "@/lib";
 import { LocalizedFormProvider, LocaleSwitcher, GlobalAiBar } from "./Localized";
 
 // ── Constants ──
-export const WEEKDAYS = [
-  { v: 1, l: "B.e" }, { v: 2, l: "Ç.a" }, { v: 3, l: "Çərş" },
-  { v: 4, l: "C.a" }, { v: 5, l: "Cümə" }, { v: 6, l: "Şənbə" }, { v: 7, l: "Bazar" },
-];
 export const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-export const FORMATS = [
-  { value: "group", label: "Qrup" },
-  { value: "individual", label: "Fərdi" },
-];
 
 /** Coerce a value that may be an id string or a populated {_id} doc → id string. */
 export const toId = (v) => (v && typeof v === "object" ? v._id : v) || "";

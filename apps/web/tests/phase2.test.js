@@ -4,7 +4,7 @@ import { sanitizeHtml } from "@/utils/sanitizeHtml";
 
 /**
  * FAZA 2 — auditin sayt tərəfi tapıntıları.
- * #11 sihirbaz qrup id-lərini göndərir, #12 videolar silinirdi, #13 baxış
+ * #11 sihirbazın göndərdiyi kurs gövdəsi, #12 videolar silinirdi, #13 baxış
  * sayğacı, #15 hər səhifəyə tam sənədlər, #16 Socket.IO ictimai saytda,
  * #19 honeypot.
  */
@@ -95,8 +95,11 @@ describe("#19 honeypot", () => {
 });
 
 describe("#11 kurs sihirbazı", () => {
-  it("qrupların id və kodu göndərilir (server silib yaratmır)", () => {
+  // Qrup (dərs qrafiki) sistemi ləğv olundu — sihirbaz artıq yalnız kursu,
+  // müəllimlərini və filial qiymətlərini göndərir.
+  it("müəllimlər kursun özündə göndərilir, qrup qalığı yoxdur", () => {
     const src = read("src/app/(protected)/dashboard/_forms/CourseWizard.jsx");
-    expect(src).toMatch(/_id: g\._id \|\| undefined,\s*\n\s*code: g\.code \|\| undefined/);
+    expect(src).toMatch(/teachers: course\.teachers/);
+    expect(src).not.toMatch(/g\.code|\bgroups\b/);
   });
 });

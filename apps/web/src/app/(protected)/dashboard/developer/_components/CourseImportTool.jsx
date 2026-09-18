@@ -29,7 +29,7 @@ export default function CourseImportTool() {
       const ok = await confirmDialog({
         tone: "warning",
         title: "Kurs məlumatları tətbiq olunsun?",
-        text: "MS Office, İngilis dili, Rus dili və IELTS kurslarının <b>təsviri, məzmunu, SEO mətnləri və qiymət matrisi</b> müştəri məlumatları ilə əvəzlənəcək.<br><br>Şəkil, sıra və dərs qrafikinə toxunulmur.",
+        text: "MS Office, İngilis dili, Rus dili və IELTS kurslarının <b>təsviri, məzmunu, SEO mətnləri və qiymət matrisi</b> müştəri məlumatları ilə əvəzlənəcək.<br><br>Şəkil, sıra və müəllim siyahısına toxunulmur.",
         confirmText: "Bəli, tətbiq et",
         cancelText: "İmtina",
       });
@@ -59,7 +59,7 @@ export default function CourseImportTool() {
       }
     >
       <Notice className="bg-sky-50 text-sky-800">
-        Yalnız sadalanan sahələr yazılır — şəkil, sıra, aktivlik və dərs qrafikinə
+        Yalnız sadalanan sahələr yazılır — şəkil, sıra, aktivlik və müəllim siyahısına
         toxunulmur. Təkrar işlədilə bilər (idempotent). Əvvəlcə <b>«Yoxla»</b> ilə
         nəyin dəyişəcəyini görün.
       </Notice>

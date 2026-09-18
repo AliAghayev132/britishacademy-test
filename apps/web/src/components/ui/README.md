@@ -17,7 +17,6 @@ admin formasında «dəyişiklik» işarəsi vermir. Yerinə:
 | `type="color"` | `ColorInput` | brend palitrası, HEX sahəsi, `onChange(e)` |
 | `type="range"` | `Slider` | `role="slider"`, ←/→ Home/End, `onChange(e)` |
 | `type="date"` | `DatePicker` / `DateRangePicker` | "YYYY-MM-DD", `onChange(string)` |
-| `type="time"` | `TimeSelect` | 15 dəqiqəlik addım, "HH:MM", `onChange(e)` |
 | `<details>` | `Collapsible` | `aria-expanded` |
 
 `onChange(e)` müqaviləsi olanlar `e.target.value` verir — mövcud formalar

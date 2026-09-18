@@ -10,6 +10,7 @@ import {
   redact,
   pickFields,
   applyLeadAccess,
+  applyLeadTopic,
   applyLeadScope,
   canSeeLead,
   leadInReach,
@@ -155,6 +156,7 @@ const list = asyncHandler(async (req, res) => {
   // görə çıxır.
   applyLeadScope(filter, req, req.params.resource);
   applyLeadAccess(filter, req, req.params.resource);
+  applyLeadTopic(filter, req, req.params.resource);
 
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),

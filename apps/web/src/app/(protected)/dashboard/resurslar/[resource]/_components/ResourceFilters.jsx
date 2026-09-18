@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 
 // Icons
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 // Store
 import { useAdminLookupsQuery } from "@/store";
@@ -24,8 +24,6 @@ export default function ResourceFilters({
   onFilter,
   hasActiveFilters,
   onClearFilters,
-  courseParam,
-  onClearCourse,
   onNew,
 }) {
   // Dinamik filtr seçimləri (filial/müəllim) — yalnız lazım olduqda çək.
@@ -60,11 +58,6 @@ export default function ResourceFilters({
       ))}
       {hasActiveFilters && (
         <button onClick={onClearFilters} className="text-sm font-semibold text-gray-500 hover:text-[#00157A]">Filtrləri təmizlə</button>
-      )}
-      {courseParam && (
-        <button onClick={onClearCourse} className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#00157A] hover:bg-blue-100">
-          <X className="h-3.5 w-3.5" /> Kurs üzrə süzülür
-        </button>
       )}
       <button onClick={onNew} className="ml-auto inline-flex items-center gap-2 rounded-lg bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
         <Plus className="h-4 w-4" /> Yeni

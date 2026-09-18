@@ -1,5 +1,5 @@
 // Models
-import { CourseCategory, Course, CourseGroup } from "#models";
+import { CourseCategory, Course } from "#models";
 
 // Data
 import { tri, COURSE_CONTENT } from "#data";
@@ -39,25 +39,3 @@ export function buildCourses(catByKey) {
   });
 }
 
-/** Assign 1 teacher per course-branch as a scheduled group (the timetable). */
-export function buildGroups(courses, branches, teachers) {
-  const groups = [];
-  courses.forEach((course, ci) => {
-    const branchList = COURSES[ci].onlyMain ? [branches[0]] : branches;
-    branchList.forEach((branch, bi) => {
-      const teacher = teachers[(ci + bi) % teachers.length];
-      groups.push(
-        new CourseGroup({
-          course: course._id, branch: branch._id, teacher: teacher._id,
-          level: "B1", format: "group",
-          schedule: [
-            { weekday: 1, from: "19:00", to: "20:30" },
-            { weekday: 3, from: "19:00", to: "20:30" },
-          ],
-          capacity: 6, enrolled: 3, status: "open",
-        }),
-      );
-    });
-  });
-  return groups;
-}

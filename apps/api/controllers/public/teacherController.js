@@ -1,11 +1,25 @@
 // Models
-import { Course, CourseGroup, Branch, Teacher } from "#models";
+import { Course, Branch, Teacher } from "#models";
 
 // Utils
 import { fail, ok, asyncHandler } from "#utils";
 
 // Local
-import { live, dropDangling } from "./shared.js";
+import { live, CARD_EXCLUDE } from "./shared.js";
+
+/**
+ * Müəllimin keçdiyi kurslar — əlaqə kursun özündədir (Course.teachers).
+ * Siyahı səhifəsi üçün bir sorğu ilə bütün kurslar çəkilir və müəllimlərə
+ * paylanır: kurs sayı onlarladır, müəllim başına ayrı sorğu mənasız olardı.
+ */
+const withCourses = (teachers, courses) =>
+  teachers.map((t) => {
+    const obj = t.toObject({ virtuals: true });
+    obj.courses = courses
+      .filter((c) => (c.teachers || []).some((id) => String(id) === String(t._id)))
+      .map((c) => ({ _id: c._id, title: c.title, slug: c.slug }));
+    return obj;
+  });
 
 /* ---------------- Teachers ---------------- */
 
@@ -17,27 +31,17 @@ const listTeachers = asyncHandler(async (req, res) => {
     filter.branches = b ? b._id : null; // unknown branch → no results
   }
 
-  // Filter by course via the timetable: teachers who run a group of that course.
+  // Kurs süzgəci: müəllim kursun `teachers` siyahısındadırsa.
   if (req.query.course) {
-    const c = await Course.findOne({ slug: req.query.course });
-    const ids = c
-      ? await CourseGroup.find({
-          course: c._id,
-          isActive: true,
-          isDeleted: false,
-        }).distinct("teacher")
-      : [];
-    filter._id = { $in: ids };
+    const c = await Course.findOne({ slug: req.query.course, isDeleted: false }).select("teachers");
+    filter._id = { $in: c ? c.teachers || [] : [] }; // naməlum kurs → nəticə yoxdur
   }
 
-  // assignments.branch — kartda filial adlarını göstərmək və axtarışda
-  // kurs/filial adlarına görə tapmaq üçün.
-  const teachers = await Teacher.findPublic(filter)
-    .populate(live("branches", "name slug"))
-    .populate(live("courses", "title slug"))
-    .populate(live("assignments.branch", "name slug"))
-    .populate(live("assignments.courses", "title slug"));
-  ok(res, { teachers: teachers.map((t) => dropDangling(t, "assignments", "branch")) });
+  const [teachers, courses] = await Promise.all([
+    Teacher.findPublic(filter).populate(live("branches", "name slug")),
+    Course.findPublic().select("title slug teachers"),
+  ]);
+  ok(res, { teachers: withCourses(teachers, courses) });
 });
 
 const getTeacherBySlug = asyncHandler(async (req, res) => {
@@ -46,33 +50,17 @@ const getTeacherBySlug = asyncHandler(async (req, res) => {
     isActive: true,
     isDeleted: false,
   })
-    .populate(live("branches", "name slug"))
-    .populate(live("courses", "title slug"))
-    // Filial üzrə dərs təyinatları — müəllim səhifəsinin əsas bölməsi.
-    .populate(live("assignments.branch", "name slug"))
-    .populate(live("assignments.courses", "title slug"));
+    .populate(live("branches", "name slug"));
   if (!teacher) {
     return fail(res, "Müəllim tapılmadı", 404);
   }
 
-  // Vaxtlı qrafik yalnız təyinat DOLDURULMAYIB isə göstərilir — köhnə
-  // məlumatlarda müəllimin dərsləri yalnız CourseGroup-da ola bilər, onda
-  // səhifə boş qalmasın. Təyinat varsa o üstündür (saatsız, sadə görünüş).
-  const hasAssignments = (teacher.assignments || []).length > 0;
-  const groups = hasAssignments
-    ? []
-    : await CourseGroup.find({
-        teacher: teacher._id,
-        isActive: true,
-        isDeleted: false,
-      })
-        .populate(live("course", "title slug"))
-        .populate(live("branch", "name slug"));
+  // Keçdiyi kurslar — kart kimi göstərilir, ağır sahələr çəkilmir.
+  const courses = await Course.findPublic({ teachers: teacher._id })
+    .populate(live("category", "name slug"))
+    .select(CARD_EXCLUDE);
 
-  ok(res, {
-    teacher: dropDangling(teacher, "assignments", "branch"),
-    groups: groups.filter((g) => g.course && g.branch),
-  });
+  ok(res, { teacher, courses });
 });
 
 export { listTeachers, getTeacherBySlug };

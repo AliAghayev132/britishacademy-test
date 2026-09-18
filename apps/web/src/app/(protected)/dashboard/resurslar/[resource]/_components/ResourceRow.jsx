@@ -1,7 +1,7 @@
 "use client";
 
 // Icons
-import { Pencil, Trash2, CalendarClock, FileVideo, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, FileVideo, ArrowUp, ArrowDown } from "lucide-react";
 
 // Components
 import { ActionsMenu } from "@/components";
@@ -76,11 +76,6 @@ export default function ResourceRow({ item, i, total, page, cfg, resource, cols,
         <ActionsMenu
           actions={[
             { label: "Redaktə", icon: Pencil, onClick: () => actions.edit(item) },
-            resource === "courses" && {
-              label: "Dərs qrafiki",
-              icon: CalendarClock,
-              onClick: () => actions.schedule(item),
-            },
             { label: "Sil", icon: Trash2, tone: "danger", onClick: () => actions.remove(item) },
           ]}
         />

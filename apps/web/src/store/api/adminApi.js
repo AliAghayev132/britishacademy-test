@@ -63,17 +63,16 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => "/admin/lookups",
       providesTags: [{ type: "Resource", id: "lookups" }],
     }),
-    // A course + its timetable reshaped into branch rows (pre-fills the edit form).
+    // A course + its per-branch pricing rows (pre-fills the edit form).
     adminCourseFull: builder.query({
       query: (id) => `/admin/courses/full/${id}`,
       providesTags: (r, e, id) => [{ type: "Resource", id: `courses-${id}` }],
     }),
-    // Create a course together with pricing + CourseGroups in one call.
+    // Create a course together with its per-branch pricing in one call.
     adminCreateCourseFull: builder.mutation({
       query: (data) => ({ url: "/admin/courses/full", method: "POST", body: data }),
       invalidatesTags: [
         { type: "Resource", id: "courses" },
-        { type: "Resource", id: "course-groups" },
         { type: "Resource", id: "teachers" },
       ],
     }),
@@ -82,7 +81,6 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: (r, e, { id }) => [
         { type: "Resource", id: "courses" },
         { type: "Resource", id: `courses-${id}` },
-        { type: "Resource", id: "course-groups" },
         { type: "Resource", id: "teachers" },
       ],
     }),

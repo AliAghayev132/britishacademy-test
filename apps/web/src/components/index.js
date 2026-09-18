@@ -72,7 +72,6 @@ export { Slider } from "./ui/Slider";
 export { StatCard } from "./ui/StatCard";
 export { Switch } from "./ui/Switch";
 export { Table } from "./ui/Table";
-export { TimeSelect } from "./ui/TimeSelect";
 export {
   FeedbackHost,
   alertDialog,

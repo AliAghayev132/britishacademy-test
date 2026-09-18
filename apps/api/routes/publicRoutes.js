@@ -58,7 +58,6 @@ PublicRouter.get("/projects", publicController.listProjects);
 PublicRouter.get("/projects/:slug", publicController.getProjectBySlug);
 
 // Timetable
-PublicRouter.get("/schedule", publicController.listSchedule);
 
 // Blog
 PublicRouter.get("/blog", publicController.listBlog);

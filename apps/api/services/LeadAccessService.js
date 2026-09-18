@@ -37,6 +37,23 @@ export function applyLeadAccess(filter, req, resource) {
   return filter;
 }
 
+/**
+ * Siyahını mövzusuna görə ayır: xaricdə təhsil müraciətləri YALNIZ öz
+ * səhifəsində görünür (`?abroad=1`), ümumi siyahıda isə gizlədilir.
+ *
+ * Əvvəl bu ayırma yalnız icazə ilə işləyirdi: hər iki bölməyə çıxışı olan
+ * admin (məs. developer) ümumi siyahıda xaricdə təhsil müraciətlərini də
+ * görürdü və iki siyahı qarışırdı.
+ */
+export function applyLeadTopic(filter, req, resource) {
+  if (resource !== "leads") return filter;
+  const cond = req.query?.abroad === "1"
+    ? { interest: ABROAD_INTEREST }
+    : { interest: { $ne: ABROAD_INTEREST } };
+  filter.$and = [...(filter.$and || []), cond];
+  return filter;
+}
+
 /** Bu müraciət istifadəçinin bölmə icazəsinə düşürmü? */
 export function canSeeLead(user, lead) {
   const isAbroad = lead?.interest === ABROAD_INTEREST;

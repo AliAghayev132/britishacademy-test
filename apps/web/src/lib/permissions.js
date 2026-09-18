@@ -31,7 +31,6 @@ export const SECTIONS = [
   { key: "courses", label: "Kurslar" },
   { key: "teachers", label: "Müəllimlər" },
   { key: "branches", label: "Filiallar" },
-  { key: "course-groups", label: "Dərs qrafiki" },
   { key: "testimonials", label: "Rəylər" },
   { key: "destinations", label: "Xaricdə təhsil" },
   // Sidebar-da «Layihələr» bəndi bu açarı işlədirdi, amma siyahıda yox idi —
@@ -86,7 +85,6 @@ const ROUTE_SECTIONS = [
   ["/dashboard/resurslar/course-categories", "courses"],
   ["/dashboard/resurslar/teachers", "teachers"],
   ["/dashboard/resurslar/branches", "branches"],
-  ["/dashboard/resurslar/course-groups", "course-groups"],
   ["/dashboard/resurslar/testimonials", "testimonials"],
   ["/dashboard/resurslar/destinations", "destinations"],
   ["/dashboard/resurslar/blog-posts", "blog"],

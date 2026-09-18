@@ -5,14 +5,6 @@ export const ADMIN_RESOURCES = {
   "course-categories": { name: "Kurs kateqoriyaları", title: "name", sub: "slug" },
   teachers: { name: "Müəllimlər", title: "fullName", sub: "title" },
   branches: { name: "Filiallar", title: "name", sub: "address" },
-  "course-groups": {
-    name: "Dərs qrafiki",
-    title: (i) => `${pickAz(i.course?.title) || "Kurs"} — ${pickAz(i.branch?.name) || "Filial"}`,
-    sub: (i) =>
-      `${pickAz(i.teacher?.fullName) || ""} · ${(i.schedule || [])
-        .map((s) => `${["", "B.e", "Ç.a", "Çərş", "C.a", "Cümə", "Şən", "Baz"][s.weekday]} ${s.from}`)
-        .join(", ")}`,
-  },
   testimonials: { name: "Rəylər", title: "name", sub: "achievement" },
   destinations: { name: "Xaricdə təhsil", title: "country", sub: "tagline" },
   projects: { name: "Layihələr", title: "title", sub: "tagline" },
@@ -39,8 +31,8 @@ export const ADMIN_RESOURCES = {
  *  - `menu-items`  → sıralama `{ location, order }`-dir; bir səhifədə müxtəlif
  *    yerlərin (header/footer) elementləri qarışıq gəlir, qonşu dəyişmək
  *    qrupları pozardı.
- *  - `blog-posts`, `leads`, `media`, `short-links`, `course-groups` → tarixə,
- *    kliklərə və ya başlanğıc tarixinə görə düzülür.
+ *  - `blog-posts`, `leads`, `media`, `short-links` → tarixə və ya kliklərə
+ *    görə düzülür.
  */
 export const ORDERABLE = new Set([
   "branches", "teachers", "course-categories", "courses", "testimonials",
@@ -92,17 +84,6 @@ export const RESOURCE_FILTERS = {
   teachers: [ACTIVE, FEATURED],
   branches: [ACTIVE],
   "course-categories": [ACTIVE],
-  "course-groups": [
-    { key: "status", label: "Status", options: [
-      { value: "open", label: "Açıq" }, { value: "full", label: "Dolu" },
-      { value: "ongoing", label: "Davam edir" }, { value: "finished", label: "Bitib" },
-      { value: "cancelled", label: "Ləğv edilib" },
-    ] },
-    { key: "format", label: "Format", options: [{ value: "group", label: "Qrup" }, { value: "individual", label: "Fərdi" }] },
-    // Dinamik seçimlər — options /admin/lookups-dan gəlir (bax: [resource]/page.js).
-    { key: "branch", label: "Filial", dynamic: "branches" },
-    { key: "teacher", label: "Müəllim", dynamic: "teachers" },
-  ],
   testimonials: [ACTIVE, { key: "type", label: "Tip", options: [{ value: "video", label: "Video" }, { value: "text", label: "Mətn" }] }],
   destinations: [ACTIVE, { key: "isScholarship", label: "Təqaüd", options: [{ value: "true", label: "Bəli" }, { value: "false", label: "Xeyr" }] }],
   "blog-posts": [{ key: "status", label: "Status", options: [

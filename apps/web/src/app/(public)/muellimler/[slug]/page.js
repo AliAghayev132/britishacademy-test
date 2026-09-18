@@ -60,70 +60,44 @@ function TeacherHero({ t, tr }) {
 }
 
 /**
- * "Filiallar və dərslər" — müəllimin hansı filialda hansı dərsi apardığı.
+ * "Keçdiyi kurslar" — müəllimin apardığı kurslar.
  *
- * Saat göstərilmir: qrafik tez-tez dəyişir və onu iki yerdə (kurs qrafiki +
- * müəllim səhifəsi) sinxron saxlamaq baxım yükü yaradırdı. Ziyarətçi üçün
- * əsas sual «bu müəllim mənim filialımda hansı dərsi keçir» sualıdır.
+ * Saat/qrafik göstərilmir: qrafik tez-tez dəyişirdi və onu iki yerdə saxlamaq
+ * baxım yükü yaradırdı. Əlaqə indi kursun özündədir (Course.teachers), ona görə
+ * ziyarətçiyə birbaşa kurs səhifəsinə keçid verilir.
  */
-function BranchCourses({ assignments, tr }) {
-  const rows = (assignments || []).filter((a) => a.branch);
-  if (!rows.length) return null;
-
+function TaughtCourses({ courses, tr }) {
   return (
     <>
       <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "40px 0 18px" }}>
-        {tr("teacher.branchCourses")}
+        {tr("teacher.courses")}
       </h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {rows.map((a, i) => (
-          <div key={a.branch?._id || i} style={{ border: "1px solid #ECEDF2", borderRadius: 14, padding: "16px 18px", background: "#fff" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: (a.courses || []).length ? 12 : 0 }}>
-              <span style={{ display: "grid", placeItems: "center", width: 28, height: 28, borderRadius: 8, background: "var(--accent-soft)", color: "var(--accent)", flex: "none", fontSize: 14, fontWeight: 700 }}>
-                {i + 1}
+        {courses.map((c) => (
+          <Link
+            key={c._id}
+            href={`/kurslar/${c.slug}`}
+            style={{ display: "block", border: "1px solid #ECEDF2", borderRadius: 14, padding: "16px 18px", background: "#fff" }}
+          >
+            <span style={{ display: "block", fontWeight: 700, color: "#16161C", fontFamily: "'Poppins'", fontSize: 15.5 }}>
+              {c.title}
+            </span>
+            {/* `excerpt` admin paneldə çox vaxt boş qalır — `lead` ehtiyatdır. */}
+            {(c.excerpt || c.lead) && (
+              <span style={{ display: "block", fontSize: 13.5, color: "#63636F", lineHeight: 1.6, marginTop: 5 }}>
+                {c.excerpt || c.lead}
               </span>
-              <span style={{ fontWeight: 700, color: "#16161C", fontFamily: "'Poppins'", fontSize: 15.5 }}>
-                {a.branch?.name}
-              </span>
-            </div>
-            {(a.courses || []).length > 0 ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {a.courses.map((c) => (
-                  <Link
-                    key={c._id}
-                    href={`/kurslar/${c.slug}`}
-                    style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)", background: "var(--accent-soft)", borderRadius: 99, padding: "7px 14px" }}
-                  >
-                    {c.title}
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div style={{ fontSize: 13.5, color: "#8A8A98" }}>{tr("teacher.noCourses")}</div>
             )}
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-/** Köhnə məlumat üçün ehtiyat: təyinat yoxdursa CourseGroup qrafiki. */
-function ScheduleList({ groups, tr }) {
-  return (
-    <>
-      <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(22px,2.8vw,30px)", color: "#14141C", margin: "40px 0 18px" }}>{tr("teacher.schedule")}</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {groups.map((g) => (
-          <div key={g._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap", border: "1px solid #ECEDF2", borderRadius: 14, padding: "14px 18px", background: "#fff" }}>
-            <div>
-              <Link href={`/kurslar/${g.course?.slug}`} style={{ fontWeight: 700, color: "#16161C", fontFamily: "'Poppins'", fontSize: 15.5 }}>{g.course?.title}</Link>
-              <div style={{ fontSize: 13, color: "#8A8A98", marginTop: 3 }}>{g.branch?.name}{g.level ? ` · ${g.level}` : ""}{g.format === "individual" ? ` · ${tr("price.individual")}` : ` · ${tr("price.groupLabel")}`}</div>
-            </div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--accent)" }}>
-              {(g.schedule || []).map((s) => `${tr(`wd.${s.weekday}`)} ${s.from}–${s.to}`).join(" · ")}
-            </div>
-          </div>
+            {(c.levels || []).length > 0 && (
+              <span style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 11 }}>
+                {c.levels.map((lv) => (
+                  <span key={lv} style={{ fontSize: 12.5, fontWeight: 700, color: "var(--accent)", background: "var(--accent-soft)", borderRadius: 99, padding: "5px 12px" }}>
+                    {lv}
+                  </span>
+                ))}
+              </span>
+            )}
+          </Link>
         ))}
       </div>
     </>
@@ -166,7 +140,7 @@ export default async function TeacherPage({ params }) {
   // ── Data fetching + notFound guard ──
   const res = await apiGetStatus(`/teachers/${slug}`);
   if (isMissing(res, "teacher")) notFound();
-  const { teacher: t, groups = [] } = res.data;
+  const { teacher: t, courses = [] } = res.data;
   const tr = await getT();
   const locale = await getLocale();
 
@@ -213,11 +187,7 @@ export default async function TeacherPage({ params }) {
               </p>
             )}
 
-            {(t.assignments || []).length > 0 ? (
-              <BranchCourses assignments={t.assignments} tr={tr} />
-            ) : (
-              groups.length > 0 && <ScheduleList groups={groups} tr={tr} />
-            )}
+            {courses.length > 0 && <TaughtCourses courses={courses} tr={tr} />}
           </div>
 
           <TeacherSidebar t={t} tr={tr} />

@@ -29,7 +29,7 @@ export default function SeedTool() {
     const ok = await confirmDialog({
       tone: "error",
       title: "Bütün məzmun silinsin?",
-      text: "Kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, ölkələr, menyu və səhifələr <b>TAMAMİLƏ SİLİNİR</b> və başlanğıc data ilə yenidən qurulur.<br><br>Müraciətlər (leads) və istifadəçi hesabları silinmir.<br><br><b>Bu əməliyyat geri qaytarıla bilməz.</b>",
+      text: "Kurslar, müəllimlər, filiallar, rəylər, ölkələr, menyu və səhifələr <b>TAMAMİLƏ SİLİNİR</b> və başlanğıc data ilə yenidən qurulur.<br><br>Müraciətlər (leads) və istifadəçi hesabları silinmir.<br><br><b>Bu əməliyyat geri qaytarıla bilməz.</b>",
       confirmText: "Bəli, sil və yenidən yüklə",
       cancelText: "İmtina",
     });
@@ -52,7 +52,7 @@ export default function SeedTool() {
       title="Bütün datanı sil və yenidən yüklə"
       description={
         <>
-          Kurslar, müəllimlər, filiallar, dərs qrafiki, rəylər, ölkələr, menyu və
+          Kurslar, müəllimlər, filiallar, rəylər, ölkələr, menyu və
           səhifələr <b>tamamilə silinir</b> və başlanğıc data ilə yenidən qurulur.
         </>
       }

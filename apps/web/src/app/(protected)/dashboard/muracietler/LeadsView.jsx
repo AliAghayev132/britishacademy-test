@@ -27,6 +27,7 @@ import { NativeSelect } from "../_forms/kit";
 const STATUS = [
   { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },
   { key: "contacted", label: "Əlaqə saxlanıldı", cls: "bg-amber-100 text-amber-700", color: "#D97706" },
+  { key: "waiting", label: "Gözləmədə", cls: "bg-violet-100 text-violet-700", color: "#7C4DFF" },
   { key: "enrolled", label: "Qeydiyyatdan keçdi", cls: "bg-emerald-100 text-emerald-700", color: "#059669" },
   { key: "rejected", label: "İmtina", cls: "bg-gray-200 text-gray-600", color: "#6B7280" },
 ];
@@ -42,9 +43,6 @@ const SOURCE_OPTIONS = [
   { value: "other", label: "Digər" },
 ];
 const SOURCE_LABEL = Object.fromEntries(SOURCE_OPTIONS.map((s) => [s.value, s.label]));
-
-/** «Xaricdə təhsil» maraq dəyəri — müraciətdə AZ yazılır (bax ApplyModal). */
-const ABROAD_INTEREST = "Xaricdə təhsil";
 
 /** Telefonu wa.me üçün rəqəmlərə çevir. */
 const waNumber = (phone) => String(phone || "").replace(/[^\d]/g, "");
@@ -88,9 +86,9 @@ export function LeadsView({ abroadOnly = false }) {
   }));
 
   const activeFilters = {
-    // Xaricdə təhsil bölməsində maraq növü SABİT süzgəcdir — istifadəçi onu
-    // dəyişə bilmir, ona görə filtr panelində göstərilmir.
-    ...(abroadOnly ? { interest: ABROAD_INTEREST } : {}),
+    // Xaricdə təhsil müraciətləri AYRI siyahıdır: bu bayraqla server yalnız
+    // onları qaytarır, ümumi siyahıda isə onları süzüb atır (applyLeadTopic).
+    ...(abroadOnly ? { abroad: 1 } : {}),
     ...(status ? { status } : {}),
     ...(source ? { source } : {}),
     ...(branch ? { branch } : {}),

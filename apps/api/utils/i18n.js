@@ -34,7 +34,7 @@ export const LOCALIZED_FIELDS = {
     "workingHours.$.days",
   ],
   Destination: [
-    "country", "region", "lead", "tagline", "contentHtml", "seo.metaTitle", "seo.metaDescription",
+    "country", "region", "h1", "lead", "tagline", "contentHtml", "seo.metaTitle", "seo.metaDescription",
     "seo.keywords", "facts.$.label", "facts.$.value", "faq.$.question", "faq.$.answer", "content.$.heading",
     "content.$.body", "content.$.items", "content.$.definitions.$.term", "content.$.definitions.$.description",
     "universities.$.name", "universities.$.city",
@@ -69,9 +69,6 @@ export const LOCALIZED_FIELDS = {
   ],
   Partner: [
     "name",
-  ],
-  CourseGroup: [
-    "note",
   ],
   Media: [
     "alt",

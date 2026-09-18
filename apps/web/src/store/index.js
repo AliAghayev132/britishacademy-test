@@ -89,7 +89,6 @@ export {
   useGetCoursesQuery,
   useGetDestinationsQuery,
   useGetHomeQuery,
-  useGetScheduleQuery,
   useGetSiteQuery,
   useGetTeacherQuery,
   useGetTeachersQuery,

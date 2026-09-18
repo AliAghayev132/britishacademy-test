@@ -4,10 +4,9 @@ export { OTP } from "./otp.model.js";
 
 // British Academy domain models
 export { Branch } from "./branch.model.js";
-export { Teacher, mergeAssignments, syncDerived } from "./teacher.model.js";
+export { Teacher } from "./teacher.model.js";
 export { CourseCategory } from "./courseCategory.model.js";
 export { Course } from "./course.model.js";
-export { CourseGroup } from "./courseGroup.model.js";
 export { Testimonial } from "./testimonial.model.js";
 export { Destination } from "./destination.model.js";
 export { BlogCategory } from "./blogCategory.model.js";

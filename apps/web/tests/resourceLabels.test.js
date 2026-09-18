@@ -6,8 +6,8 @@ import { resourceLabel, ADMIN_RESOURCES } from "@/lib/adminResources";
  * BÖLMƏ ADLARI AZƏRBAYCANCA.
  *
  * Əməliyyat jurnalında xam açar görünürdü — «faqs yaradıldı»,
- * «course-groups silindi», süzgəcdə isə «short-links». Panel istifadəçisi
- * bu adları heç yerdə görmür; onun üçün bölmələr «FAQ», «Dərs qrafiki»,
+ * «blog-posts silindi», süzgəcdə isə «short-links». Panel istifadəçisi
+ * bu adları heç yerdə görmür; onun üçün bölmələr «FAQ», «Bloq yazıları»,
  * «İzlənilən linklər»dir.
  *
  * Adlar İKİ yerdədir və uyğun qalmalıdır:
@@ -19,7 +19,7 @@ describe("resourceLabel", () => {
   it("ümumi resursların adını qaytarır", () => {
     expect(resourceLabel("courses")).toBe("Kurslar");
     expect(resourceLabel("faqs")).toBe("FAQ");
-    expect(resourceLabel("course-groups")).toBe("Dərs qrafiki");
+    expect(resourceLabel("blog-posts")).toBe("Bloq yazıları");
   });
 
   it("öz səhifəsi olan bölmələri də tanıyır", () => {

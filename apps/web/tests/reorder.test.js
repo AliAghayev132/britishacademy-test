@@ -25,9 +25,9 @@ describe("sıralanabilən bölmələr siyahısı", () => {
   });
 
   it("sırası olmayan bölmələr kənardadır", () => {
-    // Bunlar tarixə / kliklərə / başlanğıc tarixinə görə düzülür; `menu-items`
-    // isə əvvəlcə `location`-a görə — qonşu dəyişmək qrupları pozardı.
-    for (const r of ["menu-items", "blog-posts", "leads", "media", "course-groups"]) {
+    // Bunlar tarixə / kliklərə görə düzülür; `menu-items` isə əvvəlcə
+    // `location`-a görə — qonşu dəyişmək qrupları pozardı.
+    for (const r of ["menu-items", "blog-posts", "leads", "media"]) {
       expect(ORDERABLE.has(r), `${r} sıralanabilən sayılmamalıdır`).toBe(false);
     }
   });

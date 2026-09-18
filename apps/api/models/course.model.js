@@ -51,6 +51,11 @@ const courseSchema = new Schema(
       required: true,
     },
 
+    // Kursu keçən müəllimlər. Əlaqənin ƏSAS və YEGANƏ mənbəyi budur: əvvəl
+    // «kurs + filial + müəllim + saat» cədvəli vardı, dərs qrafiki sistemi
+    // çıxarıldı — saat və həftə günü artıq heç yerdə saxlanılmır.
+    teachers: [{ type: Schema.Types.ObjectId, ref: "Teacher" }],
+
     // Hero
     h1: localizedField(), // long SEO headline; falls back to title
     lead: localizedField(),
@@ -109,13 +114,6 @@ courseSchema.index({ isActive: 1, isFeatured: 1 });
 
 courseSchema.virtual("url").get(function () {
   return `/kurslar/${this.slug}`;
-});
-
-/** Scheduled groups for this course (populate when the timetable is needed). */
-courseSchema.virtual("groups", {
-  ref: "CourseGroup",
-  localField: "_id",
-  foreignField: "course",
 });
 
 /** Cheapest advertised group price — used for "from X AZN" badges. */

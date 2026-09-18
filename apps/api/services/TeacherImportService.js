@@ -33,13 +33,13 @@ const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v |
 /**
  * @param {object} opts
  * @param {boolean} [opts.dryRun]  yalnız hesabat, baza dəyişmir
- * @param {boolean} [opts.replace] mövcud təyinatları əvəz et (yoxsa birləşdir)
+ * @param {boolean} [opts.replace] mövcud filial/kurs əlaqəsini əvəz et (yoxsa birləşdir)
  */
 export async function importTeacherAssignments({ dryRun = false, replace = true } = {}) {
   const [branches, courses, existing] = await Promise.all([
     Branch.find({ isDeleted: false }).select("name slug"),
     Course.find({ isDeleted: false }).select("title slug"),
-    Teacher.find({ isDeleted: false }).select("fullName assignments"),
+    Teacher.find({ isDeleted: false }).select("fullName branches"),
   ]);
 
   // Filialı NORMALLAŞDIRILMIŞ ADDA açar sözə görə tapırıq — slug seed ilə
@@ -66,17 +66,20 @@ export async function importTeacherAssignments({ dryRun = false, replace = true 
   }
 
   for (const [key, { name, rows }] of grouped) {
-    const assignments = [];
+    // Dərs qrafiki sistemi çıxarıldı: müəllimdə yalnız FİLİALLAR saxlanılır,
+    // kursla əlaqə isə kursun özündədir (Course.teachers).
+    const branchIds = [];
+    const courseIds = [];
     const resolvedNames = [];
 
     for (const row of rows) {
       const branch = findBranch(row.branch);
       if (!branch) {
         warnings.push(`${name}: «${row.branch}» filialı tapılmadı`);
-        continue;
+      } else if (!branchIds.some((id) => String(id) === String(branch._id))) {
+        branchIds.push(branch._id);
       }
 
-      const courseIds = [];
       for (const label of row.courses) {
         const slug = COURSE_ALIASES[label.toLowerCase()];
         if (!slug || slug.startsWith("__UNMAPPED")) {
@@ -95,27 +98,41 @@ export async function importTeacherAssignments({ dryRun = false, replace = true 
         }
       }
 
-      assignments.push({ branch: branch._id, courses: courseIds });
       if (row.incomplete) {
         warnings.push(`${name}: mənbə siyahısı kəsilib — kurs siyahısı yarımçıq ola bilər`);
       }
     }
 
-    if (!assignments.length) continue;
+    if (!branchIds.length && !courseIds.length) continue;
 
     const found = teacherByName.get(key);
     const status = found ? "yeniləndi" : "yaradıldı";
+    let teacherId = found?._id;
 
     if (!dryRun) {
       if (found) {
-        found.assignments = replace
-          ? assignments
-          : [...(found.assignments || []), ...assignments];
+        const current = (found.branches || []).map(String);
+        found.branches = replace
+          ? branchIds
+          : [...new Set([...current, ...branchIds.map(String)])];
         await found.save();
         updated += 1;
       } else {
-        await Teacher.create({ fullName: name, assignments, isActive: true });
+        const doc = await Teacher.create({ fullName: name, branches: branchIds, isActive: true });
+        teacherId = doc._id;
         created += 1;
+      }
+
+      // Kurs → müəllim. `replace` rejimində müəllim siyahıda olmayan
+      // kurslardan çıxarılır, əks halda yalnız əlavə olunur.
+      if (courseIds.length) {
+        await Course.updateMany({ _id: { $in: courseIds } }, { $addToSet: { teachers: teacherId } });
+      }
+      if (replace) {
+        await Course.updateMany(
+          { teachers: teacherId, _id: { $nin: courseIds } },
+          { $pull: { teachers: teacherId } },
+        );
       }
     } else if (found) updated += 1;
     else created += 1;
@@ -123,7 +140,7 @@ export async function importTeacherAssignments({ dryRun = false, replace = true 
     report.push({
       name,
       status: dryRun ? `${status} (quru rejim)` : status,
-      branches: assignments.length,
+      branches: branchIds.length,
       courses: [...new Set(resolvedNames)].join(", ") || "—",
     });
   }

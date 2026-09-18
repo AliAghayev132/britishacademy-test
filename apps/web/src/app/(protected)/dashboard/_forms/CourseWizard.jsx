@@ -1,16 +1,13 @@
 "use client";
 
 // ── Course wizard ──
-// Creates/edits a course together with its per-branch price matrix and the
-// teacher timetable (CourseGroups) in one go, mapping to the composer endpoints
-// (POST/PUT /api/admin/courses/full). This is the "kurs yarat" flow: fill the
-// course, add the branches it runs at, and for each branch add teacher groups.
+// Creates/edits a course together with its per-branch price matrix in one go,
+// mapping to the composer endpoints (POST/PUT /api/admin/courses/full). This is
+// the "kurs yarat" flow: fill the course, pick the teachers who run it, then add
+// the branches it runs at with their prices.
 
 // React
 import { useEffect, useMemo, useState } from "react";
-
-// Icons
-import { Check } from "lucide-react";
 
 // Components
 import { FileUpload } from "@/components";
@@ -42,9 +39,7 @@ import {
   MultiSelectChips,
   AddButton,
   RemoveButton,
-  WEEKDAYS,
   LEVELS,
-  FORMATS,
   toId,
 } from "./kit";
 import { SeoFields } from "./SeoFields";
@@ -56,12 +51,12 @@ import {
   locAz,
   confirmLocalized,
 } from "./Localized";
-import { CourseGroupForm } from "./CourseGroupForm";
 
 // ── Defaults / helpers ──
 const emptyCourse = () => ({
   title: "", slug: "", category: "", h1: "", lead: "", excerpt: "",
   levels: [],
+  teachers: [],
   lesson: { perWeek: 2, minutes: 90, levelDurationMonths: [1.5, 2] },
   groupSize: { min: 3, max: 6 },
   currency: "AZN", image: "", icon: "",
@@ -72,7 +67,6 @@ const emptyCourse = () => ({
 const emptyRow = (branch = "") => ({
   branch,
   pricing: { group: { day: "", evening: "" }, individual: { day: "", evening: "" }, note: "" },
-  groups: [], // teacher timetable is added after saving (Dərs qrafiki step)
 });
 
 const num = (v) => (v === "" || v === null || v === undefined ? undefined : Number(v));
@@ -89,7 +83,7 @@ export function CourseWizard({ item, onClose }) {
     [lk],
   );
   const teacherOpts = useMemo(
-    () => (lk?.data?.teachers || []).map((t) => ({ value: t._id, label: locAz(t.title) ? `${locAz(t.fullName)} · ${locAz(t.title)}` : locAz(t.fullName) })),
+    () => (lk?.data?.teachers || []).map((t) => ({ value: t._id, label: locAz(t.fullName) })),
     [lk],
   );
   const categoryOpts = useMemo(
@@ -104,9 +98,6 @@ export function CourseWizard({ item, onClose }) {
   const [contentHtml, setContentHtml] = useState(editingId ? (full?.data?.course?.contentHtml || "") : "");
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
-  // After a successful save we show a "add schedule" step for the saved course.
-  const [saved, setSaved] = useState(null); // { id, title }
-  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Prefill from the composer response when editing.
   useEffect(() => {
@@ -119,6 +110,8 @@ export function CourseWizard({ item, onClose }) {
       ...c,
       category: toId(c.category),
       levels: c.levels || [],
+      // Server müəllimləri həm id, həm də populate olunmuş obyekt kimi qaytarır.
+      teachers: (c.teachers || []).map(toId),
       lesson: { ...emptyCourse().lesson, ...(c.lesson || {}), levelDurationMonths: c.lesson?.levelDurationMonths || [1.5, 2] },
       groupSize: { ...emptyCourse().groupSize, ...(c.groupSize || {}) },
     });
@@ -132,14 +125,6 @@ export function CourseWizard({ item, onClose }) {
           individual: { day: r.pricing?.individual?.day ?? "", evening: r.pricing?.individual?.evening ?? "" },
           note: r.pricing?.note || "",
         },
-        groups: (r.groups || []).map((g) => ({
-          // id və kod saxlanılır: server qrupu YENİLƏYİR, silib yaratmır —
-          // tarixlər, status, fərdi qiymət və aktivlik itmir.
-          _id: g._id || undefined, code: g.code || "",
-          teacher: toId(g.teacher), level: g.level || "", format: g.format || "group",
-          schedule: (g.schedule || []).map((s) => ({ weekday: s.weekday, from: s.from, to: s.to })),
-          capacity: g.capacity ?? "",
-        })),
       })),
     );
   }, [editingId, full]);
@@ -149,12 +134,6 @@ export function CourseWizard({ item, onClose }) {
   const patchRow = (ri, patch) => setRows((rs) => rs.map((r, i) => (i === ri ? { ...r, ...patch } : r)));
   const patchPricing = (ri, section, key, val) =>
     setRows((rs) => rs.map((r, i) => (i === ri ? { ...r, pricing: { ...r.pricing, [section]: { ...r.pricing[section], [key]: val } } } : r)));
-  const patchGroup = (ri, gi, patch) =>
-    setRows((rs) => rs.map((r, i) => (i === ri ? { ...r, groups: r.groups.map((g, j) => (j === gi ? { ...g, ...patch } : g)) } : r)));
-  const patchSlot = (ri, gi, si, patch) =>
-    setRows((rs) => rs.map((r, i) => (i === ri ? {
-      ...r, groups: r.groups.map((g, j) => (j === gi ? { ...g, schedule: g.schedule.map((s, k) => (k === si ? { ...s, ...patch } : s)) } : g)),
-    } : r)));
 
   const usedBranches = new Set(rows.map((r) => String(r.branch)).filter(Boolean));
   const freeBranchOpts = branchOpts.filter((b) => !usedBranches.has(String(b.value)));
@@ -190,6 +169,7 @@ export function CourseWizard({ item, onClose }) {
         lead: trimLoc(course.lead),
         excerpt: trimLoc(course.excerpt),
         levels: course.levels,
+        teachers: course.teachers,
         lesson: {
           perWeek: num(course.lesson.perWeek),
           minutes: num(course.lesson.minutes),
@@ -212,29 +192,13 @@ export function CourseWizard({ item, onClose }) {
           individual: { day: num(r.pricing.individual.day), evening: num(r.pricing.individual.evening) },
           note: r.pricing.note || undefined,
         },
-        groups: r.groups.filter((g) => g.teacher).map((g) => ({
-          _id: g._id || undefined,
-          code: g.code || undefined,
-          teacher: g.teacher,
-          level: g.level || undefined,
-          format: g.format || "group",
-          capacity: num(g.capacity),
-          schedule: g.schedule
-            .filter((s) => s.weekday && s.from && s.to)
-            .map((s) => ({ weekday: Number(s.weekday), from: s.from, to: s.to })),
-        })),
       })),
     };
 
     try {
-      let id = editingId;
       if (editingId) await update({ id: editingId, data: body }).unwrap();
-      else {
-        const res = await create(body).unwrap();
-        id = res?.data?.course?._id;
-      }
-      // Show the post-save step (add schedule) instead of closing immediately.
-      setSaved({ id, title: locAz(course.title) });
+      else await create(body).unwrap();
+      onClose();
     } catch (err) {
       setError(apiErrorMessage(err, "Yadda saxlanmadı"));
     }
@@ -302,30 +266,6 @@ export function CourseWizard({ item, onClose }) {
     </div>
   );
 
-  // After save → offer to add the timetable for this course, right here.
-  if (saved && scheduleOpen) {
-    return <CourseGroupForm item={{ course: saved.id }} onClose={() => setScheduleOpen(false)} />;
-  }
-  if (saved) {
-    return (
-      <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        <div className="w-full max-w-md rounded-2xl bg-white p-7 text-center shadow-2xl">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
-            <Check className="h-7 w-7" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Poppins'" }}>Kurs yadda saxlanıldı</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            «{saved.title}» hazırdır. İndi bu kursa dərs qrafiki — müəllim, filial və gün/saatlar — əlavə edə bilərsən.
-          </p>
-          <div className="mt-6 flex gap-3">
-            <button onClick={onClose} className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Bağla</button>
-            <button onClick={() => setScheduleOpen(true)} className="flex-1 rounded-lg bg-[#00157A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#00105e]">Dərs qrafiki əlavə et</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Overlay
       active={course.isActive}
@@ -333,7 +273,7 @@ export function CourseWizard({ item, onClose }) {
       localized
       wide
       title={editingId ? "Kursu redaktə et" : "Yeni kurs"}
-      subtitle="Kurs məlumatı → filiallar → qiymət — sonra dərs qrafiki"
+      subtitle="Kurs məlumatı → müəllimlər → filiallar və qiymət"
       onClose={onClose}
       onSave={save}
       saving={saving}
@@ -356,6 +296,16 @@ export function CourseWizard({ item, onClose }) {
             <Field label="Qısa təsvir (lead)" info="3 dildə — səhifə başında görünən qısa mətn"><LocalizedInput value={course.lead} onChange={(v) => patchCourse({ lead: v })} multiline rows={2} /></Field>
             <Field label="Excerpt (kart mətni)" info="3 dildə — kurs kartında görünən bir cümlə"><LocalizedInput value={course.excerpt} onChange={(v) => patchCourse({ excerpt: v })} /></Field>
             <Field label="Səviyyələr" info="Kursun əhatə etdiyi səviyyələr (A1–C2)"><MultiSelectChips options={LEVELS.map((l) => ({ value: l, label: l }))} value={course.levels} onChange={(v) => patchCourse({ levels: v })} /></Field>
+            {/* Müəllim–kurs bağlılığı ARTIQ kursda saxlanılır — müəllim
+                formasında kurs siyahısı yoxdur, təkrar yazılış olmasın. */}
+            <Field label="Müəllimlər" info="Kursu keçən müəllimlər — müəllim səhifəsində bu kurs görünür.">
+              <MultiSelectChips
+                options={teacherOpts}
+                value={course.teachers}
+                onChange={(v) => patchCourse({ teachers: v })}
+                empty="Müəllim tapılmadı"
+              />
+            </Field>
             <div className="grid grid-cols-4 gap-4">
               <Field label="Həftədə dərs" info="Həftədə neçə dərs keçilir"><NumberInput value={course.lesson.perWeek} onChange={(e) => patchCourse({ lesson: { ...course.lesson, perWeek: e.target.value } })} /></Field>
               <Field label="Dəqiqə" info="Bir dərsin uzunluğu (dəq)"><NumberInput value={course.lesson.minutes} onChange={(e) => patchCourse({ lesson: { ...course.lesson, minutes: e.target.value } })} /></Field>
@@ -380,14 +330,13 @@ export function CourseWizard({ item, onClose }) {
             </Field>
           </section>
 
-          {/* ── Branches + teachers ── */}
+          {/* ── Branches + pricing ── */}
           <section className="space-y-4">
             <SectionTitle
               right={<AddButton onClick={() => setRows((rs) => [...rs, emptyRow(freeBranchOpts[0]?.value || "")])}>Filial əlavə et</AddButton>}
             >
               Filiallar və qiymət
             </SectionTitle>
-            <p className="text-xs text-gray-400">Müəllim və dərs qrafiki kurs yadda saxlanandan sonra əlavə olunur.</p>
 
             {rows.length === 0 && <p className="text-sm text-gray-400">Hələ filial əlavə edilməyib. Bu kursun keçiriləcəyi filialları əlavə et.</p>}
 

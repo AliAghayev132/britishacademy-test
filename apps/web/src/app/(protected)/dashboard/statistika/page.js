@@ -57,12 +57,14 @@ const SOURCE_LABEL = {
 const STATUS_LABEL = {
   new: "Yeni",
   contacted: "Əlaqə saxlanıldı",
+  waiting: "Gözləmədə",
   enrolled: "Qeydiyyatdan keçdi",
   rejected: "İmtina",
 };
 const STATUS_COLOR = {
   new: "#2563EB",
   contacted: "#D97706",
+  waiting: "#7C4DFF",
   enrolled: "#059669",
   rejected: "#9CA3AF",
 };

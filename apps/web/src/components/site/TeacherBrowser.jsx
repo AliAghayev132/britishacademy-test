@@ -41,9 +41,7 @@ function badgeText(t) {
 // Portrait card mirroring the static `.mt-card` design.
 /** Müəllimin filial adları — kartda bir sətirdə. */
 const branchNames = (t) =>
-  (t.assignments || []).length
-    ? t.assignments.map((a) => a.branch?.name).filter(Boolean).join(" · ")
-    : (t.branches || []).map((b) => b?.name).filter(Boolean).join(" · ");
+  (t.branches || []).map((b) => b?.name).filter(Boolean).join(" · ");
 
 // Ana səhifədəki swiper də eyni kartı işlədir — görünüş bir yerdə qalsın.
 export const TeacherCard = memo(function TeacherCard({ t }) {
@@ -171,12 +169,6 @@ const haystack = (t) =>
       ...(Array.isArray(t.branches) ? t.branches.map((b) => b && b.name) : []),
       // Kurs adları da axtarılsın: «IELTS müəllimi» kimi sorğular işləsin.
       ...(Array.isArray(t.courses) ? t.courses.map((c) => c && c.title) : []),
-      ...(Array.isArray(t.assignments)
-        ? t.assignments.flatMap((a) => [
-            a.branch?.name,
-            ...(a.courses || []).map((c) => c && c.title),
-          ])
-        : []),
     ]
       .filter(Boolean)
       .join(" "),

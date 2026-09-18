@@ -35,9 +35,6 @@ export const publicApi = baseApi.injectEndpoints({
     getDestinations: builder.query({
       query: (params = {}) => ({ url: "/destinations", params }),
     }),
-    getSchedule: builder.query({
-      query: (params = {}) => ({ url: "/schedule", params }),
-    }),
     getBlog: builder.query({
       query: (params = {}) => ({ url: "/blog", params }),
       providesTags: [{ type: "Blog", id: "LIST" }],
@@ -56,6 +53,5 @@ export const {
   useGetTeacherQuery,
   useGetTestimonialsQuery,
   useGetDestinationsQuery,
-  useGetScheduleQuery,
   useGetBlogQuery,
 } = publicApi;

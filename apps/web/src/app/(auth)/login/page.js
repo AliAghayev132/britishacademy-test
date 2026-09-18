@@ -25,7 +25,7 @@ import { safeRedirect } from '@/lib'
 import { apiErrorMessage } from '@/utils'
 
 const HIGHLIGHTS = [
-  { icon: GraduationCap, text: 'Kurslar, kateqoriyalar və dərs qrafiki' },
+  { icon: GraduationCap, text: 'Kurslar, kateqoriyalar və müəllimlər' },
   { icon: Users, text: 'Müəllimlər və filiallar' },
   { icon: Building2, text: 'Müraciətlər, bloq və sayt tənzimləmələri' },
 ]
