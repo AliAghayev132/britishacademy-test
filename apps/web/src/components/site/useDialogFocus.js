@@ -9,7 +9,8 @@ const FOCUSABLE =
 /**
  * Modal dialoqun klaviatura davranışı (audit #34):
  *  - açılanda fokus içəriyə keçir (initialFocus və ya ilk fokuslanan element);
- *  - Tab/Shift+Tab dialoqdan çıxmır;
+ *  - Tab/Shift+Tab dialoqdan çıxmır (dialoqun öz portalı — `data-dialog-portal`
+ *    ilə işarələnmiş açılan siyahı — istisnadır);
  *  - arxadakı səhifə sürüşmür;
  *  - bağlananda fokus açan elementə qayıdır;
  *  - `onEscape` verilsə Escape onu çağırır.
@@ -51,6 +52,11 @@ export function useDialogFocus(open, { initialFocus, onEscape, lockScroll = true
         return;
       }
       if (e.key !== "Tab" || !node) return;
+      // Açılan siyahı <body>-yə portal edilir (ata elementin transform-u onu
+      // yerindən oynadır). DOM-da dialoqdan kənarda olsa da məntiqən onun
+      // içindədir: tələ qarışmasın, yoxsa Tab bəndlərə çatmadan formaya
+      // qaytarırdı.
+      if (document.activeElement?.closest?.("[data-dialog-portal]")) return;
       const items = focusables();
       if (!items.length) {
         e.preventDefault();

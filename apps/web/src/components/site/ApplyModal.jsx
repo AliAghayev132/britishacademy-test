@@ -62,14 +62,14 @@ const HONEYPOT = { position: "absolute", left: -9999, width: 1, height: 1, opaci
 const ModalHeader = memo(function ModalHeader({ onClose }) {
   const t = useT();
   return (
-    <div className="ba-am-head" style={{ position: "relative", background: "var(--accent)", padding: "34px 34px 40px", overflow: "hidden" }}>
+    <div className="ba-am-head" style={{ position: "relative", background: "var(--accent)", overflow: "hidden" }}>
       <button type="button" onClick={onClose} aria-label={t("apply.close")} className="ba-modal-close" style={{ position: "absolute", top: 20, right: 20, width: 38, height: 38, border: "none", borderRadius: "50%", background: "rgba(255,255,255,.22)", color: "#fff", cursor: "pointer", fontSize: 15 }}>✕</button>
       <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 12, padding: "9px 14px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/shield.png" alt="British Academy" style={{ height: 34, width: "auto" }} />
         <span style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 16, color: "#00157A" }}>British Academy</span>
       </div>
-      <h3 id="ba-apply-title" style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 30, margin: "22px 0 0", color: "#fff" }}>{t("apply.title")}</h3>
+      <h3 id="ba-apply-title" style={{ fontFamily: "'Poppins'", fontWeight: 700, color: "#fff" }}>{t("apply.title")}</h3>
       <p style={{ fontSize: 15, color: "rgba(255,255,255,.92)", margin: "9px 0 0", lineHeight: 1.55, maxWidth: 370 }}>
         {t("apply.subtitle")}
       </p>
@@ -80,7 +80,7 @@ const ModalHeader = memo(function ModalHeader({ onClose }) {
 const SuccessCard = memo(function SuccessCard({ onClose }) {
   const t = useT();
   return (
-    <div className="ba-am-success" style={{ padding: "40px 34px", textAlign: "center" }}>
+    <div className="ba-am-success" style={{ textAlign: "center" }}>
       <div className="ba-am-emoji" style={{ fontSize: 46 }}>🎉</div>
       <h4 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: 22, margin: "12px 0 8px", color: "#14141C" }}>{t("apply.successTitle")}</h4>
       <p style={{ color: "#63636F", fontSize: 15.5, margin: 0 }}>{t("apply.successText")}</p>
@@ -157,7 +157,7 @@ const DestinationPicker = memo(function DestinationPicker({ destinations, select
 const ApplyForm = memo(function ApplyForm({ form, interest, setInterest, branch, setBranch, branches, destinations, picked, onTogglePick, error, isLoading, onChange, onSubmit }) {
   const t = useT();
   return (
-    <form onSubmit={onSubmit} className="ba-am-form" style={{ padding: "28px 34px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
+    <form onSubmit={onSubmit} className="ba-am-form" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Honeypot: insan görmür və doldurmur; bot doldurursa server müraciəti yazmır. */}
       <input type="text" name="website" value={form.website} onChange={onChange} tabIndex={-1} autoComplete="off" aria-hidden="true" style={HONEYPOT} />
       <input className="ba-field" name="name" required aria-label={t("apply.name")} autoComplete="name" placeholder={t("apply.name")} value={form.name} onChange={onChange} style={field} />
@@ -293,30 +293,34 @@ export function ApplyModal({ open, onClose, preset, project, destination, course
     <div
       onClick={onOverlayClick}
       className={`ba-am-overlay${closing ? " is-closing" : ""}`}
-      style={{ display: "flex", position: "fixed", inset: 0, zIndex: 150, background: "rgba(12,13,26,.55)", backdropFilter: "blur(4px)", alignItems: "center", justifyContent: "center", padding: 24 }}
+      style={{ display: "flex", position: "fixed", inset: 0, zIndex: 150, background: "rgba(12,13,26,.55)", backdropFilter: "blur(4px)", alignItems: "center", justifyContent: "center" }}
     >
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ba-apply-title" className="ba-am-card" style={{ width: "100%", maxWidth: 540, background: "#fff", borderRadius: 26, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="ba-apply-title" className="ba-am-card" style={{ width: "100%", maxWidth: 540, background: "#fff", overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,.45)" }}>
         <ModalHeader onClose={requestClose} />
 
-        {done ? (
-          <SuccessCard onClose={requestClose} />
-        ) : (
-          <ApplyForm
-            form={form}
-            interest={interest}
-            setInterest={changeInterest}
-            branch={branch}
-            setBranch={setBranch}
-            branches={branches}
-            destinations={destinations}
-            picked={picked}
-            onTogglePick={togglePick}
-            error={error}
-            isLoading={isLoading}
-            onChange={change}
-            onSubmit={submit}
-          />
-        )}
+        {/* Başlıq (və ✕ düyməsi) həmişə göründüyü yerdə qalır, uzun forma
+            yalnız bu qatın içində sürüşür. */}
+        <div className="ba-am-body">
+          {done ? (
+            <SuccessCard onClose={requestClose} />
+          ) : (
+            <ApplyForm
+              form={form}
+              interest={interest}
+              setInterest={changeInterest}
+              branch={branch}
+              setBranch={setBranch}
+              branches={branches}
+              destinations={destinations}
+              picked={picked}
+              onTogglePick={togglePick}
+              error={error}
+              isLoading={isLoading}
+              onChange={change}
+              onSubmit={submit}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
