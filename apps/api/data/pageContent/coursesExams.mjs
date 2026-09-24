@@ -40,6 +40,41 @@ export const COURSE_PAGES_EXAMS = [
   },
 
   {
+    // Canlı kursdur (qiymətləri var), amma burada girişi yox idi: h1, lead,
+    // info və FAQ canlıda boşdur — auditdə FAQ struktur məlumatı olmayan
+    // yeganə imtahan səhifəsi bu idi. Faktlar canlı admin mətnindən: 10 il
+    // təcrübəli, IELTS 8.0 dərəcəli müəllimlər, 1,5–2 ay, həftədə 2 dəfə
+    // 90 dəq, qrup 3–6 nəfər, başlanğıc səviyyə B1.
+    //
+    // Mətn (contentHtml) canlıda admin tərəfindən yazılıb, ona görə burada
+    // yoxdur — import onsuz da dolu sahəyə toxunmur (bax pageContent.test.js
+    // `liveHasBody`). SEO canlıda da doludur; burada testin tələbi və boş
+    // mühit (yeni quraşdırma) üçün saxlanılır.
+    slug: "preielts-kursu",
+    h1: az("Pre-IELTS Hazırlıq Kursu"),
+    lead: az("IELTS-ə hazırlığın ilk mərhələsi — dil bazası B2-yə çatdırılır, sonra IELTS proqramına keçilir."),
+    info: [
+      row("Müddət", "1,5–2 ay"),
+      row("Dərs rejimi", "Həftədə 2 dəfə · 90 dəq"),
+      row("Başlanğıc səviyyə", "B1"),
+      row("Qrup", "3–6 nəfər"),
+      row("Müəllimlər", "IELTS 8.0 dərəcəli, 10 il təcrübə"),
+    ],
+    faq: [
+      qa("Pre-IELTS kimlər üçündür?", "Səviyyəsi IELTS proqramına hələ çatmayanlar üçün. IELTS kursu minimum Intermediate (B2) tələb edir; səviyyəniz aşağıdırsa, hazırlığa Pre-IELTS ilə başlayırsınız."),
+      qa("Pre-IELTS ilə IELTS arasında fərq nədir?", "Pre-IELTS dil bazasını qurur — qrammatika, lüğət və dörd bacarıq. IELTS proqramı isə imtahan formatı, tapşırıq tipləri və vaxt idarəsi üzərində işləyir."),
+      qa("Pre-IELTS-dən sonra birbaşa IELTS-ə keçirəmmi?", "Bəli. Səviyyə B2-yə çatdıqda IELTS qrupuna keçirsiniz. Keçid vaxtı müəllimin qiymətləndirməsi ilə müəyyən olunur."),
+      qa("Səviyyəmi necə bilə bilərəm?", "Saytdakı onlayn səviyyə testindən keçə və ya ödənişsiz sınaq dərsinə yazıla bilərsiniz."),
+      SCHEDULE_Q,
+    ],
+    seo: {
+      metaTitle: az("Pre-IELTS kursu Bakıda — IELTS-ə hazırlığın ilk mərhələsi"),
+      metaDescription: az("Pre-IELTS: B1 səviyyədən IELTS-ə hazırlıq. IELTS 8.0 dərəcəli müəllimlər, 1,5–2 aylıq proqram, həftədə 2 dəfə 90 dəqiqə, 3–6 nəfərlik qruplar."),
+      keywords: az("Pre-IELTS, Pre-IELTS kursu, IELTS hazırlığı, IELTS Bakı, IELTS başlanğıc"),
+    },
+  },
+
+  {
     slug: "toefl",
     h1: az("TOEFL Hazırlıq Kursu — Rəsmi İmtahan Mərkəzi"),
     lead: az("Rəsmi TOEFL imtahan mərkəzində hazırlıq — dörd bacarıq, imtahan formatı və vaxtlı sınaqlar."),

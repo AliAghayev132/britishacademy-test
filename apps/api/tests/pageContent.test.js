@@ -20,7 +20,7 @@ const COURSES = [
   "ingilis-dili-kurslari", "biznes-ingilis-dili-kursu", "huquqsunaslar-ingilis-dili-kursu",
   "otel-turizm-ingilis-dili-kursu", "alman-dili-kursu", "beynelxalq-sertifikatli-alman-dili-kursu",
   "rus-dili-kursu", "ispan-dili-kursu", "italyan-dili-kursu", "fransiz-dili-kursu",
-  "conversation-club", "workshop", "ielts-kurslari", "toefl", "oet", "toeic", "sat-kurslari",
+  "conversation-club", "workshop", "ielts-kurslari", "preielts-kursu", "toefl", "oet", "toeic", "sat-kurslari",
   "duolingo", "toles", "tefl-kurslari", "ms-office", "pesekar-excel-kursu",
   "muhasibatliq-1c-kursu", "hr-karguzarliq-kursu", "usaq-ingilis-dili", "usaq-rus-dili", "usaq-mentiq",
 ];
@@ -32,7 +32,8 @@ const ALL = [...COURSE_PAGES, ...DESTINATION_PAGES];
 const htmlOf = (p) => p.contentHtml?.az || "";
 
 describe("əhatə", () => {
-  it("27 kursun hər biri var, artıq/təkrar yoxdur", () => {
+  // preielts-kursu canlı kurs idi, amma siyahıda yox idi — test onu tutmurdu.
+  it("28 kursun hər biri var, artıq/təkrar yoxdur", () => {
     const slugs = COURSE_PAGES.map((p) => p.slug);
     expect(new Set(slugs).size, "təkrar slug").toBe(slugs.length);
     expect([...slugs].sort()).toEqual([...COURSES].sort());
@@ -62,7 +63,7 @@ describe("əhatə", () => {
 
   it("hər kursun ya mətni data-da var, ya da canlı səhifədə artıq var", () => {
     // Bu kursların canlı səhifəsində mətn artıq yazılıb — dəst onu saxlayır.
-    const liveHasBody = new Set(["ingilis-dili-kurslari", "rus-dili-kursu", "ielts-kurslari", "duolingo", "ms-office"]);
+    const liveHasBody = new Set(["ingilis-dili-kurslari", "rus-dili-kursu", "ielts-kurslari", "preielts-kursu", "duolingo", "ms-office"]);
     const missing = COURSE_PAGES.filter((p) => !liveHasBody.has(p.slug) && !htmlOf(p)).map((p) => p.slug);
     expect(missing, `mətnsiz kurs: ${missing.join(", ")}`).toEqual([]);
     for (const p of COURSE_PAGES) expect(p.info?.length, `${p.slug}: info`).toBeGreaterThanOrEqual(2);

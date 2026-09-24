@@ -75,6 +75,8 @@ const getUrls = asyncHandler(async (_req, res) => {
   const urls = [
     { path: "/", lastmod: latest(courses, posts, destinations), priority: 1.0 },
     { path: "/kurslar", lastmod: latest(courses, categories), priority: 0.8 },
+    // Qiymət cədvəli — kurs matrisindən hesablanır, ona görə lastmod kurslarla eynidir.
+    { path: "/kurslar/qiymetler", lastmod: latest(courses), priority: 0.8 },
     { path: "/muellimler", lastmod: latest(teachers), priority: 0.7 },
     { path: "/filiallar", lastmod: latest(branches), priority: 0.7 },
     { path: "/telebelerimiz", priority: 0.6 },

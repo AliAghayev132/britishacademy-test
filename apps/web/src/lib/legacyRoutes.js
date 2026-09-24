@@ -37,8 +37,12 @@ export const LEGACY_REDIRECTS = {
   "/ielts-kurslari": "/kurslar/ielts-kurslari", //   321
 
   // ── Qiymət səhifələri ──
-  // Ayrıca qiymət səhifəsi yoxdur; qiymətlər kursun öz səhifəsindədir.
-  "/ingilis-dili-kurslari-qiymetleri": "/kurslar/ingilis-dili-kurslari", //   575
+  // Ümumi qiymət sorğusu artıq ayrıca səhifəyə gedir (/kurslar/qiymetler).
+  // Əvvəl kurs səhifəsinə düşürdü — «qiymət» niyyəti ilə gələn uzun kurs
+  // mətninin içində qiymət axtarmalı olurdu.
+  "/ingilis-dili-kurslari-qiymetleri": "/kurslar/qiymetler", //   575
+  // IELTS qiyməti kursun ÖZ səhifəsində qalır: orada filial üzrə dəqiq cədvəl
+  // var, bu niyyət üçün ümumi səhifədən daha spesifikdir.
   "/ielts-kurslari-qiymetleri": "/kurslar/ielts-kurslari", //   537
 
   // ── SEO açılış səhifələri ──

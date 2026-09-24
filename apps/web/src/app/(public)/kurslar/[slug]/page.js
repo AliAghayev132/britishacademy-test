@@ -283,6 +283,12 @@ export default async function CoursePage({ params }) {
         <h2 style={{ fontFamily: "'Poppins'", fontWeight: 700, fontSize: "clamp(24px,3vw,32px)", color: "#14141C", letterSpacing: "-.02em", margin: "0 0 22px" }}>{course.pricingMode === "custom" ? tr("course.prices") : tr("course.pricesByBranch")}</h2>
         <PriceCards course={course} />
         <p style={{ fontSize: 13.5, color: "#63636E", margin: "14px 0 0" }}>{tr("course.priceHelp")} <Link href="/elaqe" style={{ color: "var(--accent)", fontWeight: 700 }}>{tr("course.contactSave")}</Link>.</p>
+        {/* Bütün kurslar üzrə müqayisə cədvəli — hər kurs səhifəsindən daxili keçid. */}
+        <p style={{ fontSize: 13.5, margin: "8px 0 0" }}>
+          <Link href="/kurslar/qiymetler" style={{ color: "var(--accent)", fontWeight: 700 }}>
+            {({ az: "Bütün kursların qiymətləri", en: "Prices for all courses", ru: "Цены на все курсы" })[locale] || "Bütün kursların qiymətləri"} →
+          </Link>
+        </p>
       </section>
       )}
 

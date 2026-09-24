@@ -14,10 +14,28 @@ import { config } from "#config";
 const DEBOUNCE_MS = 1500;
 let timer = null;
 let warned = false;
+// Konfiqurasiya xəbərdarlığının AYRICA bayrağı var: ümumi `warned`-i
+// qaldırsaydı, sonradan açar təyin olunanda şəbəkə xətası xəbərdarlığı
+// susdurulardı (package5.test.js bunu yoxlayır).
+let configWarned = false;
 
 async function send() {
   timer = null;
-  if (!config.internalApiKey || !config.webInternalUrl) return;
+  // Əvvəl konfiqurasiya yoxdursa SƏSSİZCƏ çıxırdı. Nəticə: kurs deaktiv
+  // ediləndə səhifəsi günlərlə açıq qalırdı. «Ən geci 60 s» fərziyyəsi
+  // silinmə üçün doğru deyil — Next 404 cavabını keşə yazmır, köhnə 200
+  // cavabı isə «stale» kimi verilməyə davam edir. Canlıda otel-turizm,
+  // fransiz-dili-kursu və usaq-mentiq məhz belə yetim qaldı.
+  if (!config.internalApiKey || !config.webInternalUrl) {
+    if (!configWarned) {
+      console.warn(
+        "⚠️  Sayt keşi təmizlənmir: INTERNAL_API_KEY və ya WEB_INTERNAL_URL təyin olunmayıb. " +
+          "Silinən/deaktiv edilən məzmun saytda açıq qalacaq.",
+      );
+      configWarned = true;
+    }
+    return;
+  }
   try {
     const res = await fetch(`${config.webInternalUrl}/internal/revalidate`, {
       method: "POST",

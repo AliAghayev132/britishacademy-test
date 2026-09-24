@@ -99,7 +99,13 @@ export default async function CoursesHubPage() {
         title={tr("page.courses.title")}
         subtitle={tr("page.courses.sub")}
         mascot="courses"
-      />
+      >
+        {/* Qiymət cədvəlinə daxili keçid — yeni səhifənin kəşfi və «qiymət»
+            niyyəti ilə gələn üçün qısa yol. */}
+        <Link href="/kurslar/qiymetler" style={{ display: "inline-flex", alignItems: "center", background: "#fff", color: "var(--accent)", fontWeight: 700, fontSize: 15, padding: "12px 22px", borderRadius: 99 }}>
+          {({ az: "Bütün qiymətlər", en: "All prices", ru: "Все цены" })[locale] || "Bütün qiymətlər"} →
+        </Link>
+      </PageBanner>
 
       {groups.map((cat) => (
         <CourseCategorySection key={cat._id} category={cat} courses={byCat[String(cat._id)] || []} tr={tr} />
