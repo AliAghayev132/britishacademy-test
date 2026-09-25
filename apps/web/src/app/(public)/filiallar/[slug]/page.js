@@ -48,7 +48,8 @@ const fetchBranch = (slug) => apiGetStatus(`/branches/${slug}`);
 /** Meta təsvir: ünvan + metro + qısa quyruq. Admin `seo` yazıbsa o üstündür. */
 function describe(b, tr, locale) {
   const where = [addressLine(b.address, b.district), b.metro ? metroLabel(b.metro, locale) : ""].filter(Boolean).join(", ");
-  return `${b.name} — ${where}. ${tr("meta.branch.tail")}`;
+  // Metro adı çox vaxt nöqtə ilə bitir («Nizami m.») — «Nizami m..» olmasın.
+  return `${b.name} — ${where.replace(/\.+$/, "")}. ${tr("meta.branch.tail")}`;
 }
 
 export async function generateMetadata({ params }) {
