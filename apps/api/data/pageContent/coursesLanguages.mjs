@@ -90,6 +90,10 @@ export const COURSE_PAGES_LANGUAGES = [
 
   {
     slug: "otel-turizm-ingilis-dili-kursu",
+    // Dəstdə `h1`-i olmayan yeganə kurs bu idi — səhifə `title`-a düşürdü.
+    // Kurs bir müddət deaktiv olduğu (və keş səbəbindən 404 verdiyi) üçün
+    // h1 dəsti hazırlananda gözdən qaçıb.
+    h1: az("Otel və Turizm üçün İngilis Dili Kursu"),
     lead: az("Qonaq qarşılamadan tur bələdçiliyinə qədər — turizm və qonaqpərvərlik sektoru üçün praktik ingilis dili."),
     excerpt: az("Otel, restoran və turizm sahəsində çalışanlar üçün ingilis dili: qarşılama, rezervasiya, şikayətlərin həlli və tur təqdimatı."),
     contentHtml: az(`
