@@ -61,6 +61,7 @@ export {
   useWhatsappMessagesQuery,
   useWhatsappSendMediaMutation,
   useWhatsappSendMutation,
+  useWhatsappSetAutoMutation,
   useWhatsappStatusQuery,
 } from "./api/adminApi";
 export { aiApi, useProcessAIMutation } from "./api/aiApi";

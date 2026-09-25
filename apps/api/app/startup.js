@@ -11,6 +11,9 @@ import {
   bootstrapDeveloper,
 } from "#services";
 
+// Models
+import { SiteSetting } from "#models";
+
 // Local
 import { validateEnv } from "./env.js";
 
@@ -30,7 +33,15 @@ export const initializeServices = async () => {
   // Initialize the mail service
   MailService.init();
 
-  // WhatsApp: saxlanmış sessiya varsa QR-siz avtomatik bərpa et.
+  // WhatsApp: əvvəlcə admin açarını oxu — söndürülübsə `resumeIfSession`
+  // heç nə etmir və Chromium ümumiyyətlə açılmır.
+  try {
+    const settings = await SiteSetting.getCached();
+    WhatsAppService.autoConnect = settings?.whatsapp?.autoConnect !== false;
+  } catch {
+    /* tənzimləmə oxunmasa defolt (açıq) qalır */
+  }
+  // Saxlanmış sessiya varsa QR-siz avtomatik bərpa et.
   // (Sessiya yoxdursa heç nə etmir — Chromium boş yerə açılmır.)
   WhatsAppService.resumeIfSession().catch(() => {});
   // Kitabxananın yeni versiyasını yoxla (arxa fonda, gündə bir dəfə).

@@ -106,6 +106,11 @@ export const adminApi = baseApi.injectEndpoints({
       query: (body) => ({ url: "/admin/whatsapp/init", method: "POST", body: body || {} }),
       invalidatesTags: [{ type: "Site", id: "whatsapp" }],
     }),
+    // İnteqrasiyanın açarı — söndürüləndə server QR yaratmır, Chromium açmır.
+    whatsappSetAuto: builder.mutation({
+      query: (enabled) => ({ url: "/admin/whatsapp/auto", method: "POST", body: { enabled } }),
+      invalidatesTags: [{ type: "Site", id: "whatsapp" }],
+    }),
     whatsappCheck: builder.query({
       query: (phone) => ({ url: "/admin/whatsapp/check", params: { phone } }),
     }),
@@ -350,6 +355,7 @@ export const {
   useBulkCancelMutation,
   useWhatsappStatusQuery,
   useWhatsappInitMutation,
+  useWhatsappSetAutoMutation,
   useWhatsappSendMutation,
   useWhatsappSendMediaMutation,
   useWhatsappCheckQuery,

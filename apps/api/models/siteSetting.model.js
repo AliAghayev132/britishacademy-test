@@ -51,6 +51,15 @@ const siteSettingSchema = new Schema(
       tiktok: { type: String },
     },
 
+    // WhatsApp inteqrasiyasının özü (whatsapp-web.js). `socials.whatsapp`
+    // ictimai linkdir — bu blok botu idarə edir.
+    whatsapp: {
+      // Söndürüləndə server nə avtomatik bərpa edir, nə QR yaradır:
+      // Chromium ümumiyyətlə açılmır və jurnal QR sətirləri ilə dolmur.
+      // Əl ilə «Qoşul» da bloklanır — sükutla işləməsin, səbəbi görünsün.
+      autoConnect: { type: Boolean, default: true },
+    },
+
     // Homepage hero: rotating words + the brand colour cycle behind them
     hero: {
       titlePrefix: localizedField(),

@@ -2,7 +2,7 @@
 // Bütün marşrutlar /api/admin/whatsapp/* altındadır (router səviyyəsində auth).
 
 // Models
-import { WhatsAppMessage } from "#models";
+import { WhatsAppMessage, SiteSetting } from "#models";
 
 // Services
 import {
@@ -228,6 +228,31 @@ const logout = asyncHandler(async (req, res) => {
   ok(res, null, "Sessiya silindi — yenidən QR skan etmək lazımdır");
 });
 
+/**
+ * POST /api/admin/whatsapp/auto — inteqrasiyanı yandır/söndür.
+ *
+ * Söndürüləndə server nə avtomatik bərpa edir, nə QR yaradır: Chromium
+ * bağlanır. Sessiya faylına TOXUNULMUR — yandıranda QR-siz bərpa olunur.
+ */
+const setAuto = asyncHandler(async (req, res) => {
+  if (!hasRole(req.user, "admin")) {
+    return fail(res, "WhatsApp qoşulmasını yalnız admin idarə edə bilər", 403);
+  }
+  const enabled = Boolean(req.body?.enabled);
+  const settings = await SiteSetting.get();
+  settings.whatsapp = { ...(settings.whatsapp?.toObject?.() || settings.whatsapp || {}), autoConnect: enabled };
+  await settings.save();
+  SiteSetting.clearCache?.();
+
+  await WhatsAppService.setAutoConnect(enabled);
+  await logAction(req, {
+    action: "settings",
+    resource: "whatsapp",
+    summary: enabled ? "WhatsApp inteqrasiyası açıldı" : "WhatsApp inteqrasiyası söndürüldü",
+  });
+  ok(res, WhatsAppService.getStatus(), enabled ? "WhatsApp açıldı" : "WhatsApp söndürüldü — QR yaradılmayacaq");
+});
+
 export {
-  getStatus, init, checkNumber, send, sendMedia,
+  getStatus, init, setAuto, checkNumber, send, sendMedia,
   listMessages, disconnect, logout, getLogs, removeLogs, checkVersion };

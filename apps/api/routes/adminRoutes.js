@@ -110,6 +110,8 @@ AdminRouter.get("/whatsapp/logs", whatsappController.getLogs);
 AdminRouter.delete("/whatsapp/logs", whatsappController.removeLogs);
 AdminRouter.post("/whatsapp/version/check", whatsappController.checkVersion);
 AdminRouter.post("/whatsapp/init", whatsappController.init);
+// İnteqrasiyanın açarı — söndürüləndə QR yaradılmır, Chromium açılmır.
+AdminRouter.post("/whatsapp/auto", writeRateLimiter, whatsappController.setAuto);
 AdminRouter.post("/whatsapp/send", writeRateLimiter, whatsappController.send);
 AdminRouter.post("/whatsapp/send-media", writeRateLimiter, whatsappController.sendMedia);
 AdminRouter.post("/whatsapp/disconnect", whatsappController.disconnect);

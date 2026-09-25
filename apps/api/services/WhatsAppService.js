@@ -57,6 +57,13 @@ export class WhatsAppService {
   static _nextAutoAt = 0;
   static _autoBlocked = null; // səbəb — əl ilə «Qoşul» basılana qədər avtomatik cəhd yoxdur
 
+  // ── Admin açarı (SiteSetting.whatsapp.autoConnect) ──
+  // Burada yalnız KEŞLƏNİR: bu sinif `#models`-i import etmir (dövri asılılıq
+  // olmasın). Dəyəri server açılanda startup, sonra isə panel yazır.
+  static autoConnect = true;
+  // QR gözləməsi həddə çatıb dayandırılıbsa — panel səbəbi göstərsin.
+  static qrStopped = false;
+
   // ── Kitabxana yüklənməsi (opsional asılılıq) ──
 
   /** Kitabxananı lazım olanda yüklə; yoxdursa `false` saxlanılır. */
@@ -106,6 +113,11 @@ export class WhatsAppService {
    *   üçün 8 rəqəmli qoşulma kodu istənilir.
    */
   static async init({ pairPhone, auto = false } = {}) {
+    // Admin inteqrasiyanı söndürübsə heç bir yoldan qoşulmuruq.
+    if (!this.autoConnect) {
+      this.lastError = "WhatsApp inteqrasiyası paneldən söndürülüb";
+      return;
+    }
     const lib = await this._load();
     if (!lib) {
       this.lastError = "whatsapp-web.js quraşdırılmayıb (npm i whatsapp-web.js qrcode)";
@@ -118,6 +130,8 @@ export class WhatsAppService {
       meta: { pairPhone: pairPhone || null, hasSession: this.hasSession },
     });
     this.isInitializing = true;
+    this.qrStopped = false;
+    this._qrCount = 0; // hədd hər qoşulma cəhdində sıfırdan sayılır
     this._auto = auto;
     // Əl ilə qoşulma geri çəkilməni sıfırlayır.
     if (!auto) resetAutoRetry(this);
@@ -162,6 +176,7 @@ export class WhatsAppService {
    * Sessiya yoxdursa heç nə etmir (Chromium boş yerə açılmasın).
    */
   static async resumeIfSession() {
+    if (!this.autoConnect) return;
     const lib = await this._load();
     if (!lib || !this.hasSession || this.client || this.isInitializing) return;
     if (!this._autoAllowed()) return;
@@ -180,9 +195,10 @@ export class WhatsAppService {
    * saxlanmış sessiya ilə yenidən qoşulur (QR tələb olunmur).
    */
   static startHealthWatch() {
-    if (this._healthTimer) return;
+    if (this._healthTimer || !this.autoConnect) return;
     this._healthTimer = setInterval(async () => {
       try {
+        if (!this.autoConnect) return;
         if (this.isInitializing) return;
         // Klient yoxdur, amma sessiya var → bərpa et.
         if (!this.client) {
@@ -204,6 +220,54 @@ export class WhatsAppService {
     }, HEALTH_INTERVAL);
     // Node prosesinin bağlanmasına mane olmasın.
     this._healthTimer.unref?.();
+  }
+
+  /**
+   * Skan gözləməsini dayandır (QR həddi doldu və ya admin söndürdü).
+   *
+   * Sessiya SAXLANILIR — bu, «çıxış» deyil, sadəcə gözləməyin sonudur.
+   * Chromium bağlanır ki, heç kim skan etmirsə server boş yerə brauzer
+   * saxlamasın və jurnal QR sətirləri ilə dolmasın.
+   */
+  static async stopQrWait(reason = "QR gözləmə həddi doldu") {
+    if (!this.client || this.isReady) return;
+    this.qrStopped = true;
+    this.qrCode = null;
+    this.qrDataUrl = null;
+    this.pairingCode = null;
+    this.isInitializing = false;
+    this.lastError = `${reason} — yenidən cəhd üçün «Qoşul» basın`;
+    waLog("qr", `${reason} (${this._qrCount || 0} cəhd) — gözləmə dayandırıldı`, {
+      level: "warn",
+      meta: { attempts: this._qrCount || 0 },
+    });
+    this._clearTimers();
+    await this._destroyClient().catch(() => {});
+  }
+
+  /**
+   * Admin açarı. Söndürüləndə hər şey dayanır: sağlamlıq taymeri, açıq
+   * Chromium və QR gözləməsi. Sessiya faylına toxunulmur — yandıranda
+   * QR-siz bərpa olunur.
+   */
+  static async setAutoConnect(enabled) {
+    this.autoConnect = Boolean(enabled);
+    if (this.autoConnect) {
+      this.lastError = null;
+      this.qrStopped = false;
+      resetAutoRetry(this);
+      return;
+    }
+    this.stopHealthWatch();
+    this._clearTimers();
+    this.qrCode = null;
+    this.qrDataUrl = null;
+    this.pairingCode = null;
+    this.isReady = false;
+    this.isInitializing = false;
+    this.lastError = null;
+    await this._destroyClient().catch(() => {});
+    waLog("session", "WhatsApp inteqrasiyası paneldən söndürüldü", { level: "warn" });
   }
 
   /** Proses dayananda: taymerləri dayandır, Chromium-u bağla, sessiyanı saxla. */

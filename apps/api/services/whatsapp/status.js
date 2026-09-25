@@ -7,6 +7,10 @@ import { findSystemChrome } from "./chrome.js";
 export function buildStatus(svc) {
   return {
     installed: svc.isInstalled,
+    // Admin açarı: söndürülübsə panel QR əvəzinə «söndürülüb» vəziyyətini
+    // göstərir. `qrStopped` — skan gözləməsi həddə çatıb dayandırılıb.
+    autoConnect: svc.autoConnect !== false,
+    qrStopped: Boolean(svc.qrStopped),
     libVersion: installedVersion() || svc._lib?.version || null,
     isReady: svc.isReady,
     isInitializing: svc.isInitializing,

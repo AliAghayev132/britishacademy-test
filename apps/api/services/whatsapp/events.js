@@ -3,7 +3,7 @@ import { WhatsAppMessage } from "#models";
 
 // Local
 import { waLog } from "../WhatsAppLogService.js";
-import { READY_TIMEOUT } from "./constants.js";
+import { READY_TIMEOUT, QR_MAX_ATTEMPTS } from "./constants.js";
 import { resetAutoRetry } from "./autoRetry.js";
 import { makeQrDataUrl } from "./helpers.js";
 
@@ -36,6 +36,9 @@ export function attachClientEvents(svc, lib) {
     svc.qrDataUrl = await makeQrDataUrl(qr);
     svc._qrCount = (svc._qrCount || 0) + 1;
     waLog("qr", `QR kodu yaradıldı (#${svc._qrCount})`, { meta: { attempt: svc._qrCount } });
+    // Kimsə skan etmirsə sonsuz gözləməyin mənası yoxdur: Chromium açıq
+    // qalır, jurnal dolur, paneldəki şəkil dayanmadan dəyişir.
+    if (svc._qrCount >= QR_MAX_ATTEMPTS) await svc.stopQrWait();
   });
 
   // pairWithPhoneNumber rejimində QR yerinə 8 rəqəmli kod gəlir.

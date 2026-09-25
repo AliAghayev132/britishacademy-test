@@ -7,7 +7,7 @@
 import { useState } from "react";
 
 // Icons
-import { MessageSquare, Loader2, Smartphone, KeyRound } from "lucide-react";
+import { MessageSquare, Loader2, Smartphone, KeyRound, Power, QrCode } from "lucide-react";
 
 // Utils
 import { fmtDateTime } from "@/utils";
@@ -26,25 +26,82 @@ function InfoCard({ title, value, mono }) {
   );
 }
 
-export function ConnectTab({ status, onInit, initing }) {
+/**
+ * İnteqrasiyanın açarı.
+ *
+ * Söndürüləndə server nə avtomatik bərpa edir, nə QR yaradır — Chromium
+ * ümumiyyətlə açılmır. Əvvəl belə açar yox idi: heç kim skan etməsə də
+ * whatsapp-web.js hər ~20 saniyədə yeni QR yayırdı, jurnal dolurdu və
+ * paneldəki şəkil dayanmadan dəyişirdi.
+ */
+function AutoSwitch({ autoConnect, onSetAuto, busy }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4">
+      <div className="flex items-start gap-3">
+        <span className={`mt-0.5 grid h-9 w-9 place-items-center rounded-lg ${autoConnect ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
+          <Power className="h-4 w-4" />
+        </span>
+        <div>
+          <div className="text-sm font-bold text-gray-900">WhatsApp inteqrasiyası</div>
+          <p className="mt-0.5 max-w-lg text-xs text-gray-500">
+            {autoConnect
+              ? "Açıqdır — server sessiyanı özü bərpa edir və lazım olanda QR yaradır."
+              : "Söndürülüb — QR yaradılmır, brauzer açılmır. Sessiya silinmir: açanda QR-siz bərpa olunur."}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={autoConnect}
+        aria-label="WhatsApp inteqrasiyası"
+        disabled={busy}
+        onClick={() => onSetAuto(!autoConnect)}
+        className={`relative h-7 w-12 flex-none rounded-full transition disabled:opacity-60 ${autoConnect ? "bg-emerald-500" : "bg-gray-300"}`}
+      >
+        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${autoConnect ? "left-6" : "left-1"}`} />
+      </button>
+    </div>
+  );
+}
+
+export function ConnectTab({ status, onInit, initing, onSetAuto, settingAuto }) {
   const [pairPhone, setPairPhone] = useState("");
-  const { isReady, isInitializing, qrDataUrl, pairingCode, hasSession } = status;
+  const { isReady, isInitializing, qrDataUrl, pairingCode, hasSession, qrStopped } = status;
+  const autoConnect = status.autoConnect !== false;
   const busy = initing || isInitializing;
+
+  const withSwitch = (children) => (
+    <div className="space-y-4">
+      <AutoSwitch autoConnect={autoConnect} onSetAuto={onSetAuto} busy={settingAuto} />
+      {children}
+    </div>
+  );
+
+  // ── Söndürülüb ──
+  if (!autoConnect) {
+    return withSwitch(
+      <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+        İnteqrasiya söndürülüb. Mesaj göndərilmir, QR yaradılmır və server
+        brauzer saxlamır. Yenidən işə salmaq üçün yuxarıdakı açarı açın.
+      </div>,
+    );
+  }
 
   // ── Qoşulub ──
   if (isReady) {
-    return (
+    return withSwitch(
       <div className="grid gap-4 rounded-xl border border-gray-200 bg-white p-5 sm:grid-cols-3">
         <InfoCard title="Hesab" value={status.connectedAs} />
         <InfoCard title="Nömrə" value={status.phoneNumber ? `+${status.phoneNumber}` : null} mono />
         <InfoCard title="Qoşulub" value={fmtDateTime(status.readyAt, { seconds: true })} />
-      </div>
+      </div>,
     );
   }
 
   // ── Qoşulma gözlənilir (QR və ya kod) ──
   if (qrDataUrl || pairingCode) {
-    return (
+    return withSwitch(
       <div className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
         <div className="mb-3 grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-700">
           {pairingCode ? <KeyRound className="h-6 w-6" /> : <Smartphone className="h-6 w-6" />}
@@ -76,13 +133,21 @@ export function ConnectTab({ status, onInit, initing }) {
             />
           </>
         )}
-      </div>
+      </div>,
     );
   }
 
   // ── Qoşulmayıb ──
-  return (
+  return withSwitch(
     <div className="rounded-xl border border-gray-200 bg-white p-6">
+      {/* Hədd dolub gözləmə dayandırılıbsa səbəb görünsün — əks halda
+          «QR hara getdi?» sualı yaranırdı. */}
+      {qrStopped && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <QrCode className="mt-0.5 h-4 w-4 flex-none" />
+          <span>QR skan edilmədi, gözləmə dayandırıldı. Yenidən cəhd üçün «Qoşul» basın.</span>
+        </div>
+      )}
       <p className="text-sm text-gray-600">
         {hasSession
           ? "Saxlanmış sessiya var — «Qoşul» düyməsi QR olmadan bərpa edəcək."
@@ -124,7 +189,8 @@ export function ConnectTab({ status, onInit, initing }) {
         <li>• Server yenidən başlayanda sessiya varsa <b>avtomatik qoşulur</b> — QR lazım olmur.</li>
         <li>• Hər dəqiqə vəziyyət yoxlanılır, bağlantı düşsə özü bərpa edir.</li>
         <li>• «Bağla» sessiyanı saxlayır, «Sessiyanı sil» tam çıxışdır.</li>
+        <li>• Skan edilməsə QR gözləməsi bir neçə dəqiqədən sonra öz-özünə dayanır.</li>
       </ul>
-    </div>
+    </div>,
   );
 }

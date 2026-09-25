@@ -27,6 +27,7 @@ import { notify, QueryState } from "@/components";
 import {
   useWhatsappStatusQuery,
   useWhatsappInitMutation,
+  useWhatsappSetAutoMutation,
   useWhatsappSendMutation,
   useWhatsappDisconnectMutation,
   useWhatsappLogoutMutation,
@@ -68,6 +69,7 @@ export default function MessagesPage() {
   });
 
   const [init, { isLoading: initing }] = useWhatsappInitMutation();
+  const [setAuto, { isLoading: settingAuto }] = useWhatsappSetAutoMutation();
   const [send, { isLoading: sending }] = useWhatsappSendMutation();
   const [cancelBulk] = useBulkCancelMutation();
   const [checkVersion, { isLoading: checkingVersion }] = useWhatsappCheckVersionMutation();
@@ -158,7 +160,9 @@ export default function MessagesPage() {
                 <ConnectTab
                   status={s}
                   initing={initing}
+                  settingAuto={settingAuto}
                   onInit={(arg) => run(init, arg, arg?.pairPhone ? "Kod hazırlanır…" : "Başladılır…")}
+                  onSetAuto={(enabled) => run(setAuto, enabled, enabled ? "Açılır…" : "Söndürülür…")}
                 />
               </div>
             )}
