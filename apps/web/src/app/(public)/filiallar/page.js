@@ -1,5 +1,5 @@
 // Components
-import { BranchMapSwitcher, CtaBand } from "@/components";
+import { LocaleLink as Link, BranchMapSwitcher, CtaBand } from "@/components";
 import { PageBanner } from "@/components/server";
 
 // Lib
@@ -30,7 +30,9 @@ function BranchCard({ branch, accent, tr, locale }) {
   return (
     <div className="ba-pricecard" style={{ "--c": cc }}>
       <div className="ba-pricecard-head">
-        <span className="ba-pricecard-name" style={{ fontSize: 19 }}>{b.name} {b.isMain && <span style={{ fontSize: 11, fontWeight: 800, color: cc, background: `${cc}1a`, padding: "3px 9px", borderRadius: 99, verticalAlign: "middle", marginLeft: 6 }}>{tr("branch.main")}</span>}</span>
+        {/* Ad filialın öz səhifəsinə aparır — hər filialın ünvanı, iş
+            saatları və kursları orada tamdır. */}
+        <span className="ba-pricecard-name" style={{ fontSize: 19 }}><Link href={`/filiallar/${b.slug}`} style={{ color: "inherit" }}>{b.name}</Link> {b.isMain &&<span style={{ fontSize: 11, fontWeight: 800, color: cc, background: `${cc}1a`, padding: "3px 9px", borderRadius: 99, verticalAlign: "middle", marginLeft: 6 }}>{tr("branch.main")}</span>}</span>
         {/* Metro AYRICA sətirdədir: əvvəl ünvana «·» ilə yapışdırılırdı və
             «Əhmədli, Babək pr. 88 · Əhmədli» ünvanın davamı kimi oxunurdu. */}
         <span className="ba-pricecard-addr">📍 {b.address}</span>
@@ -50,6 +52,9 @@ function BranchCard({ branch, accent, tr, locale }) {
           <a href={`tel:${b.phone.replace(/[^+\d]/g, "")}`} style={{ flex: 1, textAlign: "center", background: "var(--accent)", color: "#fff", fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 12 }}>{tr("common.callNow")}</a>
         )}
       </div>
+      <p style={{ margin: "12px 0 0", fontSize: 13.5 }}>
+        <Link href={`/filiallar/${b.slug}`} style={{ color: "var(--accent)", fontWeight: 700 }}>{tr("card.more")} →</Link>
+      </p>
     </div>
   );
 }

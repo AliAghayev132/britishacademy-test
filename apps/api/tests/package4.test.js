@@ -35,8 +35,11 @@ describe("#30 sitemap URL siyahısı", () => {
   it("404 verən ünvanlar yoxdur, layihələr və haqqımızda var", async () => {
     const { urls, page } = await run();
     const paths = urls.map((u) => u.path);
-    expect(paths.some((p) => p.startsWith("/filiallar/"))).toBe(false);
     expect(paths).toContain("/filiallar");
+    // Filialın öz səhifəsi ARTIQ VAR. Bu yoxlama əvvəl əksini tələb edirdi:
+    // marşrut yox idi, ünvan 404 verirdi, ona görə sitemap-a düşməməli idi.
+    // İndi səhifə var — sitemap-da olmalıdır (bax apps/web .../filiallar/[slug]).
+    expect(paths).toContain("/filiallar/genclik");
     expect(paths).toContain("/layiheler/layihe");
     expect(paths).toContain("/haqqimizda");
     // Page yalnız marşrutu olan sənədlər üçün oxunur.

@@ -62,7 +62,9 @@ export function BranchMapSwitcher({ branches = [] }) {
 
   return (
     <div style={{ marginTop: 28 }}>
-      {/* Filial seçimi */}
+      {/* Filial seçimi — tək filial olanda seçiləcək bir şey yoxdur
+          (filialın öz səhifəsində xəritə tək gəlir). */}
+      {branches.length > 1 && (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         {branches.map((b, i) => {
           const on = i === idx;
@@ -94,6 +96,7 @@ export function BranchMapSwitcher({ branches = [] }) {
           );
         })}
       </div>
+      )}
 
       {src ? (
         <div style={{ position: "relative", borderRadius: 22, overflow: "hidden", border: "1px solid #ECEDF2" }}>

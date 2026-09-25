@@ -74,8 +74,10 @@ const getUrls = asyncHandler(async (_req, res) => {
   // hər dəfə «indi» idi — Google hər gün hamısını dəyişmiş sayıb bu siqnala
   // inanmağı dayandırır (audit #30).
   //
-  // /filiallar/<slug> YOXDUR (filiallar bir səhifədədir) — əvvəl hər filial
-  // 404 verən ünvan kimi sitemap-a düşürdü.
+  // /filiallar/<slug> ARTIQ VAR. Bir müddət yox idi (hamısı bir səhifədə
+  // idi) və hər filial 404 verən ünvan kimi sitemap-a düşürdü — ona görə
+  // çıxarılmışdı. İndi hər filialın öz səhifəsi var: lokal axtarış üçün
+  // ünvan, metro, iş saatları və həmin filialda keçilən kurslar.
   const urls = [
     { path: "/", lastmod: latest(courses, posts, destinations), priority: 1.0 },
     { path: "/kurslar", lastmod: latest(courses, categories), priority: 0.8 },
@@ -95,6 +97,7 @@ const getUrls = asyncHandler(async (_req, res) => {
     { path: "/testler", lastmod: latest(quizzes), priority: 0.8 },
     ...map(categories, "/kurslar", 0.8),
     ...map(courses, "/kurslar", 0.8),
+    ...map(branches, "/filiallar", 0.6),
     ...map(teachers, "/muellimler", 0.6),
     ...map(destinations, "/xaricde-tehsil", 0.6),
     ...map(projects, "/layiheler", 0.5),
