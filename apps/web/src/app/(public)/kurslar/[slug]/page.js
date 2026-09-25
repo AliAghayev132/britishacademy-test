@@ -46,6 +46,25 @@ async function findCategory(slug) {
 }
 
 // ── Metadata ──
+/** Kateqoriyanın kurs siyahısı — hub həm meta, həm JSON-LD üçün oxuyur. */
+const categoryCourses = async (cat) => (await apiGet(`/courses?category=${cat.slug}`))?.courses || [];
+
+/**
+ * Kateqoriya hub-ının meta təsviri.
+ *
+ * Əvvəl sabit «<ad> — British Academy proqramları və qeydiyyat.» idi: cəmi
+ * 56–60 simvol və yeddi hub üçün demək olar eyni mətn. İndi təsvir həmin
+ * kateqoriyadakı KURS ADLARINDAN qurulur — hər hub üçün fərqli və axtarış
+ * sorğusuna uyğun olur. Kateqoriyanın öz `lead` mətni varsa ona toxunulmur.
+ */
+async function categoryDescription(cat, tr) {
+  const names = (await categoryCourses(cat)).map((c) => c.title).filter(Boolean).join(", ");
+  if (!names) return `${cat.name} — ${tr("meta.categoryDesc")}`;
+  // Siyahı büdcəyə sığmırsa son tam adda kəsilir (yarımçıq ad qalmasın).
+  const list = names.length > 80 ? `${names.slice(0, 80).replace(/,[^,]*$/, "")}…` : names;
+  return `${cat.name}: ${list}. ${tr("meta.categoryTail")}`;
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const { data } = await apiGetStatus(`/courses/${slug}`);
@@ -64,7 +83,7 @@ export async function generateMetadata({ params }) {
     const tr = await getT();
     return buildMetadata({
       title: cat.name,
-      description: cat.lead || `${cat.name} — ${tr("meta.categoryDesc")}`,
+      description: cat.lead || (await categoryDescription(cat, tr)),
       path: `/kurslar/${slug}`,
     });
   }
@@ -75,10 +94,38 @@ export async function generateMetadata({ params }) {
 /** Category hub: boxes of the category's courses. */
 async function CategoryHub({ cat }) {
   const tr = await getT();
-  const courseData = await apiGet(`/courses?category=${cat.slug}`);
-  const courses = courseData?.courses || [];
+  const locale = await getLocale();
+  const courses = await categoryCourses(cat);
+
+  // Struktur məlumatı — `/kurslar` hub-ında var idi, kateqoriya hub-larında
+  // yox idi. Halbuki «ingilis dili kursları» tipli sorğular məhz bura düşür.
+  const ld = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: cat.name,
+      numberOfItems: courses.length,
+      itemListElement: courses.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.title,
+        url: absUrl(`/kurslar/${c.slug}`, locale),
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: tr("common.home"), item: absUrl("/", locale) },
+        { "@type": "ListItem", position: 2, name: tr("common.courses"), item: absUrl("/kurslar", locale) },
+        { "@type": "ListItem", position: 3, name: cat.name, item: absUrl(`/kurslar/${cat.slug}`, locale) },
+      ],
+    },
+  ];
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ld) }} />
       <PageBanner
         title={cat.name}
         subtitle={cat.lead || cat.name}

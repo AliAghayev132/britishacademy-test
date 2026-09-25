@@ -14,6 +14,7 @@ import {
   Quiz,
   Page,
   Project,
+  Testimonial,
 } from "#models";
 
 // Utils
@@ -46,7 +47,7 @@ const getRobots = asyncHandler(async (_req, res) => {
  * Returns paths only; the Next.js sitemap route prefixes the site origin.
  */
 const getUrls = asyncHandler(async (_req, res) => {
-  const [courses, categories, branches, teachers, destinations, posts, pages, quizzes, projects] =
+  const [courses, categories, branches, teachers, destinations, posts, pages, quizzes, projects, testimonials] =
     await Promise.all([
       Course.findPublic().select("slug updatedAt"),
       CourseCategory.findPublic().select("slug updatedAt"),
@@ -57,6 +58,9 @@ const getUrls = asyncHandler(async (_req, res) => {
       Page.findPublic({ slug: { $in: Object.keys(PAGE_ROUTES) } }).select("slug updatedAt"),
       Quiz.findPublic().select("slug updatedAt"),
       Project.findPublic().select("slug updatedAt"),
+      // Yalnız lastmod üçün — rəylərin öz ünvanı yoxdur, hamısı
+      // /telebelerimiz səhifəsindədir.
+      Testimonial.findPublic().select("updatedAt"),
     ]);
 
   const map = (items, prefix, priority) =>
@@ -79,11 +83,12 @@ const getUrls = asyncHandler(async (_req, res) => {
     { path: "/kurslar/qiymetler", lastmod: latest(courses), priority: 0.8 },
     { path: "/muellimler", lastmod: latest(teachers), priority: 0.7 },
     { path: "/filiallar", lastmod: latest(branches), priority: 0.7 },
-    { path: "/telebelerimiz", priority: 0.6 },
+    { path: "/telebelerimiz", lastmod: latest(testimonials), priority: 0.6 },
     { path: "/xaricde-tehsil", lastmod: latest(destinations), priority: 0.7 },
     { path: "/layiheler", lastmod: latest(projects), priority: 0.6 },
     { path: "/bloq", lastmod: latest(posts), priority: 0.7 },
-    { path: "/elaqe", priority: 0.6 },
+    // Əlaqə səhifəsinin məzmunu filiallardır — lastmod da onlardan gəlir.
+    { path: "/elaqe", lastmod: latest(branches), priority: 0.6 },
     // Haqqımızda sənədsiz də açılır (statik mətn) — həmişə siyahıdadır.
     { path: "/haqqimizda", lastmod: pages.find((p) => p.slug === "haqqimizda")?.updatedAt, priority: 0.5 },
     // Testlər — köhnə saytda ən çox girilən səhifələr idi, indeksdə qalmalıdır.

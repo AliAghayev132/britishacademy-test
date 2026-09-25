@@ -23,20 +23,25 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:30
  * işləyir. Sabit azərbaycanca sətir olduqları müddətdə /en və /ru
  * səhifələrinin <title> və <meta description>-ı azərbaycanca gedirdi — yəni
  * axtarış nəticələrində ingilis və rus dilli istifadəçi AZ mətn görürdü.
+ *
+ * Başlıqlar TITLE_MAX (65) büdcəsinə sığır. Əvvəl 71–80 simvol idi (AZ 71,
+ * EN 76, RU 80) — Google sonunu kəsirdi, «xaricdə təhsil» / «обучение за
+ * рубежом» hissəsi nəticədə görünmürdü. «TOEFL» çıxarıldı: IELTS daha çox
+ * axtarılır, TOEFL isə öz səhifəsində və təsvirdə qalır.
  */
 const DEFAULTS = {
   az: {
-    title: "British Academy — Dil kursları, IELTS/TOEFL hazırlığı və xaricdə təhsil",
+    title: "British Academy — Dil kursları, IELTS hazırlığı, xaricdə təhsil",
     description:
       "British Academy — English UK akkreditasiyalı dil mərkəzi. İngilis, rus, alman dili kursları, IELTS · TOEFL hazırlığı və xaricdə təhsil.",
   },
   en: {
-    title: "British Academy — Language courses, IELTS/TOEFL preparation and study abroad",
+    title: "British Academy — Language courses, IELTS prep, study abroad",
     description:
       "British Academy — a language centre accredited by English UK. English, Russian and German courses, IELTS · TOEFL preparation and study abroad.",
   },
   ru: {
-    title: "British Academy — Языковые курсы, подготовка к IELTS/TOEFL и обучение за рубежом",
+    title: "British Academy — Языковые курсы, IELTS, обучение за рубежом",
     description:
       "British Academy — языковой центр с аккредитацией English UK. Курсы английского, русского и немецкого, подготовка к IELTS · TOEFL и обучение за рубежом.",
   },
@@ -81,6 +86,31 @@ export async function getSiteSettings() {
 }
 
 /**
+ * Axtarış nəticəsində görünən başlıq üçün büdcə. Data dəstindəki
+ * `metaTitle`-lar da bu hədlə yazılır (bax apps/api tests/pageContent.test.js).
+ */
+const TITLE_MAX = 65;
+
+/**
+ * Başlıq şablonunu («%s — British Academy») YALNIZ nəticə büdcəyə sığanda
+ * tətbiq et.
+ *
+ * Şəkilçi 19 simvoldur. Əvvəl hər başlığa qoşulurdu, ona görə data tərəfində
+ * ≤65 qaydasına əməl olunsa da Google-un gördüyü başlıq 65-i keçirdi: ana
+ * səhifə 71, /ru 80, /kurslar/qiymetler 77, /xaricde-tehsil/almaniya 70.
+ * Kəsilən hissə həmişə şəkilçi olurdu — yəni brend adı onsuz da görünmürdü,
+ * amma başlığın sonu da onunla birlikdə itirdi.
+ *
+ * İndi qısa başlıqlar brend şəkilçisini saxlayır, uzunlar isə öz mətnini tam
+ * göstərir. Başlıqda brend adı artıq varsa şəkilçi təkrarlanmır.
+ */
+function applyTitleTemplate(template, title, brand) {
+  const composed = template.replace("%s", title);
+  if (brand && title.includes(brand)) return title;
+  return composed.length > TITLE_MAX ? title : composed;
+}
+
+/**
  * Core builder — resolves global (admin) defaults, then applies per-page values.
  * Returns a full Next.js Metadata object. Use from an async generateMetadata.
  */
@@ -99,7 +129,7 @@ export async function resolveMetadata({
   const url = `${SITE_URL}${buildPath(path || "/", locale)}`;
   const canon = canonical || url;
   const fullImg = abs(image || seo.defaultOgImage || s?.brand?.ogImage);
-  const composed = title ? titleTemplate.replace("%s", title) : defTitle;
+  const composed = title ? applyTitleTemplate(titleTemplate, title, name) : defTitle;
   // Açar sözlər dil üzrə vergüllə ayrılmış mətn ola bilər (köhnə data massiv).
   const ownKw = toList(keywords);
   const kw = ownKw.length ? ownKw : toList(seo.keywords);

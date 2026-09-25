@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import fs from "node:fs";
-import { Course, CourseCategory, Branch, Teacher, Destination, BlogPost, Page, Quiz, Project } from "#models";
+import { Course, CourseCategory, Branch, Teacher, Destination, BlogPost, Page, Quiz, Project, Testimonial } from "#models";
 import { config } from "#config";
 import { getUrls } from "../controllers/seoController.js";
 
@@ -23,6 +23,8 @@ describe("#30 sitemap URL siyahısı", () => {
     const page = vi.spyOn(Page, "findPublic").mockReturnValue(rows());
     vi.spyOn(Quiz, "findPublic").mockReturnValue(rows());
     vi.spyOn(Project, "findPublic").mockReturnValue(rows({ slug: "layihe", updatedAt: d("01") }));
+    // Rəylərin öz ünvanı yoxdur — yalnız /telebelerimiz-in lastmod-u üçün.
+    vi.spyOn(Testimonial, "findPublic").mockReturnValue(rows({ updatedAt: d("07") }));
     const res = { json: vi.fn() };
     getUrls({}, res, (e) => { throw e; });
     // asyncHandler promise-i qaytarmır — cavabı gözləyirik.
@@ -46,8 +48,12 @@ describe("#30 sitemap URL siyahısı", () => {
     const of = (p) => urls.find((u) => u.path === p);
     expect(of("/").lastmod.toISOString()).toBe("2026-09-12T10:00:00.000Z");
     expect(of("/kurslar").lastmod.toISOString()).toBe("2026-09-10T10:00:00.000Z");
+    // Mənbəsi boş olan siyahı səhifəsi lastmod-suz qalır — «indi» yazılmır.
     expect(of("/muellimler").lastmod).toBeUndefined();
-    expect(of("/elaqe").lastmod).toBeUndefined();
+    // Əlaqə səhifəsinin məzmunu filiallardır, rəy səhifəsininki rəylər:
+    // əvvəl ikisi də lastmod-suz gedirdi, halbuki mənbələri var.
+    expect(of("/elaqe").lastmod.toISOString()).toBe("2026-09-05T10:00:00.000Z");
+    expect(of("/telebelerimiz").lastmod.toISOString()).toBe("2026-09-07T10:00:00.000Z");
   });
 });
 
