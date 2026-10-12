@@ -155,8 +155,14 @@ class FileService {
 
     // Copy the untouched original for the "download original" feature. A failure
     // here must not break the main upload, so we only warn.
+    //
+    // ⚠️ ASYNC OLMALIDIR. Əvvəl `fs.copyFileSync` idi: API tək Node prosesidir,
+    // ona görə 100 MB-lıq videonun kopyalanması boyu HADİSƏ DÖNGƏSİ tamamilə
+    // bloklanırdı — həmin saniyələrdə nə admin paneli, nə saytın server
+    // tərəfli renderi cavab verirdi. Kənardan bu, «video yükləyəndə sistem
+    // donur» kimi görünürdü.
     try {
-      fs.copyFileSync(filePath, path.join(originalsDir, randomName));
+      await fs.promises.copyFile(filePath, path.join(originalsDir, randomName));
     } catch (copyErr) {
       console.warn("Original copy failed:", copyErr.message);
     }

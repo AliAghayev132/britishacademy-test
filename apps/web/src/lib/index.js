@@ -75,6 +75,7 @@ export {
   uploadImageForEditor,
   uploadVideoForEditor,
 } from "./uploadDocumentForEditor";
+export { UPLOAD_MAX_MB, assertUploadSize } from "./uploadLimits";
 export { uploadWithProgress } from "./uploadWithProgress";
 export { withUtm } from "./utm";
 export { API_ORIGIN, API_URL, IMAGE_URL, SITE_URL, default as variables } from "./variables";

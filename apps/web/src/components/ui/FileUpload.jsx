@@ -18,11 +18,20 @@ import { useRef, useState } from "react";
 import { UploadCloud, X, Crop, Info, FolderOpen } from "lucide-react";
 
 // Lib
-import { useMarkDirty, API_URL, specSummary, uploadWithProgress, getImageUrl } from "@/lib";
+import {
+  useMarkDirty,
+  API_URL,
+  specSummary,
+  uploadWithProgress,
+  getImageUrl,
+  assertUploadSize,
+  UPLOAD_MAX_MB,
+} from "@/lib";
 
 // Local
 import { ImageCropper } from "./ImageCropper";
 import { MediaPicker } from "./MediaPicker";
+
 
 /**
  * @param {object} p
@@ -78,6 +87,14 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
   const onFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Tavanı aşan fayl ümumiyyətlə göndərilmir — dərhal və anlaşılan cavab.
+    try {
+      assertUploadSize(file, isVideo ? "video" : "image");
+    } catch (sizeErr) {
+      setErr(sizeErr.message);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     // Spesifikasiya varsa əvvəlcə kəsmə dialoqu açılır.
     if (canCrop) {
       setCropFile(file);

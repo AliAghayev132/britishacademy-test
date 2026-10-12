@@ -4,6 +4,7 @@
 import { API_URL } from './variables';
 import { uploadWithProgress } from './uploadWithProgress';
 import { getImageUrl } from './getImageUrl';
+import { assertUploadSize } from './uploadLimits';
 
 /** Server cavabından mütləq URL — uğursuzluqda istisna. */
 function editorUrl(result, fallback) {
@@ -19,6 +20,7 @@ function editorUrl(result, fallback) {
  * @returns {Promise<string>} şəklin URL-i
  */
 export async function uploadImageForEditor(file) {
+  assertUploadSize(file, 'image');
   const formData = new FormData();
   formData.append('image', file);
   const result = await uploadWithProgress(`${API_URL}/media/upload-image`, formData);
@@ -32,6 +34,7 @@ export async function uploadImageForEditor(file) {
  * @returns {Promise<string>} videonun URL-i
  */
 export async function uploadVideoForEditor(file, onProgress) {
+  assertUploadSize(file, 'video');
   const formData = new FormData();
   formData.append('video', file);
   const result = await uploadWithProgress(`${API_URL}/media/upload-video`, formData, onProgress);
@@ -46,6 +49,7 @@ export async function uploadVideoForEditor(file, onProgress) {
  * @returns {Promise<{url:string,name:string,size:number,mimetype:string}>}
  */
 export async function uploadDocumentForEditor(file, customName, onProgress) {
+  assertUploadSize(file, 'document');
   const formData = new FormData();
   formData.append('file', file);
   if (customName) formData.append('name', String(customName));

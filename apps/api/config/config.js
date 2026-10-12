@@ -108,11 +108,19 @@ const config = {
   // File upload limits/types (used by FileService media helpers + uploadLimit)
   upload: {
     maxImageSize: 30 * 1024 * 1024, // images — 30MB
-    // Tələbə video rəyləri 200 MB-a qədər ola bilər — 250 MB ehtiyatla.
     // Bu dəyər HƏM qlobal express-fileupload limitini, HƏM marşrut
     // limitini, HƏM də FileService yoxlamasını idarə edir (app.js:95).
-    // ⚠️ Reverse proxy (nginx: client_max_body_size) də uyğun olmalıdır.
-    maxVideoSize: Number(process.env.MAX_VIDEO_SIZE_MB || 250) * 1024 * 1024,
+    //
+    // ⚠️ YOL BOYU ƏN KİÇİK LİMİT QƏRAR VERİR. Sorğu
+    // Cloudflare → nginx → Express zəncirindən keçir:
+    //   • Cloudflare (pulsuz plan) — sorğu gövdəsi üçün 100 MB sərt tavan,
+    //     dəyişdirilə bilmir;
+    //   • nginx — `client_max_body_size` (bax deploy/nginx konfiqi).
+    // Burada 250 yazılmışdı, nginx-də isə 12 MB idi: panel 250 MB vəd edir,
+    // 12 MB-dan böyük video isə sərhəddə kəsilirdi (13 MB-da 502, daha
+    // böyükdə 413) — istifadəçi yalnız donmuş progress görürdü.
+    // İndi üçü də 100 MB-dır; artırmaq üçün Cloudflare planı dəyişməlidir.
+    maxVideoSize: Number(process.env.MAX_VIDEO_SIZE_MB || 100) * 1024 * 1024,
     maxDocSize: 100 * 1024 * 1024, // documents — 100MB
     allowedImageTypes: ["image/jpeg", "image/png", "image/webp", "image/jpg"],
     allowedVideoTypes: ["video/mp4", "video/webm", "video/ogg"],
