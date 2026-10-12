@@ -140,12 +140,20 @@ class FileService {
   /**
    * Save a media file under uploads/<folder>/ with a random filename and copy a
    * pristine duplicate to uploads/originals/<folder>/ (best-effort).
+   *
+   * `keepOriginal: false` — dublikat YARADILMIR. Video üçün belədir: fayl heç
+   * bir emaldan keçmir, yəni «original» nüsxə saxlanan fayl ilə BAYT-BAYT
+   * eynidir. 100 MB-lıq video üçün bu, hər yükləmədə əlavə 100 MB disk və
+   * əlavə tam kopyalama deməkdir — qarşılığında heç nə vermədən.
+   * (Şəkillərdə saxlanılır: ölçü kiçikdir və gələcək kəsmə/emal üçün mənalı
+   * ola bilər.)
+   *
    * @returns {string} public URL `/uploads/<folder>/<filename>`
    */
-  static async saveMediaWithOriginal(file, folder) {
+  static async saveMediaWithOriginal(file, folder, { keepOriginal = true } = {}) {
     const dir = this.ensureUploadDir(folder);
     // Forward-slash sub-path so ensureUploadDir's char guard keeps the separator.
-    const originalsDir = this.ensureUploadDir(`originals/${folder}`);
+    const originalsDir = keepOriginal ? this.ensureUploadDir(`originals/${folder}`) : null;
 
     const ext = this.extFor(file.mimetype);
     const randomName = `${crypto.randomBytes(16).toString("hex")}${ext}`;
@@ -161,10 +169,12 @@ class FileService {
     // bloklanırdı — həmin saniyələrdə nə admin paneli, nə saytın server
     // tərəfli renderi cavab verirdi. Kənardan bu, «video yükləyəndə sistem
     // donur» kimi görünürdü.
-    try {
-      await fs.promises.copyFile(filePath, path.join(originalsDir, randomName));
-    } catch (copyErr) {
-      console.warn("Original copy failed:", copyErr.message);
+    if (originalsDir) {
+      try {
+        await fs.promises.copyFile(filePath, path.join(originalsDir, randomName));
+      } catch (copyErr) {
+        console.warn("Original copy failed:", copyErr.message);
+      }
     }
 
     return `/${uploadPaths.root}/${folder}/${randomName}`;
@@ -211,7 +221,8 @@ class FileService {
       );
     }
 
-    return this.saveMediaWithOriginal(file, folder);
+    // Video emaldan keçmir — «original» nüsxə eyni fayldır, saxlanmır.
+    return this.saveMediaWithOriginal(file, folder, { keepOriginal: false });
   }
 
   /**

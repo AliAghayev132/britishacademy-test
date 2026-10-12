@@ -19,11 +19,16 @@ import { Video, Upload, Check, HelpCircle, ChevronDown, X } from 'lucide-react';
 // Hooks
 import { useDismiss } from '@/hooks';
 
+// Lib
+import { UPLOAD_MAX_MB } from '@/lib';
+
 // Local
 import { ToolbarButton } from './Primitives';
 
 const ACCEPT = 'video/mp4,video/webm,video/ogg';
-const MAX_MB = 100;
+// Tavan ortaq moduldadır (lib/uploadLimits.js) — Cloudflare/nginx/API ilə
+// eyni rəqəm bir yerdə saxlanılır.
+const MAX_MB = UPLOAD_MAX_MB.video;
 
 export default function VideoMenu({ editor, onVideoUpload }) {
   const [open, setOpen] = useState(false);

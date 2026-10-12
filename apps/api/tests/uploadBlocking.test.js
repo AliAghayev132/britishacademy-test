@@ -33,6 +33,14 @@ describe("yükləmə hadisə döngəsini bloklamır", () => {
     expect(src).not.toMatch(/fs\.copyFileSync\(/);
   });
 
+  it("video üçün boş «original» dublikatı yaradılmır", () => {
+    // Video emaldan keçmir: dublikat bayt-bayt eyni idi və heç yerdə
+    // oxunmurdu (getOriginalImageUrl barreldə var, istifadəçisi yoxdur).
+    // 100 MB-lıq video üçün bu, hər yükləmədə əlavə 100 MB disk deməkdir.
+    expect(src).toContain("saveMediaWithOriginal(file, folder, { keepOriginal: false })");
+    expect(src).toContain("const originalsDir = keepOriginal ?");
+  });
+
   it("faylın özü diskə asenxron köçürülür", () => {
     // express-fileupload `mv` — temp fayldan rename/stream, sinxron deyil.
     expect(src).toMatch(/await file\.mv\(filePath\)/);

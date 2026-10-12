@@ -33,6 +33,9 @@ import { ImageCropper } from "./ImageCropper";
 import { MediaPicker } from "./MediaPicker";
 
 
+/** Baytı MB kimi yaz (bir onluq rəqəm). */
+const mb = (bytes) => (bytes / 1024 / 1024).toFixed(1);
+
 /**
  * @param {object} p
  * @param {string} [p.folder] Qalereyada hansı qovluğa düşsün (məs. "bayraqlar")
@@ -45,7 +48,15 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
     setValue(next);
   };
   const inputRef = useRef(null);
-  const [pct, setPct] = useState(null); // null = boşdayanma
+  // Yükləmə vəziyyəti. `pct` null olanda yükləmə getmir.
+  const [pct, setPct] = useState(null);
+  // Canlı sayğac: nə qədər getdi / nə qədərdir və saniyədə neçə MB.
+  const [sent, setSent] = useState(null);     // { loaded, total }
+  const [speed, setSpeed] = useState(null);   // MB/s
+  // "sending" → baytlar gedir; "processing" → server faylı yazır.
+  const [phase, setPhase] = useState("sending");
+  const abortRef = useRef(null);
+  const startRef = useRef(0);
   const [err, setErr] = useState("");
   const [cropFile, setCropFile] = useState(null); // kəsmə gözləyən fayl
   const [picking, setPicking] = useState(false);  // qalereya modalı
@@ -66,12 +77,32 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
   const upload = async (file) => {
     setErr("");
     setPct(0);
+    setSent({ loaded: 0, total: file.size });
+    setSpeed(null);
+    setPhase("sending");
+    startRef.current = Date.now();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const fd = new FormData();
       fd.append(fieldName, file);
       // Qalereyada hansı bölməyə düşəcəyi (registerMedia bunu oxuyur).
       if (folder) fd.append("folder", folder);
-      const res = await uploadWithProgress(`${API_URL}${endpoint}`, fd, (p) => setPct(p));
+      const res = await uploadWithProgress(
+        `${API_URL}${endpoint}`,
+        fd,
+        (p, info) => {
+          setPct(p);
+          // Baytlar qurtardı, cavab gözlənilir — çubuq «donmuş» görünməsin.
+          if (info?.phase === "processing") { setPhase("processing"); return; }
+          if (info?.total) {
+            setSent({ loaded: info.loaded, total: info.total });
+            const sec = (Date.now() - startRef.current) / 1000;
+            if (sec > 0.4) setSpeed(info.loaded / 1024 / 1024 / sec);
+          }
+        },
+        { signal: controller.signal },
+      );
       const url = res?.data?.url;
       if (!url) throw new Error("Server URL qaytarmadı");
       onChange(url);
@@ -79,10 +110,17 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
     } catch (e) {
       setErr(e?.message || "Yüklənmə alınmadı");
     } finally {
+      abortRef.current = null;
       setPct(null);
+      setSent(null);
+      setSpeed(null);
+      setPhase("sending");
       if (inputRef.current) inputRef.current.value = "";
     }
   };
+
+  /** Gedən yükləməni dayandır — fayl böyükdürsə gözləmək məcburi olmasın. */
+  const cancel = () => abortRef.current?.abort();
 
   const onFile = async (e) => {
     const file = e.target.files?.[0];
@@ -172,7 +210,7 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
             className={`flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-medium text-gray-500 transition-colors hover:border-[#00157A] hover:text-[#00157A] disabled:opacity-60 ${isVideo ? "sm:col-span-2" : ""}`}
           >
             {canCrop ? <Crop className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
-            {uploading ? `Yüklənir… ${pct}%` : isVideo ? "Video yüklə" : canCrop ? "Yeni yüklə və kəs" : "Yeni yüklə"}
+            {uploading ? `Yüklənir… ${Math.round(pct)}%` : isVideo ? "Video yüklə" : canCrop ? "Yeni yüklə və kəs" : "Yeni yüklə"}
           </button>
         </div>
       )}
@@ -182,7 +220,7 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
         <div className="mt-1.5 flex items-start gap-1.5 text-xs text-gray-500">
           <Info className="mt-0.5 h-3 w-3 flex-none text-gray-400" />
           <span>
-            <span className="font-semibold text-gray-700">MP4 / WebM · maksimum 250 MB</span>
+            <span className="font-semibold text-gray-700">MP4 / WebM · maksimum {UPLOAD_MAX_MB.video} MB</span>
             {" — "}yüklənmə böyük fayllarda bir neçə dəqiqə çəkə bilər, səhifəni bağlamayın.
           </span>
         </div>
@@ -201,8 +239,35 @@ export function FileUpload({ value, onChange: setValue, kind = "image", spec, fo
       )}
 
       {uploading && (
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
-          <div className="h-full rounded-full bg-[#00157A] transition-all" style={{ width: `${pct}%` }} />
+        <div className="mt-2">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div
+              className={`h-full rounded-full bg-[#00157A] transition-all ${phase === "processing" ? "animate-pulse" : ""}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-between gap-3 text-xs text-gray-500">
+            {/* Baytlar qurtarandan sonra server faylı yazır — o mərhələ ayrıca
+                yazılır, əks halda 100% «ilişmiş» kimi görünürdü. */}
+            <span className="tabular-nums">
+              {phase === "processing" ? (
+                "Serverdə yazılır… bir az çəkə bilər"
+              ) : (
+                <>
+                  {Math.round(pct)}%
+                  {sent?.total ? ` · ${mb(sent.loaded)} / ${mb(sent.total)} MB` : ""}
+                  {speed ? ` · ${speed.toFixed(1)} MB/s` : ""}
+                </>
+              )}
+            </span>
+            <button
+              type="button"
+              onClick={cancel}
+              className="flex-none font-semibold text-red-600 transition hover:underline"
+            >
+              Ləğv et
+            </button>
+          </div>
         </div>
       )}
       {err && <div className="mt-1 text-xs font-semibold text-red-600">{err}</div>}
