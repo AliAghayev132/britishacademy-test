@@ -129,13 +129,11 @@ export default function VideoMenu({ editor, onVideoUpload }) {
       setProgress(100);
 
       if (url) {
-        editor
-          .chain()
-          .focus()
-          .insertContent(
-            `<div data-video-wrapper="true"><video controls src="${escapeAttr(url)}" style="max-width:100%; height:auto;"></video></div>`
-          )
-          .run();
+        // Node kimi yerləşdirilir (xam HTML sətri kimi yox): sxem onu tanıyır
+        // və redaktorda oynadıla bilən video görünür. Əvvəl HTML sətri idi,
+        // `video` node-u isə sxemdə yox idi — nəticədə teqlər mətn kimi
+        // qalırdı. Bax VideoExtension.js.
+        editor.chain().focus().setVideo({ src: url }).run();
       }
       setTimeout(() => {
         setUploading(false);

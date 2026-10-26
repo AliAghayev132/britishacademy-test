@@ -35,6 +35,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { ImageCollage } from './ImageCollageExtension';
 import { ImageSlider } from './ImageSliderExtension';
+import { Video } from './VideoExtension';
 
 /* ------------------------------------------------------------------ */
 /*  Image — `style` atributu ilə genişləndirilmiş şəkil node-u         */
@@ -408,6 +409,8 @@ export function buildExtensions({ placeholder, maxCharacters }) {
     }),
     ImageCollage,
     ImageSlider,
+    // Yüklənən video faylları (mp4/webm). Youtube uzantısı yalnız iframe-dir.
+    Video,
     Youtube.configure({
       inline: false,
       ccLanguage: 'az',

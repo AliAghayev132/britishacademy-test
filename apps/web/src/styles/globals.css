@@ -342,6 +342,13 @@ img { display: block; max-width: 100%; }
 .bz-body h2 { font-family:'Poppins'; font-weight:700; font-size:27px; letter-spacing:-.01em; color:#14141C; margin:38px 0 16px; }
 .bz-body ul { margin:0 0 22px; padding-left:22px; }
 .bz-body li { font-size:17px; line-height:1.7; color:#33333D; margin-bottom:8px; }
+/* Redaktordan gələn video (bloq, kurs, ölkə, «Haqqımızda» — hamısı .bz-body).
+   Əvvəl heç bir qayda yox idi: video yalnız öz inline `max-width:100%;
+   height:auto` üslubu ilə qalırdı və şaquli telefon videosu 760px-lik
+   sütunda ~1250px hündürlüyə çatırdı. Hündürlük ekrana bağlanır, en
+   nisbətdən hesablanır, video mərkəzə düzülür. */
+.bz-body div[data-video-wrapper] { margin:28px 0; text-align:center; }
+.bz-body video { display:block; max-width:100%; max-height:75vh; width:auto; height:auto; margin:0 auto; border-radius:14px; background:#000; }
 
 /* ---------- Image placeholder (stands in for user photos/videos) ---------- */
 .img-slot {

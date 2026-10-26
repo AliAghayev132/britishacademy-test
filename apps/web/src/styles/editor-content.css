@@ -294,9 +294,15 @@
 .ProseMirror video {
   max-width: 100%;
   height: auto;
+  /* Şaquli (9:16) telefon videosu `height:auto` ilə redaktorun bütün
+     hündürlüyünü tuturdu — ətrafdakı mətn görünmürdü. Hündürlük ekrana
+     bağlanır, en isə nisbətə görə özü hesablanır. */
+  max-height: 70vh;
+  width: auto;
   border-radius: 0.5rem;
   margin: 1.5rem auto;
   display: block;
+  background: #000;
 }
 
 .ProseMirror div[data-video-wrapper] {
