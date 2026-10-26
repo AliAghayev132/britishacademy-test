@@ -24,6 +24,7 @@ import { UPLOAD_MAX_MB } from '@/lib';
 
 // Local
 import { ToolbarButton } from './Primitives';
+import ToolbarPopover from './ToolbarPopover';
 
 const ACCEPT = 'video/mp4,video/webm,video/ogg';
 // Tavan ortaq moduldadır (lib/uploadLimits.js) — Cloudflare/nginx/API ilə
@@ -40,12 +41,13 @@ export default function VideoMenu({ editor, onVideoUpload }) {
   const [ytError, setYtError] = useState('');
 
   const ref = useRef(null);
+  const panelRef = useRef(null);
   const fileRef = useRef(null);
   const simIntervalRef = useRef(null);
   const realProgressRef = useRef(false); // hook progress callback-i çağırdımı?
 
-  /* Click-outside / Escape */
-  useDismiss(open, () => setOpen(false), ref);
+  /* Click-outside / Escape — panel portaldadır, onun ref-i də «içəri» */
+  useDismiss(open, () => setOpen(false), [ref, panelRef]);
 
   /* Cleanup */
   useEffect(
@@ -156,12 +158,8 @@ export default function VideoMenu({ editor, onVideoUpload }) {
         <Video size={16} />
       </ToolbarButton>
 
-      {open && (
-        <div
-          onMouseDown={(e) => e.preventDefault()}
-          className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-2xl
-                     border border-gray-200 p-3 z-50 w-[340px]"
-        >
+      <ToolbarPopover open={open} anchorRef={ref} panelRef={panelRef}>
+        <div className="bg-white rounded-xl border border-gray-200 p-3 w-[340px] max-w-[calc(100vw-16px)]">
           {/* YouTube */}
           <div className="mb-3">
             <p className="text-xs font-semibold text-gray-700 mb-1.5">YouTube linki</p>
@@ -286,7 +284,7 @@ export default function VideoMenu({ editor, onVideoUpload }) {
             </div>
           )}
         </div>
-      )}
+      </ToolbarPopover>
     </div>
   );
 }

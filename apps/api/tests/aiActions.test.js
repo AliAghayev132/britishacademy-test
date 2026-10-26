@@ -51,6 +51,12 @@ describe("AI əməliyyatları", () => {
     expect(block).toMatch(/"ru"/);
   });
 
+  it("tərcümə və səliqənin token büdcəsi giriş həcmindən hesablanır", () => {
+    // Sabit 1500 idi: 1148 sözlük bloq yazısının tərcüməsi 758 sözdə kəsildi
+    // və 200 ilə qayıtdı — admin yarımçıq mətni yadda saxladı.
+    expect(SRC).toMatch(/"translate" \|\| action === "polish" \? outputBudget\(/);
+  });
+
   it("seo-suite üçün token limiti artırılıb", () => {
     // Üç dil defolt 1500 tokenə sığmır — cavab yarımçıq kəsilib JSON parse
     // olunmurdu.

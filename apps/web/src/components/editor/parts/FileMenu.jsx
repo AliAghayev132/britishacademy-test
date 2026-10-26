@@ -26,6 +26,7 @@ import { useDismiss } from '@/hooks';
 
 // Local
 import { ToolbarButton } from './Primitives';
+import ToolbarPopover from './ToolbarPopover';
 
 const ACCEPT = [
   '.pdf',
@@ -79,12 +80,13 @@ export default function FileMenu({ editor, onFileUpload }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const ref = useRef(null);
+  const panelRef = useRef(null);
   const fileRef = useRef(null);
   const simIntervalRef = useRef(null);
   const realProgressRef = useRef(false);
 
-  /* Click-outside / Escape — yükləmə gedərkən bağlanmır */
-  useDismiss(open && !uploading, () => setOpen(false), ref);
+  /* Click-outside / Escape — yükləmə gedərkən bağlanmır. Panel portaldadır. */
+  useDismiss(open && !uploading, () => setOpen(false), [ref, panelRef]);
 
   /* Cleanup */
   useEffect(() => () => stopSim(), []);
@@ -241,12 +243,8 @@ export default function FileMenu({ editor, onFileUpload }) {
         <Paperclip size={16} />
       </ToolbarButton>
 
-      {open && (
-        <div
-          onMouseDown={(e) => e.preventDefault()}
-          className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-2xl
-                     border border-gray-200 p-3 z-50 w-[360px]"
-        >
+      <ToolbarPopover open={open} anchorRef={ref} panelRef={panelRef}>
+        <div className="bg-white rounded-xl border border-gray-200 p-3 w-[360px] max-w-[calc(100vw-16px)]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <FileText size={14} className="text-secondary" />
@@ -386,7 +384,7 @@ export default function FileMenu({ editor, onFileUpload }) {
             )}
           </div>
         </div>
-      )}
+      </ToolbarPopover>
 
       <input
         ref={fileRef}

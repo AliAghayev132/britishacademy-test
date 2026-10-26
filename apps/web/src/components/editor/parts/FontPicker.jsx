@@ -13,8 +13,12 @@
  *   - Digər seçimlər — istifadəçi bu fontları açıq şəkildə tətbiq edə bilər.
  * ===================================================================== */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+
+import { useDismiss } from '@/hooks';
+
+import ToolbarPopover from './ToolbarPopover';
 
 const FONT_SIZE_PRESETS = [
   '10', '11', '12', '13', '14', '15', '16',
@@ -79,15 +83,10 @@ export default function FontPicker({ editor }) {
     setSizeInput(toInputValue(editorSize));
   }, [editorSize]);
 
-  // Click-outside ilə font dropdown-u bağla
-  useEffect(() => {
-    if (!familyOpen) return;
-    const onDoc = (e) => {
-      if (!e.target.closest?.('[data-font-family-popover]')) setFamilyOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [familyOpen]);
+  // Kənara klik / Escape ilə bağla. Panel portaldadır — onun ref-i də «içəri».
+  const anchorRef = useRef(null);
+  const panelRef = useRef(null);
+  useDismiss(familyOpen, () => setFamilyOpen(false), [anchorRef, panelRef]);
 
   if (!editor) return null;
 
@@ -120,7 +119,7 @@ export default function FontPicker({ editor }) {
   return (
     <div className="flex items-center gap-1" onMouseDown={(e) => e.stopPropagation()}>
       {/* Font ailəsi seçimi */}
-      <div className="relative" data-font-family-popover>
+      <div className="relative" ref={anchorRef}>
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
@@ -137,10 +136,8 @@ export default function FontPicker({ editor }) {
           <ChevronDown size={12} className="text-gray-400 shrink-0" />
         </button>
 
-        {familyOpen && (
-          <div
-            className="absolute top-full left-0 mt-1 z-50 w-[200px] bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden py-1"
-          >
+        <ToolbarPopover open={familyOpen} anchorRef={anchorRef} panelRef={panelRef}>
+          <div className="w-[220px] bg-white border border-gray-200 rounded-xl py-1">
             {FONT_FAMILIES.map((f, i) => {
               const isCurrent = matched?.label === f.label;
               return (
@@ -168,7 +165,7 @@ export default function FontPicker({ editor }) {
               saytın əsas şriftinə qaytarır.
             </div>
           </div>
-        )}
+        </ToolbarPopover>
       </div>
 
       {/* Font ölçüsü — yalnız blur/Enter zamanı commit (fokus itməsin) */}

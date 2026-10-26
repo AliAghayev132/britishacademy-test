@@ -53,6 +53,13 @@ blogPostSchema.virtual("url").get(function () {
 blogPostSchema.plugin(i18nPlugin, { fields: LOCALIZED_FIELDS.BlogPost });
 
 blogPostSchema.pre("save", async function () {
+  // Paneldə əl ilə yazılan slug heç bir yoxlamadan keçmirdi. Canlıda
+  // «/ielts-speaking-movzulari» (əvvəlində «/») saxlandı: yazı «dərc olunmuş»
+  // görünürdü, ünvanı isə 404 verirdi. Əl ilə yazılan dəyər də eyni qaydadan
+  // keçir; düzgün slug-a təsiri yoxdur («ielts-nedir» → «ielts-nedir»).
+  if (this.slug && this.isModified("slug")) {
+    this.slug = SlugService.slugify(this.slug);
+  }
   if (!this.slug) {
     this.slug = await SlugService.unique(this.constructor, this.title, this._id);
   }

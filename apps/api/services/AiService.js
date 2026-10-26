@@ -46,6 +46,23 @@ export function tryParseJson(raw) {
 }
 
 /**
+ * Tərcümə / səliqə cavabı üçün token büdcəsi — giriş həcminə görə.
+ *
+ * NİYƏ: əvvəl hər cavaba sabit 1500 token verilirdi. 1148 sözlük bloq yazısının
+ * ingiliscə tərcüməsi 758 sözdə, cümlənin ortasında kəsildi (6 başlıqdan 3-ü) —
+ * və cavab UĞURLU (200) qayıtdı, admin yarımçıq mətni yadda saxladı.
+ *
+ * HESAB: Azərbaycan mətni + HTML təxminən 3 simvol/token; rus dili daha çox
+ * token işlədir, «düşünən» modellər (Gemini 2.5) isə düşünmə tokenlərini də bu
+ * limitdən xərcləyir. Ona görə giriş tokenlərinin ~1.5 qatı + ehtiyat verilir.
+ * Yuxarı hədd 16000 — gpt-4o-mini kimi modellərin çıxış limiti.
+ */
+export function outputBudget(input, { min = 1500, max = 16000 } = {}) {
+  const chars = typeof input === "string" ? input.length : JSON.stringify(input ?? "").length;
+  return Math.min(max, Math.max(min, Math.ceil(chars / 2) + 1000));
+}
+
+/**
  * OpenRouter chat çağırışı. Uğursuzluqda `{ ok:false, status, message }`,
  * uğurda `{ ok:true, text }` qaytarır (throw etmir).
  */
@@ -89,7 +106,18 @@ export async function aiChat({ system, user, temperature = 0.3, maxTokens = 1500
   }
 
   const data = await response.json();
-  return { ok: true, text: data.choices?.[0]?.message?.content?.trim() || "" };
+  const choice = data.choices?.[0];
+  // Limitə çatıb kəsilmiş cavab UĞUR DEYİL. Əvvəl yarımçıq mətn 200 ilə
+  // qayıdırdı və sahəyə yazılırdı — admin bunu yalnız saytda mətnin yarıda
+  // bitdiyini görəndə bilirdi.
+  if (choice?.finish_reason === "length" || choice?.native_finish_reason === "MAX_TOKENS") {
+    return {
+      ok: false,
+      status: 502,
+      message: "AI cavabı uzunluq limitinə çatıb yarımçıq kəsildi — mətni hissələrə bölüb tərcümə edin",
+    };
+  }
+  return { ok: true, text: choice?.message?.content?.trim() || "" };
 }
 
 /**
@@ -111,7 +139,8 @@ Rules:
 - Return ONLY the JSON. No markdown, no code blocks, no explanations.`;
 
   const user = JSON.stringify(fields, null, 2);
-  const res = await aiChat({ system, user, temperature: 0.2, maxTokens: 4000 });
+  // Sabit 4000 idi — uzun bloq yazısının HTML-i ilə toplu tərcümədə də kəsilirdi.
+  const res = await aiChat({ system, user, temperature: 0.2, maxTokens: outputBudget(user, { min: 4000 }) });
   if (!res.ok) return res;
 
   const parsed = tryParseJson(res.text);

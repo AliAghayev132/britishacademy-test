@@ -22,13 +22,15 @@ import { useDismiss } from '@/hooks';
 // Local
 import { ToolbarButton } from './Primitives';
 import { TEXT_COLORS, HIGHLIGHT_COLORS } from './constants';
+import ToolbarPopover from './ToolbarPopover';
 
 export default function ColorPickerPopover({ editor, variant = 'text' }) {
   const [open, setOpen] = useState(false);
   const [hex, setHex] = useState(variant === 'text' ? '#2C4B62' : '#FEF3C7');
   const ref = useRef(null);
+  const panelRef = useRef(null);
 
-  useDismiss(open, () => setOpen(false), ref);
+  useDismiss(open, () => setOpen(false), [ref, panelRef]);
 
   const palette = variant === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS;
   const Icon = variant === 'text' ? Palette : Highlighter;
@@ -58,13 +60,11 @@ export default function ColorPickerPopover({ editor, variant = 'text' }) {
         <Icon size={16} />
       </ToolbarButton>
 
-      {open && (
+      <ToolbarPopover open={open} anchorRef={ref} panelRef={panelRef}>
         <div
-          onMouseDown={(e) => e.preventDefault()}
-          className={`absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl border
-                      border-gray-200 p-2 z-50 ${
-                        variant === 'text' ? 'w-[280px]' : 'w-[260px]'
-                      }`}
+          className={`bg-white rounded-xl border border-gray-200 p-2.5 ${
+            variant === 'text' ? 'w-[280px]' : 'w-[260px]'
+          }`}
         >
           <p className="text-[11px] font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
             Hazır rənglər
@@ -130,7 +130,7 @@ export default function ColorPickerPopover({ editor, variant = 'text' }) {
             {variant === 'text' ? 'Rəngi sıfırla' : 'Vurğunu sil'}
           </button>
         </div>
-      )}
+      </ToolbarPopover>
     </div>
   );
 }

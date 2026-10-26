@@ -38,6 +38,7 @@ import { useDismiss } from '@/hooks';
 
 // Local
 import { ToolbarButton } from './Primitives';
+import ToolbarPopover from './ToolbarPopover';
 import {
   TABLE_CELL_BG_COLORS,
   TABLE_CELL_TEXT_COLORS,
@@ -54,6 +55,7 @@ export default function TableMenu({ editor }) {
   const [hover, setHover] = useState({ r: 0, c: 0 });
   const [withHeader, setWithHeader] = useState(true);
   const popRef = useRef(null);
+  const panelRef = useRef(null);
 
   /* Editor seçimi dəyişdikdə re-render */
   const [, force] = useState(0);
@@ -69,7 +71,7 @@ export default function TableMenu({ editor }) {
   }, [editor]);
 
   /* Click outside / Escape */
-  useDismiss(open, () => setOpen(false), popRef);
+  useDismiss(open, () => setOpen(false), [popRef, panelRef]);
 
   if (!editor) return null;
   const inTable = editor.isActive('table');
@@ -97,11 +99,10 @@ export default function TableMenu({ editor }) {
         <TableIcon size={16} />
       </ToolbarButton>
 
-      {open && (
+      <ToolbarPopover open={open} anchorRef={popRef} panelRef={panelRef}>
         <div
-          onMouseDown={(e) => e.preventDefault()}
-          className="absolute top-full left-0 mt-1 z-50 w-[380px] bg-white border
-                     border-gray-200 rounded-xl shadow-2xl overflow-hidden"
+          className="w-[380px] max-w-[calc(100vw-16px)] bg-white border
+                     border-gray-200 rounded-xl overflow-hidden"
         >
           {/* Başlıq */}
           <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
@@ -139,7 +140,7 @@ export default function TableMenu({ editor }) {
                 <TabBtn active={tab === 'align'}   onClick={() => setTab('align')}   icon={Settings}>Düzləndirmə</TabBtn>
               </div>
 
-              <div className="p-3 max-h-[420px] overflow-y-auto">
+              <div className="p-3 max-h-[min(420px,55vh)] overflow-y-auto">
                 {tab === 'struct' && (
                   <StructPanel
                     run={run}
@@ -180,7 +181,7 @@ export default function TableMenu({ editor }) {
             </>
           )}
         </div>
-      )}
+      </ToolbarPopover>
     </div>
   );
 }

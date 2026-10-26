@@ -15,12 +15,14 @@ import { useDismiss } from '@/hooks';
 
 // Local
 import { HEADING_OPTIONS } from './constants';
+import ToolbarPopover from './ToolbarPopover';
 
 export default function HeadingDropdown({ editor }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const panelRef = useRef(null);
 
-  useDismiss(open, () => setOpen(false), ref);
+  useDismiss(open, () => setOpen(false), [ref, panelRef]);
 
   const current =
     HEADING_OPTIONS.find((h) => h.level > 0 && editor?.isActive('heading', { level: h.level })) ||
@@ -42,9 +44,8 @@ export default function HeadingDropdown({ editor }) {
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {open && (
-        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-xl
-                        border border-gray-200 py-1 z-50 min-w-[180px]">
+      <ToolbarPopover open={open} anchorRef={ref} panelRef={panelRef}>
+        <div className="bg-white rounded-xl border border-gray-200 py-1 min-w-[200px]">
           {HEADING_OPTIONS.map(({ level, label, icon: I, desc }) => (
             <button
               key={level}
@@ -70,7 +71,7 @@ export default function HeadingDropdown({ editor }) {
             </button>
           ))}
         </div>
-      )}
+      </ToolbarPopover>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // Services
-import { aiChat, tryParseJson, resolveAiConfig, LANG_NAMES } from "#services";
+import { aiChat, tryParseJson, resolveAiConfig, outputBudget, LANG_NAMES } from "#services";
 
 // Utils
 import { fail, ok, asyncHandler } from "#utils";
@@ -206,8 +206,11 @@ Return ONLY valid JSON, no markdown, no code fences:
     user: userPrompt,
     temperature: action === "generate-slug" ? 0.1 : 0.3,
     // seo-suite bir cavabda ÜÇ dil qaytarır — defolt limit onu yarımçıq
-    // kəsir və JSON parse olunmur.
-    maxTokens: action === "seo-suite" ? 2200 : undefined,
+    // kəsir və JSON parse olunmur. Tərcümə və səliqədə cavab girişlə eyni
+    // uzunluqdadır, ona görə büdcə giriş həcmindən hesablanır (bax outputBudget).
+    maxTokens: action === "seo-suite" ? 2200
+      : action === "translate" || action === "polish" ? outputBudget(fields ?? content ?? "")
+      : undefined,
   });
   if (!ai.ok) {
     return fail(res, ai.message, ai.status);
