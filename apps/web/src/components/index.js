@@ -45,7 +45,7 @@ export { default as VideoCard } from "./site/VideoCard";
 export { default as VideoSwiper } from "./site/VideoSwiper";
 export { ViewBeacon } from "./site/ViewBeacon";
 export { WhatsAppWidget } from "./site/WhatsAppWidget";
-export { CourseCard, DestinationCard, SectionHead, TestimonialPhotoCard } from "./site/cards";
+export { CourseCard, DestinationCard, SectionHead, TestimonialCard } from "./site/cards";
 export { useDialogFocus } from "./site/useDialogFocus";
 
 // Ui
