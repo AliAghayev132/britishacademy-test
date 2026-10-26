@@ -790,6 +790,106 @@ body.ba-home #qeydiyyat > div {
 @media (max-width: 620px) { .ba-wall { columns: 1; } }
 
 /* ============================================================
+   Ana səhifə rəyləri — portret foto kartları (3:4), mətn şəklin üstündə.
+   Şəkil yoxdursa kart rəyin öz rəngindən (--c) qurulur: canlıda 6 rəyin
+   heç birində şəkil yox idi, yəni bu hal əsas görünüşdür.
+   ============================================================ */
+.ba-tpwall {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+  align-items: start;
+  /* Orta sütun aşağı sürüşür — ona görə altda yer saxlanılır. */
+  padding-bottom: 44px;
+}
+/* Jurnal ritmi: orta sütun bir az aşağıda. `translate` ayrıca xassədir —
+   `transform` ilə toqquşmur, ona görə hover qalxması bu sürüşməni ləğv etmir. */
+.ba-tpwall > .ba-tpc:nth-child(3n+2) { translate: 0 44px; }
+
+.ba-tpc {
+  position: relative; margin: 0; aspect-ratio: 3 / 4;
+  border-radius: 24px; overflow: hidden; isolation: isolate; color: #fff;
+  background:
+    radial-gradient(120% 80% at 85% 0%, color-mix(in srgb, var(--c) 55%, #fff) 0%, transparent 55%),
+    linear-gradient(160deg, var(--c) 0%, color-mix(in srgb, var(--c) 60%, #0b0d24) 100%);
+  box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--c) 70%, transparent);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+}
+/* Mətnin oxunması üçün aşağıdan tünd keçid — şəkil açıq olsa da yazı seçilir. */
+.ba-tpc::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, rgba(8,10,30,.9) 0%, rgba(8,10,30,.6) 38%, rgba(8,10,30,0) 68%);
+}
+.ba-tpc-img {
+  position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%;
+  object-fit: cover; transition: transform .7s cubic-bezier(.2,.8,.2,1);
+}
+.ba-tpc-mono {
+  position: absolute; top: -4%; right: -6%; z-index: -2;
+  font-family: 'Poppins'; font-weight: 800; line-height: 1;
+  font-size: clamp(180px, 22vw, 290px); color: rgba(255,255,255,.16);
+  pointer-events: none; user-select: none;
+}
+.ba-tpc-top {
+  position: absolute; top: 16px; left: 16px; right: 16px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.ba-tpc-stars {
+  display: inline-block; padding: 5px 11px; border-radius: 99px;
+  /* Tünd şüşə: açıq fonda qızılı ulduz sarı/narıncı kartda tamamilə itirdi. */
+  background: rgba(10,12,30,.38); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: #FFD36A; font-size: 13px; letter-spacing: 2px; line-height: 1.4;
+}
+.ba-tpc-mark {
+  font-family: 'Poppins'; font-weight: 800; font-size: 72px; line-height: .8;
+  color: rgba(255,255,255,.85);
+}
+.ba-tpc-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 22px 20px; }
+.ba-tpc-quote {
+  margin: 0; font-size: 15.5px; line-height: 1.6; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25);
+  /* Uzun rəy kartdan daşmasın. */
+  display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ba-tpc-who {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.22);
+}
+.ba-tpc-name { font-family: 'Poppins'; font-weight: 700; font-size: 16px; }
+.ba-tpc-ach {
+  font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+  /* Rəng qaraya doğru qarışdırılır: ağa doğru olanda sarı kartda ağ yazı
+     açıq sarı fonda oxunmurdu. */
+  background: color-mix(in srgb, var(--c) 72%, #000 28%); color: #fff;
+}
+.ba-tpc:hover { transform: translateY(-6px); box-shadow: 0 30px 56px -24px color-mix(in srgb, var(--c) 80%, transparent); }
+.ba-tpc:hover .ba-tpc-img { transform: scale(1.05); }
+
+@media (max-width: 980px) {
+  .ba-tpwall { grid-template-columns: repeat(2, 1fr); }
+  .ba-tpwall > .ba-tpc:nth-child(3n+2) { translate: none; }
+  .ba-tpwall > .ba-tpc:nth-child(2n) { translate: 0 44px; }
+}
+/* Telefonda yana sürüşən sıra: növbəti kart kənardan görünür — sürüşdürmə
+   olduğu özü bəlli olur. Hündür kartlar alt-alta düzülsəydi 6 kart ~6 ekran
+   tutardı. */
+@media (max-width: 620px) {
+  .ba-tpwall {
+    display: flex; gap: 14px; padding-bottom: 6px;
+    overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    margin: 0 -28px; padding-left: 28px; padding-right: 28px; scroll-padding: 0 28px;
+    scrollbar-width: none;
+  }
+  .ba-tpwall::-webkit-scrollbar { display: none; }
+  /* ~300×400 — dar kartda (261px) mətn 7 sətrə yayılıb üzün üstünə çıxırdı. */
+  .ba-tpwall > .ba-tpc { flex: 0 0 min(300px, 84%); scroll-snap-align: start; translate: none !important; }
+  .ba-tpc-quote { font-size: 14.5px; -webkit-line-clamp: 5; }
+  .ba-tpc-body { padding: 18px 18px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ba-tpc, .ba-tpc-img { transition: none; }
+  .ba-tpc:hover, .ba-tpc:hover .ba-tpc-img { transform: none; }
+}
+
+/* ============================================================
    Page banner — brand-gradient hero for inner pages, with a mascot slot.
    The mascot is a CSS background so a missing file shows nothing (no broken
    image icon) and it works in Server Components (no JS/onError needed).

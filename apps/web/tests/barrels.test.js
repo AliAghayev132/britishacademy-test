@@ -18,7 +18,13 @@ describe("barrel-lər və import qaydaları", () => {
     for (const inner of ["./site/header/", "./site/quiz/", "./ui/qr-studio/", "./sidebar/"]) {
       expect(barrel, inner).not.toContain(inner);
     }
-    // Açıq qovluq index-i isə ixrac olunur.
-    expect(barrel).toMatch(/export \{ CourseCard, DestinationCard, SectionHead, TestimonialCard \} from "\.\/site\/cards";/);
+    // Açıq qovluq index-i isə ixrac olunur. Sətir uzananda generator onu
+    // çoxsətirli yazır — ona görə format deyil, MƏZMUN yoxlanılır.
+    const cards = barrel.match(/export \{([^}]*)\} from "\.\/site\/cards";/);
+    expect(cards, "./site/cards ixrac olunmayıb").toBeTruthy();
+    const names = cards[1].split(",").map((s) => s.trim()).filter(Boolean);
+    for (const n of ["CourseCard", "DestinationCard", "SectionHead", "TestimonialCard", "TestimonialPhotoCard"]) {
+      expect(names, n).toContain(n);
+    }
   });
 });

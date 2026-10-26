@@ -5,4 +5,5 @@
 export { default as CourseCard } from "./CourseCard";
 export { default as DestinationCard } from "./DestinationCard";
 export { default as TestimonialCard } from "./TestimonialCard";
+export { default as TestimonialPhotoCard } from "./TestimonialPhotoCard";
 export { default as SectionHead } from "./SectionHead";

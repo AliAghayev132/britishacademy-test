@@ -244,7 +244,7 @@ export function TestimonialForm({ item, onClose }) {
             />
           </Field>
         </div>
-        <Field label="Şəkil (avatar)" info="Boş qalsa ad hərfi göstərilir">
+        <Field label="Şəkil (portret)" info="Ana səhifədə kartın fonu olur, rəy mətni üstündə yazılır. Boş qalsa kart seçilmiş rəngdən qurulur.">
           <FileUpload value={photo} onChange={setPhoto} kind="image" spec={IMAGE_SPECS.testimonialAvatar} />
         </Field>
       </section>

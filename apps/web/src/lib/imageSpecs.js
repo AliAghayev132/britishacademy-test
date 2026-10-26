@@ -65,11 +65,14 @@ export const IMAGE_SPECS = {
     w: 1000, h: 700, fit: "contain",
     note: "Sənəd tam görünməlidir — kəsilmir.",
   },
+  // Ana səhifədə şəkil kartın ÖZÜDÜR (3:4 portret, rəy mətni üstündə).
+  // Əvvəl 400×400 kvadrat idi və 46px dairədə görünürdü; indi kəsmə
+  // dialoqu portret nisbəti verir ki, tələbə kadrda düzgün yerləşsin.
   testimonialAvatar: {
     label: "Rəy sahibinin şəkli",
-    where: "Rəy kartı (40px dairə)",
-    w: 400, h: 400, fit: "cover",
-    note: "Boş qalsa ad hərfi göstərilir.",
+    where: "Ana səhifə rəy kartı (portret 3:4) · Tələbələrimiz səhifəsində kiçik dairə",
+    w: 600, h: 800, fit: "cover",
+    note: "Üz kadrın yuxarı yarısında olsun — aşağı hissənin üstünə rəy mətni yazılır. Boş qalsa kart rəngdən və baş hərfdən qurulur.",
   },
 
   // ── Video ──
