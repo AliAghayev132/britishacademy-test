@@ -6,8 +6,8 @@ import { wrap } from "./wrap";
 
 /**
  * Tələbə rəyləri — portret foto kartları, mətn şəklin üstündə.
- * «Tələbələrimiz» səhifəsi bütöv mətn divarını (TestimonialCard) saxlayır:
- * orada bütün rəylər sıx oxunmalıdır, burada isə seçilmiş bir neçəsi önə çıxır.
+ * «Tələbələrimiz» səhifəsində də eyni kartlardır; yeganə fərq telefondadır:
+ * burada kartlar yana sürüşür, orada alt-alta düzülür.
  */
 export default function TestimonialsSection({ testimonials, t }) {
   return (

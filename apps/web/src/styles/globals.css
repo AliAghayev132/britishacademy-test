@@ -754,7 +754,7 @@ body.ba-home #qeydiyyat > div {
 }
 
 /* ============================================================
-   Tələbə rəyləri — avatar, ulduzlar, masonry şərh divarı
+   Dairəvi avatar — kurs və müəllim səhifələrində
    ============================================================ */
 .ba-av {
   position: relative; display: grid; place-items: center; border-radius: 50%;
@@ -764,30 +764,6 @@ body.ba-home #qeydiyyat > div {
 }
 .ba-av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-.ba-stars { display: inline-block; color: #F5A524; font-size: 15px; letter-spacing: 2px; }
-
-.ba-wall { columns: 3; column-gap: 20px; }
-.ba-wall > .ba-review {
-  break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid;
-  display: block; width: 100%; margin: 0 0 20px;
-  position: relative; overflow: hidden;
-  background: #fff; border: 1px solid #ECEDF2; border-radius: 20px; padding: 24px 22px 20px;
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-}
-.ba-wall > .ba-review::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c);
-}
-.ba-wall > .ba-review:hover {
-  transform: translateY(-4px); border-color: var(--c);
-  box-shadow: 0 20px 42px rgba(20,20,45,.11);
-}
-.ba-review-quote {
-  position: absolute; top: 2px; right: 16px;
-  font-family: 'Poppins'; font-weight: 800; font-size: 76px; line-height: 1;
-  color: var(--c); opacity: .13; pointer-events: none;
-}
-@media (max-width: 980px) { .ba-wall { columns: 2; } }
-@media (max-width: 620px) { .ba-wall { columns: 1; } }
 
 /* ============================================================
    Ana səhifə rəyləri — portret foto kartları (3:4), mətn şəklin üstündə.
@@ -883,6 +859,15 @@ body.ba-home #qeydiyyat > div {
   .ba-tpwall > .ba-tpc { flex: 0 0 min(300px, 84%); scroll-snap-align: start; translate: none !important; }
   .ba-tpc-quote { font-size: 14.5px; -webkit-line-clamp: 5; }
   .ba-tpc-body { padding: 18px 18px 16px; }
+}
+/* «Tələbələrimiz» səhifəsi: telefonda yana sürüşmür, alt-alta düzülür —
+   bu səhifəyə rəyləri OXUMAĞA gəlirlər, karusel onların çoxunu gizlədərdi. */
+@media (max-width: 620px) {
+  .ba-tpwall--grid {
+    display: grid; grid-template-columns: 1fr; gap: 16px;
+    overflow: visible; margin: 0; padding: 0; scroll-snap-type: none;
+  }
+  .ba-tpwall--grid > .ba-tpc { flex: none; width: 100%; max-width: 420px; justify-self: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ba-tpc, .ba-tpc-img { transition: none; }

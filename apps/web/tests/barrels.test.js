@@ -23,7 +23,7 @@ describe("barrel-lər və import qaydaları", () => {
     const cards = barrel.match(/export \{([^}]*)\} from "\.\/site\/cards";/);
     expect(cards, "./site/cards ixrac olunmayıb").toBeTruthy();
     const names = cards[1].split(",").map((s) => s.trim()).filter(Boolean);
-    for (const n of ["CourseCard", "DestinationCard", "SectionHead", "TestimonialCard", "TestimonialPhotoCard"]) {
+    for (const n of ["CourseCard", "DestinationCard", "SectionHead", "TestimonialPhotoCard"]) {
       expect(names, n).toContain(n);
     }
   });

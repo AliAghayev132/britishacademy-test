@@ -59,6 +59,23 @@ describe("rəy foto kartı", () => {
     expect(css).toMatch(/flex: 0 0 min\(300px, 84%\)/);
   });
 
+  it("«Tələbələrimiz» də eyni kartı işlədir, amma telefonda alt-alta", () => {
+    // Bu səhifəyə rəyləri OXUMAĞA gəlirlər — karusel onların çoxunu gizlədərdi.
+    const page = read("src/app/(public)/telebelerimiz/page.js");
+    expect(page).toMatch(/<TestimonialPhotoCard key=\{t\._id\} t=\{t\} \/>/);
+    expect(page).toMatch(/className="ba-tpwall ba-tpwall--grid"/);
+    expect(css).toMatch(/\.ba-tpwall--grid \{[^}]*grid-template-columns: 1fr/s);
+  });
+
+  it("köhnə mətn divarı tamamilə çıxarılıb", () => {
+    // İki dizayn yan-yana yaşasaydı biri unudulub köhnələrdi.
+    expect(fs.existsSync("src/components/site/cards/TestimonialCard.jsx")).toBe(false);
+    expect(css).not.toMatch(/\.ba-wall\b/);
+    expect(css).not.toMatch(/\.ba-review\b/);
+    // Dairəvi avatar QALIR — kurs və müəllim səhifələri işlədir.
+    expect(css).toMatch(/\.ba-av \{/);
+  });
+
   it("hərəkəti azaltma seçimi nəzərə alınır", () => {
     expect(css).toMatch(/prefers-reduced-motion: reduce\) \{\n\s*\.ba-tpc, \.ba-tpc-img \{ transition: none; \}/);
   });

@@ -1,5 +1,5 @@
 // Components
-import { TestimonialCard, SectionHead, CtaBand, VideoSwiper } from "@/components";
+import { TestimonialPhotoCard, SectionHead, CtaBand, VideoSwiper } from "@/components";
 import { PageBanner } from "@/components/server";
 
 // Lib
@@ -79,8 +79,12 @@ export default async function StudentsPage() {
       {texts.length > 0 && (
         <section style={{ ...wrap, padding: "70px 28px 0" }}>
           <SectionHead title={tr("home.reviews.title")} />
-          <div className="ba-wall">
-            {texts.map((t) => <TestimonialCard key={t._id} t={t} />)}
+          {/* Ana səhifədəki portret foto kartları. Fərq telefondadır: orada
+              kartlar yana sürüşür (bir neçəsi önə çıxır), bu səhifəyə isə
+              rəyləri oxumağa gəlirlər — ona görə alt-alta düzülürlər
+              (`ba-tpwall--grid`). */}
+          <div className="ba-tpwall ba-tpwall--grid">
+            {texts.map((t) => <TestimonialPhotoCard key={t._id} t={t} />)}
           </div>
         </section>
       )}
