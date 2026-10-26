@@ -79,6 +79,8 @@ AdminRouter.post("/dev/test-mail", devOnly, writeRateLimiter, devController.runT
 // AI toplu tərcümə — boş EN/RU sahələrini AZ-dan doldurur (uzun sürə bilər,
 // ona görə writeRateLimiter tətbiq olunmur).
 AdminRouter.post("/dev/translate-all", devOnly, devController.runAutoTranslate);
+// Arxa fon işinin gedişatı — panel bunu dövri soruşur.
+AdminRouter.get("/dev/translate-all/status", devOnly, devController.getAutoTranslateStatus);
 // Müştəri kurs məlumatlarını (3 dil + SEO + qiymətlər) tətbiq et.
 AdminRouter.post("/dev/import-courses", devOnly, writeRateLimiter, devController.runImportCourses);
 // Ölkə bayraqlarını qalereyaya endir (şəbəkə əməliyyatı — limiter yoxdur).

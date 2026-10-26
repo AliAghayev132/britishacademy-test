@@ -231,11 +231,21 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["Resource", "Site"],
     }),
 
-    // ── AI toplu tərcümə: bazadakı boş EN/RU sahələrini AZ-dan doldurur ──
-    // Uzun sürə bilər (hər sənəd üçün 1-2 AI sorğusu).
+    // ── AI toplu tərcümə ──
+    // İş ARXA FONDA gedir: bu çağırış yalnız başladır və dərhal qayıdır
+    // (bütöv qaçış dəqiqələrlə çəkir və tək sorğuya sığmır). Gedişat
+    //  ilə oxunur.
+    // ── AI toplu tərcümə ──
+    // İş ARXA FONDA gedir: bu çağırış yalnız başladır və dərhal qayıdır.
+    // Bütöv qaçış dəqiqələrlə çəkir və tək sorğuya sığmır — əvvəl cavab
+    // gözlənilirdi, sorğu Cloudflare-in 100 saniyə limitində kəsilirdi və
+    // paneldə «yarıda dayandı» kimi görünürdü. Gedişat aşağıdakı sorğu ilə
+    // oxunur.
     adminAutoTranslate: builder.mutation({
       query: (body) => ({ url: "/admin/dev/translate-all", method: "POST", body: body || {} }),
-      invalidatesTags: ["Resource", "Site"],
+    }),
+    adminAutoTranslateStatus: builder.query({
+      query: () => "/admin/dev/translate-all/status",
     }),
 
     // ── AI köməkçi (OpenRouter): tərcümə / səliqə / slug / SEO ──
@@ -336,6 +346,7 @@ export const {
   useAiProcessMutation,
   useAiStatusQuery,
   useAdminAutoTranslateMutation,
+  useAdminAutoTranslateStatusQuery,
   useAdminImportCoursesMutation,
   useMediaFoldersQuery,
   useMediaUpdateMutation,

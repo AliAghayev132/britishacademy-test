@@ -6,6 +6,7 @@
 export {
   adminApi,
   useAdminAutoTranslateMutation,
+  useAdminAutoTranslateStatusQuery,
   useAdminContentStatsQuery,
   useAdminCourseFullQuery,
   useAdminCreateCourseFullMutation,

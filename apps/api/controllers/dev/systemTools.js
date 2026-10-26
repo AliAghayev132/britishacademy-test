@@ -1,5 +1,5 @@
 // Services
-import { seedDatabase, logAction, migrateI18n, autoTranslate, MailService } from "#services";
+import { seedDatabase, logAction, migrateI18n, TranslateJob, MailService } from "#services";
 
 // Utils
 import { fail, ok } from "#utils";
@@ -52,30 +52,35 @@ const runTestMail = developerOnly(async (req, res) => {
  * Bazadakı BOŞ EN/RU sahələrini AZ mətnindən AI ilə doldurur (OpenRouter).
  * Mövcud tərcüməyə toxunmur — təkrar işlədilə bilər.
  */
+/**
+ * Toplu tərcüməni BAŞLADIR və dərhal qayıdır.
+ *
+ * Əvvəl işin bitməsi gözlənilirdi, sorğu isə Cloudflare-in 100 saniyə
+ * limitinə ilişirdi: panel xəta görür, iş arxada davam edirdi — kənardan
+ * «yarıda saxlayır» kimi. İndi gedişat /translate-all/status ilə oxunur.
+ */
 const runAutoTranslate = developerOnly(async (req, res) => {
   const { langs, model, limit, overwrite } = req.body || {};
-  const result = await autoTranslate({
+  const { started, state } = TranslateJob.start({
     langs: Array.isArray(langs) && langs.length ? langs : ["en", "ru"],
     model: model || undefined,
     limit: Number(limit) || 500,
     overwrite: Boolean(overwrite),
   });
 
-  // AI qoşulmayıbsa 503 — cavabda nəticə də qalır ki, panel səbəbi göstərsin.
-  if (result.aborted) {
-    return res.status(503).json({
-      success: false,
-      message: result.errors[0] || "AI konfiqurasiya olunmayıb (Tənzimləmələr → AI)",
-      data: result,
-    });
-  }
+  if (!started) return ok(res, state, "Tərcümə artıq işləyir");
 
   await logAction(req, {
     action: "settings",
     resource: "dev",
-    summary: `AI toplu tərcümə: ${result.totalDocs} sənəd, ${result.totalFields} sahə`,
+    summary: "AI toplu tərcümə başladıldı",
   });
-  ok(res, result, `Tərcümə tamamlandı — ${result.totalDocs} sənəd, ${result.totalFields} sahə (${result.totalCalls} AI sorğusu)`);
+  ok(res, state, "Tərcümə başladı — gedişat aşağıda göstərilir");
 });
 
-export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate };
+/** GET /api/admin/dev/translate-all/status — arxa fon işinin vəziyyəti. */
+const getAutoTranslateStatus = developerOnly(async (_req, res) => {
+  ok(res, TranslateJob.getState());
+});
+
+export { runSeed, runMigrateI18n, runTestMail, runAutoTranslate, getAutoTranslateStatus };
