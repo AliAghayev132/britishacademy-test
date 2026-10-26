@@ -5,9 +5,8 @@
  *  ----------------------------------------------------------------------
  *  Bu fayl yalnız orkestrasiya rolunu oynayır:
  *    - Tiptap `useEditor` hook-unu çağırır.
- *    - Bütün toolbar UI-ı `parts/` qovluğundakı kiçik komponentlərdən
- *      yığır (HeadingDropdown, ColorPickerPopover, TableMenu,
- *      ImageToolbar, LinkInput, VideoMenu, ...).
+ *    - Alət panelini `parts/Toolbar` komponentinə həvalə edir — tablara
+ *      bölünmüş lent: Mətn · Abzas · Əlavə et.
  *    - Tam ekran rejimi, önizləmə, statistika və ümumi əməliyyatlar
  *      (kopyala, təmizlə) burada idarə olunur.
  *
@@ -25,15 +24,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import '@/styles/editor-content.css';
 
 // Icons
-import {
-  Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code, CodeXml,
-  List, ListOrdered, Quote, Undo, Redo, ImageIcon,
-  AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Eye, Edit3, Minus as MinusIcon, RotateCcw, Maximize2, Minimize2,
-  Copy, Check, FileText, Hash,
-  Superscript as SuperscriptIcon, Subscript as SubscriptIcon,
-  RemoveFormatting,
-} from 'lucide-react';
+import { FileText, Hash } from 'lucide-react';
 
 // UI / components
 import { confirmDialog, notify } from '@/components/ui/feedback';
@@ -45,17 +36,7 @@ import { useFlash } from '@/hooks';
 import { copyText } from '@/lib';
 
 // Local
-import { ToolbarButton, Divider } from './parts/Primitives';
-import HeadingDropdown from './parts/HeadingDropdown';
-import ColorPickerPopover from './parts/ColorPickerPopover';
-import TableMenu from './parts/TableMenu';
-import ImageToolbar from './parts/ImageToolbar';
-import LinkInput from './parts/LinkInput';
-import VideoMenu from './parts/VideoMenu';
-import FileMenu from './parts/FileMenu';
-import CollagePicker from './parts/CollagePicker';
-import SliderPicker from './parts/SliderPicker';
-import FontPicker from './parts/FontPicker';
+import Toolbar from './parts/Toolbar';
 import { buildExtensions } from './parts/extensions';
 
 // Utils
@@ -215,216 +196,20 @@ export default function TiptapEditor({
                     sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/85
                     ${isFullscreen ? '' : 'rounded-t-xl'}`}
       >
-        <div className="flex items-center gap-1 p-2 flex-wrap">
-          {/* Başlıq seçimi */}
-          <HeadingDropdown editor={editor} />
-          <Divider />
-
-          {/* Mətn formatı */}
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            isActive={editor.isActive('bold')}
-            title="Qalın (Ctrl+B)"
-          >
-            <Bold size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            isActive={editor.isActive('italic')}
-            title="Maili (Ctrl+I)"
-          >
-            <Italic size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            isActive={editor.isActive('underline')}
-            title="Altdan xətt (Ctrl+U)"
-          >
-            <UnderlineIcon size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            isActive={editor.isActive('strike')}
-            title="Üstündən xətt"
-          >
-            <Strikethrough size={16} />
-          </ToolbarButton>
-
-          {/* Vurğu və mətn rəngi */}
-          <ColorPickerPopover editor={editor} variant="highlight" />
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            isActive={editor.isActive('code')}
-            title="Kod"
-          >
-            <Code size={16} />
-          </ToolbarButton>
-          <ColorPickerPopover editor={editor} variant="text" />
-
-          <Divider />
-
-          {/* Şrift ailəsi və ölçüsü */}
-          <FontPicker editor={editor} />
-
-          <Divider />
-
-          {/* Düzləndirmə */}
-          {[
-            { a: 'left', I: AlignLeft, t: 'Sola düzlə' },
-            { a: 'center', I: AlignCenter, t: 'Mərkəzə düzlə' },
-            { a: 'right', I: AlignRight, t: 'Sağa düzlə' },
-            { a: 'justify', I: AlignJustify, t: 'Hər iki tərəfə düzlə' },
-          ].map(({ a, I, t }) => (
-            <ToolbarButton
-              key={a}
-              onClick={() => editor.chain().focus().setTextAlign(a).run()}
-              isActive={editor.isActive({ textAlign: a })}
-              title={t}
-            >
-              <I size={16} />
-            </ToolbarButton>
-          ))}
-
-          <Divider />
-
-          {/* Siyahılar / sitat / kod bloku / ayırıcı xətt */}
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            isActive={editor.isActive('bulletList')}
-            title="Nöqtəli siyahı"
-          >
-            <List size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            isActive={editor.isActive('orderedList')}
-            title="Nömrəli siyahı"
-          >
-            <ListOrdered size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            isActive={editor.isActive('blockquote')}
-            title="Sitat"
-          >
-            <Quote size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            isActive={editor.isActive('codeBlock')}
-            title="Kod bloku"
-          >
-            <CodeXml size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            title="Ayırıcı xətt"
-          >
-            <MinusIcon size={16} />
-          </ToolbarButton>
-
-          <Divider />
-
-          {/* İndekslər, cədvəl */}
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleSuperscript().run()}
-            isActive={editor.isActive('superscript')}
-            title="Yuxarı indeks"
-          >
-            <SuperscriptIcon size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().toggleSubscript().run()}
-            isActive={editor.isActive('subscript')}
-            title="Aşağı indeks"
-          >
-            <SubscriptIcon size={16} />
-          </ToolbarButton>
-
-          {/* Cədvəl menyusu (xana birləşdirmə, düzləndirmə, fon rəngi və s.) */}
-          <TableMenu editor={editor} />
-
-          <ToolbarButton
-            onClick={() =>
-              editor.chain().focus().clearNodes().unsetAllMarks().run()
-            }
-            title="Formatı təmizlə"
-          >
-            <RemoveFormatting size={16} />
-          </ToolbarButton>
-
-          {/* Yalnız şəkil seçildikdə göstərilən aləçtlər */}
-          {isImage && <ImageToolbar editor={editor} />}
-
-          <Divider />
-
-          {/* Link, şəkil, video */}
-          <LinkInput editor={editor} />
-          <ToolbarButton
-            onClick={() => fileInputRef.current?.click()}
-            title="Şəkil yüklə"
-          >
-            <ImageIcon size={16} />
-          </ToolbarButton>
-          {onImageUpload && (
-            <CollagePicker editor={editor} onImageUpload={onImageUpload} />
-          )}
-          {onImageUpload && (
-            <SliderPicker editor={editor} onImageUpload={onImageUpload} />
-          )}
-          <VideoMenu editor={editor} onVideoUpload={onVideoUpload} />
-          {onFileUpload && <FileMenu editor={editor} onFileUpload={onFileUpload} />}
-
-          <Divider />
-
-          {/* Tarixçə */}
-          <ToolbarButton
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            title="Geri al (Ctrl+Z)"
-          >
-            <Undo size={16} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            title="İrəli al (Ctrl+Y)"
-          >
-            <Redo size={16} />
-          </ToolbarButton>
-
-          {/* ============== Sağ tərəf: Kopyala / Təmizlə / Tam ekran / Önizləmə ============== */}
-          <div className="ml-auto flex items-center gap-1">
-            <ToolbarButton onClick={copyContent} title="HTML-i kopyala">
-              {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-            </ToolbarButton>
-            <ToolbarButton onClick={clearContent} title="Təmizlə">
-              <RotateCcw size={16} />
-            </ToolbarButton>
-            <ToolbarButton
-              onClick={() => setIsFullscreen((p) => !p)}
-              title={isFullscreen ? 'Kiçilt' : 'Tam ekran'}
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </ToolbarButton>
-
-            <Divider />
-
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setIsPreview((p) => !p)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                isPreview
-                  ? 'bg-secondary text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {isPreview ? <Edit3 size={14} /> : <Eye size={14} />}
-              <span>{isPreview ? 'Redaktə' : 'Önizləmə'}</span>
-            </button>
-          </div>
-        </div>
+        <Toolbar
+          editor={editor}
+          onPickImage={() => fileInputRef.current?.click()}
+          onImageUpload={onImageUpload}
+          onVideoUpload={onVideoUpload}
+          onFileUpload={onFileUpload}
+          isPreview={isPreview}
+          onTogglePreview={() => setIsPreview((p) => !p)}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={() => setIsFullscreen((p) => !p)}
+          copied={copied}
+          onCopy={copyContent}
+          onClear={clearContent}
+        />
 
         {/* ============== Statistika lentı ============== */}
         <div className="flex items-center justify-between px-4 py-1.5 bg-gray-50/50

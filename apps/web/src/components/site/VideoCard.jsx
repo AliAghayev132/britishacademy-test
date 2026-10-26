@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // Lib
-import { useT } from "@/lib";
+import { useT, getImageUrl } from "@/lib";
 
 // ── helpers ──
 function fmt(sec) {
@@ -38,8 +38,13 @@ const PauseIcon = ({ size = 22, fill = "#fff" }) => (
 export default function VideoCard({ t }) {
   const tr = useT();
   const v = t || {};
-  const url = v.video?.url || "";
-  const poster = v.video?.poster || "";
+  // API nisbi yol qaytarır (`/uploads/videos/x.webm`). `getImageUrl` onu
+  // media hostuna bağlayır — bütün digər media komponentləri belə edir.
+  // Xam saxlananda ünvan SAYTIN öz originine həll olunurdu: istehsalatda
+  // /uploads təsadüfən eyni domendə verildiyi üçün işləyirdi, dev mühitində
+  // isə localhost:3000/uploads → 404 və «MEDIA_ELEMENT_ERROR: Format error».
+  const url = getImageUrl(v.video?.url) || "";
+  const poster = getImageUrl(v.video?.poster) || "";
   const color = v.color || "var(--accent)";
   const initial = (v.name || "?").trim().charAt(0).toUpperCase();
 
