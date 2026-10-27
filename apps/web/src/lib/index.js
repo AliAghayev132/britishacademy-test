@@ -13,6 +13,15 @@ export {
   resourceLabel,
   thumbOf,
 } from "./adminResources";
+export {
+  ATTRIBUTION_TTL,
+  CONSENT_EVENT,
+  __resetAttributionForTests,
+  captureAttribution,
+  getAttribution,
+  getConsent,
+  setConsent,
+} from "./attribution";
 export { copyText } from "./clipboard";
 export { FormDirtyContext, useMarkDirty } from "./formDirty";
 export {

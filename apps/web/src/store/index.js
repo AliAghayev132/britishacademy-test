@@ -5,6 +5,7 @@
 // Api
 export {
   adminApi,
+  useAdCampaignsQuery,
   useAdminAutoTranslateMutation,
   useAdminAutoTranslateStatusQuery,
   useAdminContentStatsQuery,
@@ -52,6 +53,7 @@ export {
   useMediaUpdateMutation,
   useMigrateSlugsMutation,
   useResetLinkClicksMutation,
+  useUpdateAdCampaignsMutation,
   useWhatsappCheckQuery,
   useWhatsappCheckVersionMutation,
   useWhatsappClearLogsMutation,

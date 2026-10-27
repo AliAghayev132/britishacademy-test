@@ -133,6 +133,8 @@ const list = asyncHandler(async (req, res) => {
     // Müraciətin maraq növü («Xaricdə təhsil», «IELTS» …). Sidebar-dakı
     // ayrıca «Xaricdə təhsil müraciətləri» bölməsi bununla süzülür.
     "interest",
+    // Müraciətin reklam kanalı — «yalnız Google Ads-dən gələnlər».
+    "attribution.channel",
   ];
   for (const key of FILTERABLE) {
     const raw = req.query[key];

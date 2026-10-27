@@ -1,6 +1,9 @@
 // Config
 import { config } from "#config";
 
+// Models
+import { SiteSetting } from "#models";
+
 // Services
 import {
   MailService,
@@ -10,9 +13,6 @@ import {
   bootstrapAdmin,
   bootstrapDeveloper,
 } from "#services";
-
-// Models
-import { SiteSetting } from "#models";
 
 // Local
 import { validateEnv } from "./env.js";

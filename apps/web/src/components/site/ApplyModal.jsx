@@ -7,7 +7,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useCreateLeadMutation } from "@/store";
 
 // Lib
-import { playSfx, getSid, trackLeadSuccess, useT, t as translate } from "@/lib";
+import { playSfx, getSid, getAttribution, trackLeadSuccess, useT, t as translate } from "@/lib";
 
 // Utils
 import { apiErrorMessage, isInlineSvg, svgDataUri } from "@/utils";
@@ -272,6 +272,9 @@ export function ApplyModal({ open, onClose, preset, project, destination, course
         // Anonim sessiya kodu — server müraciəti hunidə həmin sessiyanın
         // ziyarəti və mənbəyi ilə bağlayır.
         sid: getSid(),
+        // Reklam mənbəyi (UTM + Google klik kodu) — müraciətlə BİRLİKDƏ gedir
+        // ki, admin paneldə hansı kampaniyadan gəldiyi görünsün.
+        attribution: getAttribution(),
         pageUrl: typeof window !== "undefined" ? window.location.pathname : "",
       }).unwrap();
       setDone(true);

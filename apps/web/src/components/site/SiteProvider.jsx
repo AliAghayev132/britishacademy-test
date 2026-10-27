@@ -11,6 +11,7 @@ import { ApplyModal } from "./ApplyModal";
 import { WhatsAppWidget } from "./WhatsAppWidget";
 import { SoundToggle } from "./SoundToggle";
 import { SiteTracker } from "./SiteTracker";
+import { ConsentBanner } from "./ConsentBanner";
 
 const ApplyCtx = createContext(null);
 
@@ -59,6 +60,7 @@ export function SiteProvider({ branches = [], destinations = [], children }) {
       <WhatsAppWidget branches={branches} />
       <SoundToggle />
       <SiteTracker />
+      <ConsentBanner />
     </ApplyCtx.Provider>
   );
 }

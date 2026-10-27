@@ -1,6 +1,34 @@
 // Constants
 import { Schema, Model, leadStatus, leadSources } from "#constants";
 
+// Utils
+import { ATTRIBUTION_CHANNELS } from "#utils";
+
+/**
+ * Reklam mənbəyi — müraciət hansı kampaniyadan gəlib.
+ *
+ * Müraciətin ÖZ qeydində saxlanılır (sessiya hadisəsinə istinad kimi yox):
+ * hadisələr təmizlənsə də, admin süzgəci və hesabat sadə qalsın. Ayrıca
+ * `_id`-siz alt-sənəddir — müraciətlə birlikdə yaranır, ayrıca redaktə olunmur.
+ * Təmizlənmə və kanalın təyini: utils/leadAttribution.js.
+ */
+const attributionSchema = new Schema(
+  {
+    // Google Ads / Organik / Birbaşa … — serverdə hesablanır, saytdan gəlmir.
+    channel: { type: String, enum: ATTRIBUTION_CHANNELS },
+    source: { type: String, trim: true, maxlength: 80 },     // utm_source
+    medium: { type: String, trim: true, maxlength: 80 },     // utm_medium
+    campaign: { type: String, trim: true, maxlength: 150 },  // utm_campaign — çox vaxt {campaignid}
+    term: { type: String, trim: true, maxlength: 150 },      // utm_term — açar söz ({keyword})
+    content: { type: String, trim: true, maxlength: 150 },   // utm_content — reklam qrupu ({adgroupid})
+    gclid: { type: String, trim: true, maxlength: 200 },     // Google klik kodu — oflayn konversiya üçün
+    landing: { type: String, trim: true, maxlength: 300 },   // reklamdan açılan ilk səhifə
+    referrerHost: { type: String, trim: true, maxlength: 120 },
+    capturedAt: { type: Date },                              // reklam klikinin vaxtı
+  },
+  { _id: false },
+);
+
 /**
  * Lead — a submission from the "Müraciət et" modal or the contact form.
  *
@@ -29,9 +57,13 @@ const leadSchema = new Schema(
     project: { type: Schema.Types.ObjectId, ref: "Project" },
     message: { type: String, trim: true, maxlength: 3000 },
 
+    // DİQQƏT: bu, reklam mənbəyi DEYİL — müraciətin HANSI FORMADAN gəldiyidir
+    // («Müraciət et» modalı, əlaqə səhifəsi …). Reklam mənbəyi `attribution`-dadır.
     source: { type: String, enum: leadSources, default: "apply-modal" },
     // Page the form was submitted from, for attribution
     pageUrl: { type: String, trim: true, maxlength: 500 },
+
+    attribution: { type: attributionSchema, default: undefined },
 
     status: { type: String, enum: leadStatus, default: "new" },
     note: { type: String, trim: true, maxlength: 3000 },
@@ -49,6 +81,8 @@ leadSchema.index({ createdAt: -1 });
 // filial meneceri isə öz filialı ilə (bax applyLeadScope).
 leadSchema.index({ isDeleted: 1, createdAt: -1 });
 leadSchema.index({ branch: 1, createdAt: -1 });
+// «Google Ads-dən gələn müraciətlər» süzgəci.
+leadSchema.index({ "attribution.channel": 1, createdAt: -1 });
 
 leadSchema.methods.markHandled = async function (userId, status = "contacted") {
   this.status = status;

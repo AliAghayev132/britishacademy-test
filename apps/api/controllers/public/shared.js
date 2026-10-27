@@ -35,7 +35,11 @@ const CARD_EXCLUDE = "-contentHtml -content -faq -seo";
  * Bura yalnız saytın işləməsi üçün lazım olanlar qalır; yeni gizli sahə əlavə
  * ediləndə onu da bu siyahıya yazın.
  */
-const PRIVATE_SETTING_FIELDS = ["smtp", "ai"];
+// Siyahı DENYLIST-dir: SiteSetting-ə yeni daxili sahə əlavə olunanda bura da
+// yazılmalıdır, yoxsa /api/site ilə hamıya açılır.
+//   adCampaigns — reklam kampaniyalarının adları (marketinq məlumatı)
+//   whatsapp    — WhatsApp botunun açarı (socials.whatsapp linki isə açıqdır)
+const PRIVATE_SETTING_FIELDS = ["smtp", "ai", "adCampaigns", "whatsapp"];
 
 /** SiteSetting-i public üçün təhlükəsiz hala gətir. */
 function publicSettings(doc) {

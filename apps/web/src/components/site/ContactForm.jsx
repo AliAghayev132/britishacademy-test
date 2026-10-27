@@ -7,7 +7,7 @@ import { memo, useCallback, useState } from "react";
 import { useCreateLeadMutation } from "@/store";
 
 // Lib
-import { useT } from "@/lib";
+import { useT, getAttribution } from "@/lib";
 
 // Utils
 import { apiErrorMessage } from "@/utils";
@@ -61,6 +61,8 @@ export function ContactForm({ branches = [] }) {
         branch: branch || undefined,
         source: "contact-page",
         pageUrl: "/elaqe",
+        // Reklamdan gəlib əlaqə səhifəsindən yazan istifadəçi də kampaniyaya bağlansın.
+        attribution: getAttribution(),
       }).unwrap();
       setDone(true);
     } catch (err) {

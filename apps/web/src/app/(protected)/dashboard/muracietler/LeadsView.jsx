@@ -4,7 +4,7 @@
 import { useState } from "react";
 
 // Icons
-import { Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronDown, Megaphone } from "lucide-react";
 
 // Components
 import { notify, DateRangePicker, Pagination, QueryState } from "@/components";
@@ -13,7 +13,12 @@ import { notify, DateRangePicker, Pagination, QueryState } from "@/components";
 import { useDebouncedValue } from "@/hooks";
 
 // Store
-import { useAdminListQuery, useAdminLeadStatusMutation, useAdminLookupsQuery } from "@/store";
+import {
+  useAdminListQuery,
+  useAdminLeadStatusMutation,
+  useAdminLookupsQuery,
+  useAdCampaignsQuery,
+} from "@/store";
 
 // Lib
 import { pickAz } from "@/lib";
@@ -23,6 +28,8 @@ import { fmtDate, fmtTime, apiErrorMessage } from "@/utils";
 
 // Local
 import { NativeSelect } from "../_forms/kit";
+import { AdCampaignsModal } from "./AdCampaignsModal";
+import { AD_CHANNEL_OPTIONS, AD_CHANNEL_BY_KEY } from "./adChannels";
 
 const STATUS = [
   { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },
@@ -34,6 +41,8 @@ const STATUS = [
 const STATUS_OPTIONS = STATUS.map((s) => ({ value: s.key, label: s.label, color: s.color }));
 const STATUS_BY_KEY = Object.fromEntries(STATUS.map((s) => [s.key, s]));
 
+// FORMA — müraciət saytın hansı formasından gəlib. Reklam mənbəyi (Google Ads,
+// organik…) ayrıdır: `attribution.channel`, bax adChannels.js.
 const SOURCE_OPTIONS = [
   { value: "apply-modal", label: "Müraciət formu" },
   { value: "contact-page", label: "Əlaqə səhifəsi" },
@@ -59,6 +68,8 @@ export function LeadsView({ abroadOnly = false }) {
   const [search, setSearch] = useState("");
   const [status, setStatusFilter] = useState("");
   const [source, setSource] = useState("");
+  const [channel, setChannel] = useState("");
+  const [campaignsOpen, setCampaignsOpen] = useState(false);
   const [branch, setBranch] = useState("");
   const [course, setCourse] = useState("");
   const [destination, setDestination] = useState("");
@@ -85,22 +96,27 @@ export function LeadsView({ abroadOnly = false }) {
     label: pickAz(d.country),
   }));
 
+  // Kampaniya ID → ad (Google Ads ünvana yalnız ID yazır).
+  const { data: adCampaigns } = useAdCampaignsQuery();
+  const campaignName = Object.fromEntries((adCampaigns?.data?.map || []).map((c) => [c.id, c.name]));
+
   const activeFilters = {
     // Xaricdə təhsil müraciətləri AYRI siyahıdır: bu bayraqla server yalnız
     // onları qaytarır, ümumi siyahıda isə onları süzüb atır (applyLeadTopic).
     ...(abroadOnly ? { abroad: 1 } : {}),
     ...(status ? { status } : {}),
     ...(source ? { source } : {}),
+    ...(channel ? { "attribution.channel": channel } : {}),
     ...(branch ? { branch } : {}),
     ...(course ? { course } : {}),
     ...(destination ? { destinations: destination } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
   };
-  const hasFilter = Boolean(search || status || source || branch || course || destination || from || to);
+  const hasFilter = Boolean(search || status || source || channel || branch || course || destination || from || to);
   // Ölkə süzgəci ümumi siyahıda göstərilmir, ona görə sayğacda da yer almır.
   // Düymədəki rəqəm — neçə süzgəc aktivdir (axtarış ayrıca sahədir, sayılmır).
-  const activeCount = [status, source, branch, course, ...(abroadOnly ? [destination] : []), from, to].filter(Boolean).length;
+  const activeCount = [status, source, channel, branch, course, ...(abroadOnly ? [destination] : []), from, to].filter(Boolean).length;
   // Filtr aktivdirsə panel açıq qalır — gizli süzgəc nəticəni dəyişir,
   // amma səbəbi görünmür və bu, çaşdırıcıdır.
   const panelOpen = filtersOpen || activeCount > 0;
@@ -138,6 +154,7 @@ export function LeadsView({ abroadOnly = false }) {
     setSearch("");
     setStatusFilter("");
     setSource("");
+    setChannel("");
     setBranch("");
     setCourse("");
     setDestination("");
@@ -185,6 +202,16 @@ export function LeadsView({ abroadOnly = false }) {
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${panelOpen ? "rotate-180" : ""}`} />
           </button>
 
+          {/* Google Ads ID-lərinə ad vermək — siyahıda ad görünsün. */}
+          <button
+            type="button"
+            onClick={() => setCampaignsOpen(true)}
+            className="ml-auto inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-[#00157A]"
+          >
+            <Megaphone className="h-4 w-4" />
+            Kampaniya adları
+          </button>
+
           {hasFilter && (
             <button
               onClick={resetFilters}
@@ -207,10 +234,19 @@ export function LeadsView({ abroadOnly = false }) {
             </div>
             <div className="w-44">
               <NativeSelect
-                placeholder="Bütün mənbələr"
+                placeholder="Bütün formalar"
                 options={SOURCE_OPTIONS}
                 value={source}
                 onChange={(e) => setFilter(setSource)(e.target.value)}
+              />
+            </div>
+
+            <div className="w-48">
+              <NativeSelect
+                placeholder="Bütün reklam mənbələri"
+                options={AD_CHANNEL_OPTIONS}
+                value={channel}
+                onChange={(e) => setFilter(setChannel)(e.target.value)}
               />
             </div>
 
@@ -282,6 +318,9 @@ export function LeadsView({ abroadOnly = false }) {
                   <th className="hidden px-4 py-3 lg:table-cell">Kurs / maraq</th>
                   {!abroadOnly && <th className="hidden px-4 py-3 xl:table-cell">Filial</th>}
                   <th className="hidden px-4 py-3 lg:table-cell">Mənbə</th>
+                  <th className="hidden px-4 py-3 xl:table-cell">Kampaniya</th>
+                  <th className="hidden px-4 py-3 xl:table-cell">Açar söz</th>
+                  <th className="hidden px-4 py-3 xl:table-cell">Reklam qrupu</th>
                   <th className="hidden px-4 py-3 md:table-cell">Tarix</th>
                   <th className="px-4 py-3">Status</th>
                 </tr>
@@ -348,10 +387,51 @@ export function LeadsView({ abroadOnly = false }) {
                     </td>
                     )}
 
+                    {/* Mənbə — reklam kanalı (serverdə hesablanır); altında forma.
+                        Atribusiyadan əvvəlki müraciətlərdə kanal yoxdur. */}
                     <td className="hidden px-4 py-3 lg:table-cell">
-                      <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                      {(() => {
+                        const ch = AD_CHANNEL_BY_KEY[l.attribution?.channel];
+                        return (
+                          <span
+                            className={`whitespace-nowrap rounded-md px-2 py-1 text-xs font-semibold ${ch ? ch.cls : "bg-gray-50 text-gray-400"}`}
+                            title={l.attribution?.landing ? `Açılış səhifəsi: ${l.attribution.landing}` : undefined}
+                          >
+                            {ch ? ch.label : "Məlum deyil"}
+                          </span>
+                        );
+                      })()}
+                      <div className="mt-1.5 whitespace-nowrap text-[11px] text-gray-400">
                         {SOURCE_LABEL[l.source] || l.source || "—"}
-                      </span>
+                        {l.attribution?.referrerHost && ` · ${l.attribution.referrerHost}`}
+                      </div>
+                    </td>
+
+                    {/* Kampaniya — ad (uyğunluq cədvəlindən) + ID */}
+                    <td className="hidden px-4 py-3 xl:table-cell">
+                      {l.attribution?.campaign ? (
+                        <>
+                          {campaignName[l.attribution.campaign] && (
+                            <div className="min-w-[10rem] max-w-[14rem] font-medium text-gray-700">
+                              {campaignName[l.attribution.campaign]}
+                            </div>
+                          )}
+                          <div className="max-w-[14rem] break-all font-mono text-[11px] text-gray-400">
+                            {l.attribution.campaign}
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+
+                    <td className="hidden min-w-[8rem] max-w-[12rem] px-4 py-3 text-gray-600 xl:table-cell">
+                      {l.attribution?.term || <span className="text-gray-300">—</span>}
+                    </td>
+
+                    {/* utm_content — Google Ads üçün {adgroupid} */}
+                    <td className="hidden px-4 py-3 font-mono text-[11px] text-gray-500 xl:table-cell">
+                      {l.attribution?.content || <span className="font-sans text-sm text-gray-300">—</span>}
                     </td>
 
                     {/* Tarix və saat ayrı sətirdə — cədvəl daha oxunaqlı olur */}
@@ -384,6 +464,8 @@ export function LeadsView({ abroadOnly = false }) {
           </div>
         )}
       </div>
+
+      <AdCampaignsModal isOpen={campaignsOpen} onClose={() => setCampaignsOpen(false)} />
 
       <Pagination
         page={pagination?.page || 1}

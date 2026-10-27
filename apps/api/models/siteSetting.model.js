@@ -165,6 +165,23 @@ const siteSettingSchema = new Schema(
     },
     // Served verbatim at /robots.txt
     robotsTxt: { type: String, default: "" },
+
+    // Google Ads kampaniya ID → ad. Final URL suffix-də `{campaignid}`
+    // işlədiləndə müraciətə rəqəm gəlir (məs. 21458930412); admin paneldə
+    // oxunaqlı ad göstərmək üçün uyğunluq burada saxlanılır. Google Ads API
+    // inteqrasiyası (OAuth, developer token) indiki həcm üçün artıqdır.
+    adCampaigns: {
+      type: [
+        new Schema(
+          {
+            id: { type: String, trim: true, maxlength: 150, required: true },
+            name: { type: String, trim: true, maxlength: 200, required: true },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
     // Extra schema.org JSON-LD merged into the Organization block
     organizationSchema: { type: String, default: "" },
 

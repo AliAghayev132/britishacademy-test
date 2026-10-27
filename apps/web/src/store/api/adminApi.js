@@ -52,6 +52,15 @@ export const adminApi = baseApi.injectEndpoints({
       // Also refresh the dashboard home (stats + latestLeads) after a status change.
       invalidatesTags: [{ type: "Resource", id: "leads" }, { type: "Resource", id: "stats" }],
     }),
+    // Google Ads kampaniya ID → ad uyğunluğu (müraciətlər siyahısında ad göstərilir).
+    adCampaigns: builder.query({
+      query: () => "/admin/ad-campaigns",
+      providesTags: [{ type: "Site", id: "ad-campaigns" }],
+    }),
+    updateAdCampaigns: builder.mutation({
+      query: (map) => ({ url: "/admin/ad-campaigns", method: "PUT", body: { map } }),
+      invalidatesTags: [{ type: "Site", id: "ad-campaigns" }],
+    }),
     adminStats: builder.query({
       query: () => "/admin/stats",
       providesTags: [{ type: "Resource", id: "stats" }],
@@ -330,6 +339,8 @@ export const {
   useAdminDeleteMutation,
   useAdminReorderMutation,
   useAdminLeadStatusMutation,
+  useAdCampaignsQuery,
+  useUpdateAdCampaignsMutation,
   useAdminStatsQuery,
   useAdminContentStatsQuery,
   useAdminFunnelStatsQuery,

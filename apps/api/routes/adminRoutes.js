@@ -48,6 +48,11 @@ AdminRouter.put("/settings", writeRateLimiter, adminController.updateSettings);
 // Status dəyişmək müraciəti GÖRMƏK deməkdir — controller müraciətin növünə
 // görə «leads» / «leads-abroad» yoxlayır.
 AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
+// Google Ads kampaniya ID → ad uyğunluğu. Müraciətlər bölməsindən idarə
+// olunur, ona görə həmin bölmənin icazəsi tələb edilir. Generic /:resource
+// marşrutundan ƏVVƏL olmalıdır.
+AdminRouter.get("/ad-campaigns", requireSection("leads"), leadController.getAdCampaigns);
+AdminRouter.put("/ad-campaigns", requireSection("leads"), writeRateLimiter, leadController.updateAdCampaigns);
 
 // Course composer — select lists + atomic course-with-timetable create/edit.
 // Must precede the generic /:resource matcher (otherwise "lookups"/"full"

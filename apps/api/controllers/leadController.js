@@ -1,13 +1,22 @@
 // Lead capture — the "Müraciət et" modal and contact form post here.
 
 // Models
-import { Course, Lead } from "#models";
+import { Course, Lead, SiteSetting } from "#models";
 
 // Services
 import { MailService, logAction, diffDocs, recordLeadSubmit, leadInReach } from "#services";
 
 // Utils
-import { fail, ok, asyncHandler, isObjectId, cleanIds, courseTitleIndex, normTitle } from "#utils";
+import {
+  fail,
+  ok,
+  asyncHandler,
+  isObjectId,
+  cleanIds,
+  courseTitleIndex,
+  normTitle,
+  sanitizeAttribution,
+} from "#utils";
 
 /**
  * Müraciətin kursu: sayt id göndəribsə o, göndərməyibsə `interest` mətni
@@ -59,6 +68,11 @@ const createLead = asyncHandler(async (req, res) => {
     destinations: destinations.length ? destinations : undefined,
     // Layihə müraciəti — yalnız layihənin öz səhifəsindən gəlir.
     project: isObjectId(req.body?.project) ? req.body.project : undefined,
+    // Reklam mənbəyi — sayt yadda saxladığı UTM / Google klik kodunu müraciətlə
+    // BİRLİKDƏ göndərir. Təmizlənir və kanal (Google Ads, organik …) serverdə
+    // hesablanır. Yoxdursa (razılıq verilməyib, başqa vərəqdən qayıdıb) müraciət
+    // reklam məlumatısız yazılır — bu, xəta deyil.
+    attribution: sanitizeAttribution(req.body?.attribution),
   });
 
   ok(res, { id: lead._id }, "Müraciətin qəbul edildi! Tezliklə səninlə əlaqə saxlayacağıq.", 201);
@@ -83,6 +97,63 @@ const createLead = asyncHandler(async (req, res) => {
   // həmin sessiyanın ziyarəti və mənbəyi ilə bağlansın.
   recordLeadSubmit(req.body?.sid, { path: pageUrl, form: source, ua: req.headers["user-agent"] })
     .catch((err) => console.error("Lead funnel event failed:", err.message));
+});
+
+/**
+ * GET /api/admin/ad-campaigns — kampaniya ID → ad uyğunluğu və müraciətlərdə
+ * GÖRÜNƏN kampaniyalar.
+ *
+ * `seen` — müraciətlərə gəlmiş, amma çox vaxt hələ adı yazılmamış ID-lər.
+ * Admin ID-ləri Google Ads-dən əvvəlcədən köçürməyə məcbur deyil: müraciət
+ * gəldikcə ID burada görünür, qarşısına ad yazmaq kifayətdir.
+ */
+const getAdCampaigns = asyncHandler(async (_req, res) => {
+  const [settings, seen] = await Promise.all([
+    SiteSetting.get(),
+    Lead.aggregate([
+      { $match: { isDeleted: false, "attribution.campaign": { $nin: [null, ""] } } },
+      {
+        $group: {
+          _id: "$attribution.campaign",
+          count: { $sum: 1 },
+          lastAt: { $max: "$createdAt" },
+          channel: { $last: "$attribution.channel" },
+        },
+      },
+      { $sort: { lastAt: -1 } },
+      { $limit: 200 },
+    ]),
+  ]);
+  ok(res, {
+    map: (settings.adCampaigns || []).map(({ id, name }) => ({ id, name })),
+    seen: seen.map((r) => ({ id: r._id, count: r.count, lastAt: r.lastAt, channel: r.channel })),
+  });
+});
+
+/** PUT /api/admin/ad-campaigns — uyğunluq cədvəlini bütövlükdə əvəz et. */
+const updateAdCampaigns = asyncHandler(async (req, res) => {
+  const rows = Array.isArray(req.body?.map) ? req.body.map : null;
+  if (!rows) return fail(res, "map massivi tələb olunur", 400);
+
+  // Boş sətirlər atılır, eyni ID təkrarlanırsa SONUNCU qalır.
+  const byId = new Map();
+  for (const r of rows.slice(0, 500)) {
+    const id = String(r?.id ?? "").trim().slice(0, 150);
+    const name = String(r?.name ?? "").trim().slice(0, 200);
+    if (id && name) byId.set(id, { id, name });
+  }
+
+  const settings = await SiteSetting.get();
+  settings.adCampaigns = [...byId.values()];
+  await settings.save();
+  SiteSetting.clearCache?.();
+
+  await logAction(req, {
+    action: "update",
+    resource: "leads",
+    summary: `Kampaniya adları yeniləndi (${byId.size} kampaniya)`,
+  });
+  ok(res, { map: settings.adCampaigns }, "Kampaniya adları yadda saxlanıldı");
 });
 
 /** PATCH /api/admin/leads/:id/status — admin marks a lead handled. */
@@ -120,4 +191,4 @@ const updateLeadStatus = asyncHandler(async (req, res) => {
   ok(res, { lead }, "Yeniləndi");
 });
 
-export { createLead, updateLeadStatus };
+export { createLead, updateLeadStatus, getAdCampaigns, updateAdCampaigns };
