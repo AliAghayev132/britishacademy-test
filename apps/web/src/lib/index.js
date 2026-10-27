@@ -20,6 +20,7 @@ export {
   captureAttribution,
   getAttribution,
   getConsent,
+  resetConsent,
   setConsent,
 } from "./attribution";
 export { copyText } from "./clipboard";
@@ -35,6 +36,13 @@ export { gtmIdOf } from "./gtm";
 export { DEFAULT_ORDER, HOME_SECTIONS, resolveSections, sectionEnabled } from "./homeSections";
 export { IMAGE_SPECS, specSummary } from "./imageSpecs";
 export { ldJson } from "./jsonLd";
+export {
+  bakuDateTime,
+  downloadLeadsXlsx,
+  downloadText,
+  googleConversionsCsv,
+  leadExportRows,
+} from "./leadExport";
 export { LEGACY_REDIRECTS, legacyTarget } from "./legacyRoutes";
 export {
   ROLE_LABELS,

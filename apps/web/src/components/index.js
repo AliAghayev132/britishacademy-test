@@ -16,6 +16,7 @@ export { BranchContact } from "./site/BranchContact";
 export { BranchMapSwitcher } from "./site/BranchMapSwitcher";
 export { CodeInjection } from "./site/CodeInjection";
 export { ConsentBanner } from "./site/ConsentBanner";
+export { ConsentControl } from "./site/ConsentControl";
 export { ContactForm } from "./site/ContactForm";
 export { ContentBlocks } from "./site/ContentBlocks";
 export { CtaBand } from "./site/CtaBand";

@@ -69,6 +69,10 @@ const leadSchema = new Schema(
     note: { type: String, trim: true, maxlength: 3000 },
     handledBy: { type: Schema.Types.ObjectId, ref: "User" },
     handledAt: { type: Date },
+    // «Qeydiyyatdan keçdi» statusuna keçdiyi an — Google Ads-ə offline
+    // konversiya vaxtı kimi göndərilir. `handledAt` hər status dəyişikliyində
+    // yenilənir, ona görə bu məqsədə yaramır. Aşağıdakı hook doldurur.
+    enrolledAt: { type: Date },
 
     isDeleted: { type: Boolean, default: false },
   },
@@ -83,6 +87,16 @@ leadSchema.index({ isDeleted: 1, createdAt: -1 });
 leadSchema.index({ branch: 1, createdAt: -1 });
 // «Google Ads-dən gələn müraciətlər» süzgəci.
 leadSchema.index({ "attribution.channel": 1, createdAt: -1 });
+
+// Generic yeniləmə də, status endpointi də save() ilə gedir — hər iki yol buradan keçir.
+leadSchema.pre("save", function () {
+  if (!this.isModified("status")) return;
+  if (this.status === "enrolled") {
+    if (!this.enrolledAt) this.enrolledAt = new Date();
+  } else {
+    this.enrolledAt = undefined; // səhvən qeyd edilib geri alınıbsa
+  }
+});
 
 leadSchema.methods.markHandled = async function (userId, status = "contacted") {
   this.status = status;

@@ -61,6 +61,12 @@ export const adminApi = baseApi.injectEndpoints({
       query: (map) => ({ url: "/admin/ad-campaigns", method: "PUT", body: { map } }),
       invalidatesTags: [{ type: "Site", id: "ad-campaigns" }],
     }),
+    // Müraciətlər siyahısının Excel ixracı — siyahı ilə eyni filtrlər, səhifələmə yoxdur.
+    // Keşlənmir: hər basışda təzə məlumat.
+    adminLeadsExport: builder.query({
+      query: (params) => ({ url: "/admin/leads/export", params }),
+      keepUnusedDataFor: 0,
+    }),
     adminStats: builder.query({
       query: () => "/admin/stats",
       providesTags: [{ type: "Resource", id: "stats" }],
@@ -320,6 +326,16 @@ export const adminApi = baseApi.injectEndpoints({
       query: ({ days } = {}) => ({ url: "/admin/stats/funnel", params: { days } }),
       providesTags: [{ type: "Site", id: "funnel-stats" }],
     }),
+    // Reklam kampaniyaları hesabatı (kanal / kampaniya / açar söz / reklam qrupu).
+    adminCampaignStats: builder.query({
+      query: ({ days } = {}) => ({ url: "/admin/stats/campaigns", params: { days } }),
+      providesTags: [{ type: "Site", id: "campaign-stats" }, { type: "Site", id: "ad-campaigns" }],
+    }),
+    // Google Ads-ə offline konversiya faylı üçün: qeydiyyatdan keçmiş, gclid-li müraciətlər.
+    adminGoogleConversions: builder.query({
+      query: ({ from, to } = {}) => ({ url: "/admin/stats/google-conversions", params: { from, to } }),
+      keepUnusedDataFor: 0,
+    }),
     adminGetSettings: builder.query({
       query: () => "/admin/settings",
       providesTags: [{ type: "Site", id: "settings" }],
@@ -344,6 +360,9 @@ export const {
   useAdminStatsQuery,
   useAdminContentStatsQuery,
   useAdminFunnelStatsQuery,
+  useAdminCampaignStatsQuery,
+  useLazyAdminGoogleConversionsQuery,
+  useLazyAdminLeadsExportQuery,
   useLinkStatsQuery,
   useResetLinkClicksMutation,
   useAdminGetSettingsQuery,

@@ -49,7 +49,7 @@ describe("əhatənin serverdə tətbiqi", () => {
     .map((f) => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
 
   it("siyahı sorğusuna tətbiq olunur", () => {
-    expect(SRC).toContain("applyLeadScope(filter, req, req.params.resource)");
+    expect(SRC).toContain("applyLeadScope(filter, req, resource)");
   });
 
   it("filial əhatəsi də tətbiq olunur", () => {

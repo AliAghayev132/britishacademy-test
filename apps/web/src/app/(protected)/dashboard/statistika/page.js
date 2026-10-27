@@ -26,6 +26,7 @@ import { fmtNumber } from "@/utils";
 
 // Local
 import FunnelTab from "./_components/FunnelTab";
+import CampaignsTab from "./_components/CampaignsTab";
 
 /**
  * Məzmun statistikası.
@@ -323,13 +324,15 @@ function ContentTab({ days }) {
 const TABS = [
   { key: "content", label: "Məzmun" },
   { key: "funnel", label: "Konversiya" },
+  { key: "campaigns", label: "Reklam" },
 ];
 
 /**
- * Statistika — iki tab:
+ * Statistika — üç tab:
  *   • Məzmun — nəyə baxılır, müraciətlər haradan gəlir (əvvəlki səhifə)
  *   • Konversiya — sayta giriş → forma açıldı → müraciət göndərildi
- * Dövr seçimi hər iki tab üçün ortaqdır.
+ *   • Reklam — kanal / kampaniya / açar söz üzrə müraciət və qeydiyyat
+ * Dövr seçimi bütün tablar üçün ortaqdır.
  */
 export default function StatsPage() {
   const [days, setDays] = useState(30);
@@ -374,7 +377,13 @@ export default function StatsPage() {
       </div>
 
       <div role="tabpanel">
-        {tab === "content" ? <ContentTab days={days} /> : <FunnelTab days={days} />}
+        {tab === "content" ? (
+          <ContentTab days={days} />
+        ) : tab === "funnel" ? (
+          <FunnelTab days={days} />
+        ) : (
+          <CampaignsTab days={days} />
+        )}
       </div>
     </div>
   );

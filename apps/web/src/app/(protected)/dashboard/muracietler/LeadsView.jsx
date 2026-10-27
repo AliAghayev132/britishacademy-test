@@ -4,7 +4,14 @@
 import { useState } from "react";
 
 // Icons
-import { Search, X, SlidersHorizontal, ChevronDown, Megaphone } from "lucide-react";
+import {
+  Search,
+  X,
+  SlidersHorizontal,
+  ChevronDown,
+  Megaphone,
+  FileSpreadsheet,
+} from "lucide-react";
 
 // Components
 import { notify, DateRangePicker, Pagination, QueryState } from "@/components";
@@ -18,10 +25,11 @@ import {
   useAdminLeadStatusMutation,
   useAdminLookupsQuery,
   useAdCampaignsQuery,
+  useLazyAdminLeadsExportQuery,
 } from "@/store";
 
 // Lib
-import { pickAz } from "@/lib";
+import { pickAz, leadExportRows, downloadLeadsXlsx } from "@/lib";
 
 // Utils
 import { fmtDate, fmtTime, apiErrorMessage } from "@/utils";
@@ -29,7 +37,7 @@ import { fmtDate, fmtTime, apiErrorMessage } from "@/utils";
 // Local
 import { NativeSelect } from "../_forms/kit";
 import { AdCampaignsModal } from "./AdCampaignsModal";
-import { AD_CHANNEL_OPTIONS, AD_CHANNEL_BY_KEY } from "./adChannels";
+import { AD_CHANNELS, AD_CHANNEL_OPTIONS, AD_CHANNEL_BY_KEY } from "./adChannels";
 
 const STATUS = [
   { key: "new", label: "Yeni", cls: "bg-blue-100 text-blue-700", color: "#2563EB" },
@@ -52,6 +60,13 @@ const SOURCE_OPTIONS = [
   { value: "other", label: "Digər" },
 ];
 const SOURCE_LABEL = Object.fromEntries(SOURCE_OPTIONS.map((s) => [s.value, s.label]));
+
+// Excel faylında cədvəldəki adlar işlənir, daxili açarlar yox.
+const EXPORT_LABELS = {
+  status: Object.fromEntries(STATUS.map((s) => [s.key, s.label])),
+  source: SOURCE_LABEL,
+  channel: Object.fromEntries(AD_CHANNELS.map((c) => [c.key, c.label])),
+};
 
 /** Telefonu wa.me üçün rəqəmlərə çevir. */
 const waNumber = (phone) => String(phone || "").replace(/[^\d]/g, "");
@@ -131,6 +146,27 @@ export function LeadsView({ abroadOnly = false }) {
     ...activeFilters,
   });
   const [setStatus] = useAdminLeadStatusMutation();
+  const [loadExport, { isFetching: exporting }] = useLazyAdminLeadsExportQuery();
+
+  // Ekrandakı filtrlərlə eyni müraciətlər — bütün səhifələr birlikdə.
+  const exportXlsx = async () => {
+    try {
+      const res = await loadExport({ search: search || undefined, ...activeFilters }).unwrap();
+      const { items = [], truncated, limit } = res.data || {};
+      if (!items.length) {
+        notify.error("İxrac üçün müraciət yoxdur");
+        return;
+      }
+      const rows = leadExportRows(items, { labels: EXPORT_LABELS, campaignName });
+      const day = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Baku" });
+      await downloadLeadsXlsx(rows, `muracietler${abroadOnly ? "-xaricde-tehsil" : ""}-${day}.xlsx`);
+      notify.success(
+        truncated ? `İlk ${limit} müraciət ixrac edildi — hamısı üçün tarix aralığını daraldın` : `${items.length} müraciət ixrac edildi`,
+      );
+    } catch (err) {
+      notify.error(apiErrorMessage(err, "İxrac alınmadı"));
+    }
+  };
 
   const items = data?.data?.items || [];
   const pagination = data?.data?.pagination;
@@ -202,11 +238,22 @@ export function LeadsView({ abroadOnly = false }) {
             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${panelOpen ? "rotate-180" : ""}`} />
           </button>
 
+          {/* Ekrandakı filtrlərlə Excel faylı. */}
+          <button
+            type="button"
+            onClick={exportXlsx}
+            disabled={exporting}
+            className="ml-auto inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-[#00157A] disabled:opacity-60"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            {exporting ? "Hazırlanır…" : "Excel"}
+          </button>
+
           {/* Google Ads ID-lərinə ad vermək — siyahıda ad görünsün. */}
           <button
             type="button"
             onClick={() => setCampaignsOpen(true)}
-            className="ml-auto inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-[#00157A]"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-[#00157A]"
           >
             <Megaphone className="h-4 w-4" />
             Kampaniya adları

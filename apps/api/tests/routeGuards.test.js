@@ -28,6 +28,7 @@ const OPEN_BY_DESIGN = {
   "/settings": "üç bölmə oxuyur (Tənzimləmələr, Ana səhifə, QR); yazma sahə səviyyəsində yoxlanılır",
   "/lookups": "ad/id cütləri — hamısı public saytda görünür; ölkə/filial əhatəsi tətbiq olunur",
   "/leads/:id/status": "müraciətin növünə görə controller-də yoxlanılır (leads / leads-abroad)",
+  "/leads/export": "siyahı kimi controller-də yoxlanılır (leads / leads-abroad, denySection)",
 };
 
 /** Generic CRUD marşrutları — qoruma `adminController`-dədir (denySection). */

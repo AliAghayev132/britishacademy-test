@@ -6,8 +6,12 @@ import {
   getConsent,
   setConsent,
   ATTRIBUTION_TTL,
+  resetConsent,
   __resetAttributionForTests,
 } from "../src/lib/attribution.js";
+import { bakuDateTime, googleConversionsCsv, leadExportRows } from "../src/lib/leadExport.js";
+import { PRIVACY } from "../src/app/(public)/mexfilik-siyaseti/content.js";
+import { ROUTE_SLUGS } from "../src/lib/i18n/routes.js";
 
 /**
  * MÜRACİƏTİN REKLAM MƏNBƏYİ (Google Ads atribusiyası) — sayt tərəfi.
@@ -136,6 +140,18 @@ describe("razılıq", () => {
   });
 });
 
+describe("seçimi dəyişmək (məxfilik səhifəsi)", () => {
+  it("sıfırlananda həm seçim, həm saxlanılan mənbə silinir — banner yenidən çıxır", () => {
+    const store = fakeWindow({ url: AD_URL });
+    setConsent("granted");
+    captureAttribution(NOW);
+    resetConsent();
+    expect(store.has("ba-consent")).toBe(false);
+    expect(store.has("ba-attr")).toBe(false);
+    expect(getConsent()).toBeNull();
+  });
+});
+
 describe("son reklam kliki qalib gəlir", () => {
   it("yeni reklam kliki köhnəni əvəz edir", () => {
     const store = fakeWindow({ url: AD_URL });
@@ -195,5 +211,78 @@ describe("bağlantılar", () => {
     const serverKeys = [...api.match(/ATTRIBUTION_CHANNELS = \[([^\]]+)\]/)[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
     const webKeys = [...web.matchAll(/key: "([^"]+)"/g)].map((m) => m[1]);
     expect(webKeys.sort()).toEqual([...serverKeys].sort());
+  });
+});
+
+describe("Google Ads offline konversiya faylı", () => {
+  it("Bakı vaxtı ilə, Google şablonunun başlıqları ilə", () => {
+    const csv = googleConversionsCsv(
+      [{ gclid: "CjABC", conversionAt: "2026-10-27T12:44:34.601Z" }],
+      { name: "Qeydiyyat" },
+    );
+    expect(csv.split(/\r\n/)).toEqual([
+      "Parameters:TimeZone=+0400",
+      "Google Click ID,Conversion Name,Conversion Time,Conversion Value,Conversion Currency",
+      "CjABC,Qeydiyyat,2026-10-27 16:44:34,,",
+      "",
+    ]);
+  });
+
+  it("dəyər verilibsə valyuta da yazılır; vergüllü ad dırnaqlanır", () => {
+    const csv = googleConversionsCsv([{ gclid: "x", conversionAt: "2026-01-01T00:00:00Z" }], { name: "Kurs, qeydiyyat", value: "150" });
+    expect(csv).toContain('x,"Kurs, qeydiyyat",2026-01-01 04:00:00,150,AZN');
+  });
+
+  it("Bakı vaxtı gecə yarısını düzgün keçir", () => {
+    expect(bakuDateTime("2026-03-31T20:30:00Z")).toBe("2026-04-01 00:30:00");
+  });
+});
+
+describe("Excel ixracı", () => {
+  it("reklam sütunları və oxunaqlı adlar", () => {
+    const [r] = leadExportRows(
+      [{
+        createdAt: "2026-10-27T12:00:00Z", name: "Aysel", phone: "+994501112233", source: "apply-modal", status: "enrolled",
+        course: { title: { az: "IELTS" } },
+        attribution: { channel: "google-ads", campaign: "214", term: "ielts kursu", content: "158", gclid: "Cj" },
+      }],
+      { labels: { status: { enrolled: "Qeydiyyatdan keçdi" }, source: { "apply-modal": "Müraciət formu" }, channel: { "google-ads": "Google Ads" } }, campaignName: { 214: "IELTS — Bakı" } },
+    );
+    expect(r).toMatchObject({
+      Telefon: "+994501112233", // mətn kimi — «+» itmir
+      "Kurs / maraq": "IELTS", Status: "Qeydiyyatdan keçdi", Forma: "Müraciət formu",
+      "Reklam mənbəyi": "Google Ads", "Kampaniya adı": "IELTS — Bakı", "Kampaniya ID": "214",
+      "Açar söz": "ielts kursu", "Reklam qrupu": "158",
+    });
+  });
+
+  it("müraciətlər siyahısında Excel düyməsi ekrandakı filtrlərlə işləyir", () => {
+    const view = fs.readFileSync("src/app/(protected)/dashboard/muracietler/LeadsView.jsx", "utf8");
+    expect(view).toContain("loadExport({ search: search || undefined, ...activeFilters })");
+  });
+});
+
+describe("statistika və məxfilik səhifəsi", () => {
+  it("Statistika-da «Reklam» tabı var", () => {
+    const page = fs.readFileSync("src/app/(protected)/dashboard/statistika/page.js", "utf8");
+    expect(page).toContain('{ key: "campaigns", label: "Reklam" }');
+    expect(page).toContain("<CampaignsTab days={days} />");
+  });
+
+  it("məxfilik səhifəsinin hər dildə öz ünvanı var", () => {
+    expect(ROUTE_SLUGS["mexfilik-siyaseti"]).toEqual({ az: "mexfilik-siyaseti", en: "privacy-policy", ru: "politika-konfidencialnosti" });
+    expect(fs.existsSync("src/app/(public)/mexfilik-siyaseti/page.js")).toBe(true);
+  });
+
+  it("defolt mətn üç dildə eyni quruluşdadır", () => {
+    const shape = (d) => d.sections.map((x) => x.p.length);
+    expect(shape(PRIVACY.en)).toEqual(shape(PRIVACY.az));
+    expect(shape(PRIVACY.ru)).toEqual(shape(PRIVACY.az));
+    for (const l of ["az", "en", "ru"]) expect(JSON.stringify(PRIVACY[l])).toContain("{email}");
+  });
+
+  it("banner və footer məxfilik səhifəsinə keçid verir", () => {
+    expect(fs.readFileSync("src/components/site/ConsentBanner.jsx", "utf8")).toContain('href="/mexfilik-siyaseti"');
+    expect(fs.readFileSync("src/components/site/Footer.jsx", "utf8")).toContain('href="/mexfilik-siyaseti"');
   });
 });

@@ -34,6 +34,10 @@ AdminRouter.get("/stats", adminController.stats);
 // Məzmun statistikası — «Statistika» səhifəsi üçün. Ayrıca bölmə icazəsi var.
 AdminRouter.get("/stats/content", requireSection("stats"), statsController.contentStats);
 AdminRouter.get("/stats/funnel", requireSection("stats"), statsController.funnelStats);
+// Reklam kampaniyaları hesabatı və Google Ads-ə offline konversiya siyahısı —
+// yalnız say və klik kodu, şəxsi məlumat yoxdur.
+AdminRouter.get("/stats/campaigns", requireSection("stats"), statsController.campaignStats);
+AdminRouter.get("/stats/google-conversions", requireSection("stats"), statsController.googleConversions);
 // İzlənilən linklərin hesabatı. CRUD generic /:resource ilə gedir,
 // bu iki marşrut isə ondan ƏVVƏL qeydiyyatdan keçməlidir.
 AdminRouter.get("/links/:id/stats", requireSection("links"), linkController.stats);
@@ -53,6 +57,9 @@ AdminRouter.patch("/leads/:id/status", leadController.updateLeadStatus);
 // marşrutundan ƏVVƏL olmalıdır.
 AdminRouter.get("/ad-campaigns", requireSection("leads"), leadController.getAdCampaigns);
 AdminRouter.put("/ad-campaigns", requireSection("leads"), writeRateLimiter, leadController.updateAdCampaigns);
+// Müraciətlərin Excel ixracı — bölmə yoxlaması controller-dədir (leads /
+// leads-abroad, siyahı ilə eyni). Generic /:resource/:id-dən ƏVVƏL olmalıdır.
+AdminRouter.get("/leads/export", adminController.exportLeads);
 
 // Course composer — select lists + atomic course-with-timetable create/edit.
 // Must precede the generic /:resource matcher (otherwise "lookups"/"full"

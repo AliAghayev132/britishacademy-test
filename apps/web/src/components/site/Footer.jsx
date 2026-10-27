@@ -53,7 +53,10 @@ export async function Footer({ site }) {
       </div>
       <div style={{ position: "relative", zIndex: 2, borderTop: "1px solid rgba(255,255,255,.1)", marginTop: 24 }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "22px 28px", display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", fontSize: 13, color: "#7B7C94" }}>
-          <span>© 2014–2026 British Academy. {t("footer.rights")}</span>
+          <span>
+            © 2014–2026 British Academy. {t("footer.rights")}{" "}
+            <Link href="/mexfilik-siyaseti" className="ba-flink" style={{ marginLeft: 6 }}>{t("footer.privacy")}</Link>
+          </span>
           <span>English UK · Cambridge · British Council · Duolingo · TOEFL</span>
         </div>
       </div>

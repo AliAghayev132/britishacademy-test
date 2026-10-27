@@ -154,6 +154,22 @@ export function setConsent(value) {
   window.dispatchEvent(new Event(CONSENT_EVENT));
 }
 
+/**
+ * Seçimi sıfırla — məxfilik səhifəsindəki «Seçimi dəyiş» düyməsi. Banner
+ * yenidən görünür; saxlanılan mənbə də silinir (razılıq geri götürülmüş sayılır,
+ * yenidən «Qəbul et» seçilsə yaddaşdakı nüsxə yazılacaq).
+ */
+export function resetConsent() {
+  if (!hasWindow()) return;
+  try {
+    storage()?.removeItem(CONSENT_KEY);
+    storage()?.removeItem(ATTR_KEY);
+  } catch {
+    /* yaddaş əlçatmazdır — onsuz da heç nə saxlanılmayıb */
+  }
+  window.dispatchEvent(new Event(CONSENT_EVENT));
+}
+
 /** Testlər üçün — modul vəziyyətini sıfırla. */
 export function __resetAttributionForTests() {
   mem = null;

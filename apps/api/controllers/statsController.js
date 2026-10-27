@@ -7,13 +7,21 @@
 // yavaşlayardı.
 
 // Models
-import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent } from "#models";
+import { Course, BlogPost, Teacher, Destination, Lead, SiteEvent, SiteSetting } from "#models";
 
 // Services
 import { buildFunnel, bakuDay, BAKU_TZ } from "#services";
 
 // Utils
-import { ok, asyncHandler, bakuDays, bakuDayStart, BAKU_ZONE, rankLeadInterests } from "#utils";
+import {
+  ok,
+  asyncHandler,
+  bakuDays,
+  bakuDayStart,
+  BAKU_ZONE,
+  rankLeadInterests,
+  dateRange,
+} from "#utils";
 
 /** Lokallaşdırılmış dəyərdən AZ mətni götür (admin paneli AZ-dır). */
 const az = (v) => (v && typeof v === "object" ? v.az || v.en || v.ru || "" : v || "");
@@ -184,4 +192,95 @@ const funnelStats = asyncHandler(async (req, res) => {
   ok(res, buildFunnel({ byType, daily, pages, sources, devices, firstTs: first?.ts || null }, { days, now }));
 });
 
-export { contentStats, funnelStats };
+// ── Reklam kampaniyaları ──
+
+const ENROLLED = { $sum: { $cond: [{ $eq: ["$status", "enrolled"] }, 1, 0] } };
+
+/** Bir atribusiya sahəsi üzrə: müraciət, qeydiyyat; boş dəyərlər atılır. */
+const groupBy = (field, since, limit, extra = {}) =>
+  Lead.aggregate([
+    { $match: { isDeleted: false, createdAt: { $gte: since }, [`attribution.${field}`]: { $nin: [null, ""] } } },
+    { $group: { _id: `$attribution.${field}`, leads: { $sum: 1 }, enrolled: ENROLLED, ...extra } },
+    { $sort: { leads: -1, enrolled: -1 } },
+    { $limit: limit },
+  ]);
+
+/**
+ * GET /api/admin/stats/campaigns?days=30 — müraciətlər reklam kanalı,
+ * kampaniya, açar söz və reklam qrupu üzrə; hər birində neçəsinin
+ * «Qeydiyyatdan keçdi» statusuna çatdığı.
+ *
+ * Yalnız say qaytarır — ad/telefon yoxdur, ona görə «Statistika» icazəsi
+ * kifayətdir. Dövr müraciətin gəldiyi tarixə görədir.
+ */
+const campaignStats = asyncHandler(async (req, res) => {
+  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 7), 365);
+  const since = bakuDayStart(bakuDays(days)[0]);
+
+  const [channels, campaigns, terms, adGroups, settings] = await Promise.all([
+    Lead.aggregate([
+      { $match: { isDeleted: false, createdAt: { $gte: since } } },
+      // Atribusiyadan əvvəlki müraciətlərdə kanal yoxdur — «unknown».
+      { $group: { _id: { $ifNull: ["$attribution.channel", "unknown"] }, leads: { $sum: 1 }, enrolled: ENROLLED } },
+      { $sort: { leads: -1 } },
+    ]),
+    groupBy("campaign", since, 50, { channel: { $last: "$attribution.channel" } }),
+    groupBy("term", since, 50, { campaign: { $last: "$attribution.campaign" } }),
+    groupBy("content", since, 30, { campaign: { $last: "$attribution.campaign" } }),
+    SiteSetting.get(),
+  ]);
+
+  const names = Object.fromEntries((settings.adCampaigns || []).map((c) => [c.id, c.name]));
+  const total = channels.reduce((a, r) => ({ leads: a.leads + r.leads, enrolled: a.enrolled + r.enrolled }), { leads: 0, enrolled: 0 });
+
+  ok(res, {
+    days,
+    total,
+    channels: channels.map((r) => ({ channel: r._id, leads: r.leads, enrolled: r.enrolled })),
+    campaigns: campaigns.map((r) => ({ id: r._id, name: names[r._id] || "", channel: r.channel, leads: r.leads, enrolled: r.enrolled })),
+    terms: terms.map((r) => ({ term: r._id, campaign: r.campaign, campaignName: names[r.campaign] || "", leads: r.leads, enrolled: r.enrolled })),
+    adGroups: adGroups.map((r) => ({ id: r._id, campaign: r.campaign, campaignName: names[r.campaign] || "", leads: r.leads, enrolled: r.enrolled })),
+  });
+});
+
+/** Google Ads klik kodunu yalnız klikdən sonrakı 90 gün ərzində qəbul edir. */
+const GCLID_WINDOW_MS = 90 * 864e5;
+
+/**
+ * GET /api/admin/stats/google-conversions?from=YYYY-MM-DD&to=YYYY-MM-DD
+ *
+ * «Qeydiyyatdan keçdi» statusuna keçmiş, Google Ads klik kodu olan
+ * müraciətlər — Google Ads-ə offline konversiya kimi yükləmək üçün
+ * (Hədəflər → Konversiyalar → Yükləmələr). Fayl brauzerdə qurulur.
+ *
+ * Yalnız klik kodu və vaxt qaytarılır — şəxsi məlumat yoxdur.
+ * Tarix aralığı QEYDİYYAT anına görədir: hər həftə «keçən həftə qeydiyyat
+ * edənləri» yükləmək təkrarsız olsun.
+ */
+const googleConversions = asyncHandler(async (req, res) => {
+  const range = dateRange(req.query.from, req.query.to);
+  const leads = await Lead.find({ isDeleted: false, status: "enrolled", "attribution.gclid": { $nin: [null, ""] } })
+    .select("attribution.gclid attribution.capturedAt attribution.campaign enrolledAt handledAt updatedAt")
+    .sort({ updatedAt: -1 })
+    .limit(5000)
+    .lean();
+
+  const rows = [];
+  let expired = 0;
+  for (const l of leads) {
+    // Köhnə müraciətlərdə enrolledAt yoxdur — son status dəyişikliyi vaxtı.
+    const at = l.enrolledAt || l.handledAt || l.updatedAt;
+    if (range?.$gte && at < range.$gte) continue;
+    if (range?.$lte && at > range.$lte) continue;
+    const clicked = l.attribution.capturedAt;
+    if (clicked && at - clicked > GCLID_WINDOW_MS) {
+      expired += 1; // Google rədd edəcək — fayla salınmır
+      continue;
+    }
+    rows.push({ gclid: l.attribution.gclid, conversionAt: at, campaign: l.attribution.campaign || "" });
+  }
+  rows.sort((a, b) => a.conversionAt - b.conversionAt);
+  ok(res, { rows, expired });
+});
+
+export { contentStats, funnelStats, campaignStats, googleConversions };

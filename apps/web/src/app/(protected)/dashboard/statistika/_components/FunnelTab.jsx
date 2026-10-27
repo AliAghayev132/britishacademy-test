@@ -34,7 +34,7 @@ const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
 const pageLabel = (p) => (p === "/" ? "Ana səhifə" : p);
 const DEVICE = { mobile: "Mobil", desktop: "Kompüter", tablet: "Planşet", other: "Digər" };
 
-function Card({ title, icon: Icon, hint, children }) {
+export function Card({ title, icon: Icon, hint, children }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5">
       <h2 className="flex items-center gap-2 text-sm font-bold text-gray-900">
@@ -47,7 +47,7 @@ function Card({ title, icon: Icon, hint, children }) {
   );
 }
 
-function Stat({ icon: Icon, label, value, sub }) {
+export function Stat({ icon: Icon, label, value, sub }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4">
       <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ function DailyStrip({ title, series, field }) {
   );
 }
 
-function Table({ head, rows, empty }) {
+export function Table({ head, rows, empty }) {
   if (!rows.length) return <p className="py-3 text-sm text-gray-400">{empty}</p>;
   return (
     <div className="-mx-1 overflow-x-auto">

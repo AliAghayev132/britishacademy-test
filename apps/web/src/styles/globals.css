@@ -306,6 +306,14 @@ img { display: block; max-width: 100%; }
   .ba-consent-actions > * { flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .ba-consent { animation: none; } }
+.ba-consent-link { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+/* Məxfilik səhifəsində seçimin vəziyyəti (ConsentControl) */
+.ba-consent-control {
+  margin-top: 40px; padding: 18px 20px; border: 1px solid #E4E6EF; border-radius: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.ba-consent-control-title { font-weight: 700; color: #17171F; font-size: 15px; }
+.ba-consent-control-state { color: #63636F; font-size: 14px; margin-top: 2px; }
 
 /* ── Səs effektləri düyməsi (sol aşağı — sağda WhatsApp var) ── */
 .ba-sfx-btn {

@@ -124,3 +124,46 @@ describe("müraciət modeli və endpoint", () => {
     expect(PRIVATE_SETTING_FIELDS).toContain("adCampaigns");
   });
 });
+
+describe("marketinq hesabatları", () => {
+  const routes = fs.readFileSync("routes/adminRoutes.js", "utf8");
+  const crud = fs.readFileSync("controllers/admin/crudController.js", "utf8");
+  const stats = fs.readFileSync("controllers/statsController.js", "utf8");
+
+  it("kampaniya hesabatı və konversiya siyahısı «Statistika» icazəsi ilə", () => {
+    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/campaigns", requireSection\("stats"\)/);
+    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/google-conversions", requireSection\("stats"\)/);
+  });
+
+  it("ixrac marşrutu generic /:resource-dan ƏVVƏL qeydiyyatdadır", () => {
+    // Əks halda «leads/export» → getOne(id="export") olardı.
+    const exp = routes.indexOf('AdminRouter.get("/leads/export"');
+    const generic = routes.indexOf('AdminRouter.get("/:resource"');
+    expect(exp).toBeGreaterThan(-1);
+    expect(exp).toBeLessThan(generic);
+  });
+
+  it("ixrac siyahı ilə EYNİ süzgəcdən keçir (əhatə daxil) və jurnala yazılır", () => {
+    const body = crud.slice(crud.indexOf("const exportLeads"));
+    expect(body).toMatch(/denySection\(req, res, resource\)/);
+    expect(body).toMatch(/buildListFilter\(req, entry, resource\)/);
+    expect(body).toMatch(/action: "export"/);
+    // Siyahının özü də həmin funksiyadan istifadə edir.
+    expect(crud).toMatch(/const filter = buildListFilter\(req, entry, req\.params\.resource\)/);
+    expect(crud.slice(crud.indexOf("function buildListFilter"), crud.indexOf("const list ="))).toMatch(/applyLeadScope[\s\S]*applyLeadAccess[\s\S]*applyLeadTopic/);
+  });
+
+  it("konversiya cavabında şəxsi məlumat yoxdur, 90 gündən köhnə klik atılır", () => {
+    const body = stats.slice(stats.indexOf("const googleConversions"));
+    const select = body.match(/\.select\("([^"]+)"\)/)[1];
+    for (const pii of ["name", "phone", "email"]) expect(select.split(" ")).not.toContain(pii);
+    expect(stats).toMatch(/GCLID_WINDOW_MS = 90 \* 864e5/);
+  });
+
+  it("qeydiyyat anı ayrıca saxlanılır və əl ilə yazıla bilməz", () => {
+    expect(Lead.schema.path("enrolledAt")).toBeTruthy();
+    expect(crud).toMatch(/"handledAt", "enrolledAt"/);
+    const model = fs.readFileSync("models/lead.model.js", "utf8");
+    expect(model).toMatch(/if \(this\.status === "enrolled"\) \{\s*if \(!this\.enrolledAt\) this\.enrolledAt = new Date\(\);/);
+  });
+});

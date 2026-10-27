@@ -6,6 +6,9 @@ import { useSyncExternalStore } from "react";
 // Lib
 import { useT, getConsent, setConsent, CONSENT_EVENT } from "@/lib";
 
+// Local
+import { LocaleLink } from "./LocaleLink";
+
 /**
  * Reklam ölçməsi üçün razılıq banneri.
  *
@@ -36,7 +39,12 @@ export function ConsentBanner() {
 
   return (
     <div className="ba-consent" role="region" aria-label={t("consent.title")}>
-      <p className="ba-consent-text">{t("consent.text")}</p>
+      <p className="ba-consent-text">
+        {t("consent.text")}{" "}
+        <LocaleLink href="/mexfilik-siyaseti" className="ba-consent-link">
+          {t("consent.more")}
+        </LocaleLink>
+      </p>
       <div className="ba-consent-actions">
         <button type="button" className="ba-consent-btn ba-consent-btn--ghost" onClick={() => setConsent("denied")}>
           {t("consent.decline")}

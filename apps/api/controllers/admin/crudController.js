@@ -99,17 +99,12 @@ function applyPopulate(query, populate) {
 
 
 /**
- * List every document (including inactive/unpublished — this is the admin view).
- * GET /api/admin/:resource?page=1&limit=20&search=...&sort=...
+ * Siyahı sorğusunun süzgəci — axtarış, bərabərlik filtrləri, tarix aralığı və
+ * istifadəçinin əhatə məhdudiyyətləri. Siyahı da, ixrac da BUNDAN istifadə
+ * edir: ixrac ekranda görünəndən nə artıq, nə əskik sətir verməməlidir.
  */
-const list = asyncHandler(async (req, res) => {
-  const entry = resolve(req, res);
-  if (!entry) return;
-  if (denySection(req, res, req.params.resource)) return;
-  const { model, search = [], sort, softDelete = true, populate } = entry;
-
-  const { page, limit, skip } = parsePage(req.query);
-
+function buildListFilter(req, entry, resource) {
+  const { search = [], softDelete = true } = entry;
   const filter = {};
   if (softDelete) filter.isDeleted = false;
   if (req.query.search && search.length) {
@@ -156,9 +151,24 @@ const list = asyncHandler(async (req, res) => {
 
   // Əhatə məhdudiyyətləri — sorğudan ƏVVƏL, yəni sayğac da məhdud nəticəyə
   // görə çıxır.
-  applyLeadScope(filter, req, req.params.resource);
-  applyLeadAccess(filter, req, req.params.resource);
-  applyLeadTopic(filter, req, req.params.resource);
+  applyLeadScope(filter, req, resource);
+  applyLeadAccess(filter, req, resource);
+  applyLeadTopic(filter, req, resource);
+  return filter;
+}
+
+/**
+ * List every document (including inactive/unpublished — this is the admin view).
+ * GET /api/admin/:resource?page=1&limit=20&search=...&sort=...
+ */
+const list = asyncHandler(async (req, res) => {
+  const entry = resolve(req, res);
+  if (!entry) return;
+  if (denySection(req, res, req.params.resource)) return;
+  const { model, sort, populate } = entry;
+
+  const { page, limit, skip } = parsePage(req.query);
+  const filter = buildListFilter(req, entry, req.params.resource);
 
   const [items, total] = await Promise.all([
     applyPopulate(model.find(filter).sort(sort).skip(skip).limit(limit), populate),
@@ -217,7 +227,7 @@ const getOne = asyncHandler(async (req, res) => {
 const SYSTEM_FIELDS = [
   "_id", "__v", "createdAt", "updatedAt", "isDeleted",
   "views", "clicks", "lastClickAt",
-  "createdBy", "uploadedBy", "handledBy", "handledAt", "tokenVersion",
+  "createdBy", "uploadedBy", "handledBy", "handledAt", "enrolledAt", "tokenVersion",
 ];
 
 export const stripSystemFields = (body = {}) => {
@@ -424,4 +434,39 @@ const reorder = asyncHandler(async (req, res) => {
   ok(res, null, "Sıralama yeniləndi");
 });
 
-export { list, getOne, create, update, remove, reorder };
+/** İxracda bir dəfəyə ən çox bu qədər sətir — yaddaş və cavab ölçüsü üçün. */
+const EXPORT_LIMIT = 10000;
+
+/**
+ * GET /api/admin/leads/export — müraciətlər siyahısının bütün səhifələri bir
+ * cavabda (siyahının filtrləri ilə eyni), Excel faylı brauzerdə qurulur.
+ *
+ * Şəxsi məlumatın toplu çıxarılmasıdır — jurnala yazılır.
+ */
+const exportLeads = asyncHandler(async (req, res) => {
+  const resource = "leads";
+  const entry = RESOURCES[resource];
+  if (denySection(req, res, resource)) return;
+  const filter = buildListFilter(req, entry, resource);
+
+  const rows = await entry.model
+    .find(filter)
+    .sort(entry.sort)
+    .limit(EXPORT_LIMIT + 1)
+    .populate("course", "title")
+    .populate("branch", "name")
+    .populate("destinations", "country")
+    .populate("handledBy", "firstName lastName")
+    .lean();
+  const truncated = rows.length > EXPORT_LIMIT;
+  const items = rows.slice(0, EXPORT_LIMIT);
+
+  await logAction(req, {
+    action: "export",
+    resource,
+    summary: `Müraciətlər ixrac edildi (${items.length} sətir)`,
+  });
+  ok(res, { items, truncated, limit: EXPORT_LIMIT });
+});
+
+export { list, getOne, create, update, remove, reorder, exportLeads };
