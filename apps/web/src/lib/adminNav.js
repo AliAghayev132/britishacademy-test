@@ -171,8 +171,10 @@ export const NAV_GROUPS = [
         tags: ["admin", "rol", "icazə", "səlahiyyət", "parol", "hesab", "əməkdaş", "bloklamaq"],
       },
       {
-        name: "Statistika", href: "/dashboard/statistika", icon: BarChart3, section: "stats",
-        tags: ["hesabat", "qrafik", "say", "analitika", "baxış"],
+        // «stats» və ya «ads» — yalnız reklam statistikası verilmiş marketinq
+        // əməkdaşı da bəndi görür, səhifədə isə yalnız «Reklam» tabını.
+        name: "Statistika", href: "/dashboard/statistika", icon: BarChart3, section: ["stats", "ads"],
+        tags: ["hesabat", "qrafik", "say", "analitika", "baxış", "reklam", "kampaniya", "google ads", "konversiya"],
       },
       {
         name: "İzlənilən linklər", href: "/dashboard/linkler", icon: Link2, section: "links",

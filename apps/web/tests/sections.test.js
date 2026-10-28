@@ -20,7 +20,7 @@ const KEYS = SECTIONS.map((s) => s.key);
 // boş qaldı — aşağıdakı «bəndlər tapılır» yoxlaması bunu tutdu. İndi birbaşa
 // idxal edilir, yəni yerdəyişmə testi bir daha kor qoya bilməz.
 const NAV = [...NAV_TOP, ...NAV_GROUPS.flatMap((g) => g.items), ...NAV_BOTTOM];
-const usedInSidebar = [...new Set(NAV.map((i) => i.section).filter(Boolean))];
+const usedInSidebar = [...new Set(NAV.flatMap((i) => i.section || []))];
 
 describe("bölmə siyahısı", () => {
   it("açarlar təkrarlanmır", () => {
@@ -100,7 +100,7 @@ describe("sidebar ↔ marşrut uyğunluğu", () => {
   it("hər bəndin marşrutu öz bölməsinə həll olunur", () => {
     const bad = items
       .map((i) => ({ ...i, resolved: sectionForPath(i.href) }))
-      .filter((i) => i.resolved !== i.section)
+      .filter((i) => JSON.stringify(i.resolved) !== JSON.stringify(i.section))
       .map((i) => `${i.href}: sidebar «${i.section}» ↔ marşrut «${i.resolved}»`);
     expect(bad, `uyğunsuzluq:\n${bad.join("\n")}`).toEqual([]);
   });

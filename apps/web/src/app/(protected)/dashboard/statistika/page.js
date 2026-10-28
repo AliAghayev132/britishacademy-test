@@ -3,6 +3,9 @@
 // React
 import { useState } from "react";
 
+// Libraries
+import { useSelector } from "react-redux";
+
 // Icons
 import {
   Eye,
@@ -20,6 +23,9 @@ import { QueryState } from "@/components";
 
 // Store
 import { useAdminContentStatsQuery } from "@/store";
+
+// Lib
+import { canSee } from "@/lib";
 
 // Utils
 import { fmtNumber } from "@/utils";
@@ -321,10 +327,13 @@ function ContentTab({ days }) {
   );
 }
 
+// Hər tabın öz icazəsi var: «Reklam» ayrıca verilir (marketinq komandası),
+// qalanları ümumi «Statistika» icazəsi ilə. Görünməyən tab render olunmur —
+// yəni icazəsi olmayan sorğu ümumiyyətlə getmir (server onsuz da 403 verərdi).
 const TABS = [
-  { key: "content", label: "Məzmun" },
-  { key: "funnel", label: "Konversiya" },
-  { key: "campaigns", label: "Reklam" },
+  { key: "content", label: "Məzmun", section: "stats" },
+  { key: "funnel", label: "Konversiya", section: "stats" },
+  { key: "campaigns", label: "Reklam", section: "ads" },
 ];
 
 /**
@@ -337,19 +346,23 @@ const TABS = [
 export default function StatsPage() {
   const [days, setDays] = useState(30);
   const [tab, setTab] = useState("content");
+  const { user } = useSelector((state) => state.auth);
+  const tabs = TABS.filter((x) => canSee(user, x.section));
+  // Seçilmiş tab icazədə yoxdursa (məs. yalnız «Reklam» verilib) — ilk icazəli.
+  const active = tabs.some((x) => x.key === tab) ? tab : tabs[0]?.key;
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div role="tablist" aria-label="Statistika bölmələri" className="inline-flex rounded-xl border border-gray-200 bg-white p-1">
-          {TABS.map((x) => (
+          {tabs.map((x) => (
             <button
               key={x.key}
               role="tab"
-              aria-selected={tab === x.key}
+              aria-selected={active === x.key}
               onClick={() => setTab(x.key)}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                tab === x.key ? "bg-[#00157A] text-white" : "text-gray-600 hover:bg-gray-50"
+                active === x.key ? "bg-[#00157A] text-white" : "text-gray-600 hover:bg-gray-50"
               }`}
             >
               {x.label}
@@ -377,13 +390,9 @@ export default function StatsPage() {
       </div>
 
       <div role="tabpanel">
-        {tab === "content" ? (
-          <ContentTab days={days} />
-        ) : tab === "funnel" ? (
-          <FunnelTab days={days} />
-        ) : (
-          <CampaignsTab days={days} />
-        )}
+        {active === "content" && <ContentTab days={days} />}
+        {active === "funnel" && <FunnelTab days={days} />}
+        {active === "campaigns" && <CampaignsTab days={days} />}
       </div>
     </div>
   );

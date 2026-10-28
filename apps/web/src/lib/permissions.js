@@ -41,6 +41,9 @@ export const SECTIONS = [
   { key: "whatsapp", label: "Mesaj mərkəzi (WhatsApp, toplu göndəriş)" },
   { key: "users", label: "İstifadəçilər" },
   { key: "stats", label: "Statistika" },
+  // Statistika səhifəsinin «Reklam» tabı AYRI icazədir — marketinq komandasına
+  // ümumi statistikanı açmadan (və əksinə) vermək üçün.
+  { key: "ads", label: "Reklam statistikası (kampaniyalar, Google Ads)" },
   { key: "links", label: "İzlənilən linklər" },
   { key: "quizzes", label: "Testlər" },
   { key: "logs", label: "Loglar" },
@@ -48,9 +51,14 @@ export const SECTIONS = [
   { key: "developer", label: "Developer" },
 ];
 
-/** İstifadəçi həmin bölməni görürmü? */
+/**
+ * İstifadəçi həmin bölməni görürmü?
+ * `section` massiv də ola bilər — onlardan BİRİ kifayətdir (Statistika
+ * səhifəsi: «stats» və ya «ads»).
+ */
 export const canSee = (user, section) => {
   if (!user) return false;
+  if (Array.isArray(section)) return section.some((s) => canSee(user, s));
   // Developer alətləri YALNIZ developer rolundadır — superadmin də görmür,
   // çünki oradakı əməliyyatlar məzmunu kütləvi dəyişir.
   if (section === "developer") return user.role === "developer";
@@ -98,7 +106,8 @@ const ROUTE_SECTIONS = [
   ["/dashboard/mesajlar", "whatsapp"],
   ["/dashboard/whatsapp", "whatsapp"], // köhnə ünvan — yönləndirilir
   ["/dashboard/istifadeciler", "users"],
-  ["/dashboard/statistika", "stats"],
+  // Səhifə iki icazədən hər biri ilə açılır; tablar özləri ayrıca yoxlanılır.
+  ["/dashboard/statistika", ["stats", "ads"]],
   ["/dashboard/linkler", "links"],
   ["/dashboard/testler", "quizzes"],
   ["/dashboard/loglar", "logs"],

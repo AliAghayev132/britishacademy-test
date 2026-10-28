@@ -34,7 +34,8 @@ const adminSections = [
   "whatsapp",      // WhatsApp / toplu göndəriş
   "users",         // İstifadəçilər
   "logs",          // Loglar
-  "stats",         // Statistika
+  "stats",         // Statistika (məzmun, konversiya hunisi)
+  "ads",           // Reklam statistikası — kampaniya hesabatı, Google Ads konversiyaları
   "links",         // İzlənilən linklər (reklam kampaniyaları)
   "quizzes",       // Testlər
   "settings",      // Tənzimləmələr

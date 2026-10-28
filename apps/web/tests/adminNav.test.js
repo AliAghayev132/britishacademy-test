@@ -139,7 +139,7 @@ describe("bölmə açarları serverin ağ siyahısındadır", () => {
 
     // Tanınmayan açar serverdə səssizcə süzülür və BOŞ icazə massivi qalır —
     // boş isə «məhdudiyyət yoxdur» deməkdir (səlahiyyət artımı).
-    const unknown = [...new Set(ALL.map((i) => i.section).filter(Boolean))]
+    const unknown = [...new Set(ALL.flatMap((i) => i.section || []))]
       .filter((s) => !known.includes(s));
     expect(unknown, `adminSections-də yoxdur: ${unknown.join(", ")}`).toEqual([]);
   });

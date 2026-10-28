@@ -35,9 +35,10 @@ AdminRouter.get("/stats", adminController.stats);
 AdminRouter.get("/stats/content", requireSection("stats"), statsController.contentStats);
 AdminRouter.get("/stats/funnel", requireSection("stats"), statsController.funnelStats);
 // Reklam kampaniyaları hesabatı və Google Ads-ə offline konversiya siyahısı —
-// yalnız say və klik kodu, şəxsi məlumat yoxdur.
-AdminRouter.get("/stats/campaigns", requireSection("stats"), statsController.campaignStats);
-AdminRouter.get("/stats/google-conversions", requireSection("stats"), statsController.googleConversions);
+// AYRI icazədir («ads»): marketinq komandasına ümumi statistikanı açmadan,
+// ümumi statistikaya baxana isə reklam rəqəmlərini açmadan vermək üçün.
+AdminRouter.get("/stats/campaigns", requireSection("ads"), statsController.campaignStats);
+AdminRouter.get("/stats/google-conversions", requireSection("ads"), statsController.googleConversions);
 // İzlənilən linklərin hesabatı. CRUD generic /:resource ilə gedir,
 // bu iki marşrut isə ondan ƏVVƏL qeydiyyatdan keçməlidir.
 AdminRouter.get("/links/:id/stats", requireSection("links"), linkController.stats);

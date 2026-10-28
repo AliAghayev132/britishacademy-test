@@ -265,7 +265,7 @@ describe("Excel ixracı", () => {
 describe("statistika və məxfilik səhifəsi", () => {
   it("Statistika-da «Reklam» tabı var", () => {
     const page = fs.readFileSync("src/app/(protected)/dashboard/statistika/page.js", "utf8");
-    expect(page).toContain('{ key: "campaigns", label: "Reklam" }');
+    expect(page).toContain('{ key: "campaigns", label: "Reklam", section: "ads" }');
     expect(page).toContain("<CampaignsTab days={days} />");
   });
 
@@ -284,5 +284,26 @@ describe("statistika və məxfilik səhifəsi", () => {
   it("banner və footer məxfilik səhifəsinə keçid verir", () => {
     expect(fs.readFileSync("src/components/site/ConsentBanner.jsx", "utf8")).toContain('href="/mexfilik-siyaseti"');
     expect(fs.readFileSync("src/components/site/Footer.jsx", "utf8")).toContain('href="/mexfilik-siyaseti"');
+  });
+});
+
+describe("reklam statistikası — ayrıca icazə", () => {
+  it("«ads» bölməsi var və Statistika səhifəsi «stats» VƏ YA «ads» ilə açılır", async () => {
+    const { SECTIONS, sectionForPath, canSee } = await import("../src/lib/permissions.js");
+    expect(SECTIONS.map((s) => s.key)).toContain("ads");
+    expect(sectionForPath("/dashboard/statistika")).toEqual(["stats", "ads"]);
+    const u = (permissions) => ({ role: "admin", permissions });
+    expect(canSee(u(["ads"]), ["stats", "ads"])).toBe(true);
+    expect(canSee(u(["stats"]), ["stats", "ads"])).toBe(true);
+    expect(canSee(u(["leads"]), ["stats", "ads"])).toBe(false);
+    // Yalnız ümumi statistika verilmiş adam reklam rəqəmlərini görmür.
+    expect(canSee(u(["stats"]), "ads")).toBe(false);
+  });
+
+  it("Statistika tabları öz icazəsi ilə süzülür", () => {
+    const page = fs.readFileSync("src/app/(protected)/dashboard/statistika/page.js", "utf8");
+    expect(page).toContain('{ key: "campaigns", label: "Reklam", section: "ads" }');
+    expect(page).toContain('{ key: "content", label: "Məzmun", section: "stats" }');
+    expect(page).toContain("TABS.filter((x) => canSee(user, x.section))");
   });
 });

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { classifyChannel, sanitizeAttribution, ATTRIBUTION_CHANNELS } from "#utils";
 import { Lead } from "#models";
 import { PRIVATE_SETTING_FIELDS } from "../controllers/public/shared.js";
+import { adminSections } from "#constants";
 
 /**
  * MÜRACİƏTİN REKLAM MƏNBƏYİ (Google Ads atribusiyası).
@@ -130,9 +131,10 @@ describe("marketinq hesabatları", () => {
   const crud = fs.readFileSync("controllers/admin/crudController.js", "utf8");
   const stats = fs.readFileSync("controllers/statsController.js", "utf8");
 
-  it("kampaniya hesabatı və konversiya siyahısı «Statistika» icazəsi ilə", () => {
-    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/campaigns", requireSection\("stats"\)/);
-    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/google-conversions", requireSection\("stats"\)/);
+  it("kampaniya hesabatı və konversiya siyahısı AYRI «Reklam statistikası» icazəsi ilə", () => {
+    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/campaigns", requireSection\("ads"\)/);
+    expect(routes).toMatch(/AdminRouter\.get\("\/stats\/google-conversions", requireSection\("ads"\)/);
+    expect(adminSections).toContain("ads");
   });
 
   it("ixrac marşrutu generic /:resource-dan ƏVVƏL qeydiyyatdadır", () => {
