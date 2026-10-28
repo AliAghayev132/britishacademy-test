@@ -10,6 +10,9 @@ import { useState } from "react";
 // Store
 import { useAdminListQuery, useAdminCreateMutation, useAdminUpdateMutation } from "@/store";
 
+// Lib
+import { buildPath, ROUTE_SLUGS } from "@/lib";
+
 // Utils
 import { apiErrorMessage } from "@/utils";
 
@@ -26,11 +29,54 @@ import {
 } from "./kit";
 import { LocalizedInput, toLoc, trimLoc, locAz, confirmLocalized } from "./Localized";
 
+// «dropdown» və «mega» məzmunu AVTOMATİK qurulur (ölkələr / kurs kateqoriyaları);
+// adi açılan menyu üçün «Link» seçib altına bənd əlavə etmək kifayətdir.
 const TYPE_OPTIONS = [
-  { value: "link", label: "Link" },
-  { value: "dropdown", label: "Dropdown" },
-  { value: "mega", label: "Mega menyu" },
+  { value: "link", label: "Link (alt bəndi varsa — açılan menyu)" },
+  { value: "dropdown", label: "Xaricdə təhsil ölkələri (avtomatik)" },
+  { value: "mega", label: "Kurslar mega menyusu (avtomatik)" },
 ];
+
+/** Saytın sabit səhifələri — link yazmaq əvəzinə seçmək üçün. */
+const PAGE_NAMES = {
+  haqqimizda: "Haqqımızda", kurslar: "Kurslar", muellimler: "Müəllimlər", filiallar: "Filiallar",
+  "xaricde-tehsil": "Xaricdə təhsil", layiheler: "Layihələr", telebelerimiz: "Tələbələrimiz",
+  bloq: "Bloq", elaqe: "Əlaqə", testler: "Testlər", "mexfilik-siyaseti": "Məxfilik siyasəti",
+};
+const PAGE_OPTIONS = [
+  { value: "/", label: "Ana səhifə" },
+  ...Object.keys(ROUTE_SLUGS).map((k) => ({ value: `/${k}`, label: PAGE_NAMES[k] || k })),
+];
+
+/**
+ * Linkin hər dildə ünvanı. Saytın öz səhifələrinin BİRİNCİ hissəsi avtomatik
+ * tərcümə olunur (/bloq → /en/blog); kurs, kateqoriya, bloq yazısı kimi
+ * bazadan gələn hissə isə hər dildə eyni qalır.
+ */
+function LinkPreview({ href }) {
+  const h = href.trim();
+  if (!h) return null;
+  if (!h.startsWith("/")) {
+    return <p className="mt-1.5 text-xs text-gray-400">Xarici link — hər dildə eyni ünvan açılır.</p>;
+  }
+  const first = h.split("/").filter(Boolean)[0];
+  const known = !first || ROUTE_SLUGS[first];
+  return (
+    <div className="mt-1.5 space-y-0.5 text-xs">
+      {["az", "en", "ru"].map((l) => (
+        <div key={l} className="flex gap-2">
+          <span className="w-6 font-semibold uppercase text-gray-400">{l}</span>
+          <code className="text-gray-600">{buildPath(h, l)}</code>
+        </div>
+      ))}
+      {!known && (
+        <p className="pt-1 text-amber-600">
+          «/{first}» saytın tanınan səhifələrindən deyil — EN/RU-da tərcümə olunmayacaq.
+        </p>
+      )}
+    </div>
+  );
+}
 
 const LOCATION_OPTIONS = [
   { value: "header", label: "Header" },
@@ -38,29 +84,38 @@ const LOCATION_OPTIONS = [
   { value: "mobile", label: "Mobil" },
 ];
 
-export function MenuItemForm({ item, onClose }) {
+/**
+ * `defaults` — yeni bənd üçün ilkin dəyərlər (ağacdakı «+ alt bənd» düyməsi
+ * üst bəndi və yeri, sonuncu sıranı ötürür).
+ */
+export function MenuItemForm({ item, defaults = {}, onClose }) {
   const isEdit = Boolean(item?._id);
 
   const [create, { isLoading: creating }] = useAdminCreateMutation();
   const [update, { isLoading: updating }] = useAdminUpdateMutation();
 
-  // Other menu items, for the parent picker (exclude self when editing).
   const { data: menuData } = useAdminListQuery({
     resource: "menu-items",
     limit: 100,
   });
-  const parentOptions = (menuData?.data?.items || [])
-    .filter((m) => m._id !== item?._id)
-    .map((m) => ({ value: m._id, label: locAz(m.label) }));
+  const all = menuData?.data?.items || [];
 
   const [label, setLabel] = useState(toLoc(item?.label));
   const [href, setHref] = useState(item?.href || "");
   const [type, setType] = useState(item?.type || "link");
-  const [location, setLocation] = useState(item?.location || "header");
-  const [parent, setParent] = useState(toId(item?.parent));
+  const [location, setLocation] = useState(item?.location || defaults.location || "header");
+  const [parent, setParent] = useState(toId(item?.parent) || defaults.parent || "");
   const [order, setOrder] = useState(
-    item?.order != null ? String(item.order) : "0",
+    item?.order != null ? String(item.order) : String(defaults.order ?? 0),
   );
+
+  // Menyu İKİ səviyyəlidir: üst bənd yalnız eyni yerdəki ÜST SƏVİYYƏ bənd ola
+  // bilər. Öz alt bəndləri olan bənd başqasının altına keçə bilməz — üçüncü
+  // səviyyə saytda göstərilmir, bəndlər səssizcə yox olardı.
+  const hasChildren = isEdit && all.some((m) => toId(m.parent) === item._id);
+  const parentOptions = all
+    .filter((m) => !m.parent && m._id !== item?._id && m.location === location)
+    .map((m) => ({ value: m._id, label: locAz(m.label) }));
   // Model field is `isVisible` (menu items have no isActive/isDeleted).
   const [isVisible, setIsVisible] = useState(
     isEdit ? Boolean(item?.isVisible) : true,
@@ -121,14 +176,21 @@ export function MenuItemForm({ item, onClose }) {
             <LocalizedInput value={label} onChange={setLabel} />
           </Field>
           <Field
-            label="Link (href)"
-            info="Dropdown/mega üçün boş buraxıla bilər"
+            label="Link"
+            info="Siyahıdan səhifə seçin və ya özünüz yazın. AZ ünvanı yazılır — EN/RU avtomatik çevrilir."
           >
             <TextInput
               value={href}
-              placeholder="/kurslar"
+              placeholder="/bloq"
+              list="menu-link-pages"
               onChange={(e) => setHref(e.target.value)}
             />
+            <datalist id="menu-link-pages">
+              {PAGE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </datalist>
+            <LinkPreview href={href} />
           </Field>
           <Field label="Növ" info="Link, açılan menyu və ya mega menyu">
             <NativeSelect
@@ -141,18 +203,22 @@ export function MenuItemForm({ item, onClose }) {
             <NativeSelect
               value={location}
               options={LOCATION_OPTIONS}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setParent(""); // üst bənd başqa yerə aid ola bilməz
+              }}
             />
           </Field>
           <Field
             label="Üst bənd"
-            info="Boş = üst səviyyə; seçsən alt-bənd olur"
+            info={hasChildren ? "Bu bəndin öz alt bəndləri var — başqasının altına keçə bilməz" : "Boş = üst səviyyə; seçsəniz həmin bəndin açılan menyusunda görünür"}
             className="sm:col-span-2"
           >
             <NativeSelect
               value={parent}
               placeholder="Yoxdur (üst səviyyə)"
-              options={parentOptions}
+              options={hasChildren ? [] : parentOptions}
+              disabled={hasChildren}
               onChange={(e) => setParent(e.target.value)}
             />
           </Field>
