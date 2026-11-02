@@ -12,7 +12,7 @@ export const PRIVACY = {
   az: {
     title: "Məxfilik siyasəti",
     lead: "British Academy saytında hansı məlumatların toplandığı, nə üçün istifadə edildiyi və bu barədə hansı hüquqlarınızın olduğu.",
-    updated: "Son yenilənmə: 27 oktyabr 2026",
+    updated: "Son yenilənmə: 2 noyabr 2026",
     sections: [
       {
         h: "Hansı məlumatları toplayırıq",
@@ -35,13 +35,14 @@ export const PRIVACY = {
         p: [
           "Reklam mənbəyi brauzerinizdə (localStorage) yalnız «Qəbul et» seçdikdə və 30 gün müddətinə saxlanılır. «Rədd et» seçsəniz cihazınıza heç nə yazılmır; mənbə yalnız açıq vərəqdə qalır və vərəq bağlandıqda silinir.",
           "Seçiminiz də brauzerdə yadda saxlanılır ki, banner hər dəfə görünməsin. Seçimi aşağıdakı düymə ilə istənilən vaxt dəyişə bilərsiniz.",
-          "Saytda Google xidmətləri (məsələn, Google Tag Manager vasitəsilə) istifadə oluna bilər; onlar öz kukilərini Google-un məxfilik siyasətinə uyğun olaraq saxlayır.",
+          "Reklamların effektivliyini ölçmək üçün saytda reklam platformalarının pikselləri işləyir — OpenAI və Google (məsələn, Google Tag Manager vasitəsilə). Onlar sayta baxış, cihaz və brauzer məlumatlarını toplayır və öz kukilərini həmin şirkətlərin məxfilik siyasətinə uyğun saxlayır.",
         ],
       },
       {
         h: "Məlumatları kimlə paylaşırıq",
         p: [
-          "Məlumatlarınız satılmır və reklam məqsədilə üçüncü tərəflərə verilmir. Onlara yalnız müraciətlərlə işləyən əməkdaşlarımız baxa bilər.",
+          "Məlumatlarınız satılmır. Müraciətlərə yalnız onlarla işləyən əməkdaşlarımız baxa bilər.",
+          "Reklam pikselləri (OpenAI, Google) sayta baxış, cihaz və brauzer məlumatlarını birbaşa həmin platformalara göndərir. OpenAI pikseli formaya yazdığınız e-poçt və telefon nömrəsini də şifrələnmiş (SHA-256) şəkildə OpenAI-a ötürə bilər — reklamın kimə göstərildiyini uyğunlaşdırmaq üçün.",
           "Məlumatlar bizim adımıza texniki xidmət göstərən təchizatçılarda (server, e-poçt) emal oluna bilər. Yuxarıda göstərildiyi kimi, Google Ads-ə yalnız klik kodu və qeydiyyat vaxtı ötürülür.",
         ],
       },
@@ -69,7 +70,7 @@ export const PRIVACY = {
   en: {
     title: "Privacy policy",
     lead: "What information the British Academy website collects, why we use it and what rights you have.",
-    updated: "Last updated: 27 October 2026",
+    updated: "Last updated: 2 November 2026",
     sections: [
       {
         h: "What we collect",
@@ -92,13 +93,14 @@ export const PRIVACY = {
         p: [
           "The ad source is stored in your browser (localStorage) only if you choose “Accept”, and for 30 days. If you choose “Decline”, nothing is written to your device; the source stays only in the open tab and is removed when the tab is closed.",
           "Your choice itself is remembered in the browser so the banner does not appear every time. You can change it at any time with the button below.",
-          "The site may use Google services (for example via Google Tag Manager); they keep their own cookies under Google’s privacy policy.",
+          "To measure how well our ads work, the site runs advertising pixels from OpenAI and Google (for example via Google Tag Manager). They collect page views and device and browser information, and keep their own cookies under those companies’ privacy policies.",
         ],
       },
       {
         h: "Who we share it with",
         p: [
-          "Your data is not sold and is not given to third parties for advertising. Only our staff who handle enquiries can see it.",
+          "Your data is not sold. Enquiries can be seen only by the staff who handle them.",
+          "Advertising pixels (OpenAI, Google) send page views and device and browser information directly to those platforms. The OpenAI pixel may also send the email address and phone number you type into a form to OpenAI in hashed (SHA-256) form, to match ads to the people who saw them.",
           "Data may be processed by providers that run technical services on our behalf (servers, email). As described above, only the click ID and enrolment time are sent to Google Ads.",
         ],
       },
@@ -126,7 +128,7 @@ export const PRIVACY = {
   ru: {
     title: "Политика конфиденциальности",
     lead: "Какие данные собирает сайт British Academy, для чего мы их используем и какие у вас есть права.",
-    updated: "Последнее обновление: 27 октября 2026",
+    updated: "Последнее обновление: 2 ноября 2026",
     sections: [
       {
         h: "Какие данные мы собираем",
@@ -149,13 +151,14 @@ export const PRIVACY = {
         p: [
           "Источник рекламы сохраняется в вашем браузере (localStorage) только если вы выбрали «Принять», и на 30 дней. Если вы выбрали «Отклонить», на устройство ничего не записывается; источник остаётся только в открытой вкладке и удаляется при её закрытии.",
           "Ваш выбор тоже запоминается в браузере, чтобы баннер не появлялся каждый раз. Изменить его можно в любой момент кнопкой ниже.",
-          "На сайте могут использоваться сервисы Google (например, через Google Tag Manager); они хранят собственные cookie в соответствии с политикой конфиденциальности Google.",
+          "Для оценки эффективности рекламы на сайте работают пиксели рекламных платформ — OpenAI и Google (например, через Google Tag Manager). Они собирают данные о просмотрах страниц, устройстве и браузере и хранят собственные cookie в соответствии с политиками конфиденциальности этих компаний.",
         ],
       },
       {
         h: "С кем мы делимся данными",
         p: [
-          "Ваши данные не продаются и не передаются третьим лицам в рекламных целях. Их видят только сотрудники, работающие с заявками.",
+          "Ваши данные не продаются. Заявки видят только сотрудники, которые с ними работают.",
+          "Рекламные пиксели (OpenAI, Google) передают данные о просмотрах страниц, устройстве и браузере напрямую этим платформам. Пиксель OpenAI также может передавать в OpenAI введённые в форму e-mail и номер телефона в зашифрованном виде (SHA-256) — чтобы сопоставить рекламу с тем, кому она была показана.",
           "Данные могут обрабатываться поставщиками, оказывающими нам технические услуги (сервер, электронная почта). Как указано выше, в Google Ads передаются только идентификатор клика и время записи.",
         ],
       },

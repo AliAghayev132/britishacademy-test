@@ -12,6 +12,7 @@ import {
   RouteLoader,
   GtmScript,
   GtmNoScript,
+  OpenAIPixel,
   CodeInjection,
 } from "@/components";
 import { Footer } from "@/components/server";
@@ -134,6 +135,7 @@ export default async function PublicLayout({ children }) {
           tələbi ilə məzmundan əvvəldir; ID boşdursa heç nə render olunmur. */}
       <GtmNoScript id={inject.gtmId} />
       <GtmScript id={inject.gtmId} />
+      <OpenAIPixel />
       <SiteProvider branches={navBranches} destinations={navDestinations}>
         <Suspense fallback={null}>
           <RouteLoader />

@@ -29,6 +29,7 @@ export { HomeBodyClass } from "./site/HomeBodyClass";
 export { LocaleLink } from "./site/LocaleLink";
 export { LocaleProvider } from "./site/LocaleProvider";
 export { default as Marquee } from "./site/Marquee";
+export { OpenAIPixel } from "./site/OpenAIPixel";
 export { default as PartnersCarousel } from "./site/PartnersCarousel";
 export { PriceCards } from "./site/PriceCards";
 export { QuizRunner } from "./site/QuizRunner";
