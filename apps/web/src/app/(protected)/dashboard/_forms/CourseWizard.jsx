@@ -37,6 +37,7 @@ import {
   NativeSelect,
   Toggle,
   MultiSelectChips,
+  SearchableMultiSelect,
   AddButton,
   RemoveButton,
   LEVELS,
@@ -75,17 +76,25 @@ export function CourseWizard({ item, onClose }) {
   const editingId = item?._id || null;
 
   // ── Lookups + prefill ──
-  const { data: lk } = useAdminLookupsQuery();
+  // Forma hər açılanda TƏZƏ siyahı — başqa vərəqdə əlavə olunan müəllim də görünsün.
+  const { data: lk } = useAdminLookupsQuery(undefined, { refetchOnMountOrArgChange: true });
   const { data: full, isFetching: loadingFull } = useAdminCourseFullQuery(editingId, { skip: !editingId });
 
   const branchOpts = useMemo(
     () => (lk?.data?.branches || []).map((b) => ({ value: b._id, label: locAz(b.name) })),
     [lk],
   );
-  const teacherOpts = useMemo(
-    () => (lk?.data?.teachers || []).map((t) => ({ value: t._id, label: locAz(t.fullName) })),
-    [lk],
-  );
+  // Adın altında filial(lar) — eyniadlı müəllimləri ayırmaq və axtarmaq üçün.
+  const teacherOpts = useMemo(() => {
+    const branchName = Object.fromEntries((lk?.data?.branches || []).map((b) => [b._id, locAz(b.name)]));
+    return (lk?.data?.teachers || []).map((t) => ({
+      value: t._id,
+      label: locAz(t.fullName) || "Adsız müəllim",
+      sub: [locAz(t.title), (t.branches || []).map((b) => branchName[toId(b)]).filter(Boolean).join(", ")]
+        .filter(Boolean)
+        .join(" · "),
+    }));
+  }, [lk]);
   const categoryOpts = useMemo(
     () => (lk?.data?.categories || []).map((c) => ({ value: c._id, label: locAz(c.name) })),
     [lk],
@@ -299,11 +308,12 @@ export function CourseWizard({ item, onClose }) {
             {/* Müəllim–kurs bağlılığı ARTIQ kursda saxlanılır — müəllim
                 formasında kurs siyahısı yoxdur, təkrar yazılış olmasın. */}
             <Field label="Müəllimlər" info="Kursu keçən müəllimlər — müəllim səhifəsində bu kurs görünür.">
-              <MultiSelectChips
+              <SearchableMultiSelect
                 options={teacherOpts}
                 value={course.teachers}
                 onChange={(v) => patchCourse({ teachers: v })}
                 empty="Müəllim tapılmadı"
+                searchPlaceholder="Müəllim adı və ya filial…"
               />
             </Field>
             <div className="grid grid-cols-4 gap-4">

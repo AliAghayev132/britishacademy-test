@@ -11,6 +11,19 @@ import { baseApi } from "./baseApi";
  * Generic CRUD: one set of endpoints parameterised by `resource`, mirroring the
  * server's /api/admin/:resource registry (controllers/resourceRegistry.js).
  */
+/**
+ * Seçim siyahıları (`/admin/lookups`: filiallar, müəllimlər, kateqoriyalar,
+ * kurslar, ölkələr) bu resurslardan qurulur.
+ *
+ * NASAZLIQ: lookups öz teqi ilə keşlənirdi, amma həmin resurslarda yaratma /
+ * redaktə / silmə onu YENİLƏMİRDİ. Panel açıq qaldıqca yeni əlavə olunan
+ * müəllim kurs formasındakı «Müəllimlər» seçimində görünmürdü — səhifəni tam
+ * yeniləmək lazım gəlirdi.
+ */
+const LOOKUP_RESOURCES = new Set(["branches", "teachers", "course-categories", "courses", "destinations"]);
+const LOOKUPS_TAG = { type: "Resource", id: "lookups" };
+const withLookups = (resource, tags) => (LOOKUP_RESOURCES.has(resource) ? [...tags, LOOKUPS_TAG] : tags);
+
 export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     adminList: builder.query({
@@ -23,18 +36,18 @@ export const adminApi = baseApi.injectEndpoints({
     }),
     adminCreate: builder.mutation({
       query: ({ resource, data }) => ({ url: `/admin/${resource}`, method: "POST", body: data }),
-      invalidatesTags: (r, e, { resource }) => [{ type: "Resource", id: resource }],
+      invalidatesTags: (r, e, { resource }) => withLookups(resource, [{ type: "Resource", id: resource }]),
     }),
     adminUpdate: builder.mutation({
       query: ({ resource, id, data }) => ({ url: `/admin/${resource}/${id}`, method: "PUT", body: data }),
-      invalidatesTags: (r, e, { resource, id }) => [
+      invalidatesTags: (r, e, { resource, id }) => withLookups(resource, [
         { type: "Resource", id: resource },
         { type: "Resource", id: `${resource}-${id}` },
-      ],
+      ]),
     }),
     adminDelete: builder.mutation({
       query: ({ resource, id }) => ({ url: `/admin/${resource}/${id}`, method: "DELETE" }),
-      invalidatesTags: (r, e, { resource }) => [{ type: "Resource", id: resource }],
+      invalidatesTags: (r, e, { resource }) => withLookups(resource, [{ type: "Resource", id: resource }]),
     }),
     /**
      * Siyahının sırasını yaz. `ids` — CARİ SƏHİFƏNİN elementləri istənilən
@@ -45,7 +58,7 @@ export const adminApi = baseApi.injectEndpoints({
       query: ({ resource, ids, start = 0 }) => ({
         url: `/admin/${resource}/reorder`, method: "PATCH", body: { ids, start },
       }),
-      invalidatesTags: (r, e, { resource }) => [{ type: "Resource", id: resource }],
+      invalidatesTags: (r, e, { resource }) => withLookups(resource, [{ type: "Resource", id: resource }]),
     }),
     adminLeadStatus: builder.mutation({
       query: ({ id, status, note }) => ({ url: `/admin/leads/${id}/status`, method: "PATCH", body: { status, note } }),
@@ -89,6 +102,7 @@ export const adminApi = baseApi.injectEndpoints({
       invalidatesTags: [
         { type: "Resource", id: "courses" },
         { type: "Resource", id: "teachers" },
+        LOOKUPS_TAG,
       ],
     }),
     adminUpdateCourseFull: builder.mutation({
@@ -97,6 +111,7 @@ export const adminApi = baseApi.injectEndpoints({
         { type: "Resource", id: "courses" },
         { type: "Resource", id: `courses-${id}` },
         { type: "Resource", id: "teachers" },
+        LOOKUPS_TAG,
       ],
     }),
 

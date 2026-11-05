@@ -119,6 +119,150 @@ export function MultiSelectChips({ options = [], value = [], onChange, empty }) 
   );
 }
 
+/** Axtarış üçün: kiçik hərf, AZ hərfləri sadələşdirilir («Əli» ↔ «eli», «İlkin» ↔ «ilkin»). */
+const fold = (s) =>
+  String(s || "")
+    .toLocaleLowerCase("az")
+    .replace(/ə/g, "e")
+    .replace(/ı/g, "i")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+
+/**
+ * Axtarışlı çoxlu seçim — uzun siyahılar üçün (məs. 50+ müəllim).
+ *
+ * MultiSelectChips bütün variantları çip kimi yan-yana düzürdü: siyahı
+ * böyüyəndə modalın yarısını tuturdu, kimin seçildiyini tapmaq çətin idi.
+ * Burada seçilənlər yuxarıda ayrıca durur, qalanı axtarışla süzülən,
+ * sürüşən siyahıdadır. `options[].sub` — adın altında kiçik yazı (filial…).
+ */
+export function SearchableMultiSelect({ options = [], value = [], onChange, empty, searchPlaceholder = "Axtar…" }) {
+  const markDirty = useMarkDirty();
+  const [q, setQ] = useState("");
+  const [onlySelected, setOnlySelected] = useState(false);
+  const set = new Set(value.map(String));
+  const byId = new Map(options.map((o) => [String(o.value), o]));
+
+  const commit = (next) => {
+    markDirty();
+    onChange([...next]);
+  };
+  const toggle = (id) => {
+    const next = new Set(set);
+    if (next.has(String(id))) next.delete(String(id));
+    else next.add(String(id));
+    commit(next);
+  };
+
+  if (!options.length) return <p className="text-sm text-gray-400">{empty || "Seçim yoxdur"}</p>;
+
+  const needle = fold(q.trim());
+  const shown = options.filter(
+    (o) => (!onlySelected || set.has(String(o.value))) && (!needle || fold(`${o.label} ${o.sub || ""}`).includes(needle)),
+  );
+  // Seçilmiş, amma siyahıda artıq olmayan (silinmiş) id-lər də görünsün — səssizcə itməsin.
+  const selected = [...set].map((id) => byId.get(id) || { value: id, label: "Silinmiş element", missing: true });
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white">
+      {/* Seçilənlər */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-gray-100 p-2.5">
+        {selected.length === 0 ? (
+          <span className="px-1 text-sm text-gray-400">Heç kim seçilməyib</span>
+        ) : (
+          selected.map((o) => (
+            <span
+              key={o.value}
+              className={`inline-flex items-center gap-1 rounded-full py-1 pl-3 pr-1 text-sm font-medium ${
+                o.missing ? "bg-amber-50 text-amber-700" : "bg-blue-900 text-white"
+              }`}
+            >
+              {o.label}
+              <button
+                type="button"
+                onClick={() => toggle(o.value)}
+                aria-label={`${o.label} — çıxar`}
+                className="grid h-5 w-5 place-items-center rounded-full hover:bg-white/20"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))
+        )}
+        {selected.length > 1 && (
+          <button type="button" onClick={() => commit(new Set())} className="ml-auto px-1 text-xs font-semibold text-gray-400 hover:text-red-600">
+            Hamısını çıxar
+          </button>
+        )}
+      </div>
+
+      {/* Axtarış */}
+      <div className="flex items-center gap-2 border-b border-gray-100 px-2.5 py-2">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => {
+              // Enter — ilk uyğun gələni seç/çıxar; forma göndərilməsin.
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (shown[0]) {
+                  toggle(shown[0].value);
+                  setQ("");
+                }
+              }
+            }}
+            placeholder={searchPlaceholder}
+            className="w-full rounded-lg border border-gray-200 py-1.5 pl-8 pr-2 text-sm outline-none focus:border-blue-500"
+          />
+        </div>
+        <label className="flex flex-none cursor-pointer items-center gap-1.5 text-xs font-semibold text-gray-500">
+          <input type="checkbox" checked={onlySelected} onChange={(e) => setOnlySelected(e.target.checked)} />
+          Yalnız seçilənlər
+        </label>
+        <span className="flex-none text-xs tabular-nums text-gray-400">
+          {set.size}/{options.length}
+        </span>
+      </div>
+
+      {/* Siyahı */}
+      <ul className="max-h-64 overflow-y-auto py-1" role="listbox" aria-multiselectable="true">
+        {shown.length === 0 ? (
+          <li className="px-3 py-3 text-sm text-gray-400">Uyğun nəticə yoxdur</li>
+        ) : (
+          shown.map((o) => {
+            const on = set.has(String(o.value));
+            return (
+              <li key={o.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={on}
+                  onClick={() => toggle(o.value)}
+                  className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition ${on ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                >
+                  <span
+                    className={`grid h-4 w-4 flex-none place-items-center rounded border ${
+                      on ? "border-blue-900 bg-blue-900 text-white" : "border-gray-300 bg-white"
+                    }`}
+                  >
+                    {on && <Check className="h-3 w-3" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className={`block truncate ${on ? "font-semibold text-blue-900" : "text-gray-800"}`}>{o.label}</span>
+                    {o.sub && <span className="block truncate text-xs text-gray-400">{o.sub}</span>}
+                  </span>
+                </button>
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </div>
+  );
+}
+
 export function SectionTitle({ children, right }) {
   return (
     <div className="flex items-center justify-between border-b border-gray-100 pb-2">
