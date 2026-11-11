@@ -28,3 +28,11 @@ describe("qiymət kartları", () => {
     expect(strings).not.toContain("Axşam qrupları — qrup dərsi üçün +10 AZN");
   });
 });
+
+describe("qiymətlər səhifəsi", () => {
+  it("«Axşam qrupları niyə baha olur?» sual-cavabı (+10/+20 AZN) 3 dildə yoxdur", () => {
+    const page = fs.readFileSync("src/app/(public)/kurslar/qiymetler/page.js", "utf8");
+    expect(page).not.toMatch(/\+10 AZN|\+20 AZN/);
+    expect(page).not.toContain("Axşam qrupları niyə baha olur?");
+  });
+});

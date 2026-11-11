@@ -51,7 +51,6 @@ const COPY = {
     faqTitle: "Qiymətlərlə bağlı suallar",
     faq: [
       ["Qiymətə nə daxildir?", "Əsas dərslər və kurs proqramının onlayn PDF materialları. Fiziki dərslik kitabları ayrıca ödənilir."],
-      ["Axşam qrupları niyə baha olur?", "Axşam saatlarına tələb daha yüksəkdir. Axşam qrupları qrup dərsi üçün təxminən +10 AZN, fərdi dərs üçün +20 AZN fərqlə hesablanır; dəqiq məbləğ cədvəldədir."],
       ["Qrup və fərdi dərs arasında fərq nədir?", "Qrup dərsləri kiçik tərkibdə keçirilir və daha sərfəlidir. Fərdi dərsdə proqram və temp tamamilə sizə uyğunlaşdırılır."],
       ["Qeydiyyatdan əvvəl sınaq dərsi varmı?", "Bəli, ödənişsiz sınaq dərsinə yazıla bilərsiniz. Səviyyənizi əvvəlcədən onlayn testlə də yoxlaya bilərsiniz."],
     ],
@@ -75,7 +74,6 @@ const COPY = {
     faqTitle: "Pricing questions",
     faq: [
       ["What does the price include?", "The core lessons and the online PDF course materials. Printed textbooks are paid separately."],
-      ["Why do evening groups cost more?", "Evening hours are in higher demand. Evening groups are roughly +10 AZN for group lessons and +20 AZN for one-to-one; the exact amount is in the table."],
       ["What is the difference between group and one-to-one?", "Group lessons run in small groups and cost less. In one-to-one lessons the programme and pace are fully tailored to you."],
       ["Is there a trial lesson before I enrol?", "Yes, you can book a free trial lesson. You can also check your level beforehand with the online test."],
     ],
@@ -99,7 +97,6 @@ const COPY = {
     faqTitle: "Вопросы о ценах",
     faq: [
       ["Что входит в стоимость?", "Основные занятия и онлайн PDF-материалы курса. Печатные учебники оплачиваются отдельно."],
-      ["Почему вечерние группы дороже?", "Вечерние часы пользуются большим спросом. Вечерние группы — примерно +10 AZN для групповых и +20 AZN для индивидуальных занятий; точная сумма в таблице."],
       ["Чем отличаются групповые и индивидуальные занятия?", "Групповые занятия проходят в небольших группах и стоят дешевле. На индивидуальных программа и темп полностью подстраиваются под вас."],
       ["Есть ли пробный урок до записи?", "Да, можно записаться на бесплатный пробный урок. Уровень можно заранее проверить онлайн-тестом."],
     ],
