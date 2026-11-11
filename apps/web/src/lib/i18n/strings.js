@@ -157,7 +157,6 @@ export const STRINGS = {
     "price.time": "Vaxt",
     "price.groupLabel": "Qrup",
     "price.afterEvening": "17:00-dan sonra",
-    "price.intro": "Qiymət filiala, dərs formatına (qrup / fərdi) və saata görə dəyişir. Axşam qrupları — qrup dərsi üçün +10 AZN, fərdi dərs üçün +20 AZN.",
     // Video
     "video.notReady": "Video hazır deyil",
     "video.pause": "Dayandır",
@@ -480,7 +479,6 @@ export const STRINGS = {
     "price.time": "Time",
     "price.groupLabel": "Group",
     "price.afterEvening": "after 17:00",
-    "price.intro": "Prices vary by branch, lesson format (group / individual) and time. Evening groups — +10 AZN for group, +20 AZN for individual lessons.",
     "video.notReady": "Video not ready",
     "video.pause": "Pause",
     "video.playPause": "Play / Pause",
@@ -791,7 +789,6 @@ export const STRINGS = {
     "price.time": "Время",
     "price.groupLabel": "Группа",
     "price.afterEvening": "после 17:00",
-    "price.intro": "Цена зависит от филиала, формата занятий (группа / индивидуально) и времени. Вечерние группы — +10 AZN за групповое, +20 AZN за индивидуальное занятие.",
     "video.notReady": "Видео не готово",
     "video.pause": "Пауза",
     "video.playPause": "Воспроизвести / Пауза",

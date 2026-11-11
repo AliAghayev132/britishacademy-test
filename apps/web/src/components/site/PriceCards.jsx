@@ -60,6 +60,9 @@ function BranchPriceCard({ p, cc }) {
           </tr>
         </tbody>
       </table>
+      {/* Filial üzrə qeyd (admin: kurs → filiallar və qiymət → «Qeyd»). Əvvəl
+          saxlanılırdı, amma kartda göstərilmirdi. Sətir sonları qorunur. */}
+      {p.note && <p className="ba-pricecard-note">{p.note}</p>}
     </div>
   );
 }
@@ -67,11 +70,13 @@ function BranchPriceCard({ p, cc }) {
 /**
  * Per-branch price cards: group/individual × day/evening matrix.
  *
+ * Kartların üstündəki ümumi izah («Axşam qrupları +10/+20 AZN…») çıxarıldı —
+ * hər kurs üçün doğru deyildi; filiala aid fərqlər kartın öz qeydindədir.
+ *
  * Müəllim çipləri buradan çıxarıldı — filial üzrə müəllim bölgüsü artıq API-də
  * yoxdur; müəllimlər kurs səhifəsində ayrı bölmədə göstərilir.
  */
 export function PriceCards({ course }) {
-  const t = useT();
   // ── Custom pricing mode ──
   if (course.pricingMode === "custom") {
     return <CustomPricing course={course} />;
@@ -79,15 +84,10 @@ export function PriceCards({ course }) {
 
   // ── Render ──
   return (
-    <>
-      <p style={{ fontSize: 15.5, color: "#63636F", margin: "0 0 24px" }}>
-        {t("price.intro")}
-      </p>
-      <div className="ba-pricegrid">
-        {course.pricing.map((p, i) => (
-          <BranchPriceCard key={i} p={p} cc={CC[i % CC.length]} />
-        ))}
-      </div>
-    </>
+    <div className="ba-pricegrid">
+      {course.pricing.map((p, i) => (
+        <BranchPriceCard key={i} p={p} cc={CC[i % CC.length]} />
+      ))}
+    </div>
   );
 }
