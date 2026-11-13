@@ -20,6 +20,8 @@ describe("qiymət kartları", () => {
     expect(cards).toContain('{p.note && <p className="ba-pricecard-note">{p.note}</p>}');
     // Admin qeydi bir neçə sətirlə yaza bilər — sətir sonları itməsin.
     expect(css).toMatch(/\.ba-pricecard-note \{[^}]*white-space: pre-line;/);
+    // Yaşıl fon, ağ yazı.
+    expect(css).toMatch(/\.ba-pricecard-note \{[^}]*background: #15803D; color: #fff;/);
   });
 
   it("«+10 / +20 AZN» ümumi izahı yoxdur (3 dildə)", () => {

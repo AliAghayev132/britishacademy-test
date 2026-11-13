@@ -764,11 +764,13 @@ body.ba-home #qeydiyyat > div {
 .ba-pricecard-head { display: flex; flex-direction: column; gap: 3px; margin-bottom: 16px; }
 .ba-pricecard-name { font-family: 'Poppins'; font-weight: 700; font-size: 17px; color: #16161C; }
 .ba-pricecard-addr { font-size: 13px; color: #8A8A98; }
-/* Filial üzrə qeyd — cədvəlin altında, kartın rəngində sol xətt ilə. */
+/* Filial üzrə qeyd — cədvəlin altında, yaşıl fonda ağ yazı (sahibinin seçimi).
+   #15803D saytdakı yaşıl (#16A34A) ilə eyni ailədəndir və ağ yazı ilə
+   oxunaqlıdır (~5:1 kontrast). */
 .ba-pricecard-note {
-  margin: 14px 0 0; padding: 11px 13px; border-radius: 12px;
-  background: color-mix(in srgb, var(--c) 7%, #fff); border-left: 3px solid var(--c);
-  font-size: 13.5px; line-height: 1.55; color: #3A3A46; white-space: pre-line;
+  margin: 14px 0 0; padding: 11px 14px; border-radius: 12px;
+  background: #15803D; color: #fff;
+  font-size: 13.5px; font-weight: 500; line-height: 1.55; white-space: pre-line;
 }
 
 .ba-ptable { width: 100%; border-collapse: collapse; }
