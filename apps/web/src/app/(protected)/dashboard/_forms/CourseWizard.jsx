@@ -70,6 +70,9 @@ const emptyRow = (branch = "") => ({
   pricing: { group: { day: "", evening: "" }, individual: { day: "", evening: "" }, note: "" },
 });
 
+/** Lokallaşdırılmış dəyərin hansısa dilində mətn varmı? */
+const hasText = (v) => Object.values(toLoc(v)).some((x) => String(x || "").trim());
+
 const num = (v) => (v === "" || v === null || v === undefined ? undefined : Number(v));
 
 export function CourseWizard({ item, onClose }) {
@@ -105,6 +108,10 @@ export function CourseWizard({ item, onClose }) {
   const [course, setCourse] = useState(emptyCourse());
   const [seo, setSeo] = useState(emptyCourse().seo);
   const [contentHtml, setContentHtml] = useState(editingId ? (full?.data?.course?.contentHtml || "") : "");
+  // «Qısa məlumat» kartı və FAQ — modeldə çoxdan var, saytda görünür, amma
+  // formada sahəsi yox idi: paneldən dəyişmək mümkün deyildi.
+  const [info, setInfo] = useState([]);
+  const [faq, setFaq] = useState([]);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
 
@@ -126,6 +133,8 @@ export function CourseWizard({ item, onClose }) {
     });
     setSeo(c.seo || emptyCourse().seo);
     setContentHtml(c.contentHtml || "");
+    setInfo((c.info || []).map((r) => ({ label: toLoc(r.label), value: toLoc(r.value) })));
+    setFaq((c.faq || []).map((r) => ({ question: toLoc(r.question), answer: toLoc(r.answer) })));
     setRows(
       (full.data.branches || []).map((r) => ({
         branch: toId(r.branch),
@@ -193,6 +202,10 @@ export function CourseWizard({ item, onClose }) {
         order: num(course.order) || 0,
         isActive: !!course.isActive,
         contentHtml: trimLoc(contentHtml),
+        // Yalnız TAM boş sətirlər atılır — hansısa dildə mətn varsa qalır
+        // (AZ boş, EN/RU dolu olan element səssizcə itməsin).
+        info: info.filter((r) => hasText(r.label) || hasText(r.value)).map((r) => ({ label: trimLoc(r.label), value: trimLoc(r.value) })),
+        faq: faq.filter((r) => hasText(r.question) || hasText(r.answer)).map((r) => ({ question: trimLoc(r.question), answer: trimLoc(r.answer) })),
       },
       branches: rows.filter((r) => r.branch).map((r) => ({
         branch: r.branch,
@@ -330,6 +343,39 @@ export function CourseWizard({ item, onClose }) {
             <div className="flex gap-8">
               <Toggle checked={course.isFeatured} onChange={(v) => patchCourse({ isFeatured: v })} label="Ana səhifədə göstər" />
             </div>
+          </section>
+
+          {/* ── Qısa məlumat kartı ── */}
+          <section className="space-y-4">
+            <SectionTitle right={<AddButton onClick={() => setInfo((rs) => [...rs, { label: toLoc(""), value: toLoc("") }])}>Sətir əlavə et</AddButton>}>
+              Qısa məlumat kartı
+            </SectionTitle>
+            <p className="text-xs text-gray-400">Kurs səhifəsindəki «Qısa məlumat» kartı — məs. Müddət: 3 ay, Müəllim: IELTS 8.5 · 10 il təcrübə.</p>
+            {info.length === 0 && <p className="text-sm text-gray-400">Sətir yoxdur.</p>}
+            {info.map((r, i) => (
+              <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_auto] items-end gap-3">
+                <Field label="Ad"><LocalizedInput value={r.label} onChange={(v) => setInfo((rs) => rs.map((x, j) => (j === i ? { ...x, label: v } : x)))} /></Field>
+                <Field label="Dəyər"><LocalizedInput value={r.value} onChange={(v) => setInfo((rs) => rs.map((x, j) => (j === i ? { ...x, value: v } : x)))} /></Field>
+                <div className="pb-1"><RemoveButton onClick={() => setInfo((rs) => rs.filter((_, j) => j !== i))} /></div>
+              </div>
+            ))}
+          </section>
+
+          {/* ── FAQ ── */}
+          <section className="space-y-4">
+            <SectionTitle right={<AddButton onClick={() => setFaq((rs) => [...rs, { question: toLoc(""), answer: toLoc("") }])}>Sual əlavə et</AddButton>}>
+              Tez-tez verilən suallar
+            </SectionTitle>
+            {faq.length === 0 && <p className="text-sm text-gray-400">Sual yoxdur.</p>}
+            {faq.map((r, i) => (
+              <div key={i} className="space-y-3 rounded-xl border border-gray-200 p-4">
+                <div className="flex items-end gap-3">
+                  <Field label={`Sual ${i + 1}`} className="flex-1"><LocalizedInput value={r.question} onChange={(v) => setFaq((rs) => rs.map((x, j) => (j === i ? { ...x, question: v } : x)))} /></Field>
+                  <div className="pb-1"><RemoveButton onClick={() => setFaq((rs) => rs.filter((_, j) => j !== i))} /></div>
+                </div>
+                <Field label="Cavab"><LocalizedInput multiline rows={2} value={r.answer} onChange={(v) => setFaq((rs) => rs.map((x, j) => (j === i ? { ...x, answer: v } : x)))} /></Field>
+              </div>
+            ))}
           </section>
 
           {/* ── Məzmun ── */}
